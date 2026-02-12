@@ -1,0 +1,380 @@
+/* Unique class jo aapne component ke div ko di hai */
+.api-content-wrapper {
+  /* Agar container ke liye koi base style zaroori ho */
+}
+
+/* ================= H1 Styles (36px final) ================= */
+/* H1 के लिए बेस स्टाइल (मोबाइल/डिफ़ॉल्ट) */
+.api-content-wrapper h1 {
+  font-size: 20px !important; /* Base size */
+  font-weight: 500 !important;
+  color: #4a4a4a !important; /* h1-secondary-medium ko reference karke */
+  margin-top: 2.5rem !important; /* आपके उदाहरण से */
+  border-bottom: 1px solid #eee !important; /* आपके उदाहरण से */
+  padding-bottom: 0.5rem !important; /* आपके उदाहरण से */
+}
+
+/* H1 - Tailwind-like breakpoints */
+@media (min-width: 640px) {
+  .api-content-wrapper h1 {
+    font-size: 24px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .api-content-wrapper h1 {
+    font-size: 28px !important;
+  }
+}
+@media (min-width: 1280px) {
+  .api-content-wrapper h1 {
+    font-size: 32px !important;
+  }
+}
+@media (min-width: 1440px) {
+  .api-content-wrapper h1 {
+    font-size: 36px !important; /* Final size */
+  }
+}
+
+/* --- */
+
+/* ================= H2 Styles (32px final) ================= */
+.api-content-wrapper h2 {
+  font-size: 18px !important; /* Base size */
+  font-weight: 700 !important; /* h2-bold ko reference karke */
+  color: #4a4a4a !important;
+  margin-top: 2rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+@media (min-width: 640px) {
+  .api-content-wrapper h2 {
+    font-size: 20px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .api-content-wrapper h2 {
+    font-size: 24px !important;
+  }
+}
+@media (min-width: 1440px) {
+  .api-content-wrapper h2 {
+    font-size: 32px !important; /* Final size */
+  }
+}
+
+/* --- */
+
+/* ================= H3 Styles (24px final) ================= */
+.api-content-wrapper h3 {
+  font-size: 14px !important; /* Base size */
+  font-weight: 500 !important; /* h3-secondary ko reference karke */
+  color: #4a4a4a !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.75% !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+@media (min-width: 640px) {
+  .api-content-wrapper h3 {
+    font-size: 16px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .api-content-wrapper h3 {
+    font-size: 18px !important;
+  }
+}
+@media (min-width: 1440px) {
+  .api-content-wrapper h3 {
+    font-size: 24px !important; /* Final size */
+  }
+}
+
+/* --- */
+
+/* ================= Paragraph & Text Styles ================= */
+.api-content-wrapper p {
+  font-size: 16px !important; /* Common readable size */
+  font-weight: 400 !important;
+  color: #4a4a4a !important;
+  margin-bottom: 1.5rem !important; /* आपके उदाहरण से */
+  line-height: 1.7 !important; /* आपके उदाहरण से */
+}
+
+/* --- */
+
+/* ================= List Styles ================= */
+.api-content-wrapper ul,
+.api-content-wrapper ol {
+  padding-left: 25px !important; /* आपके उदाहरण से */
+  margin-bottom: 1.5rem !important; /* आपके उदाहरण से */
+  font-size: 16px !important;
+  color: #4a4a4a !important;
+}
+
+.api-content-wrapper ul li,
+.api-content-wrapper ol li {
+  margin-bottom: 0.5rem !important;
+  line-height: 1.6 !important;
+}
+
+/* --- */
+
+/* ================= Anchor (Link) Styles ================= */
+.api-content-wrapper a {
+  color: #0070f3 !important; /* Common link color */
+  text-decoration: underline !important;
+}
+
+.api-content-wrapper a:hover {
+  text-decoration: none !important;
+}
+
+/* --- */
+
+/* ================= Table Styles ================= */
+.api-content-wrapper table {
+  width: 100% !important; /* आपके उदाहरण से */
+  border-collapse: collapse !important; /* आपके उदाहरण से */
+  margin: 1.5rem 0 !important; /* आपके उदाहरण से */
+  font-size: 15px !important;
+}
+
+.api-content-wrapper th,
+.api-content-wrapper td {
+  border: 1px solid #ddd !important;
+  padding: 8px !important;
+  text-align: left !important;
+}
+
+.api-content-wrapper th {
+  background-color: #f2f2f2 !important;
+  font-weight: 600 !important;
+  color: #333333 !important;
+}
+
+/* --- */
+
+/* ================= Preformatted/Code Styles ================= */
+.api-content-wrapper pre {
+  background-color: #f4f4f4 !important;
+  padding: 1rem !important;
+  border-radius: 4px !important;
+  overflow-x: auto !important;
+  margin: 1.5rem 0 !important;
+}
+
+.api-content-wrapper code {
+  font-family: monospace !important;
+  font-size: 0.9em !important;
+}
+
+.api-content-wrapper pre code {
+  /* Code inside pre */
+  color: #333333 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
+.api-content-wrapper p code,
+.api-content-wrapper li code {
+  /* Inline code */
+  background-color: #eee !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 3px !important;
+  color: #c7254e !important;
+}
+
+
+
+/* Unique class jo aapne component ke div ko di hai */
+.api-content-wrapper p {
+  /* ================= H3 (24px final) - Regular Style ================= */
+  
+  /* H3-regular se liya gaya default (mobile) style */
+  font-size: 14px !important;
+  font-weight: 400 !important; /* h3-regular ka weight */
+  color: #4a4a4a !important; /* h3-regular ka color */
+  line-height: 1.3 !important; /* h3 ka line-height */
+  letter-spacing: 0.75% !important; /* h3 ka letter-spacing */
+  
+  /* Paragraph spacing jise aap maintain karna chahenge */
+  margin-top: 0.5rem !important; 
+  margin-bottom: 1rem !important;
+}
+
+/* H3-regular ke responsive breakpoints */
+@media (min-width: 640px) {
+  .api-content-wrapper p {
+    font-size: 16px !important;
+  }
+}
+@media (min-width: 1024px) {
+  .api-content-wrapper p {
+    font-size: 18px !important;
+  }
+}
+@media (min-width: 1440px) {
+  .api-content-wrapper p {
+    font-size: 24px !important; /* Final size */
+  }
+}
+
+
+/* ================= Generated IMG Tag Styling ================= */
+
+/* api-content-wrapper ke andar ke sabhi <img> tags ko target karein */
+.api-content-wrapper img {
+    /* 1. Full Width aur Left Align (Jo ab kaam kar raha hai) */
+    max-width: 100% !important;
+    width: 100% !important;
+    display: block !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    
+    /* 2. Vertical Spacing (Upar ki taraf space) */
+    /* mt-6 (1.5rem) ka value dobara daal rahe hain */
+    margin-top: 1.5rem !important; 
+    
+    /* Neeche bhi spacing ke liye */
+    margin-bottom: 1.5rem !important; 
+    /* 3. Object Fit/Position (Jiski wajah se center mein aa rahi thi) */
+    /* Agar image abhi bhi top ya bottom se choti ho rahi hai toh use poora khinche */
+    /* object-fit: cover !important;  */
+    object-position: center !important; /* Ya 'top' set kar sakte hain */
+
+    /* Rounded corners */
+    border-radius: 6px !important; 
+    
+    /* Default height */
+    /* height: auto !important; */
+    max-height: 554px !important;
+}
+
+
+
+
+
+/* ================= Table Base Styles ================= */
+.api-content-wrapper table {
+    /* w-full, border-collapse */
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 1.5rem 0 !important; /* Table ke upar aur niche space */
+    border: 1px solid #ddd !important; /* Table ki outer border */
+}
+
+/* ================= Table Header (THEAD) Styles ================= */
+.api-content-wrapper thead tr {
+    /* bg-gray-50, border-b border-gray-200 */
+    background-color: #f9f9f9 !important; /* light gray background */
+    border-bottom: 1px solid #e5e5e5 !important;
+}
+
+.api-content-wrapper th {
+    /* text-left, py-4 px-6, h3-secondary, colspan={3} */
+    text-align: left !important;
+    padding: 16px 24px !important; /* py-4 (16px) px-6 (24px) */
+    color: #4a4a4a !important;
+    font-weight: 500 !important; /* h3-secondary ka weight */
+}
+
+/* H3-secondary Font Size - Responsive */
+.api-content-wrapper th {
+    font-size: 14px !important; /* Base size */
+}
+@media (min-width: 640px) {
+    .api-content-wrapper th {
+        font-size: 16px !important;
+    }
+}
+@media (min-width: 1440px) {
+    .api-content-wrapper th {
+        font-size: 24px !important; /* Final size */
+    }
+}
+
+/* ================= Table Body (TBODY) Styles ================= */
+.api-content-wrapper tbody tr {
+    /* border border-gray-200, hover:bg-gray-50, transition-colors */
+    border: 1px solid #e5e5e5 !important;
+    transition: background-color 0.15s ease-in-out !important;
+}
+
+.api-content-wrapper tbody tr:hover {
+    background-color: #f9f9f9 !important; /* hover:bg-gray-50 */
+}
+
+.api-content-wrapper td {
+    /* py-5 px-6, border, align-top */
+    padding: 20px 24px !important; /* py-5 (20px) px-6 (24px) */
+    border: 1px solid #e5e5e5 !important;
+    vertical-align: top !important; /* align-top */
+    color: #666666 !important; /* h4 default color */
+}
+
+/* First Column TD: h4-medium, w-[25%] */
+.api-content-wrapper td:first-child {
+    font-weight: 500 !important; /* h4-medium ka weight */
+    width: 25% !important; 
+}
+
+/* Other Columns TD: h4-regular, w-[37.5%] */
+.api-content-wrapper td:nth-child(2),
+.api-content-wrapper td:nth-child(3) {
+    font-weight: 400 !important; /* h4-regular ka weight */
+    width: 37.5% !important; 
+}
+
+/* H4 Font Size - Responsive (Applied to all TD) */
+.api-content-wrapper td {
+    font-size: 14px !important; /* Base size */
+}
+@media (min-width: 640px) {
+    .api-content-wrapper td {
+        font-size: 16px !important;
+    }
+}
+@media (min-width: 1440px) {
+    .api-content-wrapper td {
+        font-size: 22px !important;
+        line-height: 32px !important;
+    }
+}
+
+
+
+
+/* ================= H5 (20px final) Styles for STRONG and EM Tags ================= */
+
+/* Default/Mobile Style */
+.api-content-wrapper strong,
+.api-content-wrapper em {
+    /* h5-bold aur h5-medium se liya gaya */
+    font-size: 14px !important;
+    line-height: inherit !important; /* Line height parent element se lega */
+    color: #4a4a4a !important; 
+    
+    /* STRONG tag ko hamesha bold rehne dein */
+    font-weight: 600 !important; /* h5-bold ka weight */
+
+    /* EM tag ko hamesha italic rehne dein */
+    font-style: italic !important;
+}
+
+/* Responsive Styles (H5 ke breakpoints) */
+
+@media (min-width: 640px) {
+    .api-content-wrapper strong,
+    .api-content-wrapper em {
+        font-size: 15px !important;
+    }
+}
+@media (min-width: 1440px) {
+    .api-content-wrapper strong,
+    .api-content-wrapper em {
+        font-size: 20px !important; /* Final size */
+    }
+}

@@ -1,0 +1,20 @@
+# Allow all crawlers access to public content
+User-agent: *
+Disallow: /account/
+Disallow: /auth/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Optional: prevent crawling of search and filtered pages
+Disallow: /search
+Disallow: /?*
+
+# Allow everything else (product pages, categories, reviews, FAQs, etc.)
+Allow: /
+
+# Sitemap location
+Sitemap: https://newtownspares.advertsedge.com/sitemap.xml
