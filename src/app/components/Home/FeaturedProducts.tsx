@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import ProductCard from "./ProductCard";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchProductsData } from "@/redux/slices/homeSlice";
 
@@ -21,193 +20,201 @@ const ProductSkeleton = () => (
 
 interface FeaturedProductsProps {
   endpoint: string;
-  isSlider?: boolean;
   title?: string;
 }
 
-const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
-  endpoint,
-  isSlider = false,
-  title
-}) => {
-  const sliderRef = useRef<HTMLDivElement>(null);
+const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) => {
+  const trackRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { products, error } = useAppSelector((state: any) => state.home);
+  const { products } = useAppSelector((state: any) => state.home);
   const productsData = products?.data || [];
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
+
+  const [canScrollLeft, setCanScrollLeft]   = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [activeIndex, setActiveIndex]       = useState(0);
+  const [visibleCount, setVisibleCount]     = useState(1);
+  const [loading, setLoading]               = useState(true);
+  const [localError, setLocalError]         = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(true); // local loading flag
-  const updateScrollButtons = () => {
-    const el = sliderRef.current;
+  // ── Scroll state ──────────────────────────────────────────────────────────
+  const updateScroll = () => {
+    const el = trackRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    // Add a small threshold (1px) to account for rounding errors
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+
+    const scrollable = el.scrollWidth > el.clientWidth + 1;
+    setCanScrollLeft(scrollable && el.scrollLeft > 0);
+    setCanScrollRight(scrollable && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+
+    const colWidth = el.firstElementChild
+      ? (el.firstElementChild as HTMLElement).offsetWidth
+      : el.clientWidth;
+
+    // kitne cards visible hain
+    const visible = Math.round(el.clientWidth / colWidth);
+    setVisibleCount(visible);
+
+    // active dot = current scroll index
+    setActiveIndex(Math.round(el.scrollLeft / colWidth));
   };
+
   useEffect(() => {
-    updateScrollButtons(); // initial check
-    const el = sliderRef.current;
+    const t = setTimeout(updateScroll, 100);
+    const el = trackRef.current;
     if (!el) return;
-
-    el.addEventListener("scroll", updateScrollButtons);
-    el.addEventListener("scrollend", updateScrollButtons); // Add this
-    window.addEventListener("resize", updateScrollButtons);
-
+    el.addEventListener("scroll", updateScroll);
+    el.addEventListener("scrollend", updateScroll);
+    window.addEventListener("resize", updateScroll);
     return () => {
-      el.removeEventListener("scroll", updateScrollButtons);
-      el.removeEventListener("scrollend", updateScrollButtons); // Add this
-      window.removeEventListener("resize", updateScrollButtons);
+      clearTimeout(t);
+      el.removeEventListener("scroll", updateScroll);
+      el.removeEventListener("scrollend", updateScroll);
+      window.removeEventListener("resize", updateScroll);
     };
   }, [productsData]);
 
-
-  const [localError, setLocalError] = useState<string | null>(null); // Track error per component
-
-  // ... (keep all your existing functions)
-
+  // ── Fetch ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     setLoading(true);
-    setLocalError(null); // Clear previous error
-
+    setLocalError(null);
     dispatch(fetchProductsData(endpoint))
-      .unwrap() // This will throw if rejected
-      .then(() => {
-        setLocalError(null);
-      })
-      .catch((err) => {
-        setLocalError(err || `No ${title} found`);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .unwrap()
+      .then(() => setLocalError(null))
+      .catch((err: any) => setLocalError(err || `No ${title} found`))
+      .finally(() => setLoading(false));
   }, [dispatch, endpoint, title]);
 
+  // ── Scroll helpers ────────────────────────────────────────────────────────
+  const trackScroll = () => {
+    let last = trackRef.current?.scrollLeft || 0;
+    const check = () => {
+      const cur = trackRef.current?.scrollLeft || 0;
+      if (Math.abs(cur - last) < 1) updateScroll();
+      else { last = cur; requestAnimationFrame(check); }
+    };
+    requestAnimationFrame(check);
+  };
+
   const scrollLeft = () => {
-    sliderRef.current?.scrollBy({
-      left: -sliderRef.current.offsetWidth,
-      behavior: "smooth"
-    });
-    checkScrollEnd();
+    trackRef.current?.scrollBy({ left: -(trackRef.current.offsetWidth), behavior: "smooth" });
+    trackScroll();
   };
 
   const scrollRight = () => {
-    sliderRef.current?.scrollBy({
-      left: sliderRef.current.offsetWidth,
-      behavior: "smooth"
-    });
-    checkScrollEnd();
+    trackRef.current?.scrollBy({ left: trackRef.current.offsetWidth, behavior: "smooth" });
+    trackScroll();
   };
 
-  const checkScrollEnd = () => {
-    let lastScrollLeft = sliderRef.current?.scrollLeft || 0;
-
-    const check = () => {
-      const currentScrollLeft = sliderRef.current?.scrollLeft || 0;
-
-      if (Math.abs(currentScrollLeft - lastScrollLeft) < 1) {
-        // Scroll has stopped
-        updateScrollButtons();
-      } else {
-        // Still scrolling
-        lastScrollLeft = currentScrollLeft;
-        requestAnimationFrame(check);
-      }
-    };
-
-    requestAnimationFrame(check);
+  const scrollToIndex = (i: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const colWidth = el.firstElementChild
+      ? (el.firstElementChild as HTMLElement).offsetWidth
+      : 0;
+    el.scrollTo({ left: i * colWidth, behavior: "smooth" });
   };
+
+  // ── Dots logic ────────────────────────────────────────────────────────────
+  // e.g. 5 cards, 4 visible → 2 dots (position 0 aur 1)
+  // e.g. 5 cards, 2 visible → 4 dots
+  // e.g. 5 cards, 5 visible → 0 dots (no arrows, no dots)
+  const totalCards = Math.min(productsData.length, 5);
+  const dotsCount  = totalCards - visibleCount; // extra cards jo scroll pe hain
+  const showUI     = dotsCount > 0;             // arrows + dots dono
+
   return (
-    <div className="bg-transparent py-4 rounded relative">
-      <div className="flex items-center justify-between mb-4 bg-[#393939] border-b border-gray-400">
-        <h2 className="font-bold text-xl text-white p-3 flex-1">{title}</h2>
-        {isSlider && (
-          <div className="flex gap-2 ml-2">
-            <button
-              onClick={scrollLeft}
-              disabled={!canScrollLeft}
-              className={`p-2 rounded flex items-center justify-center text-white 
-    hover:bg-gray-800 ${!canScrollLeft ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""}`}
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              onClick={scrollRight}
-              disabled={!canScrollRight}
-              className={`p-2 rounded flex items-center justify-center text-white 
-    hover:bg-gray-800 ${!canScrollRight ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""}`}
-            >
-              <ChevronRight size={20} />
-            </button>
+    <div className="bg-transparent py-4">
 
-          </div>
-        )}
-      </div>
+      {/* ── Title ── */}
+      <h2 className="text-4xl text-[#333333] p-3 text-center w-full mb-4">{title}</h2>
 
+      {/* ── Error ── */}
+      {localError && <div className="text-red-500 text-center py-4">{localError}</div>}
 
-      {/* Error - Stop rendering here if error */}
-      {localError && (
-        <div className="text-red-500 text-center py-4">{localError}</div>
-      )}
+      {!localError && (
+        <>
+          {/* ── Skeleton ── */}
+          {loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <ProductSkeleton key={i} />
+              ))}
+            </div>
+          )}
 
-      {/* Only render loading/products if NO error */}
-   {!localError && (
-  <>
-    {loading ? (
-      /* Loading skeleton */
-      <div
-        className={
-          isSlider
-            ? "flex gap-4 overflow-x-auto pb-2 scroll-smooth scrollbar-hide"
-            : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-        }
-      >
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className={
-              isSlider
-                ? "flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4"
-                : ""
-            }
-          >
-            <ProductSkeleton />
-          </div>
-        ))}
-      </div>
-    ) : productsData.length === 0 ? (
-      /* ✅ No products found */
-      <div className="py-12 text-center text-gray-500 text-sm">
-        No products found
-      </div>
-    ) : isSlider ? (
-      /* Slider view */
-      <div
-        ref={sliderRef}
-        className="flex gap-4 overflow-x-auto pb-2 scroll-smooth scrollbar-hide"
-      >
-        {productsData.map((product: any) => (
-          <div
-            key={product.id}
-            className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 lg:w-1/5"
-          >
-            <ProductCard product={product} />
-          </div>
-        ))}
-      </div>
-    ) : (
-      /* Grid view */
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {productsData.map((product: any) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
-    )}
-  </>
+          {/* ── Empty ── */}
+          {!loading && productsData.length === 0 && (
+            <div className="py-12 text-center text-gray-500 text-sm">No products found</div>
+          )}
+
+          {/* ── Slider ── */}
+          {!loading && productsData.length > 0 && (
+            <div className="relative">
+
+              {/* Left Arrow */}
+              {showUI && (
+                <button
+                  onClick={scrollLeft}
+                  disabled={!canScrollLeft}
+                  style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
+                    flex items-center justify-center font-bold transition-opacity duration-200
+                    ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+                >
+                  &lt;
+                </button>
+              )}
+
+              {/* Grid track */}
+            <div
+  ref={trackRef}
+  className="grid grid-rows-1 grid-flow-col gap-3
+    auto-cols-[100%]
+    sm:auto-cols-[calc(50%-6px)] 
+    md:auto-cols-[calc(33.333%-8px)] 
+    lg:auto-cols-[calc(25%-9px)] 
+    2xl:auto-cols-[calc(20%-10px)]
+    overflow-x-auto scroll-smooth scrollbar-hide"
+>
+                {productsData.slice(0, 5).map((product: any) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {/* Right Arrow */}
+              {showUI && (
+                <button
+                  onClick={scrollRight}
+                  disabled={!canScrollRight}
+                  style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
+                    flex items-center justify-center font-bold transition-opacity duration-200
+                    ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+                >
+                  &gt;
+                </button>
+              )}
+
+              {/* ── Dots ── */}
+        {showUI && (
+  <div className="flex justify-center gap-2 mt-3">
+    {Array.from({ length: dotsCount + 1 }).map((_, i) => (
+      <button
+        key={i}
+        onClick={() => scrollToIndex(i)}
+        className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${
+          activeIndex === i ? "bg-[#333333]" : "bg-transparent"
+        }`}
+      />
+    ))}
+  </div>
 )}
 
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
-}
+};
 
 export default FeaturedProducts;
