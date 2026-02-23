@@ -69,7 +69,7 @@ const Page = async () => {
 
   return (
     <>
-      <main className="flex flex-col gap-30" role="main">
+      <main className="flex flex-col gap-5" role="main">
         {/* <AOSWrapper animation="zoom-in" delay={100}> */}
           <Banner />
         {/* </AOSWrapper> */}
@@ -79,8 +79,15 @@ const Page = async () => {
         {/* <AOSWrapper animation="fade-up" delay={500}> */}
            <FeaturedProducts
                 endpoint="web/products/featured-products"
-                isSlider={true}
+                title="Most Popular Products"
+              />
+           <FeaturedProducts
+                endpoint="web/products/featured-products"
                 title="Featured Products"
+              />
+           <FeaturedProducts
+                endpoint="web/products/featured-products"
+                title="New Products"
               />
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={600}> */}

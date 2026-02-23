@@ -88,9 +88,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] rounded shadow hover:shadow-md transition flex flex-col h-full p-7">
+    <div className="bg-[#FFFFFF] rounded shadow hover:shadow-md transition flex flex-col h-full p-7 border-1">
       {/* Image */}
-      <div className="relative w-[252.63px] h-[252.63px] mb-2">
+      <div className="relative w-[97.3%] h-[252.63px] mb-2 mx-auto">
         <Image
           src={imageSrc}
           alt={productName}
@@ -156,7 +156,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className="flex-1 bg-[#ff482e] hover:bg-[#D42020] font-bold text-white py-1 h-9 text-[14px] rounded transition-colors"
+            className="flex-1 h-14 bg-[#ff482e] hover:bg-[#D42020] text-white py-1 h-9 text-[14px] rounded transition-colors"
           >
             Add to Cart
           </button>
