@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import Banner from "./components/Home/Banner";
 import Brands from "./components/Home/Brands";
 import PopularProducts from "./components/Home/PopularProducts";
+import FeaturedProducts from "./components/Home/FeaturedProducts";
 
 // Lazy load below-the-fold components for better performance
 const TopIndustries = dynamic(() => import("./components/Home/TopIndustries"), {
@@ -73,10 +74,14 @@ const Page = async () => {
           <Banner />
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={400}> */}
-          <Brands />
+          {/* <Brands /> */}
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={500}> */}
-          <PopularProducts />
+           <FeaturedProducts
+                endpoint="web/products/featured-products"
+                isSlider={true}
+                title="Featured Products"
+              />
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={600}> */}
           <TopIndustries />

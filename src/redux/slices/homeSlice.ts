@@ -135,6 +135,20 @@ export const contactUs = createAsyncThunk(
     }
   }
 );
+export const fetchProductsData = createAsyncThunk(
+  "home/fetchProductsData",
+  async (endpoint: string, thunkAPI) => {
+    try {
+      const res = await axiosInstance.get(endpoint);
+      console.log(`Products from ${endpoint}:`, res.data);
+      return res.data;
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to fetch products"
+      );
+    }
+  }
+);
 
 // 2. Initial State
 const initialState = {
@@ -144,6 +158,7 @@ const initialState = {
   searchData: [],
   getBrand: [],
   popularProducts: [],
+  products: [],
   reviews: [] as any[],
   reviewsLoading: false,
   reviewsError: null as string | null,
@@ -221,6 +236,17 @@ const homeSlice = createSlice({
       .addCase(fetchStats.rejected, (state) => {
         state.statsLoading = false;
         // Stats error is not critical, so we don't set error state
+      })
+       .addCase(fetchProductsData.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductsData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload;
+      })
+      .addCase(fetchProductsData.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to fetch products data";
       });
   },
 });

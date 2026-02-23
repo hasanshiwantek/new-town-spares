@@ -11,7 +11,7 @@ axiosInstance.interceptors.request.use((config) => {
       const data = localStorage.getItem("persist:auth"); 
       const user  = data ? JSON.parse(data) : null
       const token = user?.token ? JSON.parse(user.token) : null;
-      const storeId = 4;
+      const storeId = 10;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

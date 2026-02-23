@@ -5,6 +5,11 @@ import Link from "next/link";
 import { Menu, ChevronDown, ChevronRight } from "lucide-react";
 import { fetchCategories } from "@/lib/api/category";
 import dynamic from "next/dynamic";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { RootState } from "@/redux/store";
+import { fetchCurrencies, setSelectedCurrency } from "@/redux/slices/currencySlice";
+import { FaChevronDown } from "react-icons/fa";
+import { TfiHeadphoneAlt } from "react-icons/tfi";
 
 interface Category {
   id: number;
@@ -52,7 +57,7 @@ const DropdownColumn = ({
   };
 
   return (
-    <div className="xl:w-[25.8rem] 2xl:w-[34.2rem]  bg-white text-black border-r relative">
+    <div className="xl:w-[25.8rem] 2xl:w-[34.2rem] bg-white text-black border-r relative">
       {/* Column Heading (static, no animation) */}
       <div className="px-4 py-2 h3-secondary !text-[#F15939] border-b">
         {heading}
@@ -111,10 +116,24 @@ const DropdownColumn = ({
     </div>
   );
 };
+
 const LinkHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const currencyRef = useRef<HTMLDivElement | null>(null);
+
+  const { currencies, status, selectedCurrency } = useAppSelector(
+    (state: RootState) => state.currency
+  );
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchCurrencies());
+    }
+  }, [status, dispatch]);
 
   const toggleDropdown = () => {
     setIsOpen((prev) => !prev);
@@ -125,6 +144,12 @@ const LinkHeader = () => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+      }
+      if (
+        currencyRef.current &&
+        !currencyRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -141,27 +166,23 @@ const LinkHeader = () => {
   const visibleCategories = categories.slice(0, 7); // same count as before
 
   return (
-    <header className="bg-[#5B5B5B] text-white">
+    <header className=" border-b-2">
       <nav
-        className="w-full flex items-center justify-start 
-                  gap-4 lg:gap-2 xl:gap-5 2xl:gap-7
-                  px-4 sm:px-6 md:px-10 lg:px-[2%] xl:px-[5%] 2xl:px-32 
-                  py-2 sm:py-3 
-                  relative 2xl:max-w-[1920px] xl:h-[56px] 2xl:h-[56px] lg:[h-56px] h-max"
+        className="w-full max-w-[1684px] mx-auto flex items-center justify-between 
+       px-7 xl:px-28 relative h-[54.5px] lg:h-[66.67px]"
       >
         {/* Left Section: Menu Button */}
         <div
           className="relative flex items-center 
-                 gap-1 sm:gap-2 md:gap-3 lg:gap-4 "
+                 gap-1 sm:gap-2 md:gap-3 lg:gap-4"
           ref={menuRef}
         >
           <button
             onClick={toggleDropdown}
-            className="flex items-center gap-1 sm:gap-2 hover:text-gray-300 focus:outline-none"
+            className="flex items-center justify-center gap-1 sm:gap-2 hover:text-gray-300 focus:outline-none w-[12.3rem] lg:w-[13.3rem] h-[54.5px] border-r-2 lg:mb-4"
           >
-            <Menu className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 2xl:w-[20px] 2xl:h-[20px] text-[#F2F2F2]" />
-            <span className="text-sm sm:text-base md:text-lg xl:text-xl 2xl:text-[20px] font-normal text-[#F2F2F2]">
-              Menu
+            <span className="text-sm md:text-xl text-[#333333]">
+              All Categories
             </span>
             <ChevronDown
               className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200 ${
@@ -180,38 +201,63 @@ const LinkHeader = () => {
               />
             </div>
           )}
+
+          {/* Left Section: Static Links */}
+          <ul
+            className="hidden md:flex items-center 
+            whitespace-nowrap 
+            text-sm md:text-xl text-[#333333] lg:mb-4"
+          >
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px]">
+              <Link href="/about-us">About Us</Link>
+            </li>
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px]">
+              <Link href="/contact-us">Contact Us</Link>
+            </li>
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px]">
+              <Link href="/blogs">Blog</Link>
+            </li>
+          </ul>
         </div>
 
-        {/* Right Section: Static Links */}
-        {/* ✅ Right Section: Dynamic Categories */}
-        <ul
-          className="hidden lg:flex items-center 
-            gap-4 md:gap-6 xl:gap-6 
-            whitespace-nowrap 
-            text-sm sm:text-base md:text-sm lg:text-[1rem] xl:text-xl 2xl:text-2xl
-            font-normal"
-        >
-          <li>
-            <Link href="/about-us">About</Link>
-          </li>
-          <li>
-            <Link href="/contact-us">Contact Us</Link>
-          </li>
-          <li>
-            <Link href="/blogs">Blog</Link>
-          </li>
+        {/* Right Section: Currency */}
+        <div className="relative hidden lg:flex items-center gap-1 sm:gap-6" ref={currencyRef}>
+          <div className="flex flex-col leading-tight relative">
+            <button
+              aria-label="currency"
+              onClick={() => setOpen(!open)}
+              className="flex items-center gap-1 text-xs sm:text-sm md:text-base lg:text-lg hover:text-blue-300"
+            >
+              <span className="text-sm sm:text-base md:text-lg lg:text-xl">
+                {selectedCurrency}
+              </span>
+              <FaChevronDown className="text-xs" />
+            </button>
 
-          {visibleCategories.map((cat) => (
-            <li key={cat.id} className="text-[#F2F2F2]">
-              <Link
-                href={`/category/${cat.slug}`}
-                className="hover:text-gray-300 transition-colors"
-              >
-                {cat.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+            {open && (
+              <div className="absolute top-14 mt-1 bg-white shadow-lg rounded-md max-h-64 overflow-y-auto w-44 z-10">
+                {currencies?.map((c) => (
+                  <div
+                    key={c?.code}
+                    className="px-3 py-2 text-black hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      dispatch(setSelectedCurrency(c?.code));
+                      setOpen(false);
+                    }}
+                  >
+                    {c?.code} - {c?.rate?.toFixed(2)}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <TfiHeadphoneAlt className=" w-8 h-8" />
+            <span className="text-sm sm:text-base md:text-lg lg:text-xl">
+              (029) 651-6864
+            </span>
+          </div>
+        </div>
       </nav>
     </header>
   );
