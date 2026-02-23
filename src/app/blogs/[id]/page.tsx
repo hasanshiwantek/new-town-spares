@@ -4,7 +4,7 @@ import Script from "next/script";
 import SingleBlogContainer from "@/app/components/SingleBlog/SingleBlogContainer";
 import { getBlogByIdServer } from "@/lib/api/products";
 import { Metadata } from "next";
-import navlogo from "@/assets/navlogo.png";
+import navlogo from "@/assets/navlogo.svg";
 
 const SITE_NAME = "New Town Spares";
 const BASE_URL = "https://nts-ecommerce.vercel.app";
