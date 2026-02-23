@@ -119,21 +119,18 @@ const GlobalSearchBar: React.FC = () => {
         <div>
           <input
             type="search"
-            placeholder="Search products..."
+            placeholder="Search by keyword, brand or SKU"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="
-      w-full px-4 md:px-5 lg:px-6 
+      w-full px-4 md:px-4 xl:px-6 border-gray-300 border
       py-2 md:py-2.5 lg:py-3 
-      rounded-full bg-white text-gray-800 
+      bg-white text-gray-800 
       focus:outline-none focus:ring-2 focus:ring-orange-400 
-      text-sm sm:text-base lg:text-lg
-      h-10 sm:h-12 md:h-12 lg:h-14 xl:h-[50px] 2xl:h-[64px]
-      pr-12 sm:pr-16 md:pr-20 lg:pr-27 2xl:pr-52
-    h6-medium-color
+      h-[42px]
     "
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
             <button
             aria-label="search"
             name="search"
@@ -144,13 +141,10 @@ const GlobalSearchBar: React.FC = () => {
                 }
               }}
               className="
-        bg-[#F1593957] rounded-full
-        w-8 h-8            
-        sm:w-9 sm:h-9       
-        md:w-10 md:h-6    
-        lg:w-16 lg:h-10    
-        xl:w-20 xl:h-13  
-        2xl:w-[88px] 2xl:h-[46px] 
+        bg-[#FD5430]
+        w-16 
+        lg:w-14    
+        xl:w-[52px] h-[42px] 
         flex items-center justify-center
       "
             >
@@ -161,8 +155,8 @@ const GlobalSearchBar: React.FC = () => {
           md:w-6 md:h-6 
           lg:w-7 lg:h-7 
           xl:w-8 xl:h-8 
-          2xl:w-[23.7px] 2xl:h-[23.7px]
-          text-black 
+          2xl:w-[19.98px] 2xl:h-[19.98px]
+          text-white
         "
               />
             </button>
