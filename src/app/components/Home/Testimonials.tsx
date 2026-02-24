@@ -136,26 +136,26 @@ const Testimonials = () => {
   }, [totalPages, pageIndex]);
 
   const reviewTemplate = (review: Review) => (
-    <div className="mt-[2rem] m-2 text-left p-[24px] flex flex-col gap-5 bg-white ">
-      <FaQuoteLeft size={24} color="#00b67a" className="mb-2" />
-      <Link href={review?.url} target="_blank">
-        <h2 className="mb-2 h3-24px-medium line-clamp-1">
-          {review?.reviewHeading}
-        </h2>
-      </Link>
+    <div className="mt-[2rem] m-2 text-left px-3 flex flex-col gap-2 bg-white ">
+      {/* <FaQuoteLeft size={24} color="#00b67a" className="mb-2" /> */}
       <div className="mb-3 flex items-center justify-between">
         <Image
           src={review?.stars || "/default-product-image.svg"}
           alt="Rating"
           width={80}
           height={32}
-          className="h-8 w-auto"
+          className="h-7 w-auto"
           unoptimized
         />
-        <p className="mb-1 font-[500]">{review.dateOfExperience}</p>
+        <p className="mb-1 font-[500] text-[13px]">{review.dateOfExperience}</p>
       </div>
+        <Link href={review?.url} target="_blank">
+        <h2 className="mb-2 text-[14px] line-clamp-1 underline">
+          {review?.reviewHeading}
+        </h2>
+      </Link>
       <div
-        className="mb-3 h5-20px-reg overflow-auto review-scroll"
+        className="mb-3 text-[14px] overflow-auto review-scroll"
         style={{
           maxHeight: "7.5em", // Approx 5 lines at 1.5em each
           minHeight: "7.5em",
@@ -163,7 +163,7 @@ const Testimonials = () => {
       >
         {review?.reviewContent ? review?.reviewContent : "No review content"}
       </div>
-      <p className="mb-1 h6-18-px-regular border-t p-1">{review.reviewer}</p>
+      <p className="mb-1 text-[14px] border-t p-1">{review.reviewer}</p>
     </div>
   );
 
@@ -171,21 +171,12 @@ const Testimonials = () => {
     <div>
       {/* Header */}
       <header className="text-center flex flex-col 2xl:gap-5 gap-3 mb-10">
-        <h2 className="h5-20px-regular mb-4">Testimonials</h2>
-        <h2 className="h1-lg mb-4">
-          Trusted by
-          <span className="!text-[var(--primary-color)]"> 450+</span> Satisfied
-          Clients
-        </h2>
-        <p className="h3-24px-regular mx-auto">
-          Don't take our words for it, See What our customers Say
-        </p>
+        <h2 className="text-[2.1rem]">Reviews</h2>
       </header>
-
-      <div className="flex items-center justify-between md:flex-col sm:flex-col lg:flex-row flex-col md:px-[7%] lg:px-[5.2%] xl:px-[5.2%] 2xl:px-[5.2%] px-[7%]">
+      <div className="flex items-center justify-between md:flex-col sm:flex-col lg:flex-row flex-col">
         {/* Left Summary Box */}
-        <div className="flex flex-col items-center justify-between gap-5 whitespace-nowrap 2xl:px-[60px] 2xl:py-[20px]">
-          <h3 className="text-center h3-regular">
+        <div className="flex flex-col items-center justify-between gap-3 whitespace-nowrap">
+          <h3 className="text-center text-[#333333]">
             {stats?.status || "Excellent"}
           </h3>
           <Image
@@ -198,21 +189,20 @@ const Testimonials = () => {
             height={200}
             className="max-w-[80%]"
           />
-          <span className="h5-20px-regular">
-            Based on
-            <a href="#" className="ml-2 border-b-2">
-              {stats?.count || "18"} <br />
-              reviews
-            </a>
-          </span>
+       <span className="text-[13px]">
+  Based on{" "}
+  <a href="#" className="border-b-2">
+    {stats?.count || "18"} reviews
+  </a>
+</span>
           <div className="flex items-center justify-center">
-            <IoStarSharp size={20} color="#00b67a" />
-            <h4 className="text-[#2A2A2A] mt-1">TrustPilot</h4>
+            <IoStarSharp size={35} color="#00b67a" />
+            <h4 className="text-[#2A2A2A] mt-1 text-2xl font-bold">TrustPilot</h4>
           </div>
         </div>
 
         {/* Carousel */}
-        <div className="card w-[81%] relative">
+        <div className="card w-[86%] relative">
           {reviewsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4 animate-pulse">
               {Array.from({ length: visibleItems }).map((_, index) => (
@@ -266,37 +256,43 @@ const Testimonials = () => {
           )}
 
           {/* Custom Navigation */}
-          {reviews.length > 0 && !reviewsLoading && !reviewsError && (
-            <div className="flex items-center justify-center mt-4 gap-4">
-              <button
-                aria-label="Previous"
-                onClick={navigateLeft}
-                className="p-1 text-gray-500 hover:text-gray-800 transition"
-              >
-                <GoArrowLeft size={25} />
-              </button>
+         {reviews.length > 0 && !reviewsLoading && !reviewsError && (
+  <div className="flex lg:hidden items-center justify-center mt-4 gap-4">
+    
+    {/* Left Arrow */}
+    <button
+      aria-label="Previous"
+      onClick={navigateLeft}
+      className="p-1 text-gray-500 hover:text-gray-800 transition"
+    >
+      <GoArrowLeft size={25} />
+    </button>
 
-              {/* Indicators */}
-              <div className="flex items-center gap-2">
-                {visibleIndicators.map((i) => (
-                  <span
-                    key={i}
-                    className={`w-8 h-1 rounded-full transition-all duration-500 ${
-                      i === pageIndex ? "bg-[#e84949]" : "bg-gray-300"
-                    }`}
-                  ></span>
-                ))}
-              </div>
+    {/* Dotted Indicators */}
+    <div className="flex items-center gap-3">
+      {visibleIndicators.map((i) => (
+        <button
+          key={i}
+          className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${
+            i === pageIndex
+              ? "bg-[#333333] scale-110"
+              : "bg-transparent hover:bg-gray-300"
+          }`}
+        />
+      ))}
+    </div>
 
-              <button
-                onClick={navigateRight}
-                aria-label="Next"
-                className="p-1 text-gray-500 hover:text-gray-800 transition"
-              >
-                <GoArrowRight size={25} />
-              </button>
-            </div>
-          )}
+    {/* Right Arrow */}
+    <button
+      onClick={navigateRight}
+      aria-label="Next"
+      className="p-1 text-gray-500 hover:text-gray-800 transition"
+    >
+      <GoArrowRight size={25} />
+    </button>
+
+  </div>
+)}
         </div>
       </div>
     </div>
