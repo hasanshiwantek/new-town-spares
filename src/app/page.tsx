@@ -91,10 +91,10 @@ const Page = async () => {
               />
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={600}> */}
-          <TopIndustries />
+          {/* <TopIndustries /> */}
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={700}> */}
-          <ItEquipment />
+          {/* <ItEquipment /> */}
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={800}> */}
           <AuthorizedSupplier />
@@ -103,7 +103,7 @@ const Page = async () => {
           <Testimonials />
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={1000}> */}
-          <GetInTouch />
+          {/* <GetInTouch /> */}
         {/* </AOSWrapper> */}
       </main>
     </>
