@@ -64,7 +64,7 @@ export default function PageTransition({
             "/about-us",
           ].some((p) => pathname.includes(p))
             ? "w-full max-w-[1684px] mx-auto px-7 xl:px-28 py-6"
-            : "py-6 md:px-[7%] lg:px-[5.2%] xl:px-[5.2%] 2xl:px-[5.2%] px-[7%]"
+            : "py-6 md:px-[7%] lg:px-[5.2%] xl:px-[84px] 2xl:px-[84px] px-[7%]"
         }`}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
