@@ -30,21 +30,18 @@ const FooterBottom = () => {
   return (
     <footer className="bg-[#333333] text-white w-full mx-auto">
       {/* 🔹 Newsletter Section */}
-      <section className="bg-[#2C2D2C] flex justify-center items-center h-auto min-h-[10rem]">
+      <section className="bg-[#2C2D2C] flex justify-center items-center h-auto min-h-[7.91rem]">
         <div
           className="
-        w-full max-w-full sm:max-w-[95%] md:max-w-[90%] lg:max-w-[85%] xl:max-w-[80%]
-        2xl:max-w-[90%] 
-        mx-auto 
-        px-4 sm:px-6 lg:px-8 xl:px-10 py-2 md:py-0
+        w-full max-w-[1684px] mx-auto px-7 xl:px-28
         flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 lg:gap-0
       "
         >
           <div className="text-center md:text-left w-full md:w-[60%] 2xl:max-w-[50%]">
-            <h3 className="h1-secondary-medium !text-white">
+            <h3 className="text-[19px] !text-white">
               Subscribe to our Newsletter
             </h3>
-            <p className="!text-gray-300 h6-regular">
+            <p className="!text-gray-300 text-[14px]">
               Get the latest updates on new products and upcoming sales
             </p>
           </div>
@@ -77,14 +74,14 @@ const FooterBottom = () => {
       w-full max-w-full sm:max-w-[95%] md:max-w-[90%] lg:max-w-[88%] xl:max-w-[85%]
       2xl:max-w-[90%] 
       mx-auto 
-      px-4 sm:px-6 lg:px-8 xl:px-10 
-      py-16 text-center sm:text-start
+      
+      py-6 text-center sm:text-start
     "
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
           <nav aria-label="Customer Services">
-            <h4 className="h5-bold !text-[#FFFFFF] mb-4">Customer Services</h4>
-            <ul className="flex flex-col xl:gap-3 2xl:gap-4 h5-regular !text-[#FFFFFF] gap-5">
+            <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">Customer Services</h4>
+            <ul className="flex flex-col xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF] gap-5">
               <li>
                 <Link href="/privacyPolicy">Privacy policy</Link>
               </li>
@@ -113,8 +110,8 @@ const FooterBottom = () => {
           </nav>
 
           <nav aria-label="My Account">
-            <h4 className="h5-bold !text-[#FFFFFF] mb-4">My Account</h4>
-            <ul className="flex flex-col xl:gap-3 2xl:gap-4 h5-regular !text-[#FFFFFF] gap-5">
+            <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">My Account</h4>
+            <ul className="flex flex-col xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF] gap-5">
               <li>
                 <Link href="/login">Sign in</Link>
               </li>
@@ -125,7 +122,7 @@ const FooterBottom = () => {
                 <Link href="/cart">My cart</Link>
               </li>
             </ul>
-            <h4 className="h5-bold !text-[#FFFFFF] mt-10">Follow Us</h4>
+            <h4 className="text-2xl font-bold !text-[#FFFFFF] mt-10">Follow Us</h4>
             <div className="w-[120px] h-[48px] m-auto lg:m-0 mt-7">
   <Image
     src="/footer-logo.png"
@@ -140,8 +137,8 @@ const FooterBottom = () => {
           </nav>
 
           <section aria-label="Contact Us">
-            <h4 className="h5-bold !text-[#FFFFFF] mb-4">Contact Us</h4>
-            <ul className="flex flex-col xl:gap-3 2xl:gap-4 h5-regular !text-[#FFFFFF]">
+            <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">Contact Us</h4>
+            <ul className="flex flex-col xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF]">
               <li>
                 <a href="mailto:contact@newtownspares.com">
                   contact@newtownspares.com
@@ -157,11 +154,11 @@ const FooterBottom = () => {
             
      
             <nav aria-label="Categories">
-  <h4 className="h5-bold !text-[#FFFFFF] mb-4 uppercase">
+  <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4 uppercase">
     Categories
   </h4>
 
-  <ul className="flex flex-col gap-5 xl:gap-3 2xl:gap-4 h5-regular !text-[#FFFFFF]">
+  <ul className="flex flex-col gap-5 xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF]">
     {categories && categories.length > 0 ? (
       categories.slice(0, 10).map((category) => (
         <li key={category.id || category.name}>
@@ -185,17 +182,17 @@ const FooterBottom = () => {
           </section>
 
           <address className="not-italic">
-            <h4 className="h5-bold !text-[#FFFFFF] mb-4">Address</h4>
-            <p className="h5-regular !text-[#FFFFFF]">
+            <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">Address</h4>
+            <p className="text-[14px] !text-[#FFFFFF]">
               123 Lakeview Avenue, Zurich
             </p>
-            <p className="h5-regular !text-[#FFFFFF]">Switzerland</p>
+            <p className="text-[14px] !text-[#FFFFFF]">Switzerland</p>
           </address>
         </div>
       </section>
 
       {/* 🔹 Bottom Bar */}
-      <div className="h5-regular flex items-center flex-wrap sm:flex-nowrap justify-between bg-[#2C2D2C] min-h-[4.5rem] px-[5%]">
+      <div className="text-[14px] flex items-center flex-wrap sm:flex-nowrap justify-between bg-[#2C2D2C] min-h-[4.5rem] px-[5%]">
         {/* Center Content */}
         <p className="!text-white text-center w-full">
           &copy; New Town Spares {new Date().getFullYear()}. All rights
@@ -203,7 +200,7 @@ const FooterBottom = () => {
         </p>
 
         {/* Right Content */}
-        {/* <p className="flex items-center gap-2 h5-regular !text-white mx-auto sm:ml-auto">
+        {/* <p className="flex items-center gap-2 text-[14px] !text-white mx-auto sm:ml-auto">
           <span className="whitespace-nowrap">Join Us</span>
           <Image
             src="/footer-logo.png"
