@@ -21,6 +21,9 @@ const Testimonials = dynamic(() => import("./components/Home/Testimonials"), {
 const GetInTouch = dynamic(() => import("./components/Home/GetInTouch"), {
   loading: () => <div className="h-64 animate-pulse bg-gray-200" />,
 });
+const BlogHome = dynamic(() => import("./components/Home/BlogHome"), {
+  loading: () => <div className="h-64 animate-pulse bg-gray-200" />,
+});
 const AOSWrapper = dynamic(() => import("./components/animation/AOSWrapper"));
 export const metadata: Metadata = {
   metadataBase: new URL("https://nts-ecommerce.vercel.app"),
@@ -103,7 +106,7 @@ const Page = async () => {
           <Testimonials />
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={1000}> */}
-          {/* <GetInTouch /> */}
+          <BlogHome />
         {/* </AOSWrapper> */}
       </main>
     </>
