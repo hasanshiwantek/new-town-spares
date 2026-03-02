@@ -32,12 +32,20 @@ const OurLatestBlogs = () => {
       <div className="w-full xl:max-w-[1290px] 2xl:max-w-[1720px]">
         
         {/* Heading + Search */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 md:gap-0">
-          <h1 className="h1-secondary !text-[#4A4A4A] uppercase tracking-wide text-center md:text-left">
-            Our Latest Blogs
-          </h1>
+        {/* <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 md:gap-0"> */}
+             <div className="mb-6 text-sm md:text-base">
+          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
+            Home
+          </Link>{" "}
+          / <span className="mx-1 text-[#333333] text-[13px]"> Blog</span>
+        </div>
 
-          <div className="flex items-center rounded-md overflow-hidden w-full sm:w-[70%] md:w-[50%] lg:w-[38.5%] 2xl:w-[35.2%] h-[55px] xl:h-[48.75px] 2xl:h-[65px]">
+          <h1 className="text-3xl md:text-[28px] text-[#333333] mt-16">
+          Blog
+        </h1>
+
+
+          {/* <div className="flex items-center rounded-md overflow-hidden w-full sm:w-[70%] md:w-[50%] lg:w-[38.5%] 2xl:w-[35.2%] h-[55px] xl:h-[48.75px] 2xl:h-[65px]">
             <Input
               type="text"
               placeholder="Search..."
@@ -59,8 +67,8 @@ const OurLatestBlogs = () => {
                 />
               </svg>
             </button>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
 
         {/* Blog Layout */}
         {/* <div className="flex flex-col lg:flex-row gap-6">

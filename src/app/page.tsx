@@ -107,6 +107,7 @@ const Page = async () => {
         {/* </AOSWrapper> */}
         {/* <AOSWrapper animation="fade-up" delay={1000}> */}
           <BlogHome />
+          {/* <GetInTouch /> */}
         {/* </AOSWrapper> */}
       </main>
     </>

@@ -69,22 +69,22 @@ const page = () => {
         <AboutBanner />
       {/* </AOSWrapper> */}
       {/* <AOSWrapper animation="fade-up" delay={200}> */}
-        <GlobalSupplier />
+        {/* <GlobalSupplier /> */}
       {/* </AOSWrapper> */}
       {/* <AOSWrapper animation="fade-up" delay={300}> */}
-        <AboutStats />
+        {/* <AboutStats /> */}
       {/* </AOSWrapper> */}
       {/* <AOSWrapper animation="fade-up" delay={400}> */}
-        <AboutBrandSection />
+        {/* <AboutBrandSection /> */}
       {/* </AOSWrapper> */}
       {/* <AOSWrapper animation="fade-up" delay={500}> */}
-        <SocialResponsibilitySection />
+        {/* <SocialResponsibilitySection /> */}
       {/* </AOSWrapper> */}
       {/* <AOSWrapper animation="fade-up" delay={600}> */}
-        <GetInTouch />
+        {/* <GetInTouch /> */}
       {/* </AOSWrapper> */}
       {/* <AOSWrapper animation="fade-up" delay={700}> */}
-        <ProductServicesSection />
+        {/* <ProductServicesSection /> */}
       {/* </AOSWrapper> */}
     </main>
   );

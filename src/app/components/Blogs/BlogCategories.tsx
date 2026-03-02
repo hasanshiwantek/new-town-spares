@@ -1,7 +1,9 @@
 import React from "react";
 import BlogSkeleton from "../loader/BlogSkeleton";
 import Link from "next/link";
+import Image from "next/image";
 import Pagination from "@/components/ui/pagination";
+
 const BlogCategories = ({
   blogPosts,
   error,
@@ -19,102 +21,66 @@ const BlogCategories = ({
 }) => {
   const getExcerpt = (html: string, maxLength = 200) => {
     if (!html) return "";
-
-    // Create a temporary DOM element
     const div = document.createElement("div");
     div.innerHTML = html;
-
-    // Get text content only
     const text = div.textContent || div.innerText || "";
-
-    // Truncate
     if (text.length > maxLength) {
       return text.slice(0, maxLength) + "...";
     }
     return text;
   };
- 
-// Total Pages ko backend data se nikalna
-  const totalPages = pagination?.totalPages || 1;
-  const showPagination = totalPages > 1;
-  return (
-    <div className="flex flex-col items-start   py-5 w-full xl:max-w-[1290px] 2xl:max-w-[1720px] ">
-      {/* <h2 className="h1-secondary !text-[#4A4A4A] uppercase mb-8">
-    Categories
-  </h2> */}
 
-      <div className="space-y-8 w-full">
+  const totalPages = pagination?.totalPages || 1;
+
+  return (
+    <div className="flex flex-col items-start py-5 w-full xl:max-w-[1290px] 2xl:max-w-[1720px]">
+      <div className="w-full">
         {loading ? (
-          // Skeleton Loader for 3 items
           <BlogSkeleton />
         ) : error ? (
           <div className="w-full py-10 text-center text-red-500 font-medium">
             {error || "Something went wrong while fetching blogs."}
           </div>
         ) : blogPosts && blogPosts.length > 0 ? (
-          blogPosts.map((blog) => (
-            <div
-              key={blog.id}
-              className="
-          flex flex-col 
-          md:flex-row 
-          xl:flex-row 2xl:flex-row
-          w-full 
-          xl:w-[100%] 2xl:w-[100%] 
-          xl:h-[20.9rem] 2xl:h-[20.1rem] 
-          md:gap-6 xl:gap-[30px] 2xl:gap-10 
-          bg-white rounded-lg overflow-hidden transition group
-        "
-            >
-              {/* Image */}
-              <div
-                className="
-            w-full md:w-[35%] xl:w-[35.5%] 2xl:w-[38.2%] 
-            h-[220px] md:h-[280px] lg:h-[320px] xl:h-auto
-          "
+          // ✅ Grid UI
+          <div className="w-full mx-auto grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {blogPosts.map((blog) => (
+              <Link
+                href={`blogs/${blog.slug}`}
+                key={blog.id}
+                className="bg-white transition duration-300 overflow-hidden border border-gray-100 group"
               >
-                <img
-                  src={blog.thumbnail}
-                  alt={blog.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+                {/* Image */}
+                <div className="relative h-72 w-full overflow-hidden">
+                  <Image
+                    src={blog.thumbnail}   // ✅ API field
+                    alt={blog.title}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                    sizes="(max-width: 768px) 100vw,
+                           (max-width: 1200px) 50vw,
+                           384px"
+                    priority={blog.id === blogPosts[0]?.id}  // ✅ First blog priority
+                  />
+                </div>
 
-              {/* Text Content */}
-              <div
-                className="
-            w-full md:w-[55%] xl:w-[52.2%] 2xl:w-[51.8%]
-            h-auto xl:h-[20.5rem] 2xl:h-[20.4rem] 
-            flex flex-col justify-center my-auto 
-            gap-6 md:gap-6 xl:gap-6 
-            p-5 md:p-6 xl:p-0
-          "
-              >
-                <p className="h5-medium border-l-3 border-[#F15939] pl-3">
-                  {blog.title || "N/A"}
-                </p>
-                <Link
-                  href={`blogs/${blog.id}`}
-                  className="h4-regular relative inline-block group/readmore"
-                >
-                  <h3 className="h3-secondary group-hover:!text-[#F15939] leading-12.5">
-                    {blog.title}
+                {/* Content */}
+                <div className="p-3">
+                  <p className="text-[13px] text-gray-500 mb-2">
+                    {blog.author || "N/A"}  {/* ✅ API field: author */}
+                  </p>
+
+                  <h3 className="text-xl text-gray-500 mb-3 hover:text-[#F15939] cursor-pointer transition-colors duration-300">
+                    {blog.title}  {/* ✅ API field: title */}
                   </h3>
-                </Link>
-                <p className="h5-regular line-clamp-3">
-                  {getExcerpt(blog.body, 150)}
-                </p>
 
-                <Link
-                  href={`blogs/${blog.id}`}
-                  className="h4-regular relative inline-block group/readmore"
-                >
-                  Read More →
-                  <span className="absolute left-0 -bottom-1 h-[2px] !text-[#F15939] w-0 bg-current transition-all duration-300 group-hover/readmore:w-40"></span>
-                </Link>
-              </div>
-            </div>
-          ))
+                  <p className="text-[14px] text-gray-600 text-sm line-clamp-3">
+                    {getExcerpt(blog.body, 100)}  {/* ✅ API field: body */}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         ) : (
           <div className="w-full py-10 text-center text-gray-500 font-medium">
             No blogs found.
@@ -122,17 +88,14 @@ const BlogCategories = ({
         )}
       </div>
 
-     {/* Pagination */}
-      {!loading && !error && (
+      {/* Pagination */}
+      {!loading && !error && totalPages > 1 && (
         <div className="mt-6 flex justify-end m-auto">
-         <Pagination
-            currentPage={pagination?.currentPage} 
+          <Pagination
+            currentPage={pagination?.currentPage}
             totalPages={totalPages}
             onPageChange={(page: number) =>
-              setFilters((prev: any) => ({
-                ...prev,
-                page,
-              }))
+              setFilters((prev: any) => ({ ...prev, page }))
             }
           />
         </div>
