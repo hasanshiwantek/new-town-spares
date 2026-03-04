@@ -187,7 +187,7 @@ const Testimonials = () => {
             alt="Reviews"
             width={200}
             height={200}
-            className="max-w-[80%]"
+            className="max-w-[85%]"
           />
        <span className="text-[13px]">
   Based on{" "}

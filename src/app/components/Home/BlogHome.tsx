@@ -48,14 +48,14 @@ const BlogHome = () => {
       <h2 className="text-[2.1rem] text-center mb-10">Blogs</h2>
 
       {/* Grid */}
-      <div className="w-full mx-auto grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="w-full mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {blogs.map((blog) => (
           <div
             key={blog.id}
             className="bg-white transition duration-300 overflow-hidden border-1"
           >
             {/* Image */}
-<div className="relative h-72 w-full overflow-hidden group">
+<div className="relative h-[195px] w-full overflow-hidden group">
   <Image
     src={`${blog.image}?auto=format&fit=crop&w=800&q=80`}
     alt={blog.title}
@@ -68,7 +68,7 @@ const BlogHome = () => {
   />
 </div>
             {/* Content */}
-            <div className="p-3">
+            <div className="p-4.5">
               <p className="text-[13px] text-gray-500 mb-2">{blog.date}</p>
 
               <h3 className="text-xl text-gray-500 mb-3 hover:text-blue-600 cursor-pointer">
