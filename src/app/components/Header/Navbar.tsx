@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
 
   return (
     <header className="text-white z-50 border-b-2 border-[#FD5430]">
-      <nav className="w-full max-w-[1684px] mx-auto">
+      <nav className="relative w-full max-w-[1684px] mx-auto">
         <div
           className="
         flex items-center justify-between
@@ -169,7 +169,11 @@ const Navbar: React.FC = () => {
             {/* Account */}
             <div className="relative">
               <div
-                onClick={() => setIsAccountOpen(!isAccountOpen)}
+                onClick={() =>
+                  auth?.isAuthenticated
+                    ? setIsAccountOpen(!isAccountOpen)
+                    : router.push("/auth/login")
+                }
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <div className="w-7 h-7 flex items-center justify-center">
@@ -196,6 +200,7 @@ const Navbar: React.FC = () => {
                 </div>
               </div>
 
+              {auth?.isAuthenticated && (
               <div
                 className={`absolute left-0 mt-3 w-44 bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
                   isAccountOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -219,6 +224,7 @@ const Navbar: React.FC = () => {
                   </li>
                 </ul>
               </div>
+              )}
             </div>
 
             {/* Cart  desktop*/}
@@ -239,7 +245,7 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Burger Dropdown Menu (Only below lg) */}
         {burgerMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 w-full bg-white shadow-lg z-50 p-6">
+          <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg z-[100] p-6 border-t border-gray-200">
             <div className="space-y-6">
               {/* Search Section */}
               <div>
@@ -286,29 +292,32 @@ const Navbar: React.FC = () => {
                 {cart?.length || 0}
               </span>
             </div>
-              {/* Account */}
-              <div>
-                <h3 className="text-black font-semibold text-lg mb-3">
-                  Account
-                </h3>
-                <ul className="space-y-2 text-black">
-                  <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                    Orders
-                  </li>
-                  <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                    Addresses
-                  </li>
-                  <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                    Recently Viewed
-                  </li>
-                  <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                    Account Settings
-                  </li>
-                  <li onClick={handleLogout} className="hover:text-[#FD5430] cursor-pointer py-2">
-                    Sign out
-                  </li>
-                </ul>
-              </div>
+
+              {/* Account - only when logged in */}
+              {auth?.isAuthenticated && (
+                <div>
+                  <h3 className="text-black font-semibold text-lg mb-3">
+                    Account
+                  </h3>
+                  <ul className="space-y-2 text-black">
+                    <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
+                      Orders
+                    </li>
+                    <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
+                      Addresses
+                    </li>
+                    <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
+                      Recently Viewed
+                    </li>
+                    <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
+                      Account Settings
+                    </li>
+                    <li onClick={handleLogout} className="hover:text-[#FD5430] cursor-pointer py-2">
+                      Sign out
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         )}

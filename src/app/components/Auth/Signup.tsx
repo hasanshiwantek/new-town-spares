@@ -1,20 +1,11 @@
 "use client";
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import countries from "world-countries";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectItem,
-  SelectContent,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
-import Image from "next/image";
 import Link from "next/link";
-import SignUpBG from "@/assets/auth/Signup-bg.png";
-import styles from "@/styles/auth/Auth.module.css";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { registerUser } from "@/redux/slices/authSlice";
@@ -39,6 +30,32 @@ interface SignupFormValues {
   zip: string;
 }
 
+function FieldLabel({
+  htmlFor,
+  children,
+  required,
+}: {
+  htmlFor: string;
+  children: React.ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 mb-1">
+      <Label
+        htmlFor={htmlFor}
+        className="text-[14px] text-[#333333] font-normal leading-none"
+      >
+        {children}
+      </Label>
+      {required && (
+        <span className="text-[10px] text-[#333333] uppercase shrink-0">
+          REQUIRED
+        </span>
+      )}
+    </div>
+  );
+}
+
 const SignupPage = () => {
   const countryList = countries
     .map((country) => ({
@@ -57,281 +74,284 @@ const SignupPage = () => {
   const dispatch = useAppDispatch();
   const { registerLoading } = useAppSelector((state: RootState) => state?.auth);
   const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const onSubmit = async (data: SignupFormValues) => {
     try {
       const result = await dispatch(registerUser(data));
-
       if (registerUser.fulfilled.match(result)) {
         reset();
+        toast.success("Account created successfully!");
         router.push("/auth/login");
       } else {
         const errorMessage =
-          result.payload || "Registration failed. Please try again.";
-        console.error("Registration failed:", errorMessage);
+          (result.payload as string) || "Registration failed. Please try again.";
+        toast.error(errorMessage);
       }
-    } catch (err: any) {
-      console.error("🚨 Unexpected error:", err);
+    } catch {
+      toast.error("Registration failed. Please try again.");
     }
   };
 
   const password = watch("password");
 
+  const inputClass =
+    "w-full h-[42px] max-w-full bg-white border border-gray-300 rounded text-gray-800 text-[14px] focus:ring-2 focus:ring-[#FD5430] focus:border-[#FD5430]";
+  const rowClass = "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6";
+
   return (
-    <section
-      className={`relative flex items-center justify-center min-h-screen !bg-cover !bg-center p-4 ${styles.signUpBG}`}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/10" />
-
-      {/* Form Container */}
-      <div
-        className="relative z-10 w-full 
-                   max-w-[95%] sm:max-w-[90%] lg:max-w-[80%] 2xl:max-w-[1000px]
-                   bg-white rounded-lg shadow-md 
-                   p-6 sm:p-8 lg:px-[40px] 
-                   h-auto  flex flex-col justify-center"
-      >
-        <div className="flex flex-col justify-center items-center">
-          <h1 className="h2-medium text-center">Signup</h1>
-          <p className="h5-regular text-center mb-4">
-            Create an account to get started.
-          </p>
+    <section className="min-h-screen w-full py-8">
+       <div className="mb-6 text-sm md:text-base">
+          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
+            Home
+          </Link>{" "}
+          / <span className="mx-1 text-[#333333] text-[13px]">Create Accont</span>
         </div>
+      <div className="max-w-full mx-auto w-full">
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="space-y-5 !w-full !max-w-full sm:!max-w-none mt-5 max-[642px]:max-w-sm max-[642px]:mx-auto"
-        >
-          {/* Name Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label className="h5-regular" htmlFor="firstName">
-                First Name <span className="text-red-600">*</span>
-              </Label>
-              <Input
-                id="firstName"
-                className="!w-full !max-w-full h-[60px]"
-                {...register("firstName", { required: true })}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-500">Required</p>
-              )}
-            </div>
-            <div>
-              <Label className="h5-regular" htmlFor="lastName">
-                Last Name <span className="text-red-600">*</span>
-              </Label>
-              <Input
-                id="lastName"
-                className="!w-full !max-w-full h-[60px]"
-                {...register("lastName", { required: true })}
-              />
-              {errors.lastName && (
-                <p className="text-sm text-red-500">Required</p>
-              )}
-            </div>
-          </div>
+        <h1 className="text-2xl sm:text-4xl text-gray-800 my-8">
+          New Account
+        </h1>
 
-          {/* Email / Phone */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+          {/* Row 1: Email | Password */}
+          <div className={rowClass}>
             <div>
-              <Label className="h5-regular" htmlFor="email">
-                Email <span className="text-red-600">*</span>
-              </Label>
+              <FieldLabel htmlFor="email" required>
+                Email Address
+              </FieldLabel>
               <Input
                 id="email"
                 type="email"
-                className="!w-full !max-w-full h-[60px]"
+                className={inputClass}
                 {...register("email", { required: true })}
               />
-              {errors.email && <p className="text-sm text-red-500">Required</p>}
+              {errors.email && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
             </div>
-            <div>
-              <Label className="h5-regular" htmlFor="phone">
-                Phone Number
-              </Label>
+            <div className="relative">
+              <FieldLabel htmlFor="password" required>
+                Password
+              </FieldLabel>
               <Input
-                id="phone"
-                type="tel"
-                className="!w-full !max-w-full h-[60px]"
-                {...register("phoneNumber")}
+                id="password"
+                type={showPassword ? "text" : "password"}
+                className={`${inputClass} pr-10`}
+                {...register("password", { required: true })}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                className="absolute right-2 top-13 text-gray-500 hover:text-gray-700"
+                aria-label="Toggle password"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+              {errors.password && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
             </div>
           </div>
 
-          {/* Password / Confirm */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {/* Password */}
-      <div className="relative">
-        <Label className="h5-regular" htmlFor="password">
-          Password <span className="text-red-600">*</span>
-        </Label>
-        <Input
-          id="password"
-          type={showPassword ? "text" : "password"}
-          className="!w-full !max-w-full h-[60px] pr-12"
-          {...register("password", { required: true })}
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword((prev) => !prev)}
-          className="absolute right-3 top-[65px] -translate-y-1/2 text-gray-500 hover:text-gray-700"
-        >
-          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-        </button>
-        {errors.password && (
-          <p className="text-sm text-red-500 mt-1">Required</p>
-        )}
-      </div>
-
-      {/* Confirm Password */}
-      <div className="relative">
-        <Label className="h5-regular" htmlFor="confirmPassword">
-          Confirm Password <span className="text-red-600">*</span>
-        </Label>
-        <Input
-          id="confirmPassword"
-          type={showConfirmPassword ? "text" : "password"}
-          className="!w-full !max-w-full h-[60px] pr-12"
-          {...register("password_confirmation", {
-            required: true,
-            validate: (value) =>
-              value === password || "Passwords do not match",
-          })}
-        />
-        <button
-          type="button"
-          onClick={() => setShowConfirmPassword((prev) => !prev)}
-          className="absolute right-3 top-[65px] -translate-y-1/2 text-gray-500 hover:text-gray-700"
-        >
-          {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-        </button>
-        {errors.password_confirmation && (
-          <p className="text-sm text-red-500 mt-1">
-            {errors.password_confirmation.message || "Required"}
-          </p>
-        )}
-      </div>
-    </div>
-          {/* Company Name */}
-          <div>
-            <Label className="h5-regular" htmlFor="company">
-              Company Name
-            </Label>
-            <Input
-              id="company"
-              className="!w-full !max-w-full h-[60px]"
-              {...register("companyName")}
-            />
-          </div>
-
-          {/* Address */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <Label className="h5-regular" htmlFor="address1">
-                Address Line 1 <span className="text-red-600">*</span>
-              </Label>
+          {/* Row 2: Confirm Password | First Name */}
+          <div className={rowClass}>
+            <div className="relative">
+              <FieldLabel htmlFor="confirmPassword" required>
+                Confirm Password
+              </FieldLabel>
               <Input
-                id="address1"
-                className="!w-full !max-w-full h-[60px]"
-                {...register("addressLine1", { required: true })}
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                className={`${inputClass} pr-10`}
+                {...register("password_confirmation", {
+                  required: true,
+                  validate: (v) => v === password || "Passwords do not match",
+                })}
               />
-              {errors.addressLine1 && (
-                <p className="text-sm text-red-500">Required</p>
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((p) => !p)}
+                className="absolute right-2 top-13 text-gray-500 hover:text-gray-700"
+                aria-label="Toggle password"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
+              </button>
+              {errors.password_confirmation && (
+                <p className="text-[10px] text-red-500 mt-0.5">
+                  {errors.password_confirmation.message || "Required"}
+                </p>
               )}
             </div>
             <div>
-              <Label className="h5-regular" htmlFor="address2">
-                Address Line 2
-              </Label>
+              <FieldLabel htmlFor="firstName" required>
+                First Name
+              </FieldLabel>
+              <Input
+                id="firstName"
+                className={inputClass}
+                {...register("firstName", { required: true })}
+              />
+              {errors.firstName && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
+            </div>
+          </div>
+
+          {/* Row 3: Last Name | Company Name */}
+          <div className={rowClass}>
+            <div>
+              <FieldLabel htmlFor="lastName" required>
+                Last Name
+              </FieldLabel>
+              <Input
+                id="lastName"
+                className={inputClass}
+                {...register("lastName", { required: true })}
+              />
+              {errors.lastName && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
+            </div>
+            <div>
+              <FieldLabel htmlFor="company">Company Name</FieldLabel>
+              <Input
+                id="company"
+                className={inputClass}
+                {...register("companyName")}
+              />
+            </div>
+          </div>
+
+          {/* Row 4: Phone Number | Address Line 1 */}
+          <div className={rowClass}>
+            <div>
+              <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+              <Input
+                id="phone"
+                type="tel"
+                className={inputClass}
+                {...register("phoneNumber")}
+              />
+            </div>
+            <div>
+              <FieldLabel htmlFor="address1" required>
+                Address Line 1
+              </FieldLabel>
+              <Input
+                id="address1"
+                className={inputClass}
+                {...register("addressLine1", { required: true })}
+              />
+              {errors.addressLine1 && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
+            </div>
+          </div>
+
+          {/* Row 5: Address Line 2 | Suburb/City */}
+          <div className={rowClass}>
+            <div>
+              <FieldLabel htmlFor="address2">Address Line 2</FieldLabel>
               <Input
                 id="address2"
-                className="!w-full !max-w-full h-[60px]"
+                className={inputClass}
                 {...register("addressLine2")}
               />
             </div>
             <div>
-              <Label className="h5-regular" htmlFor="city">
-                Suburb/City <span className="text-red-600">*</span>
-              </Label>
+              <FieldLabel htmlFor="city" required>
+                Suburb/City
+              </FieldLabel>
               <Input
                 id="city"
-                className="!w-full !max-w-full h-[60px]"
+                className={inputClass}
                 {...register("suburb", { required: true })}
               />
               {errors.suburb && (
-                <p className="text-sm text-red-500">Required</p>
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
               )}
             </div>
           </div>
 
-          {/* Country / State / Zip */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Row 6: Country | State */}
+          <div className={rowClass}>
             <div>
-              <Label className="h5-regular" htmlFor="country">
-                Country <span className="text-red-600">*</span>
-              </Label>
-
-              <Select>
-                <SelectTrigger className="!w-full !max-w-full !h-[60px]">
-                  <SelectValue placeholder="Select Country" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {countryList.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FieldLabel htmlFor="country" required>
+                Country
+              </FieldLabel>
+              <select
+                id="country"
+                className={`${inputClass} cursor-pointer`}
+                {...register("country", { required: true })}
+              >
+                <option value="">Select Country</option>
+                {countryList.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {errors.country && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
             </div>
             <div>
-              <Label className="h5-regular" htmlFor="state">
-                State/Province <span className="text-red-600">*</span>
-              </Label>
+              <FieldLabel htmlFor="state" required>
+                State/Province
+              </FieldLabel>
               <Input
                 id="state"
-                className="!w-full !max-w-full h-[60px]"
+                className={inputClass}
                 {...register("state", { required: true })}
               />
-              {errors.state && <p className="text-sm text-red-500">Required</p>}
-            </div>
-            <div>
-              <Label className="h5-regular" htmlFor="zip">
-                Zip/Postcode <span className="text-red-600">*</span>
-              </Label>
-              <Input
-                id="zip"
-                className="!w-full !max-w-full h-[60px]"
-                {...register("zip", { required: true })}
-              />
-              {errors.zip && <p className="text-sm text-red-500">Required</p>}
+              {errors.state && (
+                <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )}
             </div>
           </div>
 
-          {/* Submit */}
-          {registerLoading ? (
-            <div className="flex justify-center items-center py-9">
-              <div className="w-8 h-8 border-4 border-t-transparent border-[#F15939] rounded-full animate-spin"></div>
-            </div>
-          ) : (
-            <Button
-              type="submit"
-              className="w-full !py-9 !rounded-full btn-primary 2xl:text-[22px] xl:text-[16.5] text-[14px]"
-            >
-              Sign up
-            </Button>
-          )}
+          {/* Row 7: Zip (single field row) */}
+          <div className="w-full sm:w-[49.3%]">
+            <FieldLabel htmlFor="zip" required>
+              Zip/Postcode
+            </FieldLabel>
+            <Input
+              id="zip"
+              className={inputClass}
+              {...register("zip", { required: true })}
+            />
+            {errors.zip && (
+              <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+            )}
+          </div>
 
-          <p className="h6-medium text-center !text-[#4A4A4A] mt-4">
-            Already have an account?{" "}
-            <Link href="/auth/login" className="text-red-500 hover:underline">
-              Login
-            </Link>
-          </p>
+          {/* Submit */}
+          <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4">
+            <p className="text-[14px] text-gray-600 mb-0">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="text-[#FD5430] hover:underline">
+                Sign in
+              </Link>
+            </p>
+            {registerLoading ? (
+              <div className="flex justify-center sm:justify-end w-full sm:w-[173px]">
+                <div className="w-8 h-8 border-4 border-t-transparent border-[#FD5430] rounded-full animate-spin" />
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                className="w-full md:w-[173px] bg-[#FD5430] hover:bg-[#e04a2a] text-white font-medium h-[42px] rounded text-[12px]"
+              >
+                Create Account
+              </Button>
+            )}
+          </div>
         </form>
       </div>
     </section>
