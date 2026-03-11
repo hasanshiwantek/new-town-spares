@@ -17,11 +17,11 @@ export default function BrandFilter({
           <li
             key={b.brand.id}
             onClick={() => handleBrandClick(b.brand.id, b.brand.name, b.brand.slug)}
-            className={`2xl:px-[11px] 2xl:py-[11px] xl:px-[8.25px] xl:py-[6px] p-2 rounded-md cursor-pointer h5-20px-regular transition-all duration-200
+              className={`text-[13px] py-1 rounded-md cursor-pointer transition-all duration-200
               ${
                 isActive
-                  ? "bg-[#F15939] !text-white hover:bg-[#d94d30]"
-                  : "hover:bg-gray-100 text-[#333333]"
+                  ? "font-bold text-black"
+                  : "text-[#333333] hover:bg-gray-100"
               }`}
           >
             {b.brand.name}

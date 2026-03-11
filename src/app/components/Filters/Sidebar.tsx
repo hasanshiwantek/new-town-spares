@@ -133,24 +133,25 @@ export default function Sidebar({
     <aside
       className="
       flex flex-col gap-5 w-full bg-white rounded-xl
-      2xl:px-2 p-0
+      2xl:px-3 p-0
       transition-all duration-300
     "
     >
-      <div className="border rounded-xl  ">
+      <div>
         {/* Category Section */}
-        <div className="border-b 2xl:p-6  xl:p-[18px] p-4  bg-gray-100 rounded-t-lg">
+        {/* <div className="border-b 2xl:p-6  xl:p-[18px] p-4  bg-gray-100 rounded-t-lg">
           <h2 className="h3-secondary">Category</h2>
-        </div>
+        </div> */}
 
-        <ul className="px-3 py-2 space-y-2">
+        <ul className="py-2 space-y-2">
           {/* Top Brands */}
-          <li>
+          
+          {/* <li>
             <div
               onClick={() => toggleSection("Top Brands")}
-              className="flex justify-between items-center cursor-pointer transition-all mt-5 px-2"
+              className="flex justify-between items-center cursor-pointer transition-all"
             >
-              <span className="h5-20px-regular">Top Brands</span>
+              <span className="text-[13px]">Top Brands</span>
               <span
                 className={`transform transition-transform duration-300 ${
                   expandedSection === "Top Brands" ? "rotate-180" : "rotate-0"
@@ -167,7 +168,7 @@ export default function Sidebar({
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="mt-2 ml-6 border-l overflow-hidden"
+                  className=" overflow-hidden"
                 >
                   <BrandFilter
                     brands={brands}
@@ -177,7 +178,7 @@ export default function Sidebar({
                 </MotionDiv>
               )}
             </AnimatePresence>
-          </li>
+          </li> */}
 
           {/* Dynamic Categories */}
           {/* {categories.map((cat: any) => (
@@ -237,21 +238,15 @@ export default function Sidebar({
         </ul>
       </div>
 
-      {/* Price Filter */}
-      <div className="border rounded-xl ">
-        <div className="">
-          <div className="border-t bg-gray-100 2xl:p-6 rounded-xl  xl:p-[18px] p-4 ">
-            <h2 className="h3-secondary ">Shop by price</h2>
-          </div>
-          <div className="p-4">
-            <PriceFilter filters={filters} setFilters={setFilters} />
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="px-4 py-2 h5-20px-regular border-t">
-          {products?.length} products
-        </div>
+      {/* Shop By Price - clean list UI */}
+      <div className="w-full">
+        <h2 className="text-[#333333] text-xl mb-3">
+          Shop By Price
+        </h2>
+        <PriceFilter filters={filters} setFilters={setFilters} />
+        {/* <div className="mt-4 text-sm text-gray-600">
+          {products?.length ?? 0} products
+        </div> */}
       </div>
     </aside>
   );
