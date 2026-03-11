@@ -43,14 +43,14 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
       {/* Breadcrumb Navigation */}
       <nav
         aria-label="Breadcrumb"
-        className="flex items-center space-x-2 h5-20px-regular mb-6 flex-wrap"
+        className="flex items-center space-x-2  mb-6 flex-wrap"
         itemScope
         itemType="https://schema.org/BreadcrumbList"
       >
         {items.map((item, index) => (
           <React.Fragment key={index}>
             {index > 0 && (
-              <ChevronRight className="mx-2 w-4 h-4 text-gray-400" aria-hidden="true" />
+              <span className="text-[13px] text-[#666666] ml-2 mr-4">/</span>
             )}
             <span
               itemProp="itemListElement"
@@ -59,7 +59,7 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
             >
               {index === items.length - 1 ? (
                 <span
-                  className="h5-regular text-[#2a2a2a]"
+                  className="text-[13px] text-[#2a2a2a]"
                   itemProp="name"
                 >
                   {item.name}
@@ -67,7 +67,7 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
               ) : (
                 <Link
                   href={item.href}
-                  className="h5-20px-regular text-[#666666] hover:text-[#f15939] transition-colors"
+                  className="text-[13px] underline text-[#666666] hover:text-[#f15939] transition-colors"
                   itemProp="item"
                 >
                   <span itemProp="name">{item.name}</span>

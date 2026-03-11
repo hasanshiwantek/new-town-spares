@@ -55,6 +55,8 @@ export default function PageTransition({
           pathname === "/" ||
           [
             "/auth",
+            "/category",
+            "/brand",
             "/privacyPolicy",
             "/payment-options",
             "/terms-conditions",

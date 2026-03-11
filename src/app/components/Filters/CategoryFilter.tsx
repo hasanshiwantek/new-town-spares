@@ -37,16 +37,17 @@ export default function CategoryFilter({
         const hasSubcategories = cat.subcategories && cat.subcategories.length > 0;
 
         return (
-          <li key={cat.id} className="h5-regular">
+          <li key={cat.id} className="text-[13px]">
             <div className="flex justify-between items-center">
               {/* Category Name - Clickable */}
               <div
                 onClick={() => handleCategoryClick(cat.id, cat.name, cat.slug)}
-                className={`cursor-pointer px-3 py-2 rounded-md transition-all duration-200 flex-1 ${
-                  isActive
-                    ? "bg-[#F15939] text-white"
-                    : "hover:bg-gray-100 text-[#333333]"
-                }`}
+                className={`text-[13px] py-1 rounded-md cursor-pointer transition-all duration-200
+                  ${
+                    isActive
+                      ? "font-bold text-black"
+                      : "text-[#333333] hover:bg-gray-100"
+                  }`}
               >
                 {cat.name}
               </div>
@@ -61,12 +62,12 @@ export default function CategoryFilter({
                   className="p-2 hover:bg-gray-100 rounded-md transition-colors"
                   aria-label={isExpanded ? "Collapse" : "Expand"}
                 >
-                  <ChevronDown
+                  {/* <ChevronDown
                     size={18}
                     className={`text-[#4A4A4A] transform transition-transform duration-300 ${
                       isExpanded ? "rotate-180" : "rotate-0"
                     }`}
-                  />
+                  /> */}
                 </button>
               )}
             </div>
@@ -82,7 +83,7 @@ export default function CategoryFilter({
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="ml-4 mt-1 border-l border-gray-300 pl-2">
+                    <div className="ml-4 pl-2">
                       <CategoryFilter
                         categories={cat.subcategories}
                         handleCategoryClick={handleCategoryClick}

@@ -122,10 +122,10 @@ export default function ProductsClientWrapper({
   }, [isCategoryPage, isBrandPage, filterMeta.categoryName, filterMeta.brandName, params?.slug]);
 
   return (
-      <div className="flex flex-col lg:flex-row gap-4 py-4 w-full xl:max-w-[100%] 2xl:max-w-[119.5%]">
+      <div className="flex flex-col lg:flex-row gap-2 py-4 w-full xl:max-w-[100%] 2xl:max-w-[119.5%]">
         {/* Sidebar: Filters */}
         <aside
-          className="w-full lg:w-[27%] xl:w-[24%] 2xl:w-[24.1%] bg-white rounded
+          className="w-full lg:w-[22%] xl:w-[24%] 2xl:w-[20%] bg-white rounded
 "
         >
           <Sidebar
@@ -142,7 +142,7 @@ export default function ProductsClientWrapper({
         </aside>
 
         {/* Product Listing */}
-        <main className="w-full lg:w-[72%] xl:w-[73.3%] 2xl:w-[73.8%]">
+        <main className="w-full lg:w-[80%] xl:w-[73.3%] 2xl:w-[79.2%]">
           {(isCategoryPage || isBrandPage) && (
             <div className="mb-4 px-4 md:px-0">
               <Breadcrumb items={breadcrumbItems} />

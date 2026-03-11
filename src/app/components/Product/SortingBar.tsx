@@ -69,10 +69,10 @@ export default function SortingBar({
   return (
     <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col justify-between items-center border 2xl:py-[20px] 2xl:px-[30px] xl:py-[15px] xl:px-[22.5px]    p-5 w-full">
       {/* ✅ Dynamic heading */}
-      <h4 className="h3-regular">{getFilterTitle()}</h4>
+      <h4 className="text-[14px] text-[#333333]">{getFilterTitle()}</h4>
 
       <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col items-center gap-3 ">
-        <span className="h5-20px-regular">Sort by</span>
+        <span className="text-[14px] text-[#333333]">Sort by</span>
 
         {/* Sort Dropdown */}
         <select
@@ -84,7 +84,7 @@ export default function SortingBar({
               page: 1,
             }))
           }
-          className="px-3 py-1 h5-20px-regular
+          className="px-3 py-1 text-[14px] text-[#333333]
              border border-gray-300 rounded-md shadow-sm 
              bg-white cursor-pointer
              focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]
