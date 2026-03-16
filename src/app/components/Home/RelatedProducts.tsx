@@ -1,208 +1,194 @@
 "use client";
-import React, { useState } from "react";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import Image from "next/image";
-import { Product } from "@/types/types";
-import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { addToCart } from "@/redux/slices/cartSlice";
-import { RootState } from "@/redux/store";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
-import BulkInquiryModal from "../modal/BulkInquiryModal";
-import ProductPrice from "../productprice/ProductPrice";
 
-type RelatedProductItem = Omit<Product, "image"> & {
+import React, { useEffect, useRef, useState } from "react";
+import ProductCard from "./ProductCard";
+
+const ProductSkeleton = () => (
+  <div className="bg-[#f2f2f2] rounded shadow animate-pulse flex flex-col h-full">
+    <div className="w-full h-72 mb-2 bg-gray-300 rounded" />
+    <div className="px-3 pb-3 flex flex-col flex-1">
+      <div className="h-4 bg-gray-300 mb-2 w-1/3 rounded" />
+      <div className="h-4 bg-gray-300 mb-2 w-1/2 rounded" />
+      <div className="h-4 bg-gray-300 mb-2 w-full rounded" />
+      <div className="mt-auto h-8 bg-gray-300 rounded" />
+    </div>
+  </div>
+);
+
+type RelatedProductItem = {
+  id?: string | number;
   name?: string;
   sku?: string;
   image?: { path?: string }[];
   brand?: { name?: string };
   availabilityText?: string;
+  [key: string]: any;
 };
 
-const RelatedProduct = ({ products }: { products: RelatedProductItem[] }) => {
-  const [startIndex, setStartIndex] = useState(0);
-  const [direction, setDirection] = useState(0); // 👈 direction detect
-  const itemsPerPage = 4;
-  const dispatch = useAppDispatch();
-  const cart = useAppSelector((state: RootState) => state.cart.items);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<RelatedProductItem | null>(null);
+const RelatedProducts = ({ products = [] }: { products?: RelatedProductItem[] }) => {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const handlePrev = () => {
-    setDirection(-1); // 👈 going left
-    setStartIndex((prev) => Math.max(prev - itemsPerPage, 0));
+  const productsData = Array.isArray(products) ? products : [];
+
+  const updateScroll = () => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    const scrollable = el.scrollWidth > el.clientWidth + 1;
+    setCanScrollLeft(scrollable && el.scrollLeft > 0);
+    setCanScrollRight(scrollable && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+
+    const colWidth = el.firstElementChild
+      ? (el.firstElementChild as HTMLElement).offsetWidth
+      : el.clientWidth;
+
+    const visible = Math.round(el.clientWidth / colWidth);
+    setVisibleCount(visible);
+    setActiveIndex(Math.round(el.scrollLeft / colWidth));
   };
 
-  const handleNext = () => {
-    setDirection(1); // 👈 going right
-    setStartIndex((prev) =>
-      Math.min(prev + itemsPerPage, products.length - itemsPerPage)
-    );
+  useEffect(() => {
+    const t = setTimeout(updateScroll, 100);
+    const el = trackRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScroll);
+    el.addEventListener("scrollend", updateScroll);
+    window.addEventListener("resize", updateScroll);
+    return () => {
+      clearTimeout(t);
+      el.removeEventListener("scroll", updateScroll);
+      el.removeEventListener("scrollend", updateScroll);
+      window.removeEventListener("resize", updateScroll);
+    };
+  }, [productsData]);
+
+  const trackScroll = () => {
+    let last = trackRef.current?.scrollLeft || 0;
+    const check = () => {
+      const cur = trackRef.current?.scrollLeft || 0;
+      if (Math.abs(cur - last) < 1) updateScroll();
+      else {
+        last = cur;
+        requestAnimationFrame(check);
+      }
+    };
+    requestAnimationFrame(check);
   };
 
-  const visibleProducts = products.slice(startIndex, startIndex + itemsPerPage);
-  console.log("Related Products: ", products);
+  const scrollLeft = () => {
+    trackRef.current?.scrollBy({
+      left: -(trackRef.current?.offsetWidth ?? 0),
+      behavior: "smooth",
+    });
+    trackScroll();
+  };
+
+  const scrollRight = () => {
+    trackRef.current?.scrollBy({
+      left: trackRef.current?.offsetWidth ?? 0,
+      behavior: "smooth",
+    });
+    trackScroll();
+  };
+
+  const scrollToIndex = (i: number) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const colWidth = el.firstElementChild
+      ? (el.firstElementChild as HTMLElement).offsetWidth
+      : 0;
+    el.scrollTo({ left: i * colWidth, behavior: "smooth" });
+  };
+
+  const totalCards = Math.min(productsData.length, 5);
+  const dotsCount = Math.max(0, totalCards - visibleCount);
+  const showUI = dotsCount > 0;
 
   return (
-    <>
-      <h2 className="h1-secondary-medium">Related Products</h2>
-      <div className="my-8 relative w-full max-w-[1719px] mx-auto ">
-        {/* AnimatePresence for smooth slide */}
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.div
-            key={startIndex}
-            initial={{ x: direction > 0 ? 300 : -300 }}
-            animate={{ x: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 70,
-              damping: 20,
-            }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-4 
-                 gap-10  relative justify-items-center "
+    <div className="bg-transparent py-4">
+      <h2 className="text-4xl text-[#333333] p-3 text-center w-full mb-4">
+        Related Products
+      </h2>
+
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <ProductSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {!loading && productsData.length === 0 && (
+        <div className="py-12 text-center text-gray-500 text-sm">
+          No related products found
+        </div>
+      )}
+
+      {!loading && productsData.length > 0 && (
+        <div className="relative">
+          {showUI && (
+            <button
+              onClick={scrollLeft}
+              disabled={!canScrollLeft}
+              style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
+              className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
+                flex items-center justify-center font-bold transition-opacity duration-200
+                ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+            >
+              &lt;
+            </button>
+          )}
+
+          <div
+            ref={trackRef}
+            className="grid grid-rows-1 grid-flow-col gap-3
+              auto-cols-[100%]
+              sm:auto-cols-[calc(50%-6px)]
+              md:auto-cols-[calc(33.333%-8px)]
+              lg:auto-cols-[calc(25%-9px)]
+              2xl:auto-cols-[calc(20%-10px)]
+              overflow-x-auto scroll-smooth scrollbar-hide"
           >
-            {visibleProducts?.map((product: any) => (
-              <div
-                key={product?.id}
-                className="group relative flex flex-col justify-evenly items-start 
-             w-full 
-             xl:w-[101.5%] xl:h-[335.55px] 
-             2xl:w-[100.4%] 2xl:h-[449px] 
-             border border-[#D6D6D6] rounded-md bg-white p-4 lg:p-6 overflow-hidden"
-              >
-                {/* Product Image */}
-                <div
-                  className="w-full flex items-center justify-center 
-                  xl:h-[225px] 2xl:h-[240px] mb-4"
-                >
-                  <Image
-                    src={
-                      product?.image?.[1]?.path ||
-                      product?.image?.[0]?.path ||
-                      "/default-product-image.svg"
-                    }
-                    alt={product?.name}
-                    width={200}
-                    height={100}
-                    className="object-contain h-full w-auto  xl:h-[185px] lg:h-[185px] md:h-[185px]"
-                    loading="lazy"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                    quality={80}
-                  />
-                </div>
-
-                {/* Product? Name (2 lines max, fixed height) */}
-                <Link
-                  href={`/${product?.sku}`}
-                  className="relative inline-block cursor-pointer group"
-                >
-                  <p className="h6-18-px-medium line-clamp-2 min-h-[3rem]">
-                    {product?.name}
-                  </p>
-
-                  {/* Animated underline */}
-                </Link>
-
-                {/* Brand + Availability + Price (reserve space) */}
-                <div className="flex flex-col justify-between min-h-[4.5rem] mt-2">
-                  <h3 className="h7-16-px-regular line-clamp-1">
-                    {product?.brand?.name} | {product?.availabilityText}
-                  </h3>
-                  <p className="h6-18-px-medium group-hover:invisible">
-                    <ProductPrice price={Number(product?.price) || 0} inline className="h6-18-px-medium" />
-                  </p>
-                </div>
-
-                {/* Action Buttons → Always bottom aligned */}
-                <div
-                  className="absolute bottom-5 xl:bottom-8 left-0 right-0 flex justify-center gap-3 
-                                opacity-0 translate-y-10 group-hover:translate-y-4 
-                                lg:group-hover:translate-y-6 group-hover:opacity-100 
-                                transition-all duration-300 p-2"
-                >
-                  <button
-                    name="cart"
-                    onClick={() => {
-                      dispatch(addToCart(product));
-                      toast.success(`${product?.name} added to cart!`);
-                    }}
-                    className="btn-primary xl:!text-2xl 2xl:!text-[22px] 2xl:!font-medium 
-                               w-full sm:w-[48%] md:w-[45%] lg:w-[50%] xl:w-[45%]
-                               2xl:w-[173.875px] 2xl:h-[50px] whitespace-nowrap"
-                  >
-                    Add to Cart
-                  </button>
-
-                  <button
-                    name="getQuote"
-                    onClick={() => {
-                      setSelectedProduct(product);
-                      setIsModalOpen(true);
-                    }}
-                    className="xl:!text-2xl 2xl:!text-[22px] 2xl:!font-medium 
-                               w-full sm:w-[48%] md:w-[45%] lg:w-[50%] xl:w-[45%]
-                               2xl:w-[173.875px] 2xl:h-[50px] mr-2
-                               text-[#4A4A4A] bg-white border border-[#4A4A4A] 
-                               rounded-md px-4 py-2 transition-all my-1 duration-200 cursor-pointer whitespace-nowrap"
-                  >
-                    Get Quote
-                  </button>
-                </div>
-              </div>
+            {productsData.slice(0, 5).map((product: any) => (
+              <ProductCard key={product.id} product={product} />
             ))}
-          </motion.div>
-        </AnimatePresence>
+          </div>
 
-        {/* Left Arrow */}
-        <button
-          name="left"
-          onClick={handlePrev}
-          disabled={startIndex === 0}
-          className="absolute left-2 top-1/2 -translate-y-1/2 
-                     md:-left-23 border-2 text-[#F15939] 
-                     rounded-full p-6 2xl:p-8 hover:bg-gray-300 disabled:opacity-50"
-        >
-          <FaChevronLeft className="w-[10px]" />
-        </button>
+          {showUI && (
+            <button
+              onClick={scrollRight}
+              disabled={!canScrollRight}
+              style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
+              className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
+                flex items-center justify-center font-bold transition-opacity duration-200
+                ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+            >
+              &gt;
+            </button>
+          )}
 
-        {/* Right Arrow */}
-        <button
-          name="right"
-          onClick={handleNext}
-          disabled={startIndex >= products.length - itemsPerPage}
-          className="absolute right-2 top-1/2 -translate-y-1/2 
-                     md:-right-23 border-2 text-[#F15939] 
-                     rounded-full p-6 2xl:p-8 hover:bg-gray-300 disabled:opacity-50"
-        >
-          <FaChevronRight className="w-[10px]" />
-        </button>
-      </div>
-      <BulkInquiryModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedProduct(null);
-        }}
-        product={
-          selectedProduct
-            ? {
-                name:
-                  selectedProduct.name ??
-                  (typeof selectedProduct.title === "string"
-                    ? selectedProduct.title
-                    : undefined) ??
-                  "Product",
-                image:
-                  selectedProduct.image?.[0]?.path ||
-                  selectedProduct.image?.[1]?.path,
-                sku: selectedProduct.sku ?? String(selectedProduct.id ?? ""),
-              }
-            : undefined
-        }
-      />
-    </>
+          {showUI && (
+            <div className="flex justify-center gap-2 mt-3">
+              {Array.from({ length: dotsCount + 1 }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => scrollToIndex(i)}
+                  className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${
+                    activeIndex === i ? "bg-[#333333]" : "bg-transparent"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
-export default RelatedProduct;
+export default RelatedProducts;

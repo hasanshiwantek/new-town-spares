@@ -4,12 +4,12 @@ import Image from "next/image";
 
 const ProductLeft = ({ images, selectedImage, setSelectedImage }: any) => {
   return (
-    <div className=" product-left flex flex-col w-full lg:w-[37%] xl:w-[40.1%] 2xl:w-[34.9%]">
-      <div className="flex flex-col gap-[10px]">
+    <div className=" product-left flex flex-col w-full lg:w-[37%] xl:w-[37.6%] 2xl:w-[37.6%]">
+      <div className="flex flex-col gap-[10px] border">
         {/* Main Image */}
          <figure
-          className="rounded-md sm:mt-0 border flex items-center justify-center 
-          w-full lg:h-[35rem] lg:w-[100%] xl:w-[100%]  xl:h-[39.1rem] 2xl:w-[100%] 2xl:h-[49.1rem]  
+          className="rounded-md sm:mt-0 flex items-center justify-center 
+          w-full lg:h-[35rem] lg:w-[100%] xl:w-[100%]  2xl:w-[100%] xl:h-[41.5rem]  
            p-1 bg-[#FFF]"
         >
            <Image
@@ -30,7 +30,7 @@ const ProductLeft = ({ images, selectedImage, setSelectedImage }: any) => {
         {/* Thumbnails */}
         <figcaption
           className="
-            flex justify-center items-center h-[5.1rem] xl:w-[100%] xl:h-[5.7rem] 2xl:w-[100%] 2xl:h-[7.2rem] 
+            flex  justify-center text-[14px] text-[#808080] items-start h-[5.1rem] xl:w-[100%] 2xl:w-[100%] xl:h-[10.7rem] 
           "
         >
           Image may differ from the actual product

@@ -23,6 +23,14 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
     (state) => state.home,
   );
 
+  const originalPrice = Number(product?.retailPrice) || 0;
+  const currentPrice = Number(product?.price) || 0;
+  const hasBothPrices = originalPrice > 0 && currentPrice > 0;
+  const savings =
+    hasBothPrices && originalPrice > currentPrice
+      ? originalPrice - currentPrice
+      : 0;
+
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
     window.open(
@@ -36,317 +44,233 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
     dispatch(fetchStats());
   }, [dispatch]);
   return (
-    <section className=" product-middle  flex flex-col h-full w-full lg:w-[38%] xl:w-[38%] 2xl:w-[36.4%]">
+    <section className=" product-middle  flex flex-col h-full w-full lg:w-[38%] xl:w-[37.6%] 2xl:w-[37.6%]">
       <div>
-        <div className="flex flex-col gap-1 xl:gap-2.5 2xl:gap-3">
+        <div className="flex flex-col gap-1">
           {/* <h6 className="h6-regular">{product?.brand?.name}</h6> */}
           <h1
             className="
-    font-bold uppercase 
-    text-[14px] leading-7 xl:leading-9 2xl:leading-11 tracking-[0.0075em] text-[#000000] 
+     uppercase 
+    text-[14px] leading-8 tracking-[0.0075em] text-[#333333] 
     xl:text-[16.8px] 
-    2xl:text-[21px]
+    2xl:text-[20px]
   "
           >
             {product?.name || "N/A"}
           </h1>
 
-          {/* Rating */}
-          {/* Rating & Reviews */}
-          <div onClick={handleSeeMore} className="flex items-center space-x-3">
-            {/* Stars */}
-            {stats?.rating && (
-              <img
-                src={stats.image}
-                alt={`${stats.rating} Stars`}
-                className="w-20"
-              />
-            )}
-
-            {/* Rating number */}
-            {stats?.rating && (
-              <span className="text-[#121e4d] text-base">{stats.rating}</span>
-            )}
-
-            {/* Reviews count */}
-            <span className="text-[#121e4d] text-base">
-              {stats?.count ? `${stats.count} Reviews` : "— Reviews"}
+          <p className="text-[14px] text-[#333333] mt-1">
+            Brand:{" "}
+            <span className="font-medium">
+              {product?.brand?.name || "N/A"}
             </span>
+          </p>
+          <p className="text-[14px] text-[#333333]">
+            SKU:{" "}
+                <span className="font-medium">{product?.sku || "N/A"}</span>
+          </p>
+
+          {/* Rating & Reviews */}
+          <div className="flex flex-wrap items-center gap-2 text-[14px] text-[#333333]">
+            {stats?.count ? (
+              <>
+                {stats?.rating && (
+                  <img
+                    src={stats.image}
+                    alt={`${stats.rating} Stars`}
+                    className="w-20 cursor-pointer"
+                    onClick={handleSeeMore}
+                  />
+                )}
+                {stats?.rating && (
+                  <span className="font-semibold">{stats.rating}</span>
+                )}
+                <span>{`${stats.count} Reviews`}</span>
+              </>
+            ) : (
+              <>
+                <span>No reviews yet</span>
+                <button
+                  type="button"
+                  onClick={handleSeeMore}
+                  className="underline font-semibold"
+                >
+                  Write a Review
+                </button>
+              </>
+            )}
           </div>
         </div>
-
+<hr className="mt-6" />
         {/* Price */}
-        <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] xl:mt-4 2xl:mt-6">
+        <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
           <div className="flex flex-col items-start">
-            {/* Pehle wali hardcoded price */}
-            {/* <h2 className="xl:text-[13.3px] 2xl:text-[16.6px] font-bold text-[#000000]">
-  Was ${Number(product?.price || 0).toFixed(2)}
-</h2> */}
-
-            {/* Ab ProductPrice component use karo */}
-            <h2 className="xl:text-[16.8px] 2xl:text-[21px] font-bold text-[#ff482e]">
-              {product?.msrp && Number(product?.msrp) > 0 ? (
-                <>
-                  <span className="xl:text-[13.8px] 2xl:text-[18px] text-[#000000]">
-                    Was{" "}
-                    <ProductPrice
-                      price={Number(product?.retailPrice)}
-                      inline={true}
-                      className="xl:text-[13.8px] 2xl:text-[18px] text-[#000000]"
-                    />
-                  </span>
-                  <br /> Now{" "}
+            <p className="text-[15px] text-[#333333]">
+              Price:{" "}
+              {hasBothPrices ? (
+                <span className=" text-[#333333]">
                   <ProductPrice
-                    price={Number(product?.price)}
+                    price={originalPrice}
                     inline={true}
-                    textColor="#ff482e"
-                    className="xl:text-[16.8px] 2xl:text-[21px]"
+                    className="!text-[15px] text-[#333333]"
                   />
-                  <span className="xl:text-[13.3px] 2xl:text-[16.6px] ml-2 text-[#d40511]">
-                    You save{" "}
-                    <ProductPrice
-                      price={Number(product?.msrp)}
-                      inline={true}
-                      textColor="#d40511"
-                      className="xl:text-[13.3px] 2xl:text-[16.6px]"
-                    />
-                  </span>
-                </>
+                </span>
               ) : (
-                product?.price && (
-                  <ProductPrice
-                    price={Number(product?.price)}
-                    inline={true}
-                    textColor="#ff482e"
-                    className="xl:text-[16.8px] 2xl:text-[21px]"
-                  />
-                )
+                <ProductPrice
+                  price={currentPrice}
+                  inline={true}
+                  className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
+                />
+              )}
+            </p>
+
+            <h2 className="text-[20px] text-[#FF482E] !font-normal">
+              {currentPrice > 0 && (
+                <ProductPrice
+                  price={currentPrice}
+                  inline={true}
+                  textColor="#FF482E"
+                  className="!text-[20px] !font-normal"
+                />
               )}
             </h2>
-          </div>
 
-          {/* Secure Methods */}
-          <div className="flex flex-wrap items-center justify-between mt-1 xl:mt-4 2xl:mt-6">
-            <span className="xl:text-[10.2px] 2xl:[12.8px] text-[#000000]">
-              Secure methods:
+            {savings > 0 && (
+              <p className="text-[15px] text-[#CC0000] !font-normal">
+                You save{" "}
+                <ProductPrice
+                  price={savings}
+                  inline={true}
+                  textColor="#CC0000"
+                  className="!text-[15px] !font-normal"
+                />
+              </p>
+            )}
+          </div>
+          <div className="mt-2 xl:mt-3 2xl:mt-4 flex items-center gap-2 text-xs xl:text-[11.2px] 2xl:text-[14px] text-[#121e4d] flex-wrap md:flex-nowrap whitespace-nowrap">
+  <span className="inline-flex items-center justify-center rounded-full bg-[#E2E2FF] text-[#6656D5] text-[14px] font-semibold px-2 py-1 mr-1">
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#6656D5"/><path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>Zero interest
+  </span>
+  <span className="whitespace-nowrap">
+    or as low as $19/mo.&nbsp;
+    <button type="button" className="underline font-semibold">
+      See what you can spend with Affirm.
+    </button>
+  </span>
+</div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 border border-gray-200 rounded-md overflow-hidden bg-white">
+          {/* Free Shipping */}
+          <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-gray-200">
+            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+              {/* Tick Icon, tick is #333333, bg none, size bardha di but text align with tick */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="leading-none">Free Shipping</span>
             </span>
-            {/* <div className="flex items-center gap-2">
-              <Image src={visa} alt="Visa" />
-              <Image src={debit} alt="Debit" />
-              <Image src={paypal} alt="PayPal" />
-              <Image src={americanexpress} alt="AmEx" />
-              <Image src={googlepay} alt="GooglePay" />
-            </div> */}
+            {/* Text below, right-aligned with the above */}
+            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+              Upto 10 LBS
+            </span>
+          </div>
+          {/* Best Price */}
+          <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 border-gray-200">
+            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="leading-none">Best Price</span>
+            </span>
+            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+              Guarantee
+            </span>
+          </div>
+          {/* Customer Help */}
+          <div className="px-10 py-3.5 flex flex-col justify-center border-t sm:border-t-0 sm:border-r border-gray-200">
+            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="leading-none">Customer Help</span>
+            </span>
+            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+              (209) 651-6864
+            </span>
+          </div>
+          {/* Secure Payment */}
+          <div className="px-10 py-3.5 flex flex-col justify-center border-t border-gray-200">
+            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="leading-none">Secure Payment</span>
+            </span>
+            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+              Method
+            </span>
           </div>
         </div>
 
-        {/* Shipping Info */}
-        <div className="2xl:gap-[16px]  xl:gap-[12px] gap-2 bg-[#F5F5F5] mt-3 xl:mt-4 2xl:mt-6  px-4 py-2 xl:py-0 xl:h-[4.2rem] 2xl:h-[5.3rem] rounded-md flex flex-col sm:flex-row items-center justify-between">
-          <Image
-            src={freelogo}
-            alt="Free Shipping"
-            className="w-14 h-w-14 object-contain"
-          />
-          <div className="flex-1 text-center sm:text-left ">
-            <h3 className="text-[#000000] font-bold text-[11.2px] 2xl:text-[14px]">
-              Free shipping Up to 10 lbs
-            </h3>
-            <p className="xl:text-[8.4px] 2xl:text-[10.5px] text-[#000000]">
-              Get your orders delivered without extra cost.
-            </p>
-          </div>
-          <div className="flex items-center gap-1 xl:gap-3">
-            <Image src={dhllogo} alt="DHL" className="w-12 xl:w-18 h-10" />
-            <Image src={upslogo} alt="UPS" className="w-12 xl:w-16 h-10" />
-            <Image src={feedxlogo} alt="FedEx" className="w-14 xl:w-20 h-10" />
-          </div>
-        </div>
-
-        {/* SKU / Availability / Quantity */}
-        <div className="flex flex-col gap-1 w-full mt-3">
-          <Link href={`/brand/${product?.brand?.slug}`}>
-            <div className="flex gap-12 xl:gap-14 2xl:gap-16">
-              <h5 className="xl:text-[11.2px] 2xl:text-[14px] w-[18%] text-[#000000]">
-                Manufacture
-              </h5>
-              <h5 className="xl:text-[11.2px] 2xl:text-[14px] text-[#000000]">
-                {product?.brand?.name || "N/A"}
-              </h5>
-            </div>
-          </Link>
-          <div className="flex gap-12 xl:gap-14 2xl:gap-16">
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] w-[18%] text-[#000000]">
-              Mfr Part#
-            </h5>
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] text-[#000000]">
-              {product?.sku || "N/A"}
-            </h5>
-          </div>
-          <div className="flex gap-12 xl:gap-14 2xl:gap-16">
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] w-[18%] text-[#000000]">
-              Availability
-            </h5>
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] text-[#000000]">
-              {product?.availabilityText || "N/A"}
-            </h5>
-          </div>
-          <div className="flex gap-12 xl:gap-14 2xl:gap-16">
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] w-[18%] text-[#000000]">
-              Weight
-            </h5>
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] text-[#000000]">
-              {product?.dimensions?.weight || "N/A"}
-            </h5>
-          </div>
-          <div className="flex gap-12 xl:gap-14 2xl:gap-16">
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] w-[18%] text-[#000000]">
-              Shipping
-            </h5>
-            <h5 className="xl:text-[11.2px] 2xl:text-[14px] text-[#000000]">
-              {product?.fixedShippingCost || "N/A"}
-            </h5>
-          </div>
-
-          <div className="flex gap-7 lg:gap-1.5 xl:gap-2.5 mt-2 xl:mt-4 2xl:mt-6 ">
-            <div
-              className="
-              bg-[#f5f5f5]
-      flex items-center justify-center 
-      w-48 h-[38.39px]             
-      lg:w-32 lg:h-12            
-      xl:w-[30.1%] xl:h-[3.2rem]    
-      2xl:w-[30%] 2xl:h-[48px]  
-      border border-gray-300
-    "
-            >
-              <button
-                aria-label="Decrease quantity"
-                onClick={decrement}
-                className="
-        flex items-center justify-center
-        text-gray-700      
-        w-full h-full
-        lg:w-10 lg:h-10
-        xl:w-[48.8px] xl:h-[40px]
-        2xl:w-[35%] 2xl:h-[48px]
-        hover:text-red-500 transition
-      "
-              >
-                <Minus width={15} height={15} />
-              </button>
-
-              <span
-                className="
-        flex items-center justify-center font-semibold
-        text-sm sm:text-base md:text-lg
-         w-full h-full lg:w-12 lg:h-12
-        xl:w-[48.8px] xl:h-[40px] 2xl:w-[35%] 2xl:h-[48px]
-        border-x border-gray-300
-      "
-              >
-                {quantity}
-              </span>
-
-              <button
-                aria-label="Increase quantity"
-                onClick={increment}
-                className="
-        flex items-center justify-center
-         text-gray-700
-        w-full h-full
-        lg:w-10 lg:h-10
-        xl:w-[48.8px] xl:h-[40px]
-        2xl:w-[35%] 2xl:h-[48px]
-        hover:text-green-600 transition
-      "
-              >
-                <Plus width={15} height={15} />
-              </button>
-            </div>
-
-            {/* Add to Cart */}
-            <button
-              aria-label={`Add ${quantity} ${product?.name} to cart`}
-              onClick={() => {
-                // Check if product already in cart
-                const existingItem = cart.find(
-                  (item: any) => item.id === product.id,
-                );
-                const currentQty = existingItem ? existingItem.quantity : 0;
-
-                // Calculate how much we can add without exceeding maxPurchaseQuantity
-                const remainingQty = product?.maxPurchaseQuantity
-                  ? product.maxPurchaseQuantity - currentQty
-                  : quantity;
-
-                if (remainingQty < 0) {
-                  toast.error(
-                    `Cannot add more than ${product?.maxPurchaseQuantity} units of ${product.name} to cart.`,
-                  );
-                  return;
-                }
-
-                // Final quantity to add (not total, just the increment)
-                const quantityToAdd = Math.min(quantity, remainingQty);
-
-                // Dispatch with quantityToAdd
-                dispatch(addToCart({ ...product, quantity: quantityToAdd }));
-
-                toast.success(
-                  `${product.name} added to cart (${quantityToAdd})!`,
-                );
-              }}
-              className="
-      bg-[#F15939] 
-      hover:border-[#F15939] hover:bg-white hover:text-[#F15939] 
-      font-bold text-[13px] xl:text-[11.2px] 2xl:text-[14px] 
-      text-white border border-[#F15939] 
-     flex items-center justify-center space-x-2 transition 
-      w-full xl:w-[50rem] 2xl:w-[67.9%]
-    "
-            >
-              {/* <ShoppingCart
-                className="w-5 h-5 sm:w-6 sm:h-6 2xl:w-7 2xl:h-7"
-                fill="white"
-              /> */}
-              <span>Add to Cart</span>
-            </button>
-          </div>
-        </div>
       </div>
-
-      {/* Actions */}
-      <div className="flex items-center mt-3 xl:mt-4 2xl:mt-6 h-[38.4px] 2xl:h-[48.1px]">
-        {/* Buy Now */}
-        <button
-          aria-label={`Buy ${product?.name} now`}
-          onClick={() => {
-            dispatch(addToCart(product));
-            setTimeout(() => {
-              router.push("/checkout");
-            }, 2000);
-          }}
-          style={{ cursor: "pointer" }}
-          className=" font-bold
-      text-[14px] xl:text-[11.2px] 2xl:text-[14px]  
-      bg-[#121e4d] text-white
-    flex items-center justify-center space-x-2  
-      w-full xl:w-full 2xl:w-[100%] h-full  border hover:bg-[#192a6e] transition-colors"
+      {/* Note with icon and text side by side */}
+      <div className="mt-6 bg-[#F5F5F5] p-6 flex items-start">
+        {/* Icon 34x42 with color #333333 */}
+        <svg
+          version="1.1"
+          viewBox="0 0 512 512"
+          width={34}
+          height={42}
+          className="inline-block flex-shrink-0"
+          style={{ color: "#333333", minWidth: 34, minHeight: 42, maxWidth: 34, maxHeight: 42 }}
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <span>Buy Now</span>
-        </button>
-      </div>
-
-      {/* Note */}
-      <div className="mt-3 xl:mt-6 2xl:mt-8">
-        <p className="xl:text-[11.2px] 2xl:text-[14px] text-[#000000]">
-          <span className="text-red-600 ">*</span> All Business Entities,
-          Corporations, Public & Private School Systems, Governmental
-          Organizations, Colleges, Universities & Libraries are welcome to
-          submit purchase orders.
+          <path
+            fill="currentColor"
+            d="M 54.26 0.00   L 457.73 0.00   L 457.72 378.82   A 0.93 0.93 0.0 0 1 456.79 379.75   L 325.68 379.75   A 0.43 0.42 0.0 0 0 325.25 380.17   L 325.24 512.00   L 54.26 512.00   L 54.26 0.00   Z   M 320.00 92.28   A 0.53 0.53 0.0 0 0 319.47 91.75   L 192.53 91.75   A 0.53 0.53 0.0 0 0 192.00 92.28   L 192.00 121.22   A 0.53 0.53 0.0 0 0 192.53 121.75   L 319.47 121.75   A 0.53 0.53 0.0 0 0 320.00 121.22   L 320.00 92.28   Z   M 378.74 167.16   A 0.91 0.91 0.0 0 0 377.83 166.25   L 134.17 166.25   A 0.91 0.91 0.0 0 0 133.26 167.16   L 133.26 195.34   A 0.91 0.91 0.0 0 0 134.17 196.25   L 377.83 196.25   A 0.91 0.91 0.0 0 0 378.74 195.34   L 378.74 167.16   Z   M 378.74 231.16   A 0.91 0.91 0.0 0 0 377.83 230.25   L 134.17 230.25   A 0.91 0.91 0.0 0 0 133.26 231.16   L 133.26 259.34   A 0.91 0.91 0.0 0 0 134.17 260.25   L 377.83 260.25   A 0.91 0.91 0.0 0 0 378.74 259.34   L 378.74 231.16   Z   M 378.74 295.16   A 0.91 0.91 0.0 0 0 377.83 294.25   L 134.17 294.25   A 0.91 0.91 0.0 0 0 133.26 295.16   L 133.26 323.34   A 0.91 0.91 0.0 0 0 134.17 324.25   L 377.83 324.25   A 0.91 0.91 0.0 0 0 378.74 323.34   L 378.74 295.16   Z   M 164.75 380.23   A 0.50 0.50 0.0 0 0 164.25 379.73   L 133.75 379.73   A 0.50 0.50 0.0 0 0 133.25 380.23   L 133.25 409.25   A 0.50 0.50 0.0 0 0 133.75 409.75   L 164.25 409.75   A 0.50 0.50 0.0 0 0 164.75 409.25   L 164.75 380.23   Z   M 256.00 380.30   A 0.55 0.55 0.0 0 0 255.45 379.75   L 195.31 379.75   A 0.55 0.55 0.0 0 0 194.76 380.30   L 194.76 409.20   A 0.55 0.55 0.0 0 0 195.31 409.75   L 255.45 409.75   A 0.55 0.55 0.0 0 0 256.00 409.20   L 256.00 380.30   Z"
+          />
+          <path
+            fill="currentColor"
+            d="M 355.25 508.85   L 355.25 410.07   A 0.32 0.32 0.0 0 1 355.57 409.75   L 454.35 409.75   A 0.32 0.32 0.0 0 1 454.57 410.30   L 355.80 509.07   A 0.32 0.32 0.0 0 1 355.25 508.85   Z"
+          />
+        </svg>
+        {/* Text */}
+        <p className="ml-5 text-[12px] text-[#333333]">
+          All Business Entities, Corporations, Public &amp; Private School Systems, Governmental
+          Organizations, Colleges, Universities &amp; Libraries are welcome to submit purchase orders.
         </p>
       </div>
-    </section>
+
+    {/* TrustPilot / SAM.GOV / D&B logos */}
+    <div className="flex flex-row flex-wrap gap-6 items-center mt-6">
+      <Image
+        src="/productslug/trustpilot.PNG"
+        alt="Trustpilot"
+        width={114}
+        height={40}
+        className="w-[114px] h-[40px] object-contain"
+      />
+
+      <div className="flex flex-col items-center">
+        <Image
+          src="/productslug/samgov.PNG"
+          alt="SAM.GOV"
+          width={114}
+          height={40}
+          className="w-[114px] h-[40px] object-contain"
+        />
+      </div>
+
+      <Image
+        src="/productslug/dnb.PNG"
+        alt="D&B"
+        width={114}
+        height={40}
+        className="w-[114px] h-[40px] object-contain"
+      />
+    </div>
+  </section>
   );
 };
 

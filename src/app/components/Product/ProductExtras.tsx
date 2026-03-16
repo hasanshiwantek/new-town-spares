@@ -24,8 +24,8 @@ interface Props {
 export default function ProductExtras({ products }: Props) {
   return (
     <>
-      <ProductFAQs />
-      <ProductReview />
+      {/* <ProductFAQs />
+      <ProductReview /> */}
       <RelatedProduct products={products} />
     </>
   );
