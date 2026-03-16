@@ -52,27 +52,19 @@ const ProductCard = ({ product }: { product: any }) => {
 
   return (
     <div className="max-w-full mx-auto">
-      <div className="bg-white rounded-xl w-full 2xl:max-w-[1719px] 2xl:px-3 px-0">
+      <div className="bg-white rounded-xl w-full">
         {/* Breadcrumb */}
         <nav
           aria-label="breadcrumb"
-          className="flex items-center space-x-2 h5-20px-regular lg:mb-7 sm:mb-7 mb-7 flex-wrap"
+          className="flex items-center space-x-2 lg:mb-7 sm:mb-7 mb-7 flex-wrap"
         >
-          <span>Home</span>
+          <span className="text-[#333333] text-[13px]">Home</span>
+          <span className="text-[#333333] text-[13px] ml-2 mr-4">/</span>
           {/* {product.categoryHierarchy?.map((data: any, index: number) => (
           ))} */}
-          <React.Fragment>
-            <Image
-              className="inline-block align-middle"
-              src="/arrow-right.png"
-              alt="Arrow Right"
-              width={12}
-              height={12}
-              loading="lazy"
-              sizes="12px"
-            />
-            <span className="h5-regular">{product?.sku}</span>
-          </React.Fragment>
+      
+            <span className="text-[#333333] text-[13px]">{product?.sku}</span>
+        
         </nav>
 
         <div className="flex flex-wrap lg:flex-nowrap 2xl:gap-6 xl:gap-[20px] lg:gap-[25px] md:gap-5 sm:gap-4 gap-4 ">
@@ -90,9 +82,17 @@ const ProductCard = ({ product }: { product: any }) => {
           />
           <ProductRight
             product={{
+              ...product,
               name: product?.name,
               image: images[0],
               sku: product?.sku,
+            }}
+            quantity={quantity}
+            increment={increment}
+            decrement={decrement}
+            onAddToCart={() => {
+              dispatch(addToCart({ ...product, quantity }));
+              toast.success(`${product?.name} added to cart (${quantity})!`);
             }}
           />
         </div>
