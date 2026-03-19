@@ -7,7 +7,7 @@ export const fetchProducts = async () => {
     const res = await fetch(`${baseURL}web/products/products`, {
       next: { revalidate: 60 }, // ✅ revalidate every 60 seconds
       headers: {
-        storeId: "4",
+        storeId: "10",
       },
     });
 
@@ -25,7 +25,7 @@ export const fetchProductBySlug = async (slug: string) => {
   try {
     const res = await fetch(`${baseURL}web/products/get-product/${slug}`, {
       cache: "no-store",
-      headers: { storeId: "4" },
+      headers: { storeId: "10" },
     });
 
     if (!res.ok) {
@@ -74,7 +74,7 @@ export async function fetchFilteredProducts(filters: {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: "4",
+      storeId: "10",
     },
     cache: "no-store", // or "no-cache" for fresh data
   });
@@ -95,7 +95,7 @@ export const getBlogByIdServer = async (id: string) => {
     const res = await fetch(`${baseURL}web/blogs/blog-posts/${id}`, {
       next: { revalidate: 3600 }, // Example: revalidate every hour
       headers: {
-        storeId: "4",
+        storeId: "10",
       },
     });
 

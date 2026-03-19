@@ -34,29 +34,29 @@ const blogs = [
 const RecentPost = () => {
   return (
     <>
-         <h3 className="h2-medium ">
-            Recent Posts
+         <h3 className="text-xl  md:text-[28px] text-[#333333]">
+         Popular Blogs
           </h3>
-    <section className="w-full flex  justify-center bg-[#F5F6FA] py-10 px-4 border sm:px-6 lg:px-5">
+    <section className="w-full flex  justify-center">
         
-      <div className="w-full xl:max-w-[1440px] 2xl:max-w-[1920px] ">
-        <div className="flex flex-col gap-10 justify-items-center ">
+      <div className="w-full">
+        <div className="flex flex-col gap-4 justify-items-center ">
           {blogs.map((blog) => (
             <Link
               key={blog.id}
               href={`/blog/${blog.slug}`}
               className="
-            w-[80%] p-6 md:p-0 xl:w-[100.7%] 2xl:w-[97.1%]
+            w-[100%] p-6 md:p-0 xl:w-[100%] 2xl:w-[100%]
              rounded-lg transition overflow-hidden
-            flex flex-col sm:flex-row justify-start items-center sm:items-stretch gap-5 sm:gap-7
+            flex flex-col sm:flex-row justify-start items-center sm:items-stretch gap-5 sm:gap-7 border !p-2.5
           "
             >
               {/* Image */}
               <div
                 className="
-              w-full sm:w-[30%] md:w-[25%] lg:w-[35%]
-              xl:w-[36.5%] xl:h-[100.3%] 
-              2xl:w-[40.6%] 2xl:h-[100%]
+              
+              w-[31.5%]
+              w-[31.6%] h-[53px]
               relative overflow-hidden  flex-shrink-0
             "
               >
@@ -72,16 +72,16 @@ const RecentPost = () => {
               {/* Text */}
               <div
                 className="
-              flex flex-col justify-center lg:justify-between gap-2 lg:gap-3 items-start 
+              flex flex-col justify-center lg:justify-between items-start 
               w-full sm:w-[55%] md:w-[60%]
               text-left py-2 sm:py-2
             "
               >
-                <p className="h5-20px-regular  ">
+                <p className="text-[13px] text-[#333333]  ">
                   {blog.author}
                 </p>
-                <h3 className="h5-regular group-hover:text-[#F15939] transition-colors duration-200 line-clamp-2">
-                  {blog.title}
+                <h3 className="text-[13px] text-[#333333]group-hover:text-[#F15939] transition-colors duration-200 line-clamp-2">
+                  {blog.date}
                 </h3>
               </div>
             </Link>

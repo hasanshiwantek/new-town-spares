@@ -7,47 +7,54 @@ import { useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 const Cart = () => {
     const auth = useAppSelector((state: RootState) => state?.auth);
+    const cart = useAppSelector((state: RootState) => state.cart.items);
   return (
     <main className="w-full flex justify-center  py-1">
       {/* Fixed container centered on screen */}
       <div
         className="
-        xl:w-[1290px] 2xl:w-[1720px]
-          flex flex-col gap-10
+          w-full flex flex-col gap-10
         "
       >
         {/* Heading Section */}
-        <div className="w-full xl:max-w-[43.9%] 2xl:max-w-[44.2%]">
-          <h1 className="h1-secondary-medium ">Shopping Cart</h1>
-          {!auth?.isAuthenticated && (
-  <p className="h5-20px-regular text-gray-600">
-    Log in to synchronize the items in your shopping cart.{" "}
-    <Link href="/auth/login">
-      <span className="text-[#F15939] cursor-pointer hover:underline">
-        Log In Now
-      </span>
-    </Link>
+        <div className="w-full">
+        <div className="mb-6 text-sm md:text-base">
+          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px] underline">
+            Home
+          </Link>{" "}
+          / <span className="mx-1 text-[#333333] text-[13px]">Your Cart</span>
+        </div>
+           
+  <p className="text-[#333333] text-[28px]">
+  Your Cart ({cart?.length || 0} items)
   </p>
-)}
 
         </div>
 
         {/* Main Content */}
         <div
           className="
-            flex flex-col lg:flex-row
-            w-full gap-5
+            flex flex-col md:items-end xl:items-start xl:flex-row
+            w-full gap-6
           "
         >
-          {/* Left: Cart List */}
-          <div className="w-full xl:w-[66.2%] 2xl:w-[66.8%]">
+          {/* Cart List — full width when empty, otherwise shared with OrderSummary */}
+          <div
+            className={
+              cart?.length
+                ? "w-full xl:w-[66.2%] 2xl:w-[68.6%]"
+                : "w-full"
+            }
+          >
             <CartList />
           </div>
 
-          {/* Right: Order Summary */}
-          <div className="w-full xl:w-[32.1%] 2xl:w-[32.3%]">
-            <OrderSummary />
-          </div>
+          {/* Order Summary — hidden when cart is empty */}
+          {cart?.length > 0 && (
+            <div className="w-full md:w-[44.6%] xl:w-[32.1%] 2xl:w-[30.2%]">
+              <OrderSummary />
+            </div>
+          )}
         </div>
       </div>
     </main>

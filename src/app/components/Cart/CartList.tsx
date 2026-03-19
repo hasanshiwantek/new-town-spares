@@ -11,7 +11,7 @@ import {
   removeFromCart,
   updateQty,
 } from "@/redux/slices/cartSlice";
-import { Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -82,121 +82,186 @@ const CartList = () => {
     }
   };
 
+  const isEmpty = !cart?.length;
+
   return (
-    <div className="border border-[#D6D6D6] rounded-lg 2xl:w-full">
-      <div className="hidden  xl:flex justify-between font-semibold py-5 px-8 bg-[#F6F6F6]">
-        <span className="h3-secondary">Items</span>
-        <span className="flex justify-between xl:w-[31.8%] 2xl:w-[31.2%]">
-          <span className="h5-20px-regular">Price</span>
-          <span className="h5-20px-regular">Qty</span>
-          <span className="h5-20px-regular">Subtotal</span>
-        </span>
-      </div>
-      {cart?.length > 0 ? (
-        cart?.map((item, index) => (
-          <>
-            {/* Example product row */}
-            <div
-              key={item?.id}
-              className="flex flex-col xl:flex-row items-center justify-between p-4"
-            >
-              <div className="flex flex-col xl:flex-row items-center xl:w-[65.1%] 2xl:w-[64.5%]">
-                <div className="w-full xl:w-[18.1%] 2xl:w-[18%]">
-                  <Image
-                    width={98}
-                    height={105}
-                    src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
-                    alt={item.name}
-                    className="xl:w-[87.6%] 2xl:w-[53%] xl:h-[6.5rem] 2xl:h-[8.8rem] object-contain border m-auto"
-                  />
-                </div>
-                <div className="w-full xl:w-[82.1%] 2xl:w-[82%] mx-2">
-                  <p className="h5-medium-20px-medium text-center xl:text-start">
-                    SKU: {item.sku || "N/A"}
-                  </p>
-                  <p className="h5-medium   text-center lg:mx-auto md:mx-auto sm:mx-auto w-[100%] sm:w-[60%]  md:w-[70%] lg:w-[80%] xl:text-start xl:w-[100%] 2xl:w-[100%]">
-                    {item.name}
-                  </p>
-                </div>
-              </div>
-
-              <div className="relative flex items-center gap-4 xl:gap-0 xl:w-[33%]  2xl:w-[32%] justify-between">
-                <p className="h5-regular">${Number(item.price).toFixed(2)}</p>
-                <div className="flex items-center border border-gray-300 overflow-hidden xl:w-[27.9%] 2xl:w-[28.1%]">
-                  {/* Number Input */}
-                  <input
-                    type="number"
-                    value={
-                      quantities[item.id] === undefined
-                        ? item.quantity
-                        : quantities[item.id]
-                    }
-                    onChange={(e) => handleChange(item.id, e.target.value)}
-                    onKeyDown={(e) => handleManualQtyUpdate(e, item.id , item.maxPurchaseQuantity)}
-                    className="w-10 xl:w-[51%] 2xl:w-[48.9%] text-center py-2 xl:px-2 2xl:px-2 outline-none h5-medium [appearance:textfield] 
-                   [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-
-                  {/* Buttons */}
-                  <div className="flex flex-col justify-center items-center border-l border-gray-300 w-10 xl:w-[51%] 2xl:w-[48.9%]">
-                    <button
-                      type="button"
-                        onClick={() => {
-    if (!item.maxPurchaseQuantity || item.quantity < item.maxPurchaseQuantity) {
-      dispatch(increaseQty(item.id));
-    }
-  }}
-                      className="flex items-center justify-center w-2.5 h-5 hover:bg-gray-100 text-[#AEAEAE]"
-                    >
-                      ▲
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => dispatch(decreaseQty(item.id))}
-                      className="flex items-center justify-center w-2.5 h-6 hover:bg-gray-100 text-[#AEAEAE]"
-                    >
-                      ▼
-                    </button>
-                  </div>
-                </div>
-                {/* Trash / Delete Button */}
-                <button
-                  onClick={() => {
-                    setItemToDelete(item);
-                    setIsDialogOpen(true);
-                  }}
-                  className="absolute -right-12 xl:right-0 xl:bottom-14 2xl:right-1 2xl:bottom-18 ml-auto text-gray-500 hover:text-red-700 transition"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-
-                <p className="h5-regular">
-                  ${Number(item.price * item.quantity).toFixed(2)}
-                </p>
-              </div>
-            </div>
-
-            {/* line grey */}
-            <div className="w-[97%] mx-auto h-[1px] bg-gray-300"></div>
-          </>
-        ))
-      ) : (
-        <div className="text-7xl text-[#4A4A4A] text-center my-16">
-          No Cart Added
+    <div
+      className={`w-full border border-[#D6D6D6] rounded-lg 2xl:w-full p-7 ${
+        isEmpty ? "min-h-[259px]" : ""
+      }`}
+    >
+      {!isEmpty && (
+        <div className="hidden md:grid md:grid-cols-[1fr_100px_90px_90px_120px] md:gap-2 lg:gap-4 font-semibold pb-6 text-[14px] text-[#333333] border-b border-gray-300">
+          <span>Item</span>
+          <span>SKU</span>
+          <span>Price</span>
+          <span>Quantity</span>
+          <span className="text-right">Total</span>
         </div>
       )}
 
-      {/* Continue + Update */}
-      <div className="flex justify-between items-center my-7 px-6">
-        <Link href={"/products"}>
-          <button className="h3-regular xl:w-64 2xl:w-85 py-2 px-4  rounded-lg border border-[#4A4A4A] hover:text-[#F15939] transition">
-            Continue Shopping
+      {cart?.length > 0 ? (
+        <>
+          {cart.map((item) => (
+            <div key={item?.id}>
+              <div className="border-b border-gray-300 py-4 md:py-0">
+                <div className="md:hidden">
+                  <div className="flex justify-center">
+                    <Image
+                      width={98}
+                      height={105}
+                      src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
+                      alt={item.name}
+                      className="w-[88px] h-[9.2rem] shrink-0 object-contain border"
+                    />
+                  </div>
+
+                  <div className="text-center mt-3">
+                    <p className="text-[14px] text-[#777777]">{item.brand?.name || "—"}</p>
+                    <p className="text-[15px] text-[#333333] line-clamp-3 mt-1">
+                      {item.name}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4">
+                    <div>
+                      <p className="text-[12px] text-[#777777]">SKU</p>
+                      <p className="text-[14px] text-[#333333]">{item.sku || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-[#777777]">Price</p>
+                      <p className="text-[14px] text-[#333333]">
+                        ${Number(item.price).toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-[#777777] mb-1">Quantity</p>
+                      <div className="w-[64px] h-[40px] border border-gray-300 overflow-hidden bg-white shrink-0">
+                        <input
+                          type="number"
+                          value={
+                            quantities[item.id] === undefined
+                              ? item.quantity
+                              : quantities[item.id]
+                          }
+                          onChange={(e) => handleChange(item.id, e.target.value)}
+                          onKeyDown={(e) =>
+                            handleManualQtyUpdate(
+                              e,
+                              item.id,
+                              item.maxPurchaseQuantity
+                            )
+                          }
+                          className="w-[64px] h-[40px] text-center py-2 outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[12px] text-[#777777]">Total</p>
+                      <p className="text-[14px] text-[#333333] font-bold">
+                        ${Number(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => {
+                        setItemToDelete(item);
+                        setIsDialogOpen(true);
+                      }}
+                      className="shrink-0 w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition"
+                      aria-label="Remove item"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="hidden md:grid md:grid-cols-[1fr_100px_90px_90px_120px] md:gap-2 lg:gap-4 items-center">
+                  {/* Item: thumbnail + brand + title */}
+                  <div className="flex items-center gap-4 w-full">
+                    <Image
+                      width={98}
+                      height={105}
+                      src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
+                      alt={item.name}
+                      className="w-[73.50px] h-[8.4rem] shrink-0 object-contain border"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-[14px] text-[#777777]">
+                        {item.brand?.name || "—"}
+                      </p>
+                      <p className="text-[15px] text-[#333333] line-clamp-3">
+                        {item.name}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-[14px] text-[#333333]">{item.sku || "N/A"}</p>
+                  <p className="text-[14px] text-[#333333]">
+                    ${Number(item.price).toFixed(2)}
+                  </p>
+                  <div className="w-[50px] h-[40px] border border-gray-300 overflow-hidden bg-white shrink-0">
+                    <input
+                      type="number"
+                      value={
+                        quantities[item.id] === undefined
+                          ? item.quantity
+                          : quantities[item.id]
+                      }
+                      onChange={(e) => handleChange(item.id, e.target.value)}
+                      onKeyDown={(e) =>
+                        handleManualQtyUpdate(e, item.id, item.maxPurchaseQuantity)
+                      }
+                      className="w-[50px] h-[40px] text-center py-2 outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-4">
+                    <p className="text-[14px] text-[#333333] font-bold">
+                      ${Number(item.price * item.quantity).toFixed(2)}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setItemToDelete(item);
+                        setIsDialogOpen(true);
+                      }}
+                      className="shrink-0 w-6 h-6 rounded-full bg-[#F15939] hover:bg-red-600 text-white flex items-center justify-center transition"
+                      aria-label="Remove item"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center text-center w-full min-h-[259px] px-4">
+          <p className="text-[22px] text-[#333333] leading-none mb-8">
+            Your cart is empty
+          </p>
+          <Link href="/products">
+            <button className="h-[40px] px-4 md:px-12 rounded bg-[#FF4F2F] hover:bg-[#F15939] transition text-white text-[14px] font-medium">
+              Click here to continue shopping
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Footer: Empty Cart / Continue Shopping */}
+      {!isEmpty && (
+        <div className="flex justify-end items-center mt-6 px-6">
+          <button
+            onClick={() => dispatch(clearCart())}
+            className="w-full md:w-[117px] py-2 px-5 border rounded-lg hover:bg-gray-100 transition"
+          >
+            Empty Cart
           </button>
-        </Link>
-        <button onClick={() => dispatch(clearCart())} disabled={cart.length === 0} className="h3-regular xl:w-46 2xl:w-68 py-2 px-5 border border-[#4A4A4A] rounded-lg hover:bg-gray-100 transition">
-          Empty Cart
-        </button>
-      </div>
+        </div>
+      )}
       {/* ShadCN Dialog for Delete Confirmation */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
