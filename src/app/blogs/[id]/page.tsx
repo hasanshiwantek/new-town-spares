@@ -126,6 +126,7 @@ export default async function BlogPostPage({
 }) {
   
   const { id } = await params;
+  
   const blog = await getBlogByIdServer(id);
 
   if (!blog) {
