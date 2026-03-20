@@ -55,8 +55,9 @@ export default function OrderSuccessPage() {
     shipping: Number(localOrder.shippingCost || 0),
     tax: 0,
     total: Number(localOrder.totalAmount || 0),
+    discountAmount: Number(localOrder.discountAmount || 0),
   };
-
+  
   const handleCheckOrders = () => {
     // ✅ clear Redux only after UI has localOrder
     dispatch(clearLastOrder());
@@ -64,7 +65,7 @@ export default function OrderSuccessPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="py-8 w-full max-w-[1170px] mx-auto  ">
       <div className="grid md:grid-cols-2 gap-8">
 
         {/* Left Section */}
@@ -154,8 +155,16 @@ export default function OrderSuccessPage() {
 
           <div className="flex justify-between text-xl font-bold text-gray-900 border-t-2 border-gray-300 pt-4">
             <span>Order Total</span>
-            <span>${orderData.total.toFixed(2)}</span>
+            <span>${orderData?.discountAmount ? (orderData.discountAmount).toFixed(2) : orderData.total.toFixed(2)}</span>
           </div>
+        {orderData?.discountAmount > 0 && (
+          <div className="flex justify-between text-xl font-bold text-gray-900 border-t-2 border-gray-300 pt-4">
+            <span>Total Discount</span>
+            <span>
+              -${(Number(orderData.subTotal) -Number(orderData.discountAmount)).toFixed(2)}
+            </span>
+          </div>
+        )}
         </div>
       </div>
     </div>
