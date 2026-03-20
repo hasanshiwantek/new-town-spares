@@ -28,6 +28,7 @@ interface SignupFormValues {
   country: string;
   state: string;
   zip: string;
+  useRole: 2;
 }
 
 function FieldLabel({
@@ -79,7 +80,11 @@ const SignupPage = () => {
 
   const onSubmit = async (data: SignupFormValues) => {
     try {
-      const result = await dispatch(registerUser(data));
+      const payload = {
+        userRole: 2,
+        ...data,
+      };
+      const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
         reset();
         toast.success("Account created successfully!");

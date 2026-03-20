@@ -2,23 +2,20 @@
 import React, { useMemo, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAppSelector } from "@/hooks/useReduxHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { Input } from "@/components/ui/input";
+import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice";
 
 const OrderSummary = () => {
   const cart = useAppSelector((state: RootState) => state.cart.items);
+  const { appliedCoupon, discountAmount, loading: couponLoading } = useAppSelector(
+    (state: RootState) => state.coupon
+  );
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const [couponCode, setCouponCode] = useState("");
   const [showCouponInput, setShowCouponInput] = useState(false);
-
-  const handleApplyCoupon = useCallback(() => {
-    if (!couponCode.trim()) {
-      toast.error("Please enter a coupon code");
-      return;
-    }
-    toast.info("Coupon applied (demo)"); // same as before: apply logic can be wired later
-  }, [couponCode]);
 
   const totalItems = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -38,6 +35,25 @@ const OrderSummary = () => {
   }, [cart]);
 
   const total = subtotal + shipping;
+  const grandTotal = Math.max(total - (discountAmount || 0), 0);
+
+  const handleApplyCoupon = useCallback(() => {
+    const code = couponCode.trim();
+    if (!code) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    dispatch(applyCoupon({ couponCode: code, total }))
+      .unwrap()
+      .then(() => {
+        toast.success("Coupon applied");
+        setShowCouponInput(false);
+      })
+      .catch((err) => {
+        toast.error(typeof err === "string" ? err : "Failed to apply coupon");
+      });
+  }, [couponCode, dispatch, total]);
 
   const handleProceedToCheckout = useCallback(() => {
     if (!cart.length) {
@@ -70,7 +86,23 @@ const OrderSummary = () => {
 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
           <span className="text-[14px] text-[#333333]">Coupon Code:</span>
-          {!showCouponInput ? (
+          {appliedCoupon ? (
+            <div className="flex items-center gap-3">
+              <span className="text-[14px] text-[#333333]">
+                {appliedCoupon.couponCode}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  dispatch(removeCoupon());
+                  toast.success("Coupon removed");
+                }}
+                className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+              >
+                Remove
+              </button>
+            </div>
+          ) : !showCouponInput ? (
             <button
               type="button"
               onClick={() => setShowCouponInput(true)}
@@ -102,16 +134,28 @@ const OrderSummary = () => {
             <button
               type="button"
               onClick={handleApplyCoupon}
-              className="text-[14px] text-white bg-[#F15939] border border-[#F15939] px-4 rounded h-10 shrink-0"
+              disabled={couponLoading}
+              className="text-[14px] text-white bg-[#F15939] border border-[#F15939] px-4 rounded h-10 shrink-0 disabled:opacity-60"
             >
               Apply
             </button>
           </div>
         )}
 
+        {discountAmount > 0 && (
+          <div className="flex justify-between items-center py-2">
+            <span className="text-[14px] text-[#333333]">Discount:</span>
+            <span className="text-[14px] text-[#333333] font-semibold">
+              -${discountAmount.toFixed(2)}
+            </span>
+          </div>
+        )}
+
         <div className="flex justify-between items-center py-4">
           <span className="text-[14px] text-[#333333] font-semibold">Grand total:</span>
-          <span className="text-[20px] text-[#333333] font-semibold">${total.toFixed(2)}</span>
+          <span className="text-[20px] text-[#333333] font-semibold">
+            ${grandTotal.toFixed(2)}
+          </span>
         </div>
 
         <button
