@@ -1,22 +1,36 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { fetchAccountOrders } from "@/redux/slices/myaccountSlice";
 import Link from "next/link";
+import ReturnItemsModal from "./ReturnItemsModal"; // Import modal
 
 const OrderProduct = () => {
   const dispatch = useAppDispatch();
   const { order, loading, error } = useAppSelector(
     (state: RootState) => state.myaccount
-  ); 
-  console.log("Order.....",order);
-  
+  );
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   useEffect(() => {
     dispatch(fetchAccountOrders());
   }, [dispatch]);
+
+  const handleReturnClick = (e: React.MouseEvent, item: any) => {
+    e.preventDefault(); // Link ko prevent karein
+    setSelectedOrder(item);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+  };
 
   // Skeleton Loader
   if (loading) {
@@ -42,82 +56,110 @@ const OrderProduct = () => {
     );
   }
 
-  if (error) return   <p className="text-red-500">
-    Failed to fetch orders. {error}
-  </p>;
+  if (error)
+    return (
+      <p className="text-red-500">Failed to fetch orders. {error}</p>
+    );
+
   if (!order?.orders || order.orders.length === 0)
-    return <p>No orders found.</p>;
+    return (
+      <div className="w-full bg-white border border-black p-4">
+        <p className="text-[#545454] text-[14px]">
+          You haven't placed any order with us. When you do, they will appear
+          on this page.
+        </p>
+      </div>
+    );
 
   return (
-    <div className="flex flex-col gap-4">
-      {order.orders.map((item: any) => (
-        <div
-          key={item.id}
-          className="border rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 w-full"
-        >
-          {/* Left Side: Product Info */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:w-[65%] w-full">
-            {/* Product Image */}
-            <div className="w-full max-w-[128px] h-32 relative flex-shrink-0">
-              <Image
-                src={
-                  item?.products?.[0]?.images?.[0] ||
-                  "/default-product-image.svg"
-                }
-                alt={item?.products?.[0]?.name || "Product Image"}
-                fill
-                className="object-contain border rounded-md"
-              />
-            </div>
+    <>
+      <div className="flex flex-col gap-4">
+        {order.orders.map((item: any) => (
+          <div
+            key={item.id}
+            className="border text-center md:text-left rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 w-full"
+          >
+            {/* Left Side: Product Info */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:w-[65%] w-full">
+              {/* Product Image */}
+              <div className="w-full max-w-[128px] h-32 relative flex-shrink-0">
+                <Image
+                  src={
+                    item?.products?.[0]?.images?.[0] || item?.products?.[1]?.images?.[0] ||
+                    "/default-product-image.svg"
+                  }
+                  alt={item?.products?.[0]?.name || item?.products?.[1]?.name || "Product Image"}
+                  fill
+                  className="object-contain border rounded-md"
+                />
+              </div>
 
-            {/* Product Details */}
-            <div className="flex flex-col justify-center w-full">
-             <Link href={`/my-account/orders/${item.order_number || ""}`}>
-              <p className="h6-18-px-medium mb-1">
-                Order #{item.order_number || "N/A"}
-              </p>
-             </Link>
-              <p className="mb-2 text-sm md:text-base">
-                {item?.products?.length || 1} product
-                totaling $
-                {item?.total_amount
-                  ? Number(item.total_amount).toFixed(2)
-                  : "0.00"}
-              </p>
+              {/* Product Details */}
+              <div className="flex flex-col justify-center w-full">
+                <Link href={`/my-account/orders/${item.order_number || ""}`}>
+                  <p className="mb-1 text-xl text-red-600 hover:text-red-700 transition-colors duration-200">
+                    Order #{item.order_number || "N/A"}
+                  </p>
+                </Link>
+                <p className="text-sm md:text-[14px]">
+                  {item?.products?.length || 1} product totaling $
+                  {item?.total_amount
+                    ? Number(item.total_amount).toFixed(2)
+                    : "0.00"}
+                </p>
 
-              {/* Order Info */}
-              <div className="flex flex-col sm:flex-row sm:gap-12 gap-2 mt-2 text-sm">
-                <div className="flex flex-col">
-                  <span className="h6-18-px-medium">Order Placed</span>
-                  <span>
-                    {item?.created_at
-                      ? new Date(item.created_at).toLocaleDateString()
-                      : "-"}
-                  </span>
-                </div>
+                {/* Order Info */}
+                <div className="flex flex-col items-center justify-center md:justify-start md:items-start sm:flex-row sm:gap-12 gap-2 mt-2 text-sm">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[12px]">Order Placed</span>
+                    <span className="text-xl">
+                      {item?.created_at
+                        ? new Date(item.created_at).toLocaleDateString()
+                        : "-"}
+                    </span>
+                  </div>
 
-                <div className="flex flex-col">
-                  <span className="h6-18-px-medium">Last Update</span>
-                  <span>
-                    {item?.updated_at
-                      ? new Date(item.updated_at).toLocaleDateString()
-                      : "-"}
-                  </span>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[12px]">Last Update</span>
+                    <span className="text-xl">
+                      {item?.updated_at
+                        ? new Date(item.updated_at).toLocaleDateString()
+                        : "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Right Side: Status Button */}
+            <div className="md:w-[30%] w-full flex flex-col md:items-end items-center mt-2 md:mt-0">
+              <button className="bg-[#BFBFBF] text-white font-bold border border-[#BFBFBF] px-4 py-2 rounded hover:bg-white hover:text-[#F15939] transition w-auto text-center text-sm md:text-base">
+                {item?.status || "Pending"}
+              </button>
+
+              {item?.status === "Completed" && (
+                <button
+                  onClick={(e) => handleReturnClick(e, item)}
+                  className="mt-2 text-lg text-[#393939] underline cursor-pointer hover:text-red-600 transition"
+                >
+                  Return Items?
+                </button>
+              )}
+            </div>
           </div>
+        ))}
+      </div>
 
-          {/* Right Side: Status Button */}
-          <div className="md:w-[30%] w-full flex md:justify-end justify-start mt-2 md:mt-0">
-  <button className="bg-[#F15939] text-white font-bold border border-[#F15939] px-4 py-2 rounded hover:bg-white hover:text-[#F15939] transition w-auto text-center text-sm md:text-base">
-    {item.status || "Pending"}
-  </button>
-</div>
-
-        </div>
-      ))}
-    </div>
+      {/* Modal */}
+      {selectedOrder && (
+        <ReturnItemsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          orderId={selectedOrder?.order_number || null}
+          isSubmit={selectedOrder?.returnRequest?.isSubmit}
+        />
+      )}
+    </>
   );
 };
 
