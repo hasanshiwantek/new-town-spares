@@ -18,6 +18,7 @@ import {
   setSelectedCurrency,
 } from "@/redux/slices/currencySlice";
 import { FaUser, FaShoppingCart } from "react-icons/fa";
+import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 
 // ✅ Optimized imports (Next Image optimized assets)
 import usaFlag from "../../../../public/usa-logo.png";
@@ -37,6 +38,14 @@ const Navbar: React.FC = () => {
   );
   const [open, setOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const {
+    skuInput,
+    setSkuInput,
+    qty,
+    setQty,
+    adding,
+    handleAddBySku,
+  } = useAddProductBySku();
 
   useEffect(() => {
     if (status === "idle") {
@@ -123,16 +132,32 @@ const Navbar: React.FC = () => {
             <div className="flex items-center justify-end xl:max-w-[300px]">
               <input
                 type="text"
+                value={skuInput}
+                onChange={(e) => setSkuInput(e.target.value)}
                 placeholder="Add SKU to Cart"
                 className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black"
               />
 
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
-                1
+                <input
+                  type="number"
+                  min={1}
+                  value={qty}
+                  onChange={(e) =>
+                    setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
+                  }
+                  className="w-full h-full text-center text-sm bg-transparent outline-none"
+                  style={{ appearance: "textfield" }}
+                />
               </div>
 
-              <button className="w-[30%] xl:w-[34%] h-[42px] bg-[#FD5430] text-xl">
-                Add to Cart
+              <button
+                type="button"
+                onClick={handleAddBySku}
+                disabled={adding}
+                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FD5430] text-xl text-white disabled:opacity-70"
+              >
+                {adding ? "..." : "Add to Cart"}
               </button>
             </div>
           </div>
@@ -263,16 +288,32 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="text"
+                    value={skuInput}
+                    onChange={(e) => setSkuInput(e.target.value)}
                     placeholder="Add SKU to Cart"
                     className="w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black"
                   />
 
                   <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
-                    1
+                    <input
+                      type="number"
+                      min={1}
+                      value={qty}
+                      onChange={(e) =>
+                        setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
+                      }
+                      className="w-full h-full text-center text-sm bg-transparent outline-none"
+                      style={{ appearance: "textfield" }}
+                    />
                   </div>
 
-                  <button className="flex-1 h-[42px] bg-[#FD5430] text-white text-sm">
-                    Add
+                  <button
+                    type="button"
+                    onClick={handleAddBySku}
+                    disabled={adding}
+                    className="flex-1 h-[42px] bg-[#FD5430] text-white text-sm disabled:opacity-70"
+                  >
+                    {adding ? "..." : "Add"}
                   </button>
                 </div>
 

@@ -1,8 +1,11 @@
+import ReturnOrder from '@/app/components/myaccount/ReturnOrder'
 import React from 'react'
 
 const page = () => {
   return (
-    <div>page i am return</div>
+    <div>
+      <ReturnOrder/>
+    </div>
   )
 }
 
