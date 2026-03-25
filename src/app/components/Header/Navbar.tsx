@@ -19,6 +19,7 @@ import {
 } from "@/redux/slices/currencySlice";
 import { FaUser, FaShoppingCart } from "react-icons/fa";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import { removeFromCart, updateQty } from "@/redux/slices/cartSlice";
 
 // ✅ Optimized imports (Next Image optimized assets)
 import usaFlag from "../../../../public/usa-logo.png";
@@ -30,6 +31,10 @@ const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
   const cart = useAppSelector((state: RootState) => state.cart.items);
+  const totalCartItems = cart.reduce(
+    (sum: number, item: any) => sum + (item?.quantity || 0),
+    0
+  );
   const auth = useAppSelector((state: RootState) => state?.auth);
   const currencyRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -38,6 +43,11 @@ const Navbar: React.FC = () => {
   );
   const [open, setOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const cartRef = useRef<HTMLDivElement | null>(null);
+  const [quantities, setQuantities] = useState<{ [key: string]: number | string }>(
+    {}
+  );
   const {
     skuInput,
     setSkuInput,
@@ -52,6 +62,50 @@ const Navbar: React.FC = () => {
       dispatch(fetchCurrencies());
     }
   }, [status, dispatch]);
+
+  useEffect(() => {
+    const updated: { [key: string]: number } = {};
+    cart.forEach((item: any) => {
+      updated[item.id] = item.quantity;
+    });
+    setQuantities(updated);
+  }, [cart]);
+
+  const handleQtyChange = (id: string, value: string) => {
+    if (value === "" || /^\d*$/.test(value)) {
+      setQuantities((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
+  };
+
+  const handleManualQtyUpdate = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    id: string,
+    maxPurchaseQuantity?: number
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const inputValue = quantities[id];
+      const parsed = Number(inputValue);
+
+      const newQty = maxPurchaseQuantity
+        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+        : parsed > 0
+        ? parsed
+        : 1;
+
+      dispatch(updateQty({ id, quantity: newQty }));
+
+      setQuantities((prev) => ({
+        ...prev,
+        [id]: newQty,
+      }));
+
+      e.currentTarget.blur();
+    }
+  };
 
   const router = useRouter();
   const handleLogout = () => {
@@ -73,6 +127,9 @@ const Navbar: React.FC = () => {
         !currencyRef.current.contains(event.target as Node)
       ) {
         setOpen(false);
+      }
+      if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
+        setIsCartOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -253,17 +310,168 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Cart  desktop*/}
-            <div className="flex items-center gap-3">
-              <Link
-                href="/cart"
-                className="w-10 h-10 flex items-center justify-center rounded"
+            <div className="relative flex items-center gap-3" ref={cartRef}>
+              <button
+                type="button"
+                onClick={() => setIsCartOpen((s) => !s)}
+                className="flex items-center gap-3"
+                aria-label="Open cart"
               >
-                <FaShoppingCart className="text-black w-7 h-6" />
-              </Link>
+                <div className="w-10 h-10 flex items-center justify-center rounded">
+                  <FaShoppingCart className="text-black w-7 h-6" />
+                </div>
 
-              <span className="w-10 h-10 bg-[#EBEBEB] text-black text-xl flex items-center justify-center rounded-full">
-                {cart?.length || 0}
-              </span>
+                <span className="w-10 h-10 bg-[#EBEBEB] text-black text-xl flex items-center justify-center rounded-full">
+                  {totalCartItems || 0}
+                </span>
+              </button>
+
+              {isCartOpen && (
+                <div className="absolute right-0 top-full mt-3 w-[330px] bg-white border border-gray-200 shadow-xl rounded-md z-[120] overflow-hidden">
+                  <div className="px-5 py-4 border-b border-gray-200">
+                    <h2 className="text-[#333333] text-3xl">Your Cart</h2>
+                  </div>
+
+                  <div className="px-5 py-4 border-b border-gray-200">
+                    <p className="text-[#959595] text-[14px] text-center">
+                      {cart.length === 0
+                        ? "Your Cart Is Empty."
+                        : `${cart.reduce((sum, i) => sum + (i.quantity || 0), 0)} item(s) in cart`}
+                    </p>
+                  </div>
+
+                  {cart.length > 0 && (
+                    <div className="max-h-[420px] overflow-y-auto">
+                      {cart.map((item) => {
+                        const imageUrl =
+                          item?.image?.[0]?.path ||
+                          item?.image?.path ||
+                          item?.image ||
+                          "/default-product-image.svg";
+                        const itemPrice = Number(item?.price || 0);
+                        return (
+                          <div
+                            key={item.id}
+                            className="px-5 py-4 border-b border-gray-200 flex gap-4"
+                          >
+                            <div className="shrink-0">
+                              <Image
+                                src={imageUrl}
+                                alt={item?.name ?? ""}
+                                width={56}
+                                height={56}
+                                className="object-contain w-18 h-18"
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
+                                {item?.name ?? "—"}
+                              </p>
+                              <p className="text-[#333333] text-[14px] mt-1">
+                                {item?.sku ?? ""}
+                              </p>
+
+                              <div className="mt-2 flex items-center gap-2">
+                                <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
+                                  <input
+                                    type="number"
+                                    value={
+                                      quantities[item.id] === undefined
+                                        ? item.quantity
+                                        : quantities[item.id]
+                                    }
+                                    onChange={(e) =>
+                                      handleQtyChange(item.id, e.target.value)
+                                    }
+                                    onKeyDown={(e) =>
+                                      handleManualQtyUpdate(
+                                        e,
+                                        item.id,
+                                        item.maxPurchaseQuantity
+                                      )
+                                    }
+                                    className="w-[35px] h-8 text-center outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    aria-label="Quantity"
+                                  />
+                                </div>
+                                <span className="text-[#333333]">×</span>
+                                <span className="text-[#FD5430] text-[14px]">
+                                  ${itemPrice.toFixed(2)}
+                                </span>
+                                <div className="flex-1" />
+                                <button
+                                  type="button"
+                                  onClick={() => dispatch(removeFromCart(item.id))}
+                                  className="shrink-0 w-8 h-8 rounded-full bg-[#FD5430] text-white flex items-center justify-center"
+                                  aria-label="Remove item"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="px-5 py-4 space-y-3 text-[14px] text-[#333333]">
+                    {(() => {
+                      const totalItems = cart.reduce(
+                        (sum, i) => sum + (i.quantity || 0),
+                        0
+                      );
+                      const subtotal = cart.reduce(
+                        (sum, i) => sum + Number(i.price || 0) * (i.quantity || 0),
+                        0
+                      );
+                      return (
+                        <>
+                          <div className="flex justify-between border-t border-gray-200 pt-3">
+                            <span>Total Items:</span>
+                            <span>{totalItems}</span>
+                          </div>
+                          <div className="flex justify-between border-t border-gray-200 pt-3">
+                            <span>Subtotal:</span>
+                            <span>${subtotal.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between font-semibold border-t border-gray-200 pt-3">
+                            <span>Grand total:</span>
+                            <span>${subtotal.toFixed(2)}</span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="px-5 pb-5">
+                    <div className="flex gap-2 border-t border-gray-200 pt-4">
+                      <Link
+                        href="/cart"
+                        onClick={() => setIsCartOpen(false)}
+                        className="flex-1 h-[37.58px] flex items-center justify-center rounded border border-gray-300 bg-white text-gray-700 text-[14px] font-medium hover:bg-gray-50"
+                      >
+                        View Cart
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (cart.length === 0) {
+                            toast.error("Your cart is empty");
+                            return;
+                          }
+                          setIsCartOpen(false);
+                          router.push("/checkout");
+                        }}
+                        className="flex-1 h-[37.58px] rounded bg-[#FD5430] hover:bg-[#e04a2a] text-white text-[14px] font-medium"
+                      >
+                        Check out
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         </div>
@@ -295,16 +503,20 @@ const Navbar: React.FC = () => {
                   />
 
                   <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
-                    <input
-                      type="number"
-                      min={1}
+                    <select
                       value={qty}
                       onChange={(e) =>
                         setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                       }
-                      className="w-full h-full text-center text-sm bg-transparent outline-none"
-                      style={{ appearance: "textfield" }}
-                    />
+                      className="w-full h-full text-center text-sm bg-transparent outline-none cursor-pointer"
+                      aria-label="Quantity"
+                    >
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <button
@@ -321,18 +533,18 @@ const Navbar: React.FC = () => {
 
               {/* account */}
          
-  <div className="flex md:hidden items-center gap-3">
-              <Link
-                href="/cart"
-                className="w-10 h-10 flex items-center justify-center rounded"
-              >
-                <FaShoppingCart className="text-black w-7 h-6" />
-              </Link>
+              <div className="flex md:hidden items-center gap-3">
+                <Link
+                  href="/cart"
+                  className="w-10 h-10 flex items-center justify-center rounded"
+                >
+                  <FaShoppingCart className="text-black w-7 h-6" />
+                </Link>
 
-              <span className="w-10 h-10 bg-[#EBEBEB] text-black text-xl flex items-center justify-center rounded-full">
-                {cart?.length || 0}
-              </span>
-            </div>
+                <span className="w-10 h-10 bg-[#EBEBEB] text-black text-xl flex items-center justify-center rounded-full">
+                  {totalCartItems || 0}
+                </span>
+              </div>
 
               {/* Account - only when logged in */}
               {auth?.isAuthenticated && (
