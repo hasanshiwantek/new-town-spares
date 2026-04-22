@@ -277,7 +277,7 @@ const CartList = () => {
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="!p-4 !text-lg">
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}  className="!p-4 !text-lg">
+            <Button variant="destructive" onClick={confirmDelete}  className="!p-4 !text-[#fd5430] !text-lg">
               Confirm
             </Button>
           </DialogFooter>

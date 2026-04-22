@@ -339,10 +339,10 @@ const SignupPage = () => {
           {/* Submit */}
           <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4">
             <p className="text-[14px] text-gray-600 mb-0">
-              Already have an account?{" "}
+              {/* Already have an account?{" "}
               <Link href="/auth/login" className="text-[#FD5430] hover:underline">
                 Sign in
-              </Link>
+              </Link> */}
             </p>
             {registerLoading ? (
               <div className="flex justify-center sm:justify-end w-full sm:w-[173px]">

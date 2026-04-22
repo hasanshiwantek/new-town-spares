@@ -45,7 +45,7 @@ const DropdownColumn = ({
   setIsOpen,
 }: {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  heading: string;
+  heading?: string;
   categories: Category[];
 }) => {
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
@@ -55,13 +55,12 @@ const DropdownColumn = ({
     hidden: { opacity: 0, x: -30 },
     visible: { opacity: 1, x: 0 },
   };
-
   return (
     <div className="xl:w-[25.8rem] 2xl:w-[34.2rem] bg-white text-black border-r relative">
       {/* Column Heading (static, no animation) */}
-      <div className="px-4 py-2 h3-secondary !text-[#F15939] border-b">
+      {heading && <div className="px-4 py-2 h3-secondary !text-[#F15939] border-b">
         {heading}
-      </div>
+      </div>}
 
       {/* Animated List */}
       <MotionUl
@@ -79,7 +78,7 @@ const DropdownColumn = ({
               <MotionLi
                 key={cat.id}
                 variants={listVariants}
-                className="flex justify-between items-center px-4 py-3 h4-regular hover:bg-gray-100 hover:border-l-2 border-[#F15939] cursor-pointer relative"
+                className="flex justify-between items-center px-4 py-3  hover:bg-gray-100 hover:border-l-2 border-[#F15939] cursor-pointer relative"
                 onMouseEnter={() => setActiveCategory(cat.id)}
                 onMouseLeave={() => setActiveCategory(null)}
               >
@@ -102,7 +101,8 @@ const DropdownColumn = ({
                       {cat.subcategories.length > 0 ? (
                         <DropdownColumn
                           setIsOpen={setIsOpen}
-                          heading={cat.name}
+                          heading={""}
+                          // heading={cat.name}
                           categories={cat.subcategories}
                         />
                       ) : null}
@@ -174,20 +174,22 @@ const LinkHeader = () => {
         {/* Left Section: Menu Button */}
         <div
           className="relative flex items-center 
-                 gap-1 sm:gap-2 md:gap-3 lg:gap-4"
+                 "
+          //  gap-1 sm:gap-2 md:gap-3 lg:gap-4"
           ref={menuRef}
+          onMouseLeave={() => setIsOpen(false)}
         >
           <button
             onClick={toggleDropdown}
-            className="flex items-center justify-center gap-1 sm:gap-2 hover:text-gray-300 focus:outline-none w-[12.3rem] lg:w-[13.3rem] h-[54.5px] border-r-2 lg:mb-4"
+            onMouseEnter={toggleDropdown}
+            className="flex items-center justify-center gap-1 sm:gap-2 hover:text-gray-300 focus:outline-none w-[12.3rem] lg:w-[13.3rem] h-[54.5px] border-r-2 lg:mb-4 border-b-2 border-b-transparent hover:border-b-[#FF482E]"
           >
             <span className="text-sm md:text-xl text-[#333333]">
               All Categories
             </span>
             <ChevronDown
-              className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -196,14 +198,14 @@ const LinkHeader = () => {
             <div className="absolute left-0 top-10 flex bg-white shadow-xl border z-50">
               <DropdownColumn
                 setIsOpen={setIsOpen}
-                heading="All Categories"
+                heading=""
                 categories={categories}
               />
             </div>
           )}
 
           {/* Left Section: Static Links */}
-          <ul
+          {/* <ul
             className="hidden md:flex items-center 
             whitespace-nowrap 
             text-sm md:text-xl text-[#333333] lg:mb-4"
@@ -215,6 +217,17 @@ const LinkHeader = () => {
               <Link href="/contact-us">Contact Us</Link>
             </li>
             <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px]">
+              <Link href="/blogs">Blog</Link>
+            </li>
+          </ul> */}
+          <ul className="hidden md:flex items-center whitespace-nowrap text-sm md:text-xl text-[#333333] lg:mb-4">
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
+              <Link href="/about-us">About Us</Link>
+            </li>
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
+              <Link href="/contact-us">Contact Us</Link>
+            </li>
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
               <Link href="/blogs">Blog</Link>
             </li>
           </ul>

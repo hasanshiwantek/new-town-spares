@@ -1,3 +1,5 @@
+import SortDropdown from "./SortDropdown";
+
 interface Props {
   total: number;
   view: "list" | "grid";
@@ -75,7 +77,7 @@ export default function SortingBar({
         <span className="text-[14px] text-[#333333]">Sort by</span>
 
         {/* Sort Dropdown */}
-        <select
+        {/* <select
           value={filters.sortBy || ""}
           onChange={(e) =>
             setFilters((prev: any) => ({
@@ -94,27 +96,27 @@ export default function SortingBar({
           <option value="bestSelling">Best Selling</option>
           <option value="priceLowToHigh">Low to High</option>
           <option value="priceHighToLow">High to Low</option>
-        </select>
+        </select> */}
+        <SortDropdown filters={filters} setFilters={setFilters} />
+
 
         {/* View Toggle */}
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setView("grid")}
-            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${
-              view === "grid"
+            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "grid"
                 ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
                 : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
-            }`}
+              }`}
           >
             ▭▭
           </button>
           <button
             onClick={() => setView("list")}
-            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${
-              view === "list"
+            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "list"
                 ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
                 : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
-            }`}
+              }`}
           >
             ☰
           </button>

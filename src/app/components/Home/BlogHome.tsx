@@ -17,7 +17,7 @@ const BlogHome = () => {
   }, [dispatch]);
 
   return (
-    <div className="bg-gray-50 py-12">
+    <div className=" py-12">
       {/* Heading */}
       <h2 className="text-[2.1rem] text-center mb-10">Blogs</h2>
 

@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 const Cart = () => {
-    const auth = useAppSelector((state: RootState) => state?.auth);
-    const cart = useAppSelector((state: RootState) => state.cart.items);
+  const auth = useAppSelector((state: RootState) => state?.auth);
+  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const isLoggedIn = Boolean(auth?.isAuthenticated);
   return (
     <main className="w-full flex justify-center  py-1">
       {/* Fixed container centered on screen */}
@@ -18,16 +19,16 @@ const Cart = () => {
       >
         {/* Heading Section */}
         <div className="w-full">
-        <div className="mb-6 text-sm md:text-base">
-          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px] underline">
-            Home
-          </Link>{" "}
-          / <span className="mx-1 text-[#333333] text-[13px]">Your Cart</span>
-        </div>
-           
-  <p className="text-[#333333] text-[28px]">
-  Your Cart ({cart?.length || 0} items)
-  </p>
+          <div className="mb-6 text-sm md:text-base">
+            <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px] underline">
+              Home
+            </Link>{" "}
+            / <span className="mx-1 text-[#333333] text-[13px]">Your Cart</span>
+          </div>
+
+          <p className="text-[#333333] text-[28px]">
+            Your Cart ({cart?.length || 0} items)
+          </p>
 
         </div>
 
@@ -35,7 +36,7 @@ const Cart = () => {
         <div
           className="
             flex flex-col md:items-end xl:items-start xl:flex-row
-            w-full gap-6
+            w-full gap-6 
           "
         >
           {/* Cart List — full width when empty, otherwise shared with OrderSummary */}
@@ -47,6 +48,11 @@ const Cart = () => {
             }
           >
             <CartList />
+            {!isLoggedIn && <div className="flex justify-center sm:justify-end mt-3">
+              <Link href="/auth/login" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px] underline">
+                Sign in to save your cart
+              </Link>{" "}
+            </div>}
           </div>
 
           {/* Order Summary — hidden when cart is empty */}
