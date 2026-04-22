@@ -29,12 +29,12 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
   const { products } = useAppSelector((state: any) => state.home);
   const productsData = products?.data || [];
 
-  const [canScrollLeft, setCanScrollLeft]   = useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const [activeIndex, setActiveIndex]       = useState(0);
-  const [visibleCount, setVisibleCount]     = useState(1);
-  const [loading, setLoading]               = useState(true);
-  const [localError, setLocalError]         = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   // ── Scroll state ──────────────────────────────────────────────────────────
   const updateScroll = () => {
@@ -118,8 +118,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
   // e.g. 5 cards, 2 visible → 4 dots
   // e.g. 5 cards, 5 visible → 0 dots (no arrows, no dots)
   const totalCards = Math.min(productsData.length, 5);
-  const dotsCount  = totalCards - visibleCount; // extra cards jo scroll pe hain
-  const showUI     = dotsCount > 0;             // arrows + dots dono
+  const dotsCount = totalCards - visibleCount; // extra cards jo scroll pe hain
+  const showUI = dotsCount > 0;             // arrows + dots dono
 
   return (
     <div className="bg-transparent py-4">
@@ -155,26 +155,36 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
                 <button
                   onClick={scrollLeft}
                   disabled={!canScrollLeft}
-                  style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
+                  style={{ width: 20, height: 41, fontSize: 30, lineHeight: 1 }}
+                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10  shadow-md rounded
                     flex items-center justify-center font-bold transition-opacity duration-200
                     ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
                 >
-                  &lt;
+                  &#8249;
                 </button>
               )}
 
               {/* Grid track */}
-            <div
-  ref={trackRef}
-  className="grid grid-rows-1 grid-flow-col gap-3
+              <div
+                ref={trackRef}
+                //             className="grid grid-rows-1 grid-flow-col gap-3
+                // auto-cols-[100%]
+                // sm:auto-cols-[calc(50%-6px)] 
+                // md:auto-cols-[calc(33.333%-8px)] 
+                // lg:auto-cols-[calc(25%-9px)] 
+                // 2xl:auto-cols-[calc(20%-10px)]
+                // overflow-x-auto scroll-smooth scrollbar-hide "
+                className="grid grid-rows-1 grid-flow-col gap-3
     auto-cols-[100%]
     sm:auto-cols-[calc(50%-6px)] 
     md:auto-cols-[calc(33.333%-8px)] 
     lg:auto-cols-[calc(25%-9px)] 
     2xl:auto-cols-[calc(20%-10px)]
-    overflow-x-auto scroll-smooth scrollbar-hide"
->
+    overflow-x-auto scroll-smooth
+    [&::-webkit-scrollbar]:hidden
+    [-ms-overflow-style:none]
+    [scrollbar-width:none]"
+              >
                 {productsData.slice(0, 5).map((product: any) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -185,29 +195,28 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
                 <button
                   onClick={scrollRight}
                   disabled={!canScrollRight}
-                  style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
+                  style={{ width: 20, height: 41, fontSize: 30, lineHeight: 1 }}
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10  shadow-md rounded
                     flex items-center justify-center font-bold transition-opacity duration-200
                     ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
                 >
-                  &gt;
+                  &#8250;
                 </button>
               )}
 
               {/* ── Dots ── */}
-        {showUI && (
-  <div className="flex justify-center gap-2 mt-3">
-    {Array.from({ length: dotsCount + 1 }).map((_, i) => (
-      <button
-        key={i}
-        onClick={() => scrollToIndex(i)}
-        className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${
-          activeIndex === i ? "bg-[#333333]" : "bg-transparent"
-        }`}
-      />
-    ))}
-  </div>
-)}
+              {showUI && (
+                <div className="flex justify-center gap-2 mt-3">
+                  {Array.from({ length: dotsCount + 1 }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => scrollToIndex(i)}
+                      className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${activeIndex === i ? "bg-[#333333]" : "bg-transparent"
+                        }`}
+                    />
+                  ))}
+                </div>
+              )}
 
             </div>
           )}

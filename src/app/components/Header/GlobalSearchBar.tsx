@@ -24,10 +24,10 @@ const GlobalSearchBar: React.FC = () => {
   const { searchData, loading } = useAppSelector((state: any) => state.home);
 
   const [results, setResults] = useState<any[]>([]);
-  
+
   // Cache state object for storing search results
   const [searchCache, setSearchCache] = useState<{ [key: string]: any[] }>({});
-  
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(query, 300);
@@ -35,7 +35,7 @@ const GlobalSearchBar: React.FC = () => {
   // Auto-fetch search results after debounce delay with cache check
   useEffect(() => {
     const trimmedQuery = debouncedQuery.trim().toLowerCase();
-    
+
     if (trimmedQuery.length > 1) {
       // Check if results exist in cache
       if (searchCache[trimmedQuery]) {
@@ -68,9 +68,9 @@ const GlobalSearchBar: React.FC = () => {
         price: item.price || item.costPrice || "0.00",
         url: `/category/${item.categories?.[0]?.slug || item.slug}`,
       }));
-      
+
       setResults(mapped);
-      
+
       // Store in cache with lowercase trimmed query as key
       const cacheKey = debouncedQuery.trim().toLowerCase();
       if (cacheKey.length > 1) {
@@ -132,8 +132,8 @@ const GlobalSearchBar: React.FC = () => {
           />
           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
             <button
-            aria-label="search"
-            name="search"
+              aria-label="search"
+              name="search"
               onClick={() => {
                 if (query.trim()) {
                   dispatch(globalSearch({ query }));

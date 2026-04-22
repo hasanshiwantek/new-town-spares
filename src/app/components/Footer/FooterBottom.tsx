@@ -34,10 +34,10 @@ const FooterBottom = () => {
         <div
           className="
         w-full max-w-[1684px] mx-auto px-7 xl:px-28
-        flex flex-col md:flex-row items-center justify-center gap-2 md:gap-8 lg:gap-0
+        flex flex-col md:flex-row items-center justify-around gap-2 md:gap-8 lg:gap-0
       "
         >
-          <div className="text-center md:text-left w-full md:w-[60%] 2xl:max-w-[50%]">
+          <div className="hidden md:block text-center  md:text-center w-full md:w-[60%]  2xl:max-w-[50%]">
             <h3 className="text-[19px] !text-white">
               Subscribe to our Newsletter
             </h3>
@@ -45,16 +45,15 @@ const FooterBottom = () => {
               Get the latest updates on new products and upcoming sales
             </p>
           </div>
-
-          <form className="w-[80%] md:w-[50%] 2xl:max-w-[30%] flex items-center mt-4 md:mt-0">
+          <form className="w-[80%] md:w-[45%] 2xl:max-w-[30%]  flex flex-col md:flex-row  items-center mt-4 md:mt-0">
             <input
               type="email"
-              placeholder="Enter your email"
-              className="w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none rounded-md text-sm md:text-base"
+              placeholder="Your email address"
+              className="w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base h-[42px]"
             />
             <button
               type="submit"
-              className="btn-primary !p-3 !rounded-sm w-[40%] md:w-[30%] max-w-[9rem]"
+              className="btn-primary !rounded-none !p-3 w-[40%] md:w-[30%] max-w-[9rem] h-[42px]"
             >
               Subscribe
             </button>
@@ -64,7 +63,7 @@ const FooterBottom = () => {
 
       {/* 🔹 Dynamic Categories Section */}
 
-     
+
 
       {/* <div className="w-full max-w-[90%] h-[0.125rem] bg-[#585858] mx-auto"></div> */}
 
@@ -124,14 +123,14 @@ const FooterBottom = () => {
             </ul>
             <h4 className="text-2xl font-bold !text-[#FFFFFF] mt-10">Follow Us</h4>
             <div className="w-[120px] h-[48px] m-auto lg:m-0 mt-7">
-  <Image
-    src="/footer-logo.png"
-    alt="Join Us Logo"
-    width={120}
-    height={48}
-    className="object-contain"
-  />
-</div>
+              <Image
+                src="/footer-logo.png"
+                alt="Join Us Logo"
+                width={120}
+                height={48}
+                className="object-contain"
+              />
+            </div>
 
 
           </nav>
@@ -151,32 +150,32 @@ const FooterBottom = () => {
           </section>
 
           <section aria-label="Contact Us">
-            
-     
-            <nav aria-label="Categories">
-  <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4 uppercase">
-    Categories
-  </h4>
 
-  <ul className="flex flex-col gap-5 xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF]">
-    {categories && categories.length > 0 ? (
-      categories.slice(0, 10).map((category) => (
-        <li key={category.id || category.name}>
-          <Link href={`/category/${category.slug}`}>
-            {category.name}
-          </Link>
-        </li>
-      ))
-    ) : (
-      // 🔹 Skeleton Loader
-      Array.from({ length: 6 }).map((_, index) => (
-        <li key={index}>
-          <div className="h-4 w-40 bg-white/20 rounded animate-pulse" />
-        </li>
-      ))
-    )}
-  </ul>
-</nav>
+
+            <nav aria-label="Categories">
+              <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4 uppercase">
+                Categories
+              </h4>
+
+              <ul className="flex flex-col gap-5 xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF]">
+                {categories && categories.length > 0 ? (
+                  categories.slice(0, 10).map((category) => (
+                    <li key={category.id || category.name}>
+                      <Link href={`/category/${category.slug}`}>
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))
+                ) : (
+                  // 🔹 Skeleton Loader
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <li key={index}>
+                      <div className="h-4 w-40 bg-white/20 rounded animate-pulse" />
+                    </li>
+                  ))
+                )}
+              </ul>
+            </nav>
 
 
           </section>
@@ -194,9 +193,8 @@ const FooterBottom = () => {
       {/* 🔹 Bottom Bar */}
       <div className="text-[14px] flex items-center flex-wrap sm:flex-nowrap justify-between bg-[#2C2D2C] min-h-[4.5rem] px-[5%]">
         {/* Center Content */}
-        <p className="!text-white text-center w-full">
-          &copy; New Town Spares {new Date().getFullYear()}. All rights
-          reserved.
+        <p className="!text-white text-center sm:text-left w-full">
+          &copy; {new Date().getFullYear()} New Town Spares Inc.
         </p>
 
         {/* Right Content */}

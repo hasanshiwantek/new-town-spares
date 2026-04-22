@@ -11,6 +11,7 @@ import Pagination from "@/components/ui/pagination";
 import dynamic from "next/dynamic";
 import ProductCard from "../Home/ProductCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
+import SortDropdown from "./SortDropdown";
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
@@ -42,7 +43,7 @@ export default function ProductList({
   isLoading = false,
   error = null,
   filterMeta,
-initialCategorydescription,
+  initialCategorydescription,
 }: ProductListProps) {
   const [view, setView] = useState<"list" | "grid">("list");
   const [page, setPage] = useState(1);
@@ -62,8 +63,8 @@ w-full
       {/* Headings */}
       <div className="mb-4">
         <h1 className="text-4xl text-[#333333] pb-4">
-  {initialCategorydescription?.name || "Product Category"}
-</h1>
+          {initialCategorydescription?.name || "Product Category"}
+        </h1>
         <p className="text-[14px] text-[#333333] ">
           {/* Do you need to fix your computer or make it work better? At
           NewTownSpares, we have all the IT Accessories you need! It doesn’t
@@ -71,9 +72,9 @@ w-full
           here to help you. We have parts from popular brands like Intel, Dell,
           and HP. */}
           <p className="text-[14px] text-[#333333] px-5 py-2 max-h-[150px] overflow-y-auto border border-gray-300 rounded-md">
-  {initialCategorydescription?.description ||
-    "Discover quality products available in this category, curated to meet your needs. Do you need to fix your computer or make it work better? At NewTownSpares, we have all the IT Accessories you need! It doesn’t matter if it’s for your home, work, or even an old computer. We are here to help you. We have parts from popular brands like Intel, Dell, and HP."}
-</p>
+            {initialCategorydescription?.description ||
+              "Discover quality products available in this category, curated to meet your needs. Do you need to fix your computer or make it work better? At NewTownSpares, we have all the IT Accessories you need! It doesn’t matter if it’s for your home, work, or even an old computer. We are here to help you. We have parts from popular brands like Intel, Dell, and HP."}
+          </p>
         </p>
       </div>
 
@@ -98,6 +99,7 @@ w-full
         filterMeta={filterMeta}
       />
 
+
       {/* Error State */}
       {error && (
         <div className="mt-6 text-center text-red-500 font-medium">
@@ -121,11 +123,10 @@ w-full
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className={`mt-4 ${
-            view === "grid"
+          className={`mt-4 ${view === "grid"
               ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
               : "space-y-4"
-          }`}
+            }`}
         >
           {Array.from({ length: 6 }).map((_, idx) => (
             <ProductSkeleton key={idx} view={view} />
@@ -143,11 +144,10 @@ w-full
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className={`xl:max-w-[754px] w-full ${
-              view === "grid"
+            className={`xl:max-w-[754px] w-full ${view === "grid"
                 ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-3"
                 : "space-y-4"
-            }`}
+              }`}
           >
             <AnimatePresence mode="wait">
               {products.map((product, idx) =>

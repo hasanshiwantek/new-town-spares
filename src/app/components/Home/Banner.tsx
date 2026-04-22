@@ -11,11 +11,11 @@ const Banner = () => {
 
   return (
     <div className="w-full flex justify-center items-centenr">
-      <div className="flex flex-col md:flex-row w-full justify-between md:h-[400px] gap-6 md:gap-0">
+      <div className="flex flex-col md:flex-row w-full justify-between md:h-[400px] lg:h-[460px] gap-6 md:gap-0">
 
         {/* Left Image Section */}
         <div
-          className={`relative w-full h-[260px] md:h-[400px] ${
+          className={`relative w-full h-[260px] md:h-[400px] lg:h-[460px] ${
             isLoggedIn ? "md:w-full lg:w-full" : "md:w-[64%] lg:w-[74.8%]"
           }`}
         >
@@ -30,7 +30,7 @@ const Banner = () => {
 
         {/* Right Sign In Section */}
         {!isLoggedIn && (
-          <div className="w-full md:w-[35%] lg:w-[23.9%] h-[332px] md:h-[400px] bg-[#EBEBEB] flex flex-col justify-center px-7">
+          <div className="w-full md:w-[35%] lg:w-[23.9%] h-[332px] md:h-[400px] lg:h-[460px] bg-[#EBEBEB] flex flex-col justify-center px-7">
             <h2 className="text-lg xl:text-[20px] text-[#333333] mb-5 text-center">
               Sign In
             </h2>

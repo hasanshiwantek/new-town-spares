@@ -25,33 +25,32 @@ const MyAccountTabs = () => {
     <div>
       {/* Breadcrumb */}
       <div className="h5-regular mb-4 text-gray-600">
-        <span>Home</span> &gt; <span>Your Account</span> &gt;{" "}
-        <span className="font-semibold">{getActiveTab()}</span>
+        <span>Home</span> / <span>Your Account</span> /{" "}
+        <span className="">{getActiveTab()}</span>
       </div>
-      <div className="h5-regular mb-4 text-gray-600">
-        <span className="font-semibold">{getActiveTab()}</span>
+      <div className=" mb-4 text-gray-600  flex justify-center">
+        <span className="text-3xl">{getActiveTab()}</span>
       </div>
 
       {/* Tabs */}
-   <div className="flex flex-wrap gap-3 mb-6 justify-center sm:justify-start">
-  {tabs.map((tab) => {
-    const isActive = pathname.startsWith(tab.href);
-    return (
-      <Link
-        key={tab.name}
-        href={tab.href}
-        className={`px-4 py-2 rounded-md text-sm sm:text-base font-medium transition-colors duration-200 ${
-          isActive
-            ? "bg-[#F15939] text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-        }`}
-      >
-        {tab.name}
-      </Link>
-    );
-  })}
-</div>
-
+      <div className="flex flex-wrap  gap-5 mb-6 justify-start sm:justify-center">
+        {tabs.map((tab) => {
+          const isActive = pathname.startsWith(tab.href);
+          return (
+            <Link
+              key={tab.name}
+              href={tab.href}
+              className={`text-2xl font-medium transition-colors duration-200 border-b-2
+        ${isActive
+                  ? "text-[#413836]  border-[#413836]"
+                  : "text-[#F15939] border-transparent hover:border-[#F15939]"
+                }`}
+            >
+              {tab.name}
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 };

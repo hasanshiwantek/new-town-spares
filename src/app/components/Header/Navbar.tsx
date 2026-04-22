@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { Search, ShoppingCart, Menu, X, User } from "lucide-react";
-import navlogo from "@/assets/navlogo.svg";
+import navlogo from "@/assets/navlogoreal.webp";
 import Image from "next/image";
 import Link from "next/link";
 import { FaHeadphones, FaChevronDown } from "react-icons/fa";
@@ -181,7 +181,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Center: Search (Desktop only) */}
-          <div className="hidden lg:flex flex-1 justify-end items-center gap-0 2xl:gap-7 max-w-[64%]">
+          <div className="hidden lg:flex flex-1 justify-end items-center gap-1 2xl:gap-7 max-w-[64%]">
             <div className="relative flex-1 max-w-[498.52px]">
               <GlobalSearchBar />
             </div>
@@ -489,7 +489,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {/* Add SKU Section */}
-              <div>
+              <div className="hidden sm:block">
                 <h3 className="text-black font-semibold text-lg mb-3">
                   Quick Add to Cart
                 </h3>
@@ -533,7 +533,7 @@ const Navbar: React.FC = () => {
 
               {/* account */}
          
-              <div className="flex md:hidden items-center gap-3">
+              <div className="hidden md:flex items-center gap-3">
                 <Link
                   href="/cart"
                   className="w-10 h-10 flex items-center justify-center rounded"

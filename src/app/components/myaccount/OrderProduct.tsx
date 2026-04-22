@@ -63,11 +63,13 @@ const OrderProduct = () => {
 
   if (!order?.orders || order.orders.length === 0)
     return (
-      <div className="w-full bg-white border border-black p-4">
-        <p className="text-[#545454] text-[14px]">
-          You haven't placed any order with us. When you do, they will appear
-          on this page.
-        </p>
+      <div className="w-full flex justify-center">
+        <div className="w-full sm:w-[50%] bg-[#dfdfdf] rounded-md flex justify-center p-4">
+          <p className="text-[#545454] text-[14px]">
+            You haven't placed any order with us. When you do, they will appear
+            on this page.
+          </p>
+        </div>
       </div>
     );
 

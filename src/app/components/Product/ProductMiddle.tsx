@@ -188,7 +188,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             </span>
           </div>
           {/* Customer Help */}
-          <div className="px-10 py-3.5 flex flex-col justify-center border-t sm:border-t-0 sm:border-r border-gray-200">
+          <div className="px-10 py-3.5 flex flex-col justify-center border-t  border-r border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
                 <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
