@@ -67,7 +67,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
                 let numVal = Math.max(1, parseInt(val as string, 10) || 1);
 
                 // Handle max quantity
-                const max = product?.maxPurchaseQuantity || 9999;
+                const max = product?.maxPurchaseQuantity || 1;
                 if (numVal > max) numVal = max;
 
                 // Only update if parent provided handler

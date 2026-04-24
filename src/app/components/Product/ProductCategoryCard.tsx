@@ -7,6 +7,7 @@ interface Product {
   id: number;
   name: string;
   slug: string;
+  productUrl?: string;
   sku: string;
   price: any;
   msrp: any;
@@ -33,8 +34,8 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
   const salePrice = Number(product.price);
 
   return (
-<div
-  className="
+    <div
+      className="
     border border-gray-200 rounded-md bg-white
     grid gap-4 items-start w-full transition-all duration-300
     grid-cols-1
@@ -42,10 +43,10 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     lg:grid-cols-[200px_280px_200px]
     p-7
   "
->
+    >
       {/* Product Image (Left) */}
       <div className="flex items-center justify-center shrink-0 mx-auto" style={{ width: 200, height: 200 }}>
-        <Link href={`/${product?.sku}`} className="block w-full h-full">
+        <Link href={`${product?.productUrl}`} className="block w-full h-full">
           <Image
             src={imageUrl}
             alt={product?.name ?? ""}
@@ -68,7 +69,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
           </span>
         </div>
         <Link
-          href={`/${product?.sku}`}
+          href={`${product?.productUrl}`}
           className="cursor-pointer group mt-1"
         >
           <p className="text-[#333333] text-[15px] leading-snug line-clamp-3 group-hover:text-[#FD5430] transition-colors">
@@ -81,7 +82,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       <div className="flex flex-col items-center sm:items-end justify-center gap-2 w-full shrink-0">
         <div className="flex flex-col items-start w-full max-w-[200px]">
           {hasOriginalPrice && (
-            <p className="text-[#333333] text-[14px] inline"> 
+            <p className="text-[#333333] text-[14px] inline">
               Price: <ProductPrice price={originalPrice} inline className="text-[#333333] !text-[14px]" />
             </p>
           )}
@@ -93,7 +94,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
             {product?.availabilityText ?? "In Stock"}
           </p>
           <Link
-            href={`/${product?.sku}`}
+            href={`${product?.productUrl}`}
             className="w-full mt-2 flex items-center justify-center rounded-md bg-[#FD5430] hover:bg-[#e04a2a] text-white  text-[14px] py-3.5 transition-colors"
           >
             Choose Options
@@ -107,10 +108,10 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
         product={
           product
             ? {
-                name: product.name,
-                image: product.image?.[0]?.path,
-                sku: product.sku ?? "",
-              }
+              name: product.name,
+              image: product.image?.[0]?.path,
+              sku: product.sku ?? "",
+            }
             : undefined
         }
       />

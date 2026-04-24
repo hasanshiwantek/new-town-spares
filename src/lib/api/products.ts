@@ -1,13 +1,13 @@
 // lib/api/products.ts
+import { baseURL, storeId } from "../axiosInstance";
 import serverAxios from "../serverAxios";
 import { redirect } from "next/navigation";
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
 export const fetchProducts = async () => {
   try {
     const res = await fetch(`${baseURL}web/products/products`, {
       next: { revalidate: 60 }, // ✅ revalidate every 60 seconds
       headers: {
-        storeId: "10",
+        storeId: storeId,
       },
     });
 
@@ -19,13 +19,13 @@ export const fetchProducts = async () => {
     throw new Error("Failed to load products");
   }
 };
+export const fetchProductBySlugAndUrl = async (slug?: string) => {
 
-// Get single product by slug (always fresh)
-export const fetchProductBySlug = async (slug: string) => {
+  if (!slug) return
   try {
-    const res = await fetch(`${baseURL}web/products/get-product/${slug}`, {
+    const res = await fetch(`${baseURL}web/products/get-product-by-url${slug}`, {
       cache: "no-store",
-      headers: { storeId: "10" },
+      headers: { storeId: storeId },
     });
 
     if (!res.ok) {
@@ -38,11 +38,34 @@ export const fetchProductBySlug = async (slug: string) => {
       console.warn(`⚠️ No product found for slug: ${slug}`);
       return null;
     }
-    console.log("Slug data response: ", data?.data);
 
     return data.data;
   } catch (err) {
     console.error("🚨 Error fetching product:", err);
+    return null; // always return null, not throw
+  }
+};
+// Get single product by slug (always fresh)
+export const fetchProductBySlug = async (slug: string) => {
+  try {
+    const res = await fetch(`${baseURL}web/products/get-product/${slug}`, {
+      cache: "no-store",
+      headers: { storeId: storeId },
+    });
+
+    if (!res.ok) {
+      console.error(`❌ API failed for slug: ${slug}, status: ${res.status}`);
+      return null;
+    }
+
+    const data = await res.json();
+    if (!data?.data) {
+      console.warn(`⚠️ No product found for slug: ${slug}`);
+      return null;
+    }
+
+    return data.data;
+  } catch (err) {
     return null; // always return null, not throw
   }
 };
@@ -74,7 +97,7 @@ export async function fetchFilteredProducts(filters: {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: "10",
+      storeId: storeId,
     },
     cache: "no-store", // or "no-cache" for fresh data
   });
@@ -95,12 +118,12 @@ export const getBlogByIdServer = async (id: string) => {
     const res = await fetch(`${baseURL}web/blogs/blog-posts/${id}`, {
       next: { revalidate: 3600 }, // Example: revalidate every hour
       headers: {
-        storeId: "10",
+        storeId: storeId,
       },
     });
 
     if (!res.ok) {
-       throw new Error("Failed to fetch blog with id");
+      throw new Error("Failed to fetch blog with id");
     }
 
     const data = await res.json();

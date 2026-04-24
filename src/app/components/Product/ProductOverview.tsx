@@ -11,8 +11,8 @@ const ProductOverview = ({ product }: { product: any }) => {
           {/* Main Overview Heading */}
 
           {/* Intro Paragraph */}
-         
-           {/* <div className="description-content" 
+
+          {/* <div className="description-content" 
          dangerouslySetInnerHTML={{ __html: product?.description }}>
     </div> */}
           {/* <p className="h5-regular !leading-relaxed w-full xl:w-[60rem] 2xl:w-[80rem]">
@@ -67,52 +67,43 @@ const ProductOverview = ({ product }: { product: any }) => {
         {/* Product Details Section */}
         <section className="border" aria-labelledby="product-details-heading">
           <div className=" p-4">
-          <h2 className="text-[20px] text-[#333333]">Description</h2>
+            <h2 className="text-[20px] text-[#333333]">Description</h2>
           </div>
           <div className="px-4">
             <h2 className="text-[16px] text-[#33333]!mb-2">{product?.metaDescription || "N/A"}</h2>
           </div>
           <div className=" p-4">
-          <h2 className="text-[20px] text-[#333333]">Details</h2>
+            <h2 className="text-[20px] text-[#333333]">Details</h2>
           </div>
-<hr className="border-t border-2 border-[#333333] opacity-80 w-[98%] mx-auto mb-3" />
+          <hr className="border-t border-2 border-[#333333] opacity-80 w-[98%] mx-auto mb-3" />
           {/* Key-Value Details */}
           <dl className="p-2 space-y-4">
-  {[
-    ["Brand", product?.brand?.name || "N/A"],
-    [
-      "Weight",
-      product?.dimensions?.weight
-        ? `${product.dimensions.weight} lbs`
-        : "N/A",
-    ],
-    ["MSRP", product?.msrp ? `$${product.msrp}` : "N/A"],
-    ["Price", product?.price ? `$${product.price}` : "N/A"],
-    ["Condition", product?.showCondition ? "Yes" : "N/A"],
-    ["Availability", product?.availabilityText || "N/A"],
-    ["Stock", product?.currentStock ?? "N/A"],
-  ].map(([key, value], index) => (
-    <div
-      key={key}
-      className={`!grid  !grid-cols-[180px_1fr] lg:!grid-cols-[350px_1fr] !items-center !p-2 ${
-        index % 2 === 1 ? "" : "bg-[#F2F2F2]"
-      }`}
-    >
-      <dt className="text-[16px] text-[#333333]">{key}</dt>
-      <dd className="text-[16px] text-[#333333]">
-        {key === "Brand" && product?.brand?.name ? (
-          <Link
-            href={`/brand/${product.brand.slug}`}
-          >
-            {value}
-          </Link>
-        ) : (
-          value
-        )}
-      </dd>
-    </div>
-  ))}
-</dl>
+            {[
+              ...product?.customFields?.map((item: {
+                name: string; value: string
+
+              }) => [item.name, item.value])
+            ].map(([key, value], index) => (
+              <div
+                key={key}
+                className={`!grid  !grid-cols-[180px_1fr] lg:!grid-cols-[350px_1fr] !items-center !p-2 ${index % 2 === 1 ? "" : "bg-[#F2F2F2]"
+                  }`}
+              >
+                <dt className="text-[16px] text-[#333333]">{key}</dt>
+                <dd className="text-[16px] text-[#333333]">
+                  {key === "Brand" && product?.brand?.name ? (
+                    <Link
+                      href={`/brand/${product.brand.slug}`}
+                    >
+                      {value}
+                    </Link>
+                  ) : (
+                    value
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
         </section>
       </div>

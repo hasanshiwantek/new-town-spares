@@ -65,11 +65,11 @@ const CartList = () => {
       const inputValue = quantities[id];
       const parsed = Number(inputValue);
 
-         const newQty = maxPurchaseQuantity
-      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-      : parsed > 0
-      ? parsed
-      : 1;
+      const newQty = maxPurchaseQuantity
+        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+        : parsed > 0
+          ? parsed
+          : 1;
 
       dispatch(updateQty({ id, quantity: newQty }));
 
@@ -86,9 +86,8 @@ const CartList = () => {
 
   return (
     <div
-      className={`w-full border border-[#D6D6D6] rounded-lg 2xl:w-full p-7 ${
-        isEmpty ? "min-h-[259px]" : ""
-      }`}
+      className={`w-full border border-[#D6D6D6] rounded-lg 2xl:w-full p-7 ${isEmpty ? "min-h-[259px]" : ""
+        }`}
     >
       {!isEmpty && (
         <div className="hidden md:grid md:grid-cols-[1fr_100px_90px_90px_120px] md:gap-2 lg:gap-4 font-semibold pb-6 text-[14px] text-[#333333] border-b border-gray-300">
@@ -110,7 +109,7 @@ const CartList = () => {
                     <Image
                       width={98}
                       height={105}
-                      src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
+                      src={item.image?.[0]?.path || ""}
                       alt={item.name}
                       className="w-[88px] h-[9.2rem] shrink-0 object-contain border"
                     />
@@ -118,9 +117,11 @@ const CartList = () => {
 
                   <div className="text-center mt-3">
                     <p className="text-[14px] text-[#777777]">{item.brand?.name || "—"}</p>
-                    <p className="text-[15px] text-[#333333] line-clamp-3 mt-1">
-                      {item.name}
-                    </p>
+                    <Link href={`${item?.productUrl || "#"}`}>
+                      <p className="text-[15px] text-[#333333] line-clamp-3 mt-1">
+                        {item.name}
+                      </p>
+                    </Link>
                   </div>
 
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4">
@@ -184,7 +185,7 @@ const CartList = () => {
                     <Image
                       width={98}
                       height={105}
-                      src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
+                      src={item.image?.[0]?.path || ""}
                       alt={item.name}
                       className="w-[73.50px] h-[8.4rem] shrink-0 object-contain border"
                     />
@@ -277,7 +278,7 @@ const CartList = () => {
             <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="!p-4 !text-lg">
               Cancel
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}  className="!p-4 !text-[#fd5430] !text-lg">
+            <Button variant="destructive" onClick={confirmDelete} className="!p-4 !text-[#fd5430] !text-lg">
               Confirm
             </Button>
           </DialogFooter>

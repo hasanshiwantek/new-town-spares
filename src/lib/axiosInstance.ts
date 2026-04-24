@@ -2,16 +2,18 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
+export const baseURL = "https://backend.sparemicro.com/api/"
+export const storeId = "4";
+
 const axiosInstance = axios.create({
-  baseURL: "https://backend.sparemicro.com/api/",
+  baseURL: baseURL,
 });
 
 axiosInstance.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-      const data = localStorage.getItem("persist:auth"); 
-      const user  = data ? JSON.parse(data) : null
-      const token = user?.token ? JSON.parse(user.token) : null;
-      const storeId = 10;
+    const data = localStorage.getItem("persist:auth");
+    const user = data ? JSON.parse(data) : null
+    const token = user?.token ? JSON.parse(user.token) : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

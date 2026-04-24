@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { storeId } from "@/lib/axiosInstance";
 // Base URL
 const BASE_URL = "https://newtownspares.advertsedge.com";
 
@@ -7,7 +8,7 @@ const BASE_URL = "https://newtownspares.advertsedge.com";
 async function fetchCategories() {
   const res = await fetch(
     "https://ecom.brokercell.com/api/web/categories/get-categories",
-    { headers: { storeId: "4" }, cache: "no-store" }
+    { headers: { storeId: storeId }, cache: "no-store" }
   );
   const data = await res.json();
   return data.data || [];
@@ -16,7 +17,7 @@ async function fetchCategories() {
 // Fetch brands
 async function fetchBrands() {
   const res = await fetch("https://ecom.brokercell.com/api/web/brands/brands", {
-    headers: { storeId: "4" },
+    headers: { storeId: storeId },
     cache: "no-store",
   });
   const data = await res.json();

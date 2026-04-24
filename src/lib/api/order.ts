@@ -1,4 +1,4 @@
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+import { baseURL, storeId } from "../axiosInstance";
 
 export const fetchOrderDetails = async (orderId: string) => {
   try {
@@ -6,7 +6,7 @@ export const fetchOrderDetails = async (orderId: string) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        storeId: "4",
+        storeId: storeId,
       },
       body: JSON.stringify({
         orderId: orderId,

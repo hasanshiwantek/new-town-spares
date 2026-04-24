@@ -27,6 +27,7 @@ const GlobalSearchBar: React.FC = () => {
 
   // Cache state object for storing search results
   const [searchCache, setSearchCache] = useState<{ [key: string]: any[] }>({});
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +68,7 @@ const GlobalSearchBar: React.FC = () => {
         sku: item.sku || "N/A",
         price: item.price || item.costPrice || "0.00",
         url: `/category/${item.categories?.[0]?.slug || item.slug}`,
+        productUrl: `${item?.productUrl}`,
       }));
 
       setResults(mapped);
@@ -90,7 +92,26 @@ const GlobalSearchBar: React.FC = () => {
       setShowDropdown(true);
     }
   }, [searchData, results]);
+  const handleOnChange = (value?: string) => {
+    const trimmed = (value ?? query).trim();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (trimmed.length > 1) {
+      debounceRef.current = setTimeout(() => {
+        const cacheKey = trimmed.toLowerCase();
+        dispatch(globalSearch({ query: trimmed }));
+        setShowDropdown(true);
+      }, 500);
+    }
+  };
 
+  const handleSearch = () => {
+    const trimmed = query.trim();
+    if (trimmed.length > 1) {
+      const cacheKey = trimmed.toLowerCase();
+      dispatch(globalSearch({ query: trimmed }));
+      setShowDropdown(true);
+    }
+  };
   // Navigate to selected category
   const handleSelect = (url: string) => {
     setQuery("");
@@ -121,7 +142,14 @@ const GlobalSearchBar: React.FC = () => {
             type="search"
             placeholder="Search by keyword, brand or SKU"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            // onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              handleOnChange(e.target.value)
+              setQuery(e.target.value)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
             className="
       w-full px-4 md:px-4 xl:px-6 border-gray-300 border
       py-2 md:py-2.5 lg:py-3 
@@ -134,12 +162,13 @@ const GlobalSearchBar: React.FC = () => {
             <button
               aria-label="search"
               name="search"
-              onClick={() => {
-                if (query.trim()) {
-                  dispatch(globalSearch({ query }));
-                  setShowDropdown(true); // ensure it opens immediately
-                }
-              }}
+              // onClick={() => {
+              //   if (query.trim()) {
+              //     dispatch(globalSearch({ query }));
+              //     setShowDropdown(true); // ensure it opens immediately
+              //   }
+              // }}
+              onClick={handleSearch}
               className="
         bg-[#FD5430]
         w-16 
@@ -177,7 +206,7 @@ const GlobalSearchBar: React.FC = () => {
             results.map((item: any) => (
               <div
                 key={item.id}
-                onClick={() => handleSelect(item.url)}
+                onClick={() => handleSelect(item.productUrl)}
                 className="
             flex items-start gap-3 p-3 border-b border-gray/50
             hover:bg-[var(--primary-color)] hover:text-white

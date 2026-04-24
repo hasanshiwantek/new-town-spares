@@ -140,7 +140,6 @@ export const fetchProductsData = createAsyncThunk(
   async (endpoint: string, thunkAPI) => {
     try {
       const res = await axiosInstance.get(endpoint);
-      console.log(`Products from ${endpoint}:`, res.data);
       return res.data;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(
