@@ -24,6 +24,8 @@ interface Product {
   msrp?: number;
   image?: { path?: string }[];
   slug: string;
+  productUrl?: string;
+  availabilityText?: string;
 }
 
 interface ProductCardProps {
@@ -107,7 +109,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </p>
         </Link>
 
-        <Link href={`/${product?.sku}`}>
+        <Link href={`${product?.productUrl}`}>
           <p className="text-xl font-medium mb-1 line-clamp-4 hover:text-[#D42020]">
             {productName}
           </p>
@@ -138,7 +140,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <hr className="border-t border-[#E0E0E0] mb-3" />
 
         {/* In Stock */}
-        <p className="text-[14px] text-[#333333] mb-3">In Stock</p>
+        <p className="text-[14px] text-[#333333] mb-3">{product?.availabilityText ? product?.availabilityText : "In Stock"}</p>
 
         {/* Quantity + Add to Cart Row */}
         <div className="flex items-center gap-2 mt-auto">

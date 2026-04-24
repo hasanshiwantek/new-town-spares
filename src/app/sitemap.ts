@@ -1,4 +1,5 @@
 // app/sitemap.ts
+import { storeId } from "@/lib/axiosInstance";
 import type { MetadataRoute } from "next";
 
 // Base URL of your website
@@ -10,7 +11,7 @@ async function fetchProducts() {
       "https://ecom.brokercell.com/api/web/products/products",
       {
         headers: {
-          storeId: "4",
+          storeId: storeId,
         },
       }
     );
@@ -29,7 +30,7 @@ async function fetchCategories() {
       "https://ecom.brokercell.com/api/web/categories/get-categories",
       {
         headers: {
-          storeId: "4",
+          storeId: storeId,
         },
       }
     );

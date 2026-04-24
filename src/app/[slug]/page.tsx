@@ -1,11 +1,14 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import Script from "next/script";
 import dynamic from "next/dynamic";
-import { fetchProductBySlug, fetchProducts } from "@/lib/api/products";
+import { fetchProductBySlug, fetchProductBySlugAndUrl, fetchProducts } from "@/lib/api/products";
 import ProductCard from "@/app/components/Product/ProductCard";
 import ProductOverview from "@/app/components/Product/ProductOverview";
 import ProductExtras from "@/app/components/Product/ProductExtras";
 import { Suspense } from "react";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+
 // ✅ Dynamic metadata for SEO
 export async function generateMetadata({
   params,
@@ -13,7 +16,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params; // <-- await here
-  const product = await fetchProductBySlug(slug);
+  const headersList = await headers();
+
+  // ✅ Most reliable - Next.js sets this automatically
+  const fullUrl = headersList.get("x-full-url");
+  const pathname: any = headersList.get("x-pathname");
+
+
+  const product = await fetchProductBySlugAndUrl(pathname);
 
   if (!product) {
     return {
@@ -79,13 +89,23 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params; // <-- await here
-  console.log("Slug: ", slug);
+  const headersList = await headers();
+
+  // ✅ Most reliable - Next.js sets this automatically
+  const fullUrl = headersList.get("x-full-url");
+  const pathname: any = headersList.get("x-pathname");
+
+  // const product = await fetchProductBySlugAndUrl(pathname);
+
   // 🔥 Parallel data fetching
   const [product, products] = await Promise.all([
-    fetchProductBySlug(slug),
+    // fetchProductBySlug(slug),
+    fetchProductBySlugAndUrl(pathname),
     fetchProducts(),
   ]);
-
+  if (!product) {
+    notFound();
+  }
   const backendSchema = product?.schema;
 
   return (
@@ -108,11 +128,12 @@ export default async function ProductPage({
           <ProductOverview product={product} />
 
           {/* Client-side component */}
-        <Suspense fallback={<div className="py-10 text-center text-sm text-gray-500">
-      Loading...
-    </div>}>
-  <ProductExtras products={products} />
-       </Suspense>
+          <Suspense fallback={<div className="py-10 text-center text-sm text-gray-500">
+            Loading...
+          </div>}>
+            {/* <ProductExtras products={product} /> */}
+            <ProductExtras products={products} />
+          </Suspense>
 
         </article>
       </main>

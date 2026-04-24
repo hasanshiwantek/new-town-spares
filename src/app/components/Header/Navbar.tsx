@@ -71,13 +71,28 @@ const Navbar: React.FC = () => {
     setQuantities(updated);
   }, [cart]);
 
-  const handleQtyChange = (id: string, value: string) => {
-    if (value === "" || /^\d*$/.test(value)) {
-      setQuantities((prev) => ({
-        ...prev,
-        [id]: value,
-      }));
-    }
+  // const handleQtyChange = (id: string, value: string) => {
+  //   if (value === "" || /^\d*$/.test(value)) {
+  //     setQuantities((prev) => ({
+  //       ...prev,
+  //       [id]: value,
+  //     }));
+  //   }
+  // };
+  const handleQtyChange = (id: number, value: string, max?: number) => {
+    if (!/^\d*$/.test(value)) return; // allow only digits or empty
+
+    let num = parseInt(value || "1", 10);
+
+    const maxQty = max || 2;
+
+    // clamp between 1 and max
+    num = Math.max(1, Math.min(maxQty, num));
+
+    setQuantities((prev) => ({
+      ...prev,
+      [id]: num,
+    }));
   };
 
   const handleManualQtyUpdate = (
@@ -93,8 +108,8 @@ const Navbar: React.FC = () => {
       const newQty = maxPurchaseQuantity
         ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
         : parsed > 0
-        ? parsed
-        : 1;
+          ? parsed
+          : 1;
 
       dispatch(updateQty({ id, quantity: newQty }));
 
@@ -265,9 +280,8 @@ const Navbar: React.FC = () => {
                 <div className="hidden 2xl:flex items-center gap-1">
                   <span className="text-black text-xl">Account</span>
                   <svg
-                    className={`w-5 h-5 text-black transition-transform duration-200 ${
-                      isAccountOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-5 h-5 text-black transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -283,29 +297,36 @@ const Navbar: React.FC = () => {
               </div>
 
               {auth?.isAuthenticated && (
-              <div
-                className={`absolute left-0 mt-3 w-44 bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
-                  isAccountOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                }`}
-              >
-                <ul className="py-2 text-sm text-gray-700">
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                    Orders
-                  </li>
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                    Addresses
-                  </li>
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                    Recently Viewed
-                  </li>
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                    Account Settings
-                  </li>
-                  <li onClick={handleLogout} className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                    Sign out
-                  </li>
-                </ul>
-              </div>
+                <div
+                  className={`absolute left-0 mt-3 w-44 bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${isAccountOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                    }`}
+                >
+                  <ul className="py-2 text-sm text-gray-700">
+                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
+                      <Link href={"/my-account/orders"}>
+                        Orders
+                      </Link>
+                    </li>
+                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
+                      <Link href={"/my-account/addresses"}>
+                        Addresses
+                      </Link>
+                    </li>
+                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
+                      <Link href={"/my-account/recently-viewed"}>
+                        Recently Viewed
+                      </Link>
+                    </li>
+                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
+                      <Link href={"/my-account/account-settings"}>
+                        Account Settings
+                      </Link>
+                    </li>
+                    <li onClick={handleLogout} className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
+                      Sign out
+                    </li>
+                  </ul>
+                </div>
               )}
             </div>
 
@@ -381,8 +402,11 @@ const Navbar: React.FC = () => {
                                         ? item.quantity
                                         : quantities[item.id]
                                     }
+                                    // onChange={(e) =>
+                                    //   handleQtyChange(item.id, e.target.value)
+                                    // }
                                     onChange={(e) =>
-                                      handleQtyChange(item.id, e.target.value)
+                                      handleQtyChange(item.id, e.target.value, item.maxPurchaseQuantity)
                                     }
                                     onKeyDown={(e) =>
                                       handleManualQtyUpdate(
@@ -485,7 +509,7 @@ const Navbar: React.FC = () => {
                 <h3 className="text-black font-semibold text-lg mb-3">
                   Search Products
                 </h3>
-                  <GlobalSearchBar />
+                <GlobalSearchBar />
               </div>
 
               {/* Add SKU Section */}
@@ -532,7 +556,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {/* account */}
-         
+
               <div className="hidden md:flex items-center gap-3">
                 <Link
                   href="/cart"
@@ -554,16 +578,24 @@ const Navbar: React.FC = () => {
                   </h3>
                   <ul className="space-y-2 text-black">
                     <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                      Orders
+                      <Link href={"/my-account/orders"}>
+                        Orders
+                      </Link>
                     </li>
                     <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                      Addresses
+                      <Link href={"/my-account/addresses"}>
+                        Addresses
+                      </Link>
                     </li>
                     <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                      Recently Viewed
+                      <Link href={"/my-account/recently-viewed"}>
+                        Recently Viewed
+                      </Link>
                     </li>
                     <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
-                      Account Settings
+                      <Link href={"/my-account/account-settings"}>
+                        Account Settings
+                      </Link>
                     </li>
                     <li onClick={handleLogout} className="hover:text-[#FD5430] cursor-pointer py-2">
                       Sign out

@@ -43,6 +43,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
     dispatch(fetchReviews());
     dispatch(fetchStats());
   }, [dispatch]);
+
   return (
     <section className=" product-middle  flex flex-col h-full w-full lg:w-[38%] xl:w-[37.6%] 2xl:w-[37.6%]">
       <div>
@@ -67,7 +68,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           </p>
           <p className="text-[14px] text-[#333333]">
             SKU:{" "}
-                <span className="font-medium">{product?.sku || "N/A"}</span>
+            <span className="font-medium">{product?.sku || "N/A"}</span>
           </p>
 
           {/* Rating & Reviews */}
@@ -101,7 +102,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             )}
           </div>
         </div>
-<hr className="mt-6" />
+        <hr className="mt-6" />
         {/* Price */}
         <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
           <div className="flex flex-col items-start">
@@ -148,16 +149,16 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             )}
           </div>
           <div className="mt-2 xl:mt-3 2xl:mt-4 flex items-center gap-2 text-xs xl:text-[11.2px] 2xl:text-[14px] text-[#121e4d] flex-wrap md:flex-nowrap whitespace-nowrap">
-  <span className="inline-flex items-center justify-center rounded-full bg-[#E2E2FF] text-[#6656D5] text-[14px] font-semibold px-2 py-1 mr-1">
-    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#6656D5"/><path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>Zero interest
-  </span>
-  <span className="whitespace-nowrap">
-    or as low as $19/mo.&nbsp;
-    <button type="button" className="underline font-semibold">
-      See what you can spend with Affirm.
-    </button>
-  </span>
-</div>
+            <span className="inline-flex items-center justify-center rounded-full bg-[#E2E2FF] text-[#6656D5] text-[14px] font-semibold px-2 py-1 mr-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#6656D5" /><path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>Zero interest
+            </span>
+            <span className="whitespace-nowrap">
+              or as low as $19/mo.&nbsp;
+              <button type="button" className="underline font-semibold">
+                See what you can spend with Affirm.
+              </button>
+            </span>
+          </div>
         </div>
 
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 border border-gray-200 rounded-md overflow-hidden bg-white">
@@ -166,7 +167,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
               {/* Tick Icon, tick is #333333, bg none, size bardha di but text align with tick */}
               <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span className="leading-none">Free Shipping</span>
             </span>
@@ -179,7 +180,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span className="leading-none">Best Price</span>
             </span>
@@ -191,7 +192,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           <div className="px-10 py-3.5 flex flex-col justify-center border-t  border-r border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span className="leading-none">Customer Help</span>
             </span>
@@ -203,7 +204,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           <div className="px-10 py-3.5 flex flex-col justify-center border-t border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               <span className="leading-none">Secure Payment</span>
             </span>
@@ -242,35 +243,35 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
         </p>
       </div>
 
-    {/* TrustPilot / SAM.GOV / D&B logos */}
-    <div className="flex flex-row flex-wrap gap-6 items-center mt-6">
-      <Image
-        src="/productslug/trustpilot.PNG"
-        alt="Trustpilot"
-        width={114}
-        height={40}
-        className="w-[114px] h-[40px] object-contain"
-      />
-
-      <div className="flex flex-col items-center">
+      {/* TrustPilot / SAM.GOV / D&B logos */}
+      <div className="flex flex-row flex-wrap gap-6 items-center mt-6">
         <Image
-          src="/productslug/samgov.PNG"
-          alt="SAM.GOV"
+          src="/productslug/trustpilot.PNG"
+          alt="Trustpilot"
+          width={114}
+          height={40}
+          className="w-[114px] h-[40px] object-contain"
+        />
+
+        <div className="flex flex-col items-center">
+          <Image
+            src="/productslug/samgov.PNG"
+            alt="SAM.GOV"
+            width={114}
+            height={40}
+            className="w-[114px] h-[40px] object-contain"
+          />
+        </div>
+
+        <Image
+          src="/productslug/dnb.PNG"
+          alt="D&B"
           width={114}
           height={40}
           className="w-[114px] h-[40px] object-contain"
         />
       </div>
-
-      <Image
-        src="/productslug/dnb.PNG"
-        alt="D&B"
-        width={114}
-        height={40}
-        className="w-[114px] h-[40px] object-contain"
-      />
-    </div>
-  </section>
+    </section>
   );
 };
 

@@ -1,10 +1,11 @@
 // lib/serverAxios.ts
 import axios from "axios";
+import { baseURL, storeId } from "./axiosInstance";
 
 const serverAxios = axios.create({
-  baseURL: "https://backend.sparemicro.com/api/",
+  baseURL: baseURL,
   headers: {
-    storeId: 4, // Replace with dynamic storeId if needed
+    storeId: storeId, // Replace with dynamic storeId if needed
   },
 });
 

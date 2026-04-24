@@ -1,33 +1,30 @@
 // // lib/api/categories.ts
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+import { baseURL, storeId } from "../axiosInstance";
 
 export const fetchCategories = async () => {
   const res = await fetch(`${baseURL}web/categories/get-categories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: "4",
+      storeId: storeId,
     },
     // ✅ ISR: cache once, refresh every 5 min
-    next: { revalidate: 300},
+    next: { revalidate: 60},
   });
 
   if (!res.ok) throw new Error("Failed to fetch categories");
 
   const data = await res.json();
-  console.log("Categories data: ",data.data);
   
   return data?.data || [];
 };
-
-
 
 export const fetchCategoryById = async (id: number | string ) => {
   const res = await fetch(`${baseURL}web/categories/categories/${id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: "4",
+      storeId: storeId,
     },
     // ✅ ISR: cache once, refresh every 5 min
     next: { revalidate: 300 },

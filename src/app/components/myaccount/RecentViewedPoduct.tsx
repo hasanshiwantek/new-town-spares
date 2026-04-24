@@ -40,7 +40,7 @@ const RecentViewedProduct = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
         {recentProducts.map((product: any, index: number) => (
           <Link
-            href={`/${product.sku}`}
+            href={`${product?.productUrl}`}
             key={product.sku || index}
             className="border rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300"
           >

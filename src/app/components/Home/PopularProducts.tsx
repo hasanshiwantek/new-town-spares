@@ -117,7 +117,7 @@ const PopularProducts = () => {
                                 xl:h-[225px] 2xl:h-[240px] mb-4"
                   >
                     <Link
-                      href={`/${product?.sku}`}
+                      href={`${product?.productUrl}`}
                       className="relative inline-block cursor-pointer group"
                     >
                       <Image
@@ -139,7 +139,7 @@ const PopularProducts = () => {
 
                   {/* Product Name */}
                   <Link
-                    href={`/${product?.sku}`}
+                    href={`${product?.productUrl}`}
                     className="relative inline-block cursor-pointer group"
                   >
                     <p className="h6-18-px-medium line-clamp-2 min-h-[3rem]">
