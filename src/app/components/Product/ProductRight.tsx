@@ -146,13 +146,14 @@ const ProductRight: React.FC<ProductRightProps> = ({
         product={
           product
             ? {
-                name: product.name ?? "",
-                image: product.image,
-                sku: product.sku ?? "",
-              }
+              name: product.name ?? "",
+              image: product.image,
+              sku: product.sku ?? "",
+            }
             : undefined
         }
       />
+    
     </>
   );
 };

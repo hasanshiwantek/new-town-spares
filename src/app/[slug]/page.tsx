@@ -8,6 +8,8 @@ import ProductExtras from "@/app/components/Product/ProductExtras";
 import { Suspense } from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import ProductRecent from "../components/Product/ProductRecent";
+// import { useAppSelector } from "@/hooks/useReduxHooks";
 
 // ✅ Dynamic metadata for SEO
 export async function generateMetadata({
@@ -90,7 +92,7 @@ export default async function ProductPage({
 }) {
   const { slug } = await params; // <-- await here
   const headersList = await headers();
-
+  // const recentProducts = useAppSelector((state: any) => state.recent.items);
   // ✅ Most reliable - Next.js sets this automatically
   const fullUrl = headersList.get("x-full-url");
   const pathname: any = headersList.get("x-pathname");
@@ -107,7 +109,6 @@ export default async function ProductPage({
     notFound();
   }
   const backendSchema = product?.schema;
-
   return (
     <>
       {/* ✅ Structured Data (SEO safe) */}
@@ -132,7 +133,8 @@ export default async function ProductPage({
             Loading...
           </div>}>
             {/* <ProductExtras products={product} /> */}
-            <ProductExtras products={products} />
+            <ProductExtras products={products?.filter((p: any) => p.id !== product.id)} />
+            <ProductRecent productId={product?.id} />
           </Suspense>
 
         </article>

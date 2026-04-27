@@ -9,13 +9,12 @@ import { getBlogs } from "@/redux/slices/storeFrontSlice";
 
 const BlogContainer = () => {
   const [filters, setFilters] = useState({ page: 1, perPage: 20 });
-const dispatch = useAppDispatch();
-const { blogs, error,loading } = useAppSelector(
-  (state: any) => state.storeFront
-);
-const blogPosts = blogs?.data;
-const pagination = blogs?.pagination || null;
-console.log("Blogs data from frontend: ", blogPosts);
+  const dispatch = useAppDispatch();
+  const { blogs, error, loading } = useAppSelector(
+    (state: any) => state.storeFront
+  );
+  const blogPosts = blogs?.data;
+  const pagination = blogs?.pagination || null;
   useEffect(() => {
     dispatch(getBlogs(filters));
   }, [dispatch]);
@@ -24,9 +23,9 @@ console.log("Blogs data from frontend: ", blogPosts);
     <div>
       <OurLatestBlogs />
       {/* <GridCard /> */}
-      <BlogCategories blogPosts={blogPosts} error={error} loading={loading} pagination={pagination} 
-  filters={filters}
-  setFilters={setFilters} />
+      <BlogCategories blogPosts={blogPosts} error={error} loading={loading} pagination={pagination}
+        filters={filters}
+        setFilters={setFilters} />
       {/* <BlogTrending /> */}
     </div>
   );

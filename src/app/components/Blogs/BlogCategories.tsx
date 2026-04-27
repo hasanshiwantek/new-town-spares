@@ -19,15 +19,20 @@ const BlogCategories = ({
   setFilters: any;
   loading: boolean;
 }) => {
-  const getExcerpt = (html: string, maxLength = 200) => {
+  // const getExcerpt = (html: string, maxLength = 200) => {
+  //   if (!html) return "";
+  //   const div = document.createElement("div");
+  //   div.innerHTML = html;
+  //   const text = div.textContent || div.innerText || "";
+  //   if (text.length > maxLength) {
+  //     return text.slice(0, maxLength) + "...";
+  //   }
+  //   return text;
+  // };
+  const getExcerpt = (html: string, maxLength = 100) => {
     if (!html) return "";
-    const div = document.createElement("div");
-    div.innerHTML = html;
-    const text = div.textContent || div.innerText || "";
-    if (text.length > maxLength) {
-      return text.slice(0, maxLength) + "...";
-    }
-    return text;
+    const text = html.replace(/<[^>]*>/g, "").trim();
+    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
   };
 
   const totalPages = pagination?.totalPages || 1;
@@ -51,7 +56,7 @@ const BlogCategories = ({
                 className="bg-white transition duration-300 overflow-hidden border border-gray-100 group"
               >
                 {/* Image */}
-                <div className="relative h-72 w-full overflow-hidden">
+                {/* <div className="relative h-72 w-full overflow-hidden">
                   <Image
                     src={blog.thumbnail}   // ✅ API field
                     alt={blog.title}
@@ -62,7 +67,19 @@ const BlogCategories = ({
                            384px"
                     priority={blog.id === blogPosts[0]?.id}  // ✅ First blog priority
                   />
-                </div>
+                </div> */}
+                {blog.thumbnail && (
+                  <div className="relative h-72 w-full overflow-hidden">
+                    <Image
+                      src={blog.thumbnail}
+                      alt={blog.title}
+                      fill
+                      className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 384px"
+                      priority={blog.id === blogPosts[0]?.id}
+                    />
+                  </div>
+                )}
 
                 {/* Content */}
                 <div className="p-3">

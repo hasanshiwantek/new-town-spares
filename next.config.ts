@@ -58,6 +58,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'backend.sparemicro.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'dummyimage.com',
       },
     ],

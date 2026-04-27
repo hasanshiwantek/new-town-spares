@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Star, Plus, Minus } from "lucide-react";
 import Image from "next/image";
 import freelogo from "@/assets/card-icon/freelogo.png";
@@ -14,6 +14,7 @@ import ProductPrice from "../productprice/ProductPrice";
 import { fetchReviews, fetchStats } from "@/redux/slices/homeSlice";
 import Link from "next/link";
 import { RootState } from "@/redux/store";
+import AddReviewModal from "../modal/AddReviewModal";
 
 const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   const dispatch = useAppDispatch();
@@ -22,7 +23,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   const { reviews, reviewsLoading, reviewsError, stats } = useAppSelector(
     (state) => state.home,
   );
-
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const originalPrice = Number(product?.retailPrice) || 0;
   const currentPrice = Number(product?.price) || 0;
   const hasBothPrices = originalPrice > 0 && currentPrice > 0;
@@ -43,6 +44,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
     dispatch(fetchReviews());
     dispatch(fetchStats());
   }, [dispatch]);
+  console.log("product", product);
 
   return (
     <section className=" product-middle  flex flex-col h-full w-full lg:w-[38%] xl:w-[37.6%] 2xl:w-[37.6%]">
@@ -93,7 +95,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 <span>No reviews yet</span>
                 <button
                   type="button"
-                  onClick={handleSeeMore}
+                  onClick={() => setIsReviewModalOpen(true)}
                   className="underline font-semibold"
                 >
                   Write a Review
@@ -271,6 +273,19 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           className="w-[114px] h-[40px] object-contain"
         />
       </div>
+      {isReviewModalOpen && <AddReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        product={
+          product
+            ? {
+              name: product.name ?? "",
+              image: product.image[0].path,
+              sku: product.sku ?? "",
+            }
+            : undefined
+        }
+      />}
     </section>
   );
 };
