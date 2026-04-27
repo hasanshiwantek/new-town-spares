@@ -52,7 +52,7 @@ const BlogHome = () => {
               return (
                 <Link
                   key={blog.id ?? idx}
-                  href={`/blogs/${blog.id}`}
+                  href={`/blogs/${blog.slug}`}
                   className="bg-white transition duration-300 overflow-hidden border border-gray-200 block"
                 >
                   {/* Image */}

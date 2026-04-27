@@ -6,6 +6,8 @@ interface RecentProduct {
   name: string;
   image: string;
   price: number;
+  id?: number;
+  brand?: string;
 }
 
 interface RecentState {

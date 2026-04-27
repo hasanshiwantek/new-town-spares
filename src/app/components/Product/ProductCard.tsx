@@ -29,14 +29,15 @@ const ProductCard = ({ product }: { product: any }) => {
 
     dispatch(
       addRecentView({
+        ...product,
         sku: product?.sku,
         productUrl: product?.productUrl,
         name: product?.name,
         image:
-          product?.image?.[0]?.path ||
-          product?.image?.[1]?.path ||
-          "/default-product-image.svg",
+          product?.image,
         price: Number(product?.price) || 0,
+        id: product?.id,
+        brand: product?.brand,
       })
     );
   }, [product]);

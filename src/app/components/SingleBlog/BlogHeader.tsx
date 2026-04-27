@@ -3,6 +3,8 @@ import Image from "next/image";
 import Blogimg1 from "@/assets/blog/blogImage1.jpg";
 import dayjs from "dayjs";
 const BlogHeader = ({ blogPost }: { blogPost: any }) => {
+  console.log("blogPost", blogPost);
+
   return (
     <section className="w-full bg-white">
       {/* Blog Title + Meta */}
