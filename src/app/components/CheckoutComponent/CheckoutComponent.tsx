@@ -94,7 +94,7 @@ const CheckoutForm = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.cart.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
-  
+
   // ADD COUPON STATE FROM REDUX
   const { appliedCoupon, discountAmount } = useAppSelector(
     (state: RootState) => state.coupon
@@ -170,7 +170,9 @@ const CheckoutForm = () => {
   const watchedBillingSame = watch("billingSame");
   const stripeCardMethods = ["credit_card"];
   const walletMethods = ["google_pay", "apple_pay"];
-
+  const { shippingRates } = useAppSelector((state) => state.shippingZone);
+  // 2. watchedShippingMethod add 
+  const watchedShippingMethod = watch("shippingMethod");
   // Memoized calculations
   const subtotal = useMemo(() => {
     return cart.reduce(
@@ -179,7 +181,13 @@ const CheckoutForm = () => {
     );
   }, [cart]);
 
-  const shipping = useMemo(() => {
+  const shipping = watchedShippingMethod ? useMemo(() => {
+    if (!watchedShippingMethod || !shippingRates?.length) return 0;
+    const selected = shippingRates.find((rate) =>
+      rate.service_type === watchedShippingMethod
+    );
+    return selected ? Number(selected?.total_charge) : 0;
+  }, [watchedShippingMethod, shippingRates]) : useMemo(() => {
     if (cart.length === 0) return 0;
 
     return cart.reduce((sum, item) => {
@@ -189,12 +197,12 @@ const CheckoutForm = () => {
   }, [cart]);
 
   const tax = 0;
-  
+
   // Total before discount
   const totalBeforeDiscount = useMemo(() => subtotal + shipping + tax, [subtotal, shipping]);
-  
+
   // Final total after discount
-  const finalTotal = useMemo(() => 
+  const finalTotal = useMemo(() =>
     Math.max(totalBeforeDiscount - discountAmount, 0),
     [totalBeforeDiscount, discountAmount]
   );
@@ -401,7 +409,7 @@ const CheckoutForm = () => {
         skipEmptyCartCheckRef.current = true;
         dispatch(setLastOrder(orderData));
         dispatch(clearCart());
-       dispatch(removeCoupon());
+        dispatch(removeCoupon());
         router.push("/order-success");
       } catch (err: any) {
         console.error("❌ Wallet payment failed:", err);
@@ -646,9 +654,9 @@ const CheckoutForm = () => {
       const orderData = await placeOrder({ ...data, paymentIntentId });
       skipEmptyCartCheckRef.current = true;
       dispatch(setLastOrder(orderData));
-dispatch(clearCart());
-dispatch(removeCoupon());
-router.push("/order-success");
+      dispatch(clearCart());
+      dispatch(removeCoupon());
+      router.push("/order-success");
     } catch (err: any) {
       console.error("❌ Error processing order:", err);
       const errorMessage =
@@ -714,6 +722,7 @@ router.push("/order-success");
                   country: watch("country"),
                   zip: watch("zip"),
                 }}
+                watchedShippingMethod={watchedShippingMethod}
               />
             </div>
 
@@ -769,10 +778,10 @@ router.push("/order-success");
                   watchedPaymentMethod === "credit_card"
                     ? "Credit Card"
                     : watchedPaymentMethod === "apple_pay"
-                    ? "Apple Pay"
-                    : watchedPaymentMethod === "google_pay"
-                    ? "Google Pay"
-                    : "Credit Card"
+                      ? "Apple Pay"
+                      : watchedPaymentMethod === "google_pay"
+                        ? "Google Pay"
+                        : "Credit Card"
                 }
               />
             </div>

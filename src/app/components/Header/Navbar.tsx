@@ -237,7 +237,7 @@ const Navbar: React.FC = () => {
           {/* Right Section (Desktop only) */}
           <section className="hidden md:flex items-center gap-4">
             {/* Currency */}
-            <div className="relative" ref={currencyRef}>
+            {/* <div className="relative" ref={currencyRef}>
               <button
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-1 text-xs sm:text-sm md:text-base lg:text-lg font-semibold hover:text-blue-300"
@@ -261,7 +261,7 @@ const Navbar: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Account */}
             <div className="relative">
