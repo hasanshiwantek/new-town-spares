@@ -178,9 +178,7 @@ const Navbar: React.FC = () => {
       "
         >
           {/* Left: Hamburger + Logo */}
-          {/* Left: Hamburger + Logo */}
-          <div className="flex items-center gap-3 flex-shrink-0 lg:flex-none w-full lg:w-auto justify-between lg:justify-start">
-
+          <div className="flex items-center gap-3 flex-shrink-0">
             {/* Hamburger Button (Only below lg) */}
             <button
               aria-label="burger-menu"
@@ -194,9 +192,9 @@ const Navbar: React.FC = () => {
               )}
             </button>
 
-            {/* Logo — centered on mobile */}
-            <Link href={"/"} onClick={() => setBurgerMenuOpen(false)} className="absolute left-1/2 -translate-x-1/2 lg:static lg:left-auto lg:translate-x-0">
-              <div className="relative w-40 sm:w-52 lg:w-64 xl:w-72 2xl:w-[250px] h-[55px] lg:h-[70px]">
+            {/* Logo */}
+            <Link href={"/"} className="" onClick={() => setBurgerMenuOpen(false)}>
+              <div className="relative border w-64 xl:w-72 2xl:w-[250px] h-[70px]">
                 <Image
                   src={navlogo}
                   alt="Logo"
@@ -208,9 +206,6 @@ const Navbar: React.FC = () => {
                 />
               </div>
             </Link>
-
-            {/* Spacer — mobile pe right side balance ke liye */}
-            <div className="w-10 h-10 lg:hidden" />
           </div>
 
           {/* Center: Search (Desktop only) */}
@@ -523,7 +518,7 @@ const Navbar: React.FC = () => {
         {/* Mobile Burger Dropdown Menu (Only below lg) */}
         {burgerMenuOpen && (
           // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200 overflow-visible">
-          <div className="lg:hidden fixed inset-0 top-[182.98px] left-0 right-0 bottom-0 bg-white !z-[150] p-6 overflow-y-auto overflow-x-visible">
+          <div className="lg:hidden fixed inset-0 top-[172.98px] left-0 right-0 bottom-0 bg-white !z-[150] p-6 overflow-y-auto overflow-x-visible">
 
             {/* // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200"> */}
             <div className="space-y-6">
