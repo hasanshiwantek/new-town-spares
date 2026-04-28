@@ -25,6 +25,7 @@ import { removeFromCart, updateQty } from "@/redux/slices/cartSlice";
 import usaFlag from "../../../../public/usa-logo.png";
 import userIcon from "../../../../public/human-icon.png";
 import headphoneIcon from "../../../../public/headphone-icon.png";
+import { fetchCategories } from "@/lib/api/category";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -41,6 +42,8 @@ const Navbar: React.FC = () => {
   const { currencies, status, selectedCurrency } = useAppSelector(
     (state: RootState) => state.currency
   );
+  const [categories, setCategories] = useState<any[]>([]);
+
   const [open, setOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -152,7 +155,17 @@ const Navbar: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  useEffect(() => {
+    fetchCategories().then((data) => setCategories(data));
+  }, []);
+  useEffect(() => {
+    if (burgerMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [burgerMenuOpen]);
   return (
     <header className="text-white z-50 border-b-2 border-[#FD5430]">
       <nav className="relative w-full max-w-[1684px] mx-auto">
@@ -180,7 +193,7 @@ const Navbar: React.FC = () => {
             </button>
 
             {/* Logo */}
-            <Link href={"/"}>
+            <Link href={"/"} onClick={() => setBurgerMenuOpen(false)}>
               <div className="relative w-64 xl:w-72 2xl:w-[250px] h-[70px]">
                 <Image
                   src={navlogo}
@@ -237,7 +250,7 @@ const Navbar: React.FC = () => {
           {/* Right Section (Desktop only) */}
           <section className="hidden md:flex items-center gap-4">
             {/* Currency */}
-            {/* <div className="relative" ref={currencyRef}>
+            <div className="relative" ref={currencyRef}>
               <button
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-1 text-xs sm:text-sm md:text-base lg:text-lg font-semibold hover:text-blue-300"
@@ -261,7 +274,7 @@ const Navbar: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div> */}
+            </div>
 
             {/* Account */}
             <div className="relative">
@@ -499,18 +512,37 @@ const Navbar: React.FC = () => {
             </div>
           </section>
         </div>
-
+        <div className="lg:hidden px-3 pb-3">
+          <GlobalSearchBar onHideMenu={() => setBurgerMenuOpen(false)} />
+        </div>
         {/* Mobile Burger Dropdown Menu (Only below lg) */}
         {burgerMenuOpen && (
-          <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg z-[100] p-6 border-t border-gray-200">
+          // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200 overflow-visible">
+          <div className="lg:hidden fixed inset-0 top-[182.98px] left-0 right-0 bottom-0 bg-white !z-[150] p-6 overflow-y-auto overflow-x-visible">
+
+            {/* // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200"> */}
             <div className="space-y-6">
               {/* Search Section */}
-              <div>
+              {/* <div>
                 <h3 className="text-black font-semibold text-lg mb-3">
                   Search Products
                 </h3>
                 <GlobalSearchBar />
-              </div>
+              </div> */}
+              <Link href={"/"} onClick={() => setBurgerMenuOpen(false)}>
+                <div className="flex items-end justify-between px-4 py-2 border-b border-gray-100 hover:bg-gray-50">
+                  <span className="text-gray-500 text-[15px] ">All Categories</span>
+                  <span className="text-gray-400 text-lg">›</span>
+                </div>
+              </Link>
+              {categories.map((cat) => (
+                <Link key={cat.id} href={`/category/${cat.slug}`} onClick={() => setBurgerMenuOpen(false)}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
+                    <span className="text-gray-500 text-[15px]">{cat.name}</span>
+                    <span className="text-gray-400 text-lg">›</span>
+                  </div>
+                </Link>
+              ))}
 
               {/* Add SKU Section */}
               <div className="hidden sm:block">

@@ -15,7 +15,7 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
-const GlobalSearchBar: React.FC = () => {
+const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
@@ -117,6 +117,9 @@ const GlobalSearchBar: React.FC = () => {
     setQuery("");
     setShowDropdown(false);
     router.push(url);
+    if (onHideMenu) {
+      onHideMenu();
+    }
   };
 
   // Hide dropdown on outside click
@@ -195,7 +198,9 @@ const GlobalSearchBar: React.FC = () => {
 
       {/* Dropdown Results */}
       {showDropdown && query.trim().length > 1 && (
-        <div className="absolute top-full left-0 w-full mt-2 bg-white text-[#4A4A4A] shadow-lg rounded-md overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+        // <div className="absolute top-full left-0 w-full mt-2 bg-white text-[#4A4A4A] shadow-lg rounded-md overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+        <div className="absolute top-full left-0 w-full mt-2 bg-white text-[#4A4A4A] shadow-lg rounded-md overflow-hidden max-h-[400px] overflow-y-auto" style={{ zIndex: 9999 }}>
+
           {loading && <div className="p-3 text-gray/80">Searching...</div>}
 
           {!loading && results.length === 0 && (
@@ -212,6 +217,8 @@ const GlobalSearchBar: React.FC = () => {
             hover:bg-[var(--primary-color)] hover:text-white
             transition-colors cursor-pointer
           "
+                style={{ zIndex: 300 }}
+
               >
                 {/* Product Info */}
                 <div className="flex flex-col flex-grow overflow-hidden">
