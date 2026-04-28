@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -17,6 +17,9 @@ import {
   Controller,
   useWatch,
 } from "react-hook-form";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { RootState } from "@/redux/store";
+import { fetchShippingRates } from "@/redux/slices/shippingSlice";
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
@@ -36,8 +39,40 @@ interface ShippingStepProps {
     country: string;
     zip: string;
   };
+  watchedShippingMethod?: string;
 }
+function calculatePackage(products: any[]) {
+  const totalWeight = products.reduce((sum, p) => {
+    const weight = parseFloat(p.dimensions?.weight) || 0;
+    const qty = p.quantity || 1;
+    return sum + (weight * qty);
+  }, 0);
 
+  const orderTotal = products.reduce((sum, p) => {
+    const price = parseFloat(p.price) || 0;
+    const qty = p.quantity || 1;
+    return sum + (price * qty);
+  }, 0);
+
+  const itemCount = products.reduce((sum, p) => sum + (p.quantity || 1), 0);
+
+
+  const maxLength = Math.max(...products.map(p => parseFloat(p.dimensions?.depth) || 0));
+  const maxWidth = Math.max(...products.map(p => parseFloat(p.dimensions?.width) || 0));
+  const maxHeight = Math.max(...products.map(p => parseFloat(p.dimensions?.height) || 0));
+
+  return {
+    total_weight: totalWeight,   // fallback if data missing
+    weight_unit: "LB",
+    package_length: maxLength,
+    package_width: maxWidth,
+    package_height: maxHeight,
+    dimension_unit: "IN",
+    order_total: orderTotal,
+    item_count: itemCount,
+    package_value: orderTotal,
+  };
+}
 const ShippingStep: React.FC<ShippingStepProps> = ({
   register,
   errors,
@@ -48,7 +83,12 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   isCompleted,
   onEdit,
   shippingInfo,
+  watchedShippingMethod
 }) => {
+  const { shippingRates, ratesLoader } = useAppSelector((state) => state.shippingZone);
+  const dispatch = useAppDispatch()
+  const cart = useAppSelector((state: RootState) => state?.cart?.items);
+
   // Watch form values to check if shipping address is complete
   const firstName = useWatch({ control, name: "firstName" });
   const lastName = useWatch({ control, name: "lastName" });
@@ -56,6 +96,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const city = useWatch({ control, name: "city" });
   const country = useWatch({ control, name: "country" });
   const zip = useWatch({ control, name: "zip" });
+  const state = useWatch({ control, name: "state" });
 
   // Check if all required fields are filled
   const isShippingComplete = useMemo(() => {
@@ -68,7 +109,37 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
       zip?.trim()
     );
   }, [firstName, lastName, address1, city, country, zip]);
+  useEffect(() => {
+    if (!city?.trim() && !country?.trim() && !zip?.trim() && !state?.trim()) return;
+    const pkg = calculatePackage(cart);
+    const timer = setTimeout(() => {
+      dispatch(fetchShippingRates({
+        data: {
+          destination: {
+            country_code: country.trim(),
+            city: city.trim(),
+            "state": state.trim(),
+            postal_code: zip.trim(),
+          },
+          package: pkg,
+          // "package": {
+          //   "total_weight": 2.5,
+          //   "weight_unit": "LB",
+          //   "package_length": 10,
+          //   "package_width": 6,
+          //   "package_height": 4,
+          //   "dimension_unit": "IN",
+          //   "order_total": 75.00,
+          //   "item_count": 1,
+          //   "package_value": 75.00
+          // }
+        },
+      }));
+    }, 600);
 
+    return () => clearTimeout(timer);
+  }, [city, country, zip, state]);
+  
   if (isCompleted && !isActive) {
     return (
       <div className="flex items-start justify-between">
@@ -107,9 +178,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             <Input
               id="firstName"
               type="text"
-              className={`w-full h-[40px] ${
-                errors.firstName ? "border-red-500" : ""
-              }`}
+              className={`w-full h-[40px] ${errors.firstName ? "border-red-500" : ""
+                }`}
               {...register("firstName", {
                 required: "First name is required",
               })}
@@ -128,9 +198,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             <Input
               id="lastName"
               type="text"
-              className={`w-full h-[40px] ${
-                errors.lastName ? "border-red-500" : ""
-              }`}
+              className={`w-full h-[40px] ${errors.lastName ? "border-red-500" : ""
+                }`}
               {...register("lastName", {
                 required: "Last name is required",
               })}
@@ -174,9 +243,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
           <Input
             id="address1"
             type="text"
-            className={`w-full !max-w-[96%] h-[40px] ${
-              errors.address1 ? "border-red-500" : ""
-            }`}
+            className={`w-full !max-w-[96%] h-[40px] ${errors.address1 ? "border-red-500" : ""
+              }`}
             {...register("address1", {
               required: "Address is required",
             })}
@@ -230,9 +298,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger
-                  className={`w-full !max-w-[96%] h-[40px] ${
-                    errors.country ? "border-red-500" : ""
-                  }`}
+                  className={`w-full !max-w-[96%] h-[40px] ${errors.country ? "border-red-500" : ""
+                    }`}
                 >
                   <SelectValue placeholder="Select country" />
                 </SelectTrigger>
@@ -273,9 +340,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             <Input
               id="zip"
               type="text"
-              className={`w-full h-[40px] ${
-                errors.zip ? "border-red-500" : ""
-              }`}
+              className={`w-full h-[40px] ${errors.zip ? "border-red-500" : ""
+                }`}
               {...register("zip", {
                 required: "Postal code is required",
               })}
@@ -313,73 +379,60 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
           </p>
         )}
 
-        <div className="space-y-3">
-          <label
-            className={`flex items-start gap-3 border rounded p-4 ${
-              isShippingComplete
-                ? "cursor-pointer has-[:checked]:border-red-600"
-                : "cursor-not-allowed opacity-50 bg-gray-50"
-            }`}
-          >
-            <input
-              type="radio"
-              value="fedex_economy"
-              {...register("shippingMethod", {
-                required: "Please select a shipping method",
-              })}
-              className="mt-1"
-              disabled={!isShippingComplete}
-            />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/checkouticon/fedex.png"
-                  alt="FedEx"
-                  width={60}
-                  height={20}
-                  className="object-contain"
-                />
-                <span className="text-sm text-gray-600">
-                  (International Economy)
-                </span>
+        {shippingRates?.length > 0 && <div className=" border border-black">
+          {ratesLoader ? (
+            // Skeleton
+            Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 border rounded p-4 animate-pulse">
+                <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-5 bg-gray-200 rounded w-16" />
+                </div>
               </div>
-              <div className="text-lg font-bold mt-1">$409.75</div>
-            </div>
-          </label>
-
-          <label
-            className={`flex items-start gap-3 border rounded p-4 ${
-              isShippingComplete
-                ? "cursor-pointer has-[:checked]:border-red-600"
-                : "cursor-not-allowed opacity-50 bg-gray-50"
-            }`}
-          >
-            <input
-              type="radio"
-              value="fedex_priority"
-              {...register("shippingMethod", {
-                required: "Please select a shipping method",
-              })}
-              className="mt-1"
-              disabled={!isShippingComplete}
-            />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/checkouticon/fedex.png"
-                  alt="FedEx"
-                  width={60}
-                  height={20}
-                  className="object-contain"
-                />
-                <span className="text-sm text-gray-600">
-                  (International Priority)
-                </span>
+            ))
+          ) : shippingRates?.map((rate, i) => {
+            return <label
+              key={`${rate.method_id}-${rate.service_type}`}
+              className={`flex items-start gap-3 border rounded p-4 transition-colors ${isShippingComplete
+                ? "cursor-pointer"
+                : "cursor-not-allowed opacity-50"
+                } ${watchedShippingMethod == rate.service_type
+                  ? "border-black  !bg-[#ffffff]"
+                  : ""
+                }`}
+            >
+              <input
+                type="radio"
+                value={rate.service_type}
+                {...register("shippingMethod", {
+                  required: "Please select a shipping method",
+                })}
+                className="mt-1"
+                disabled={!isShippingComplete}
+              />
+              <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  {rate.is_fedex && (
+                    <Image
+                      src="/checkouticon/fedex.png"
+                      alt="FedEx"
+                      width={60}
+                      height={20}
+                      className="shrink-0 object-contain"
+                    />
+                  )}
+                  <span className="text-base font-medium text-gray-700">
+                    {rate.is_fedex ? `(${rate.service_name})` : rate.display_name}
+                  </span>
+                </div>
+                <div className="text-base font-bold flex-shrink-0">
+                  {rate.total_charge === 0 ? "Free" : `$${Number(rate.total_charge).toFixed(2)}`}
+                </div>
               </div>
-              <div className="text-lg font-bold mt-1">$459.68</div>
-            </div>
-          </label>
-        </div>
+            </label>
+          })}
+        </div>}
 
         {errors.shippingMethod && (
           <p className="text-sm text-red-500 mt-2">
