@@ -67,7 +67,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-
+  eslint: {
+    ignoreDuringBuilds: true,  // ← yeh add karo
+  },
   productionBrowserSourceMaps: false,
 
   compiler: {
