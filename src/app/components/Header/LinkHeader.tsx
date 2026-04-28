@@ -166,7 +166,7 @@ const LinkHeader = () => {
   const visibleCategories = categories.slice(0, 7); // same count as before
 
   return (
-    <header className=" border-b-2">
+    <header className=" hidden sm:block border-b-2">
       <nav
         className="w-full max-w-[1684px] mx-auto flex items-center justify-between 
        px-7 xl:px-28 relative h-[54.5px] lg:h-[66.67px]"

@@ -90,7 +90,7 @@ const Banner = () => {
               {loginLoading ? "Loading..." : "Sign In"}
             </button>
 
-            <div className="flex justify-center gap-4 mt-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 mt-4">
               <Link href="/auth/forgot-password" className="cursor-pointer text-sm xl:text-[14px] text-[#333333] underline">
                 Forgot your password?
               </Link>
@@ -100,7 +100,6 @@ const Banner = () => {
             </div>
           </form>
         )}
-
       </div>
     </div>
   );

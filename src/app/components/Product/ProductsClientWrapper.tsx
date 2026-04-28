@@ -22,13 +22,11 @@ export default function ProductsClientWrapper({
   const [pagination, setPagination] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  console.log("Filtered Products data from frontend: ", products);
-  console.log("Pagination: ", pagination);
-  
+
   // Detect if we're on brand or category page
   const isBrandPage = pathname?.startsWith('/brand/');
   const isCategoryPage = pathname?.startsWith('/category/');
-  
+
   const [filters, setFilters] = useState<ProductFilterPayload>({
     page: 1,
     pageSize: 20,
@@ -81,8 +79,6 @@ export default function ProductsClientWrapper({
     categoryName: initialCategoryName || undefined,
   });
 
-  console.log("Filters: ", filters);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -105,7 +101,7 @@ export default function ProductsClientWrapper({
   // Generate breadcrumb items based on page type
   const breadcrumbItems = React.useMemo(() => {
     const items = [{ name: "Home", href: "/" }];
-    
+
     if (isCategoryPage && filterMeta.categoryName) {
       items.push({
         name: filterMeta.categoryName,
@@ -117,48 +113,48 @@ export default function ProductsClientWrapper({
         href: `/brand/${params?.slug || ""}`,
       });
     }
-    
+
     return items;
   }, [isCategoryPage, isBrandPage, filterMeta.categoryName, filterMeta.brandName, params?.slug]);
 
   return (
-      <div className="flex flex-col lg:flex-row gap-2 py-4 w-full xl:max-w-[100%] 2xl:max-w-[119.5%]">
-        {/* Sidebar: Filters */}
-        <aside
-          className="w-full lg:w-[22%] xl:w-[24%] 2xl:w-[20%] bg-white rounded
+    <div className="flex flex-col lg:flex-row gap-2 py-4 w-full xl:max-w-[100%] 2xl:max-w-[119.5%]">
+      {/* Sidebar: Filters */}
+      <aside
+        className="w-full lg:w-[22%] xl:w-[24%] 2xl:w-[20%] bg-white rounded hidden sm:block
 "
-        >
-          <Sidebar
-            categories={categories}
-            brands={brands}
-            filters={filters}
-            setFilters={setFilters}
-            products={products}
-            filterMeta={filterMeta}
-            setFilterMeta={setFilterMeta}
-            isBrandPage={isBrandPage}
-            isCategoryPage={isCategoryPage}
-          />
-        </aside>
+      >
+        <Sidebar
+          categories={categories}
+          brands={brands}
+          filters={filters}
+          setFilters={setFilters}
+          products={products}
+          filterMeta={filterMeta}
+          setFilterMeta={setFilterMeta}
+          isBrandPage={isBrandPage}
+          isCategoryPage={isCategoryPage}
+        />
+      </aside>
 
-        {/* Product Listing */}
-        <main className="w-full lg:w-[80%] xl:w-[73.3%] 2xl:w-[79.2%]">
-          {(isCategoryPage || isBrandPage) && (
-            <div className="mb-4 px-4 md:px-0">
-              <Breadcrumb items={breadcrumbItems} />
-            </div>
-          )}
-          <ProductList
-            filters={filters}
-            setFilters={setFilters}
-            products={products}
-            pagination={pagination}
-            isLoading={isLoading}
-            error={error}
-            filterMeta={filterMeta}
-            initialCategorydescription={initialCategorydescription}
-          />
-        </main>
-      </div>
+      {/* Product Listing */}
+      <main className="w-full lg:w-[80%] xl:w-[73.3%] 2xl:w-[79.2%]">
+        {(isCategoryPage || isBrandPage) && (
+          <div className="mb-4 px-4 md:px-0">
+            <Breadcrumb items={breadcrumbItems} />
+          </div>
+        )}
+        <ProductList
+          filters={filters}
+          setFilters={setFilters}
+          products={products}
+          pagination={pagination}
+          isLoading={isLoading}
+          error={error}
+          filterMeta={filterMeta}
+          initialCategorydescription={initialCategorydescription}
+        />
+      </main>
+    </div>
   );
 }

@@ -52,6 +52,31 @@ export default function ProductList({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [filters.page]);
+
+  const getFilterTitle = () => {
+    const parts: string[] = [];
+
+    if (filterMeta.brandName) {
+      parts.push(`Brand: ${filterMeta.brandName}`);
+    }
+
+    if (filterMeta.categoryName) {
+      parts.push(`Category: ${filterMeta.categoryName}`);
+    }
+
+    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
+      parts.push(`Price: $${filters.minPrice} - $${filters.maxPrice}`);
+    } else if (filters.minPrice !== undefined) {
+      parts.push(`Price: Above $${filters.minPrice}`);
+    } else if (filters.maxPrice !== undefined) {
+      parts.push(`Price: Below $${filters.maxPrice}`);
+    }
+
+    return parts.length === 0
+      ? `All Products (Showing ${total || 0})`
+      : `${parts.join(", ")} (Showing ${total || 0})`;
+  };
+
   return (
     <section
       className="
@@ -65,6 +90,7 @@ w-full
         <h1 className="text-4xl text-[#333333] pb-4">
           {initialCategorydescription?.name || "Product Category"}
         </h1>
+        <h4 className="text-[14px] block sm:hidden text-[#333333] mb-2">{getFilterTitle()}</h4>
         <p className="text-[14px] text-[#333333] ">
           {/* Do you need to fix your computer or make it work better? At
           NewTownSpares, we have all the IT Accessories you need! It doesn’t
@@ -90,15 +116,15 @@ w-full
       </div> */}
 
       {/* Sort Bar */}
-      <SortingBar
-        total={total || 0}
-        view={view}
-        setView={setView}
-        filters={filters}
-        setFilters={setFilters}
-        filterMeta={filterMeta}
-      />
 
+        <SortingBar
+          total={total || 0}
+          view={view}
+          setView={setView}
+          filters={filters}
+          setFilters={setFilters}
+          filterMeta={filterMeta}
+        />
 
       {/* Error State */}
       {error && (
@@ -124,8 +150,8 @@ w-full
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           className={`mt-4 ${view === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-              : "space-y-4"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            : "space-y-4"
             }`}
         >
           {Array.from({ length: 6 }).map((_, idx) => (
@@ -145,8 +171,8 @@ w-full
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className={`xl:max-w-[754px] w-full ${view === "grid"
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-3"
-                : "space-y-4"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-3"
+              : "space-y-4"
               }`}
           >
             <AnimatePresence mode="wait">

@@ -54,7 +54,7 @@ const AuthorizedSupplier: React.FC = () => {
   );
 
   return (
-    <div className="max-w-full mx-auto bg-[#FAFAFA]">
+    <div className="max-w-full mx-auto ">
 
       {/* SAM.GOV + D&B — Ek hi row mein, dono cards side by side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
