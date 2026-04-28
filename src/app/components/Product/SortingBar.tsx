@@ -71,42 +71,23 @@ export default function SortingBar({
   return (
     <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col justify-between items-center border 2xl:py-[20px] 2xl:px-[30px] xl:py-[15px] xl:px-[22.5px]    p-5 w-full">
       {/* ✅ Dynamic heading */}
-      <h4 className="text-[14px] text-[#333333]">{getFilterTitle()}</h4>
+      <h4 className="text-[14px] hidden sm:block text-[#333333]">{getFilterTitle()}</h4>
 
       <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col items-center gap-3 ">
+
         <span className="text-[14px] text-[#333333]">Sort by</span>
 
         {/* Sort Dropdown */}
-        {/* <select
-          value={filters.sortBy || ""}
-          onChange={(e) =>
-            setFilters((prev: any) => ({
-              ...prev,
-              sortBy: e.target.value,
-              page: 1,
-            }))
-          }
-          className="px-3 py-1 text-[14px] text-[#333333]
-             border border-gray-300 rounded-md shadow-sm 
-             bg-white cursor-pointer
-             focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]
-             hover:border-gray-400 transition-all"
-        >
-          <option value="">Sort By</option>
-          <option value="bestSelling">Best Selling</option>
-          <option value="priceLowToHigh">Low to High</option>
-          <option value="priceHighToLow">High to Low</option>
-        </select> */}
         <SortDropdown filters={filters} setFilters={setFilters} />
 
 
         {/* View Toggle */}
-        <div className="flex items-center space-x-2">
+        <div className="hidden sm:flex items-center space-x-2">
           <button
             onClick={() => setView("grid")}
             className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "grid"
-                ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
-                : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+              ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
+              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
               }`}
           >
             ▭▭
@@ -114,8 +95,8 @@ export default function SortingBar({
           <button
             onClick={() => setView("list")}
             className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "list"
-                ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
-                : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+              ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
+              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
               }`}
           >
             ☰

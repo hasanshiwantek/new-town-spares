@@ -4,6 +4,7 @@ import Banner from "./components/Home/Banner";
 import Brands from "./components/Home/Brands";
 import PopularProducts from "./components/Home/PopularProducts";
 import FeaturedProducts from "./components/Home/FeaturedProducts";
+import AccountInfoBar from "./components/Home/AccountInfoBar";
 
 // Lazy load below-the-fold components for better performance
 const TopIndustries = dynamic(() => import("./components/Home/TopIndustries"), {
@@ -65,7 +66,8 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
       "max-image-preview": "large",
       "max-snippet": -1,
-    },},
+    },
+  },
 };
 
 const Page = async () => {
@@ -73,42 +75,23 @@ const Page = async () => {
   return (
     <>
       <main className="flex flex-col gap-5" role="main">
-        {/* <AOSWrapper animation="zoom-in" delay={100}> */}
-          <Banner />
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={400}> */}
-          {/* <Brands /> */}
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={500}> */}
-           <FeaturedProducts
-                endpoint="web/products/featured-products"
-                title="Most Popular Products"
-              />
-           <FeaturedProducts
-                endpoint="web/products/featured-products"
-                title="Featured Products"
-              />
-           <FeaturedProducts
-                endpoint="web/products/featured-products"
-                title="New Products"
-              />
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={600}> */}
-          {/* <TopIndustries /> */}
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={700}> */}
-          {/* <ItEquipment /> */}
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={800}> */}
-          <AuthorizedSupplier />
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={900}> */}
-          <Testimonials />
-        {/* </AOSWrapper> */}
-        {/* <AOSWrapper animation="fade-up" delay={1000}> */}
-          <BlogHome />
-          {/* <GetInTouch /> */}
-        {/* </AOSWrapper> */}
+        <Banner />
+        <AccountInfoBar />
+        <FeaturedProducts
+          endpoint="web/products/featured-products"
+          title="Most Popular Products"
+        />
+        <FeaturedProducts
+          endpoint="web/products/featured-products"
+          title="Featured Products"
+        />
+        <FeaturedProducts
+          endpoint="web/products/featured-products"
+          title="New Products"
+        />
+        <AuthorizedSupplier />
+        <Testimonials />
+        <BlogHome />
       </main>
     </>
   );

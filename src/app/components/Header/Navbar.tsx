@@ -193,8 +193,8 @@ const Navbar: React.FC = () => {
             </button>
 
             {/* Logo */}
-            <Link href={"/"} className="" onClick={() => setBurgerMenuOpen(false)}>
-              <div className="relative border w-64 xl:w-72 2xl:w-[250px] h-[70px]">
+            <Link href={"/"}  onClick={() => setBurgerMenuOpen(false)}>
+              <div className="relative  w-64 xl:w-72 2xl:w-[250px] h-[70px]">
                 <Image
                   src={navlogo}
                   alt="Logo"
@@ -250,7 +250,7 @@ const Navbar: React.FC = () => {
           {/* Right Section (Desktop only) */}
           <section className="hidden md:flex items-center gap-4">
             {/* Currency */}
-            <div className="relative" ref={currencyRef}>
+            {/* <div className="relative" ref={currencyRef}>
               <button
                 onClick={() => setOpen(!open)}
                 className="flex items-center gap-1 text-xs sm:text-sm md:text-base lg:text-lg font-semibold hover:text-blue-300"
@@ -274,7 +274,7 @@ const Navbar: React.FC = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Account */}
             <div className="relative">
@@ -603,7 +603,7 @@ const Navbar: React.FC = () => {
               </div>
 
               {/* Account - only when logged in */}
-              {auth?.isAuthenticated && (
+              {/* {auth?.isAuthenticated && (
                 <div>
                   <h3 className="text-black font-semibold text-lg mb-3">
                     Account
@@ -634,7 +634,7 @@ const Navbar: React.FC = () => {
                     </li>
                   </ul>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         )}
