@@ -178,7 +178,9 @@ const Navbar: React.FC = () => {
       "
         >
           {/* Left: Hamburger + Logo */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Left: Hamburger + Logo */}
+          <div className="flex items-center gap-3 flex-shrink-0 lg:flex-none w-full lg:w-auto justify-between lg:justify-start">
+
             {/* Hamburger Button (Only below lg) */}
             <button
               aria-label="burger-menu"
@@ -192,9 +194,9 @@ const Navbar: React.FC = () => {
               )}
             </button>
 
-            {/* Logo */}
-            <Link href={"/"} onClick={() => setBurgerMenuOpen(false)}>
-              <div className="relative w-64 xl:w-72 2xl:w-[250px] h-[70px]">
+            {/* Logo — centered on mobile */}
+            <Link href={"/"} onClick={() => setBurgerMenuOpen(false)} className="absolute left-1/2 -translate-x-1/2 lg:static lg:left-auto lg:translate-x-0">
+              <div className="relative w-40 sm:w-52 lg:w-64 xl:w-72 2xl:w-[250px] h-[55px] lg:h-[70px]">
                 <Image
                   src={navlogo}
                   alt="Logo"
@@ -206,6 +208,9 @@ const Navbar: React.FC = () => {
                 />
               </div>
             </Link>
+
+            {/* Spacer — mobile pe right side balance ke liye */}
+            <div className="w-10 h-10 lg:hidden" />
           </div>
 
           {/* Center: Search (Desktop only) */}
