@@ -280,8 +280,9 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           product
             ? {
               name: product.name ?? "",
-              image: product.image[0].path,
-              sku: product.sku ?? "",
+              image: product?.image?.[0]?.path,
+              sku: product?.sku ?? "",
+              id: product.id,
             }
             : undefined
         }

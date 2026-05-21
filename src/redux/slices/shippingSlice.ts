@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/axiosInstance";
 
+
 export const fetchShippingRates = createAsyncThunk(
     "shippingZone/fetchShippingRates",
     async ({ data }: { data: any }, thunkAPI) => {
@@ -24,6 +25,11 @@ const shippingZoneSlice = createSlice({
     name: "shippingZone",
     initialState,
     reducers: {
+        resetShippingRates: (state) => {
+            state.shippingRates = [];
+            state.ratesLoader = false;
+            state.error = null;
+        },
     },
 
     extraReducers: (builder) => {
@@ -41,4 +47,6 @@ const shippingZoneSlice = createSlice({
             })
     },
 });
+export const { resetShippingRates } = shippingZoneSlice.actions;
+
 export default shippingZoneSlice.reducer;

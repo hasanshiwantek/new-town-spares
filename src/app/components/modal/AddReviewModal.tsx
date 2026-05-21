@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import {
@@ -14,8 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { bulkInquiry } from "@/redux/slices/homeSlice";
+import { addReview, bulkInquiry } from "@/redux/slices/homeSlice";
 import { Label } from "@/components/ui/label";
+import { toast } from "react-toastify";
 interface AddReviewModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -23,6 +24,7 @@ interface AddReviewModalProps {
         name: string;
         image?: string;
         sku?: string;
+        id?: string | number;
     };
 }
 
@@ -31,15 +33,17 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     onClose,
     product,
 }) => {
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        fullName: "",
+        name: "",
         email: "",
-        reviewSubject: "",
-        comments: "",
+        subject: "",
+        comment: "",
+        rating: 0,
     });
     const dispatch = useAppDispatch();
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        e: any
     ) => {
         setFormData({
             ...formData,
@@ -49,25 +53,34 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
         const payload = {
-            sku: product?.sku ?? "",
+            productId: product?.id,
             ...formData,
         };
-        const result = await dispatch(bulkInquiry(payload))
+        const result = await dispatch(addReview(payload))
         try {
-            if (bulkInquiry.fulfilled.match(result)) {
-                console.log("Request for quote send✅", result?.payload);
-                setTimeout(() => {
-                    onClose();
-                }, 2000);
+            if (addReview.fulfilled.match(result)) {
+                onClose()
+                toast.success("Review submitted successfully!");
             } else {
                 console.log("Error Sending Quote: ", result?.payload);
             }
         } catch (err) {
             console.log("Something went wrong: ", err);
+        } finally {
+            setLoading(false);
         }
     };
-
+    useEffect(() => {
+        setFormData({
+            name: "",
+            email: "",
+            subject: "",
+            comment: "",
+            rating: 0,
+        })
+    }, [isOpen])
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="!max-w-[70rem] w-full max-h-[90vh] overflow-y-auto p-0 rounded-lg shadow-sm">
@@ -112,15 +125,13 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
 
                     {/* Right Side - Form */}
                     <div className="md:w-3/5 p-5 ">
-
-
                         <form onSubmit={handleSubmit} className="space-y-4">
 
                             {/* Rating */}
                             <div>
                                 <div className="flex items-center justify-between mb-1">
                                     <Label
-                                        htmlFor="email"
+                                        htmlFor="rating"
                                         className="text-[#999] text-[14px] font-medium block mb-2"
                                     >Rating:</Label>
                                     <span className="text-[11px] text-[#999] uppercase tracking-wider">Required</span>
@@ -129,8 +140,8 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                                 <div className="relative">
                                     <select
                                         name="rating"
-                                        // value={formData.rating}
-                                        // onChange={handleChange}
+                                        value={formData.rating}
+                                        onChange={handleChange}
                                         required
                                         className="w-full h-[46px] px-3 border border-[#ccc] bg-white text-[14px] text-[#333] rounded-md appearance-none focus:outline-none focus:border-[#F15939]"
                                     >
@@ -149,17 +160,16 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                                 <div className="flex items-center justify-between mb-1">
 
                                     <Label
-                                        htmlFor="fullName"
+                                        htmlFor="name"
                                         className="text-[#999] text-[14px] font-medium block mb-2"
                                     >Name</Label>
                                 </div>
                                 <Input
                                     type="text"
-                                    name="fullName"
+                                    name="name"
                                     placeholder="Name"
-                                    value={formData.fullName}
+                                    value={formData.name}
                                     onChange={handleChange}
-                                    required
                                     className="w-full h-[46px] !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md  focus:outline-none focus:ring-2 focus:ring-[#F15939]"
                                 />
                             </div>
@@ -187,7 +197,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                                 <div className="flex items-center justify-between mb-1">
 
                                     <Label
-                                        htmlFor="reviewSubject"
+                                        htmlFor="subject"
                                         className="text-[#999] text-[14px] font-medium block mb-2"
                                     >Review Subject</Label>
                                     <span className="text-[11px] text-[#999] uppercase tracking-wider">Required</span>
@@ -195,9 +205,9 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                                 </div>
                                 <Input
                                     type="text"
-                                    name="reviewSubject"
+                                    name="subject"
                                     placeholder="Review Subject"
-                                    value={formData.reviewSubject}
+                                    value={formData.subject}
                                     onChange={handleChange}
                                     required
                                     className="w-full h-[46px] !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md  focus:outline-none focus:ring-2 focus:ring-[#F15939]"
@@ -207,15 +217,15 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                             <div>
                                 <div className="flex items-center justify-between mb-1">
                                     <Label
-                                        htmlFor="comments"
+                                        htmlFor="comment"
                                         className="text-[#999] text-[14px] font-medium block mb-2"
                                     >Comments</Label>
                                     <span className="text-[11px] text-[#999] uppercase tracking-wider">Required</span>
                                 </div>
                                 <Textarea
-                                    name="comments"
+                                    name="comment"
                                     placeholder="Comments"
-                                    value={formData.comments}
+                                    value={formData.comment}
                                     onChange={handleChange}
                                     rows={4}
                                     className="w-full h-[100px] px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939] resize-none"
@@ -225,7 +235,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                                 type="submit"
                                 className=" bg-[#F15939] h-[40px] text-white !p-5 !text-lg rounded-md font-medium hover:bg-[#d94d30] transition-colors duration-200"
                             >
-                                Submit Review
+                                {loading ? "Submitting..." : "Submit Review"}
                             </Button>
                         </form>
                     </div>

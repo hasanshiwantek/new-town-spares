@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -16,17 +16,24 @@ import {
   Control,
   Controller,
   useWatch,
+  UseFormSetValue,
 } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { fetchShippingRates } from "@/redux/slices/shippingSlice";
+import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
+import { setCompletedDestinations, setIsMultiAddress } from "@/redux/slices/multiAddressSlice";
+import MultiAddressShipping from "./MultiAddressShipping";
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
   control: Control<any>;
+  setValue: UseFormSetValue<any>;
   onContinue: () => void;
   countryList: Array<{ name: string; code: string }>;
+  stateList: Array<{ name: string; code: string }>;
+  cityList: Array<{ name: string }>;
   isActive: boolean;
   isCompleted: boolean;
   onEdit?: () => void;
@@ -41,7 +48,7 @@ interface ShippingStepProps {
   };
   watchedShippingMethod?: string;
 }
-function calculatePackage(products: any[]) {
+export function calculatePackage(products: any[]) {
   const totalWeight = products.reduce((sum, p) => {
     const weight = parseFloat(p.dimensions?.weight) || 0;
     const qty = p.quantity || 1;
@@ -79,6 +86,9 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   control,
   onContinue,
   countryList,
+  stateList,
+  cityList,
+  setValue,
   isActive,
   isCompleted,
   onEdit,
@@ -88,7 +98,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const { shippingRates, ratesLoader } = useAppSelector((state) => state.shippingZone);
   const dispatch = useAppDispatch()
   const cart = useAppSelector((state: RootState) => state?.cart?.items);
-
+  const [showSingleAddressModal, setShowSingleAddressModal] = useState(false);
+  const { isMultiAddress, completedDestinations, destShippingRates } = useAppSelector(
+    (state) => state.multiAddress
+  );
   // Watch form values to check if shipping address is complete
   const firstName = useWatch({ control, name: "firstName" });
   const lastName = useWatch({ control, name: "lastName" });
@@ -97,7 +110,13 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const country = useWatch({ control, name: "country" });
   const zip = useWatch({ control, name: "zip" });
   const state = useWatch({ control, name: "state" });
+  const getDestRate = (dest: any) => {
+    if (!dest.selectedShippingMethod) return null;
 
+    const rates = destShippingRates[dest.id] || [];
+    const rate = rates.find((r: any) => r.service_type === dest.selectedShippingMethod);
+    return rate || null;
+  };
   // Check if all required fields are filled
   const isShippingComplete = useMemo(() => {
     return !!(
@@ -111,36 +130,104 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   }, [firstName, lastName, address1, city, country, zip]);
   useEffect(() => {
     if (!city?.trim() && !country?.trim() && !zip?.trim() && !state?.trim()) return;
-    const pkg = calculatePackage(cart);
-    const timer = setTimeout(() => {
-      dispatch(fetchShippingRates({
-        data: {
-          destination: {
-            country_code: country.trim(),
-            city: city.trim(),
-            "state": state.trim(),
-            postal_code: zip.trim(),
+    if (city?.trim() && country?.trim() && zip?.trim() && state?.trim()) {
+      const pkg = calculatePackage(cart);
+      const timer = setTimeout(() => {
+        dispatch(fetchShippingRates({
+          data: {
+            destination: {
+              country_code: country.trim(),
+              city: city.trim(),
+              "state": state.trim(),
+              postal_code: zip.trim(),
+            },
+            package: pkg,
+            // "package": {
+            //   "total_weight": 2.5,
+            //   "weight_unit": "LB",
+            //   "package_length": 10,
+            //   "package_width": 6,
+            //   "package_height": 4,
+            //   "dimension_unit": "IN",
+            //   "order_total": 75.00,
+            //   "item_count": 1,
+            //   "package_value": 75.00
+            // }
           },
-          package: pkg,
-          // "package": {
-          //   "total_weight": 2.5,
-          //   "weight_unit": "LB",
-          //   "package_length": 10,
-          //   "package_width": 6,
-          //   "package_height": 4,
-          //   "dimension_unit": "IN",
-          //   "order_total": 75.00,
-          //   "item_count": 1,
-          //   "package_value": 75.00
-          // }
-        },
-      }));
-    }, 600);
+        }));
+      }, 600);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    }
+
   }, [city, country, zip, state]);
-  
+
   if (isCompleted && !isActive) {
+    if (isMultiAddress) {
+      return (
+        <div className="flex items-start justify-between">
+          <div className="space-y-6">
+            {/* Destinations list — pass from parent */}
+            {completedDestinations?.map((dest: any, index: number) => {
+              const grouped: Record<string, number> = {};
+              dest.allocatedItems?.forEach((slot: string) => {
+                const id = slot.split("-")[0];
+                grouped[id] = (grouped[id] || 0) + 1;
+              });
+              // ✅ Rate find karo
+              const rate = getDestRate(dest);
+              const rateLabel = rate
+                ? rate.is_fedex
+                  ? `${rate.service_name}`
+                  : rate.display_name
+                : dest.selectedShippingMethod || "";
+              const ratePrice = rate ? Number(rate.total_charge) : 0;
+              return (
+                <div key={dest.id} className="space-y-1">
+                  <p className="font-bold text-gray-800 text-base">Destination #{index + 1}</p>
+                  {dest.address && (
+                    <>
+                      <p className="text-sm text-gray-600">
+                        {dest.address.firstName} {dest.address.lastName}
+                      </p>
+                      <p className="text-sm text-gray-600">{dest.address.address1}</p>
+                      <p className="text-sm text-gray-600">
+                        {dest.address.city && `${dest.address.city}, `}
+                        {dest.address.state && `${dest.address.state}, `}
+                        {dest.address.country}
+                        {dest.address.zip && ` ${dest.address.zip}`}
+                      </p>
+                    </>
+                  )}
+                  <p className="text-sm text-gray-600 mt-2">
+                    {dest.allocatedItems?.length} Items
+                  </p>
+                  {Object.entries(grouped).map(([itemId, count]) => {
+                    const item = cart.find((c: any) => String(c.id) === itemId);
+                    return item ? (
+                      <p key={itemId} className="text-xs text-gray-600">
+                        {count} x {item.name}
+                      </p>
+                    ) : null;
+                  })}
+                  {/* {dest.selectedShippingMethod && (
+                    <div className="mt-1">
+                      <p className="text-xs text-gray-600">{rateLabel}</p>
+                      <p className="text-xs text-gray-600 ml-2">
+                        {ratePrice === 0 ? "$0.00" : `$${ratePrice.toFixed(2)}`}
+                      </p>
+                    </div>
+                  )} */}
+                </div>
+              );
+            })}
+          </div>
+          <button type="button" onClick={onEdit} className="btn-primary flex-shrink-0">
+            EDIT
+          </button>
+        </div>
+      );
+    }
     return (
       <div className="flex items-start justify-between">
         <div className="text-base text-gray-600">
@@ -164,207 +251,283 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
 
   return (
     <div className="space-y-6">
+      {showSingleAddressModal && <ShipToSingleAddressModal
+        open={showSingleAddressModal}
+        onClose={() => setShowSingleAddressModal(false)}
+      />}
       {/* Shipping Address */}
       <div>
-        <h3 className="text-sm font-medium mb-4 text-gray-700">
-          Shipping Address
-        </h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-medium mb-4 text-gray-700">
+            {isMultiAddress ? "Choose where to ship each item" : "Shipping Address"}
+          </h3>
+          {cart?.reduce((sum, item) => sum + (item.quantity || 1), 0) > 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (isMultiAddress) {
+                  setShowSingleAddressModal(true);
+                } else {
+                  dispatch(setIsMultiAddress(true));
+                }
+                localStorage.removeItem("shippingCost")
+                localStorage.removeItem("shippingData")
+              }}
+              className="text-[13px] text-gray-700 hover:underline font-medium"
+            >
+              {isMultiAddress ? "Ship to single address" : "Ship to multiple addresses"}
+            </button>
+          )}
+        </div>
+        {isMultiAddress ? (
+          <MultiAddressShipping
+            cart={cart}
+            shippingRates={shippingRates || []}
+            onContinue={onContinue}
+            onSingleAddress={() => dispatch(setIsMultiAddress(false))}
+            onComplete={(destinations: any) => {
+              dispatch(setCompletedDestinations(destinations));
+            }}
+          />
+        ) : (<>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label htmlFor="firstName" className="text-base mb-2 text-gray-700">
+                First Name
+              </label>
+              <Input
+                id="firstName"
+                type="text"
+                className={`w-full h-[40px] ${errors.firstName ? "border-red-500" : ""
+                  }`}
+                {...register("firstName", {
+                  required: "First name is required",
+                })}
+              />
+              {errors.firstName && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.firstName.message as string}
+                </p>
+              )}
+            </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <label htmlFor="firstName" className="text-base mb-2 text-gray-700">
-              First Name
+            <div className="flex flex-col">
+              <label htmlFor="lastName" className="text-base mb-2 text-gray-700">
+                Last Name
+              </label>
+              <Input
+                id="lastName"
+                type="text"
+                className={`w-full h-[40px] ${errors.lastName ? "border-red-500" : ""
+                  }`}
+                {...register("lastName", {
+                  required: "Last name is required",
+                })}
+              />
+              {errors.lastName && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.lastName.message as string}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col mt-4">
+            <label htmlFor="company" className="text-base mb-2 text-gray-700">
+              Company Name <span className="text-gray-400">(Optional)</span>
             </label>
             <Input
-              id="firstName"
+              id="company"
               type="text"
-              className={`w-full h-[40px] ${errors.firstName ? "border-red-500" : ""
+              className="w-full !max-w-[96%] h-[40px]"
+              {...register("company")}
+            />
+          </div>
+
+          <div className="flex flex-col mt-4">
+            <label htmlFor="phone" className="text-base mb-2 text-gray-700">
+              Phone Number <span className="text-gray-400">(Optional)</span>
+            </label>
+            <Input
+              id="phone"
+              type="text"
+              className="w-full !max-w-[96%] h-[40px]"
+              {...register("phone")}
+            />
+          </div>
+
+          <div className="flex flex-col mt-4">
+            <label htmlFor="address1" className="text-base mb-2 text-gray-700">
+              Address Line 1
+            </label>
+            <Input
+              id="address1"
+              type="text"
+              className={`w-full !max-w-[96%] h-[40px] ${errors.address1 ? "border-red-500" : ""
                 }`}
-              {...register("firstName", {
-                required: "First name is required",
+              {...register("address1", {
+                required: "Address is required",
               })}
             />
-            {errors.firstName && (
+            {errors.address1 && (
               <p className="text-sm text-red-500 mt-1">
-                {errors.firstName.message as string}
+                {errors.address1.message as string}
               </p>
             )}
           </div>
 
-          <div className="flex flex-col">
-            <label htmlFor="lastName" className="text-base mb-2 text-gray-700">
-              Last Name
+          <div className="flex flex-col mt-4">
+            <label htmlFor="address2" className="text-base mb-2 text-gray-700">
+              Address Line 2 <span className="text-gray-400">(Optional)</span>
             </label>
             <Input
-              id="lastName"
+              id="address2"
               type="text"
-              className={`w-full h-[40px] ${errors.lastName ? "border-red-500" : ""
-                }`}
-              {...register("lastName", {
-                required: "Last name is required",
+              className="w-full !max-w-[96%] h-[40px]"
+              {...register("address2")}
+            />
+          </div>
+
+          <div className="flex flex-col mt-4">
+            <label htmlFor="city" className="text-base mb-2 text-gray-700">
+              City
+            </label>
+            <Input
+              id="city"
+              type="text"
+              className={`w-full !max-w-[96%] h-[40px] ${errors.city ? "border-red-500" : ""}`}
+              {...register("city", {
+                required: "City is required",
               })}
             />
-            {errors.lastName && (
+            {errors.city && (
               <p className="text-sm text-red-500 mt-1">
-                {errors.lastName.message as string}
+                {errors.city.message as string}
               </p>
             )}
           </div>
-        </div>
 
-        <div className="flex flex-col mt-4">
-          <label htmlFor="company" className="text-base mb-2 text-gray-700">
-            Company Name <span className="text-gray-400">(Optional)</span>
-          </label>
-          <Input
-            id="company"
-            type="text"
-            className="w-full !max-w-[96%] h-[40px]"
-            {...register("company")}
-          />
-        </div>
-
-        <div className="flex flex-col mt-4">
-          <label htmlFor="phone" className="text-base mb-2 text-gray-700">
-            Phone Number <span className="text-gray-400">(Optional)</span>
-          </label>
-          <Input
-            id="phone"
-            type="text"
-            className="w-full !max-w-[96%] h-[40px]"
-            {...register("phone")}
-          />
-        </div>
-
-        <div className="flex flex-col mt-4">
-          <label htmlFor="address1" className="text-base mb-2 text-gray-700">
-            Address Line 1
-          </label>
-          <Input
-            id="address1"
-            type="text"
-            className={`w-full !max-w-[96%] h-[40px] ${errors.address1 ? "border-red-500" : ""
-              }`}
-            {...register("address1", {
-              required: "Address is required",
-            })}
-          />
-          {errors.address1 && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.address1.message as string}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col mt-4">
-          <label htmlFor="address2" className="text-base mb-2 text-gray-700">
-            Address Line 2 <span className="text-gray-400">(Optional)</span>
-          </label>
-          <Input
-            id="address2"
-            type="text"
-            className="w-full !max-w-[96%] h-[40px]"
-            {...register("address2")}
-          />
-        </div>
-
-        <div className="flex flex-col mt-4">
-          <label htmlFor="city" className="text-base mb-2 text-gray-700">
-            City
-          </label>
-          <Input
-            id="city"
-            type="text"
-            className={`w-full !max-w-[96%] h-[40px] ${errors.city ? "border-red-500" : ""}`}
-            {...register("city", {
-              required: "City is required",
-            })}
-          />
-          {errors.city && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.city.message as string}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col mt-4">
-          <label htmlFor="country" className="text-base mb-2 text-gray-700">
-            Country
-          </label>
-          <Controller
-            name="country"
-            control={control}
-            rules={{ required: "Country is required" }}
-            render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger
-                  className={`w-full !max-w-[96%] h-[40px] ${errors.country ? "border-red-500" : ""
-                    }`}
-                >
-                  <SelectValue placeholder="Select country" />
-                </SelectTrigger>
-                <SelectContent>
-                  {countryList.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
-                      {country.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {errors.country && (
-            <p className="text-sm text-red-500 mt-1">
-              {errors.country.message as string}
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="flex flex-col">
-            <label htmlFor="state" className="text-base mb-2 text-gray-700">
-              State/Province
+          <div className="flex flex-col mt-4">
+            <label htmlFor="country" className="text-base mb-2 text-gray-700">
+              Country
             </label>
-            <Input
-              id="state"
-              type="text"
-              className="w-full h-[40px]"
-              {...register("state")}
+            <Controller
+              name="country"
+              control={control}
+              rules={{ required: "Country is required" }}
+              render={({ field }) => (
+                <Select
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    setValue("state", "");  //  state reset
+                  }}
+                  // onValueChange={field.onChange}
+                  value={field.value}>
+                  <SelectTrigger
+                    className={`w-full !max-w-[96%] h-[40px] ${errors.country ? "border-red-500" : ""
+                      }`}
+                  >
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countryList.map((country) => (
+                      <SelectItem key={country.code} value={country.code}>
+                        {country.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             />
-          </div>
-
-          <div className="flex flex-col">
-            <label htmlFor="zip" className="text-base mb-2 text-gray-700">
-              Postal Code
-            </label>
-            <Input
-              id="zip"
-              type="text"
-              className={`w-full h-[40px] ${errors.zip ? "border-red-500" : ""
-                }`}
-              {...register("zip", {
-                required: "Postal code is required",
-              })}
-            />
-            {errors.zip && (
+            {errors.country && (
               <p className="text-sm text-red-500 mt-1">
-                {errors.zip.message as string}
+                {errors.country.message as string}
               </p>
             )}
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 mt-4">
-          <input
-            type="checkbox"
-            id="billingSame"
-            {...register("billingSame")}
-            className="w-4 h-4"
-          />
-          <label htmlFor="billingSame" className="text-base text-gray-700">
-            My Billing address is the same as my Shipping address
-          </label>
-        </div>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="flex flex-col">
+              <label htmlFor="state" className="text-base mb-2 text-gray-700 flex items-baseline justify-between">
+                <span className="">
+                  State/Province
+                </span>
+                {!stateList.length && (
+                  <span className="shrink-0 text-gray-400">(Optional)</span>
+                )}
+              </label>
+              {stateList.length > 0 ? <Controller
+                name="state"
+                disabled={!country?.trim()}
+                control={control}
+                rules={{ required: "State/Province is required" }}
+                render={({ field }) => (
+                  <Select onValueChange={(val) => {
+                    field.onChange(val);
+                  }} value={field.value}>
+                    <SelectTrigger
+                      className={`w-full !max-w-full h-[40px] ${errors.state ? "border-red-500" : ""
+                        }`}
+                    >
+                      <SelectValue placeholder="Select state/province" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {stateList.map((state) => (
+                        <SelectItem key={state.code} value={state.code}>
+                          {state.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              /> : <Input
+                id="state"
+                type="text"
+                className={`w-full !max-w-full h-[40px] ${errors.state ? "border-red-500" : ""
+                  }`}
+                {...register("state")}
+              />}
+              {/* <Input
+                id="state"
+                type="text"
+                className="w-full h-[40px]"
+                {...register("state")}
+              /> */}
+            </div>
+
+            <div className="flex flex-col">
+              <label htmlFor="zip" className="text-base mb-2 text-gray-700">
+                Postal Code
+              </label>
+              <Input
+                id="zip"
+                type="text"
+                className={`w-full h-[40px] ${errors.zip ? "border-red-500" : ""
+                  }`}
+                {...register("zip", {
+                  required: "Postal code is required",
+                })}
+              />
+              {errors.zip && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.zip.message as string}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="billingSame"
+              {...register("billingSame")}
+              className="w-4 h-4"
+            />
+            <label htmlFor="billingSame" className="text-base text-gray-700">
+              My Billing address is the same as my Shipping address
+            </label>
+          </div>
+        </>)}
       </div>
 
       {/* Shipping Method */}
@@ -405,24 +568,36 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               <input
                 type="radio"
                 value={rate.service_type}
-                {...register("shippingMethod", {
-                  required: "Please select a shipping method",
-                })}
+                // {...register("shippingMethod", {
+                //   required: "Please select a shipping method",
+                // })}
+                {...register("shippingMethod")}
+                onChange={(e) => {
+                  register("shippingMethod").onChange(e); // keep react-hook-form in sync
+                  const selectedRate = shippingRates?.find(
+                    (r: any) => r.service_type === e.target.value
+                  );
+                  const cost = selectedRate ? Number(selectedRate.total_charge).toFixed(2) : "0";
+                  const shippingData = {
+                    country: country?.trim(),
+                    city: city?.trim(),
+                    "state": state?.trim(),
+                    zip: zip?.trim(),
+                  }
+                  localStorage.setItem("shippingCost", cost);
+                  localStorage.setItem("shippingData", JSON.stringify(shippingData));
+                }}
                 className="mt-1"
                 disabled={!isShippingComplete}
               />
               <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
                   {rate.is_fedex && (
-                    <Image
-                      src="/checkouticon/fedex.png"
-                      alt="FedEx"
-                      width={60}
-                      height={20}
-                      className="shrink-0 object-contain"
-                    />
+                    <span>
+                      FedEx
+                    </span>
                   )}
-                  <span className="text-base font-medium text-gray-700">
+                  <span>
                     {rate.is_fedex ? `(${rate.service_name})` : rate.display_name}
                   </span>
                 </div>

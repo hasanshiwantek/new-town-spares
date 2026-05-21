@@ -4,6 +4,7 @@ import LayoutWrapper from "./components/layout/LayoutWrapper";
 import { Inter, Jost } from "next/font/google";
 import localFont from "next/font/local";
 import "../styles/blog/api-content.css";
+import ScriptInjector from "@/components/ScriptInjector";
 const jost = Jost({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
@@ -137,7 +138,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <LayoutWrapper>
+          <ScriptInjector />
+          {children}
+        </LayoutWrapper>
       </body>
     </html>
   );
