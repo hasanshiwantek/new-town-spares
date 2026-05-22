@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 export const baseURL = "https://backend.sparemicro.com/api/"
-export const storeId = "10";
+export const storeId = "4";
 
 const axiosInstance = axios.create({
   baseURL: baseURL,
