@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { globalSearch } from "@/redux/slices/homeSlice";
+import { usePathname } from "next/navigation";
 
 // Simple debounce helper
 const useDebounce = (value: string, delay: number) => {
@@ -30,7 +31,7 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const pathname = usePathname();
   const debouncedQuery = useDebounce(query, 300);
 
   // Auto-fetch search results after debounce delay with cache check
@@ -150,8 +151,23 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               handleOnChange(e.target.value)
               setQuery(e.target.value)
             }}
+            // onKeyDown={(e) => {
+            //   if (e.key === "Enter") handleSearch();
+            // }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleSearch();
+              if (e.key === "Enter") {
+                e.preventDefault();
+                const q = query.trim();
+                if (q) {
+                  localStorage.setItem("advancedSearchFilters", JSON.stringify({ q }));
+                  window.dispatchEvent(new Event("searchFiltersUpdated"));
+                  if (pathname === "/advanced-search") {
+                    window.location.reload()
+                  } else {
+                    router.push(`/advanced-search`);
+                  }
+                }
+              }
             }}
             className="
       w-full px-4 md:px-4 xl:px-6 border-gray-300 border
@@ -171,7 +187,21 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               //     setShowDropdown(true); // ensure it opens immediately
               //   }
               // }}
-              onClick={handleSearch}
+              // onClick={handleSearch}
+              onClick={(e) => {
+                e.preventDefault();
+                const q = query.trim();
+                if (q) {
+                  localStorage.setItem("advancedSearchFilters", JSON.stringify({ q }));
+                  window.dispatchEvent(new Event("searchFiltersUpdated"));
+                  if (pathname === "/advanced-search") {
+                    window.location.reload()
+                  } else {
+                    router.push(`/advanced-search`);
+                  }
+                  // router.push(`/advanced-search?q=${q}`);
+                }
+              }}
               className="
         bg-[#FD5430]
         w-16 

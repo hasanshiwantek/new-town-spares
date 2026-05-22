@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
+import Link from "next/link";
 
 interface ProductRightProps {
   product?: {
@@ -28,12 +29,13 @@ const ProductRight: React.FC<ProductRightProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const price = Number(product?.price) || 0;
+  const purchasabilityStatus = product?.purchasabilityStatus == "available"
 
   return (
     <>
       <aside className="product-right w-full lg:w-[22%] xl:w-[20.3%] 2xl:w-[20%] mt-3">
         {/* Top: Price, Stock, Quantity, Add to Cart */}
-        <div className="border border-gray-300 rounded-lg w-full p-7 ">
+        {purchasabilityStatus ? <div className="border border-gray-300 rounded-lg w-full p-7 ">
           <div className="text-[20px] font-semibold text-[#FF482E]">
             {price > 0 && (
               <ProductPrice
@@ -96,7 +98,18 @@ const ProductRight: React.FC<ProductRightProps> = ({
           >
             Add to Cart
           </button>
-        </div>
+        </div> : <div className="border border-gray-300 rounded-lg w-full p-7 ">
+          <Link
+            href="tel:0296516864"
+            className="w-full block text-center py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[15px] transition-colors"
+          >
+            CALL FOR PRICE
+          </Link>
+
+          <p className="mt-8">
+            We're committed to offering you unbeatable prices and delivering exceptional service. Feel free to get in touch with us anytime – we're here and eager to assist you !
+          </p>
+        </div>}
 
         {/* Expert Team Support */}
         <div className="border border-gray-300 rounded-lg w-full mt-6 p-7">
@@ -153,7 +166,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
             : undefined
         }
       />
-    
+
     </>
   );
 };
