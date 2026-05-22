@@ -1,0 +1,59 @@
+"use client";
+
+import { useState } from "react";
+
+interface Tab {
+  label: string;
+  count?: number;
+  isDivided?: boolean; // show divider before this tab
+}
+
+interface ProductTabsProps {
+  tabs?: Tab[];
+  activeTab?: number;
+  onTabChange?: (index: number) => void;
+}
+
+export default function ProductTabs({ tabs, activeTab: controlledActive, onTabChange }: ProductTabsProps) {
+  const [internalActive, setInternalActive] = useState(0);
+  const activeIndex = controlledActive ?? internalActive;
+
+  const defaultTabs: Tab[] = [
+    { label: "PRODUCTS", count: 10000 },
+    { label: "NEWS & INFORMATION", count: 0 },
+    { label: "SHOW SEARCH FORM", isDivided: true },
+  ];
+
+  const items = tabs || defaultTabs;
+
+  const handleClick = (index: number) => {
+    if (onTabChange) {
+      onTabChange(index);
+    } else {
+      setInternalActive(index);
+    }
+  };
+
+  return (
+    <div className="flex items-center w-full  gap-3.5 border-b border-gray-200 pb-2 mt-2 text-[14px] font-semibold">
+      {items.map((tab, index) => (
+        <div key={index} className="flex items-center gap-3.5">
+          {tab.isDivided && (
+            <div className="w-px h-7 bg-gray-400" />
+          )}
+          <button
+            onClick={() => handleClick(index)}
+            className={`uppercase tracking-wide transition-colors ${
+              activeIndex === index
+                ? "text-[#333] border-b-1 border-[#333] "
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {tab.label}
+            {tab.count !== undefined && ` (${tab.count})`}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}

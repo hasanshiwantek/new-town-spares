@@ -1,11 +1,15 @@
 "use client";
-import React, { useMemo, useCallback, useState } from "react";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { Input } from "@/components/ui/input";
 import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice";
+import { calculatePackage } from "../CheckoutComponent/Shippingstep";
+import { fetchShippingRates } from "@/redux/slices/shippingSlice";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Country, State, City } from "country-state-city";
 
 const OrderSummary = () => {
   const cart = useAppSelector((state: RootState) => state.cart.items);
@@ -16,7 +20,27 @@ const OrderSummary = () => {
   const router = useRouter();
   const [couponCode, setCouponCode] = useState("");
   const [showCouponInput, setShowCouponInput] = useState(false);
-
+  const [showShipping, setShowShipping] = useState(false);
+  const { shippingRates, ratesLoader } = useAppSelector((state) => state.shippingZone);
+  const [loading, setLoading] = useState(false);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState("");
+  const [shippingData, setShippingData] = useState({
+    country: "",
+    state: "",
+    city: "",
+    zip: "",
+  });
+  const countryList = Country.getAllCountries().map((c) => ({
+    name: c.name,
+    code: c.isoCode,
+  }));
+  const stateList = useMemo(() => {
+    if (!shippingData.country) return [];
+    return State.getStatesOfCountry(shippingData.country).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [shippingData.country]);
   const totalItems = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.quantity, 0);
   }, [cart]);
@@ -26,6 +50,12 @@ const OrderSummary = () => {
   }, [cart]);
 
   const shipping = useMemo(() => {
+
+    if (typeof window !== "undefined") {
+      const savedCost = localStorage.getItem("shippingCost");
+      if (savedCost) return Number(savedCost);
+    }
+
     if (cart.length === 0) return 0;
 
     return cart.reduce((sum, item) => {
@@ -36,6 +66,7 @@ const OrderSummary = () => {
 
   const total = subtotal + shipping;
   const grandTotal = Math.max(total - (discountAmount || 0), 0);
+  const shippingCost = Number(localStorage.getItem("shippingCost"));
 
   const handleApplyCoupon = useCallback(() => {
     const code = couponCode.trim();
@@ -64,6 +95,52 @@ const OrderSummary = () => {
     router.push("/checkout");
   }, [cart.length, router]);
 
+
+  const handleShippingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const pkg = calculatePackage(cart);
+    dispatch(fetchShippingRates({
+      data: {
+        destination: {
+          ...shippingData,
+          country_code: shippingData?.country?.trim(),
+          postal_code: shippingData?.zip?.trim(),
+        },
+        package: pkg,
+      },
+    })).unwrap().finally(() => {
+      setLoading(false);
+    })
+  };
+
+
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        const res = await fetch("/api/detect-country"); // apna Next.js route
+        const data = await res.json();
+        if (data.country_code) {
+          setShippingData((prev) => ({
+            ...prev,
+            country: data.country_code,
+            // state: data.state ?? "",
+            // city: data.city ?? "",
+            // zip: data.zip ?? "",
+          }));
+        }
+        const shippingDataLocal = localStorage.getItem("shippingData"); // Clear any previously saved shipping cost when component mounts
+        if (shippingDataLocal) {
+          setShippingData(JSON.parse(shippingDataLocal));
+        }
+      } catch {
+        setShippingData({ ...shippingData, country: "US" });
+      }
+    };
+
+    detectCountry();
+  }, []);
+
   return (
     <div className="border rounded-lg 2xl:w-full">
       <div className="px-6 py-5">
@@ -79,10 +156,173 @@ const OrderSummary = () => {
 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
           <span className="text-[14px] text-[#333333]">Shipping:</span>
-          <button className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors">
-            Add Info
-          </button>
+          {shippingCost ? <button className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors" onClick={() => setShowShipping(!showShipping)}>
+            {!showShipping ? `$${shippingCost.toFixed(2)}` : ""}
+          </button> :
+            <button className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors" onClick={() => setShowShipping(!showShipping)}>
+              {showShipping ? "Cancel" : "Add info"}
+            </button>}
         </div>
+        {showShipping && (
+          <form
+            onSubmit={handleShippingSubmit}
+            className="flex flex-col gap-3 mt-4"
+          >
+            {/* Country */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <label className="w-full md:w-1/3 text-[14px]">Country</label>
+
+              <Select
+                value={shippingData.country}
+                onValueChange={(value) =>
+                  setShippingData({ ...shippingData, country: value })
+                }
+              >
+                <SelectTrigger className="w-full md:w-2/3  outline-none">
+                  <SelectValue placeholder="Choose a Country" />
+                </SelectTrigger>
+                <SelectContent className="w-full md:w-2/3  outline-none">
+                  {countryList.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* State */}
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <label className="w-full md:w-1/3 text-[14px]">
+                State/Province
+              </label>
+              {stateList.length > 0 ? <Select
+                value={shippingData.state}
+                onValueChange={(value) =>
+                  setShippingData({ ...shippingData, state: value })
+                }
+              >
+                <SelectTrigger className="w-full md:w-2/3  outline-none">
+                  <SelectValue placeholder="Choose a State" />
+                </SelectTrigger>
+                <SelectContent className="w-full md:w-2/3  outline-none">
+                  {stateList.map((state) => (
+                    <SelectItem key={state.code} value={state.code}>
+                      {state.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select> : <Input
+                className="w-full md:w-2/3"
+                onChange={(e) =>
+                  setShippingData({ ...shippingData, state: e.target.value })
+                }
+              />}
+            </div>
+
+            {/* City */}
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <label className="w-full md:w-1/3 text-[14px]">Suburb/City</label>
+              <Input
+                value={shippingData.city}
+                className="w-full md:w-2/3"
+                onChange={(e) =>
+                  setShippingData({ ...shippingData, city: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Zip */}
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <label className="w-full md:w-1/3 text-[14px]">Zip/Postcode</label>
+              <Input
+                className="w-full md:w-2/3"
+                value={shippingData.zip}
+                onChange={(e) =>
+                  setShippingData({ ...shippingData, zip: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full md:w-[65%] btn-primary"
+              // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+              >
+                {loading ? "Loading..." : "Estimate Shipping"}
+              </button>
+            </div>
+
+            {shippingRates?.length > 0 && <div className="">
+              {ratesLoader ? (
+                Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="flex items-start gap-3 border rounded p-4 animate-pulse">
+                    <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-5 bg-gray-200 rounded w-16" />
+                    </div>
+                  </div>
+                ))
+              ) : shippingRates?.map((rate, i) => {
+                return <label
+                  key={`${rate.method_id}-${rate.service_type}`}
+                  className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="shippingMethod"
+                    value={rate.service_type}
+                    checked={selectedShippingMethod === rate.service_type}
+                    onChange={(e) => setSelectedShippingMethod(e.target.value)}
+                    className="mt-1"
+                  />
+                  <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
+                    <div className="flex items-center gap-2 font-normal" >
+                      {rate.is_fedex && (
+                        <span>
+                          FedEx
+                        </span>
+                      )}
+                      <span className="">
+                        {rate.is_fedex ? `(${rate.service_name})` : rate.display_name}
+                      </span>
+                    </div>
+                    <div className=" font-bold flex-shrink-0">
+                      {rate.total_charge === 0 ? "Free" : `$${Number(rate.total_charge).toFixed(2)}`}
+                    </div>
+                  </div>
+                </label>
+              })}
+              <div className="flex justify-end mt-1.5 mb-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!selectedShippingMethod) {
+                      toast.error("Please select a shipping method");
+                      return;
+                    }
+                    const selectedRate = shippingRates?.find(
+                      (rate: any) => rate.service_type === selectedShippingMethod
+                    );
+                    const cost = selectedRate ? Number(selectedRate.total_charge).toFixed(2) : "0";
+                    localStorage.setItem("shippingCost", cost);
+                    localStorage.setItem("shippingData", JSON.stringify(shippingData));
+                    window.location.reload(); // Refresh to update totals with new shipping cost
+                  }}
+                  className="w-full md:w-[55%] text-[18px] btn-primary"
+                // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                >
+                  Update Shipping Cost
+                </button>
+              </div>
+            </div>}
+
+          </form>
+        )}
 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
           <span className="text-[14px] text-[#333333]">Coupon Code:</span>

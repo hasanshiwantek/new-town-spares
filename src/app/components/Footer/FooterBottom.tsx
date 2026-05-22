@@ -4,6 +4,9 @@ import Link from "next/link";
 import { fetchCategories } from "@/lib/api/category";
 import Image from "next/image";
 import FooterSkeleton from "../loader/FooterSkeleton";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { subscribeNewsletter } from "@/redux/slices/contactSlice";
+import { useRouter } from "next/navigation";
 interface Category {
   id: number;
   name: string;
@@ -13,6 +16,10 @@ interface Category {
 
 const FooterBottom = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const dispatch = useAppDispatch();
+  const [email, setEmail] = useState("");
+  const router = useRouter();
+  const { newsletterLoading, newsletterSuccess, newsletterError } = useAppSelector((state: any) => state.contact);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -26,7 +33,9 @@ const FooterBottom = () => {
 
     loadCategories();
   }, []); // ✅ run once on mount
-
+  const handleSelect = (url: string) => {
+    router.push(url);
+  };
   return (
     <React.Fragment>
       <div className="flex sm:hidden">
@@ -162,17 +171,28 @@ const FooterBottom = () => {
                   Get the latest updates on new products and upcoming sales
                 </p>
               </div>
-              <form className="w-[80%] md:w-[45%] 2xl:max-w-[30%]  flex flex-col md:flex-row  items-center mt-4 md:mt-0">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                if (email.trim()) {
+                  dispatch(subscribeNewsletter({ email: email.trim() })).unwrap().then(() => {
+                    handleSelect("/result")
+                    setEmail("")
+                  });
+                }
+              }} className="w-[80%] md:w-[45%] 2xl:max-w-[30%]  flex flex-col md:flex-row  items-center mt-4 md:mt-0">
                 <input
                   type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
                   className="w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base h-[42px]"
                 />
                 <button
-                  type="submit"
+                  type="submit" disabled={newsletterLoading}
                   className="btn-primary !rounded-none !p-3 w-[40%] md:w-[30%] max-w-[9rem] h-[42px]"
                 >
-                  Subscribe
+                  {newsletterLoading ? "Loading" : "Subscribe"}
                 </button>
               </form>
             </div>

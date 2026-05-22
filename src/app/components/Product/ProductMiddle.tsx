@@ -32,6 +32,8 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
       ? originalPrice - currentPrice
       : 0;
 
+  const purchasabilityStatus = product?.purchasabilityStatus == "available"
+
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
     window.open(
@@ -44,7 +46,6 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
     dispatch(fetchReviews());
     dispatch(fetchStats());
   }, [dispatch]);
-  console.log("product", product);
 
   return (
     <section className=" product-middle  flex flex-col h-full w-full lg:w-[38%] xl:w-[37.6%] 2xl:w-[37.6%]">
@@ -107,7 +108,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
         <hr className="mt-6" />
         {/* Price */}
         <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
-          <div className="flex flex-col items-start">
+          {purchasabilityStatus ? <div className="flex flex-col items-start">
             <p className="text-[15px] text-[#333333]">
               Price:{" "}
               {hasBothPrices ? (
@@ -125,8 +126,24 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                   className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
                 />
               )}
+            </p> : <p className="text-[15px] text-[#333333]">
+              Price:{" "}
+              {hasBothPrices ? (
+                <span className=" text-[#333333]">
+                  <ProductPrice
+                    price={originalPrice}
+                    inline={true}
+                    className="!text-[15px] text-[#333333]"
+                  />
+                </span>
+              ) : (
+                <ProductPrice
+                  price={currentPrice}
+                  inline={true}
+                  className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
+                />
+              )}
             </p>
-
             <h2 className="text-[20px] text-[#FF482E] !font-normal">
               {currentPrice > 0 && (
                 <ProductPrice
@@ -149,7 +166,14 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 />
               </p>
             )}
-          </div>
+          </div> : <div className="flex flex-col items-start">
+            <Link
+              href="tel:0296516864"
+              className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[18px] tracking-wide transition-colors"
+            >
+              CALL FOR PRICE
+            </Link>
+          </div>}
           <div className="mt-2 xl:mt-3 2xl:mt-4 flex items-center gap-2 text-xs xl:text-[11.2px] 2xl:text-[14px] text-[#121e4d] flex-wrap md:flex-nowrap whitespace-nowrap">
             <span className="inline-flex items-center justify-center rounded-full bg-[#E2E2FF] text-[#6656D5] text-[14px] font-semibold px-2 py-1 mr-1">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#6656D5" /><path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>Zero interest
@@ -280,8 +304,9 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           product
             ? {
               name: product.name ?? "",
-              image: product.image[0].path,
-              sku: product.sku ?? "",
+              image: product?.image?.[0]?.path,
+              sku: product?.sku ?? "",
+              id: product.id,
             }
             : undefined
         }

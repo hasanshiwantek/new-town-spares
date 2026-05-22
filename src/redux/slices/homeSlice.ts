@@ -148,7 +148,29 @@ export const fetchProductsData = createAsyncThunk(
     }
   }
 );
+export const addReview = createAsyncThunk(
+  "home/addReview",
+  async (payload: any, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post(
+        `web/reviews/add`,
+        payload
+      );
 
+      if (res?.data?.status && res?.data?.data) {
+        return res.data;
+      }
+
+      return thunkAPI.rejectWithValue(res?.data);
+    } catch (err: any) {
+      console.error("Error sending review:", err);
+
+      return thunkAPI.rejectWithValue(
+        err?.response?.data || "Something went wrong"
+      );
+    }
+  }
+);
 // 2. Initial State
 const initialState = {
   statistics: null,

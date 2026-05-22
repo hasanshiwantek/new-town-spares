@@ -72,7 +72,7 @@ const ProductCard = ({ product }: { product: any }) => {
               >
                 /
               </span>
-              <span
+              <Link href={`/category/${cat?.slug}`}
                 className={`text-[13px] ${index === product.categoryHierarchy.length - 1
                   ? "!text-[#fd5430]"
                   : "text-[#333333]"
@@ -80,7 +80,7 @@ const ProductCard = ({ product }: { product: any }) => {
                 itemProp="name"
               >
                 {cat.name}
-              </span>
+              </Link>
             </span>
           ))}
 

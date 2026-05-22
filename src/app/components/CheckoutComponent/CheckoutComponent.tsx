@@ -17,6 +17,7 @@ import {
 import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice"; // ADD THIS
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import { Country, State, City } from "country-state-city";
 import {
   Dialog,
   DialogContent,
@@ -46,19 +47,21 @@ import ShippingStep from "./Shippingstep";
 import BillingStep from "./Billingstep";
 import PaymentStep from "./Paymentstep";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
+import { resetMultiAddress } from "@/redux/slices/multiAddressSlice";
+import { resetShippingRates } from "@/redux/slices/shippingSlice";
 
 // Stripe publishable key
 const stripePromise = loadStripe(
-  "pk_test_51Q84ITDXm8Pt3arOOI28hj5W9JPohSimaAfVeGxCPCf9N86B5rK1POKOhQpOsNmeaid1cbRAU06yzV8eienwD10B00KDT12v4S"
+  // "pk_test_51Q84ITDXm8Pt3arOOI28hj5W9JPohSimaAfVeGxCPCf9N86B5rK1POKOhQpOsNmeaid1cbRAU06yzV8eienwD10B00KDT12v4S"
+  "pk_test_51TTnoo8vkezGA3pyz8ekc5xIQNyhweCnxiumTB1si5Dejq5YWPGHDJIJPpBHMLw9hYRkbSkOGpdCzPrlW8g59HZ600cueNQymh"
 );
 
 // Pre-compute country list at module level
-const countryList = countries
-  .map((country) => ({
-    name: country.name.common,
-    code: country.cca2,
-  }))
-  .sort((a, b) => a.name.localeCompare(b.name));
+const countryList = Country.getAllCountries().map((c) => ({
+  name: c.name,
+  code: c.isoCode,
+}));
+
 
 interface CheckoutFormValues {
   email: string;
@@ -87,6 +90,7 @@ interface CheckoutFormValues {
   billingCountry: string;
   billingState: string;
   billingZip: string;
+  newsletter?: boolean;
 }
 
 // Inner component that uses Stripe hooks
@@ -94,7 +98,9 @@ const CheckoutForm = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.cart.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
-
+  const { isMultiAddress, completedDestinations, destinations, destShippingRates } = useAppSelector(
+    (state) => state.multiAddress
+  );
   // ADD COUPON STATE FROM REDUX
   const { appliedCoupon, discountAmount } = useAppSelector(
     (state: RootState) => state.coupon
@@ -126,7 +132,16 @@ const CheckoutForm = () => {
   const router = useRouter();
   const emptyCartWarningShownRef = useRef(false);
   const skipEmptyCartCheckRef = useRef(false);
+  const getDeviceType = () => {
+    if (typeof window === "undefined") return "desktop";
 
+    const userAgent = navigator.userAgent;
+
+    if (/mobile/i.test(userAgent)) return "mobile";
+    if (/tablet/i.test(userAgent)) return "tablet";
+
+    return "desktop";
+  };
   useEffect(() => {
     if (cart.length === 0) {
       if (skipEmptyCartCheckRef.current) {
@@ -150,22 +165,25 @@ const CheckoutForm = () => {
     setValue,
     control,
     trigger,
+    getValues,
     formState: { errors },
   } = useForm<CheckoutFormValues>({
     defaultValues: {
       paymentMethod: "credit_card",
-      billingSame: false,
+      billingSame: isMultiAddress ? false : true,
       email: auth?.user?.email || "",
       firstName: auth?.user?.firstName || "",
       lastName: auth?.user?.lastName || "",
       company: auth?.user?.companyName || "",
       phone: auth?.user?.phone || "",
       state: auth?.user?.state || "",
-      country: "US",
-      billingCountry: "US",
+      country: "",
+      billingCountry: "",
+      newsletter: false,
     },
   });
-
+  const watchedCountry = watch("country");
+  const watchedState = watch("state");
   const watchedPaymentMethod = watch("paymentMethod") || "credit_card";
   const watchedBillingSame = watch("billingSame");
   const stripeCardMethods = ["credit_card"];
@@ -173,6 +191,22 @@ const CheckoutForm = () => {
   const { shippingRates } = useAppSelector((state) => state.shippingZone);
   // 2. watchedShippingMethod add 
   const watchedShippingMethod = watch("shippingMethod");
+  const user: any = localStorage.getItem("persist:auth");
+  const parsedAuth = auth ? JSON.parse(user) : null;
+  const token = parsedAuth?.token ? JSON.parse(parsedAuth.token) : null;
+
+
+  const watchedBillingCountry = watch("billingCountry");
+  const watchedBillingState = watch("billingState");
+  const watchedFirstName = watch("firstName");
+  const watchedLastName = watch("lastName");
+  const watchedCompany = watch("company");
+  const watchedPhone = watch("phone");
+  const watchedAddress1 = watch("address1");
+  const watchedAddress2 = watch("address2");
+  const watchedCity = watch("city");
+  const watchedZip = watch("zip");
+
   // Memoized calculations
   const subtotal = useMemo(() => {
     return cart.reduce(
@@ -181,20 +215,79 @@ const CheckoutForm = () => {
     );
   }, [cart]);
 
-  const shipping = watchedShippingMethod ? useMemo(() => {
-    if (!watchedShippingMethod || !shippingRates?.length) return 0;
-    const selected = shippingRates.find((rate) =>
-      rate.service_type === watchedShippingMethod
-    );
-    return selected ? Number(selected?.total_charge) : 0;
-  }, [watchedShippingMethod, shippingRates]) : useMemo(() => {
-    if (cart.length === 0) return 0;
+  const stateList = useMemo(() => {
+    if (!watchedCountry) return [];
+    return State.getStatesOfCountry(watchedCountry).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [watchedCountry]);
+  // ✅ State change hone pe cities
+  const cityList = useMemo(() => {
+    if (!watchedCountry || !watchedState) return [];
+    return City.getCitiesOfState(watchedCountry, watchedState).map((c) => ({
+      name: c.name,
+    }));
+  }, [watchedCountry, watchedState]);
 
-    return cart.reduce((sum, item) => {
-      const cost = Number(item.fixedShippingCost || 0);
-      return sum + cost;
-    }, 0);
-  }, [cart]);
+
+
+  const billingStateList = useMemo(() => {
+    if (!watchedBillingCountry) return [];
+    return State.getStatesOfCountry(watchedBillingCountry).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [watchedBillingCountry]);
+
+  const billingCityList = useMemo(() => {
+    if (!watchedBillingCountry || !watchedBillingState) return [];
+    return City.getCitiesOfState(watchedBillingCountry, watchedBillingState).map((c) => ({
+      name: c.name,
+    }));
+  }, [watchedBillingCountry, watchedBillingState]);
+  const shipping = useMemo(() => {
+    if (isMultiAddress) {
+      return destinations.reduce((sum, dest) => {
+        if (!dest.selectedShippingMethod) return sum;
+
+        // ✅ Per-dest rates check karo
+        const destRates = destShippingRates[dest.id] || [];
+        const globalRates = shippingRates || [];
+        const allRates = destRates.length > 0 ? destRates : globalRates;
+
+        const rate = allRates.find(
+          (r: any) => r.service_type === dest.selectedShippingMethod
+        );
+
+        if (!rate) {
+          if (dest.selectedShippingMethod === "flat") return sum + 10;
+          if (dest.selectedShippingMethod === "own") return sum + 0;
+          return sum;
+        }
+
+        return sum + Number(rate.total_charge || 0);
+      }, 0);
+    }
+
+    // Single address — existing logic
+    if (watchedShippingMethod) {
+      if (!shippingRates?.length) return 0;
+      const selected = shippingRates.find(
+        (rate: any) => rate.service_type === watchedShippingMethod
+      );
+      return selected ? Number(selected.total_charge) : 0;
+    }
+    // ✅ Cart page se localStorage mein saved cost
+    if (typeof window !== "undefined") {
+      const savedCost = localStorage.getItem("shippingCost");
+      if (savedCost) return Number(savedCost);
+    }
+
+    if (cart.length === 0) return 0;
+    return cart.reduce((sum, item) => sum + Number(item.fixedShippingCost || 0), 0);
+  }, [isMultiAddress, destinations, destShippingRates, watchedShippingMethod, shippingRates, cart]);
+
 
   const tax = 0;
 
@@ -313,31 +406,117 @@ const CheckoutForm = () => {
     };
   }, [stripe, cart, finalTotal]); // DEPENDENCY: finalTotal instead of total
 
+  // const buildOrderPayload = useCallback(
+  //   (data: CheckoutFormValues & { paymentIntentId?: string | null }) => ({
+  //     firstName: data.firstName,
+  //     lastName: data.lastName,
+  //     companyName: data.company || "",
+  //     email: data.email,
+  //     phone: data.phone || "",
+  //     addressLine1: data.address1,
+  //     addressLine2: data.address2 || "",
+  //     city: data.city,
+  //     state: data.state || "",
+  //     zip: data.zip,
+  //     country: data.country,
+  //     paymentMethod: data.paymentMethod,
+  //     shippingMethod: data.shippingMethod,
+  //     discountAmount: discountAmount ? finalTotal : 0,
+  //     shippingCost: shipping,
+  //     comments: data.orderComment || "",
+  //     paymentIntentId: data.paymentIntentId ?? "",
+  //     products: cart.map((item) => ({
+  //       product_id: item.id,
+  //       quantity: item.quantity || 1,
+  //     })),
+  //   }),
+  //   [cart, shipping]
+  // );
   const buildOrderPayload = useCallback(
-    (data: CheckoutFormValues & { paymentIntentId?: string | null }) => ({
-      firstName: data.firstName,
-      lastName: data.lastName,
-      companyName: data.company || "",
-      email: data.email,
-      phone: data.phone || "",
-      addressLine1: data.address1,
-      addressLine2: data.address2 || "",
-      city: data.city,
-      state: data.state || "",
-      zip: data.zip,
-      country: data.country,
-      paymentMethod: data.paymentMethod,
-      shippingMethod: data.shippingMethod,
-      discountAmount: discountAmount ? finalTotal : 0,
-      shippingCost: shipping,
-      comments: data.orderComment || "",
-      paymentIntentId: data.paymentIntentId ?? "",
-      products: cart.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity || 1,
-      })),
-    }),
-    [cart, shipping]
+    (data: CheckoutFormValues & { paymentIntentId?: string | null }) => {
+      // ✅ Multi address mode
+      if (isMultiAddress && destinations.length > 0) {
+        return {
+          userType: token ? null : "guest",
+          deviceType: getDeviceType(),
+          email: data.email,
+          paymentMethod: data.paymentMethod,
+          discountAmount: discountAmount ? finalTotal : 0,
+          shippingCost: shipping,
+          comments: data.orderComment || "",
+          paymentIntentId: data.paymentIntentId ?? "",
+          newsletter: data.newsletter || false,
+          // ✅ Multi destination array
+          isMultiAddress: true,
+          destinations: destinations.map((dest) => {
+            // Per dest allocated products
+            const allocatedProducts: Record<string, number> = {};
+            dest.allocatedItems.forEach((slot) => {
+              const itemId = slot.split("-")[0];
+              allocatedProducts[itemId] = (allocatedProducts[itemId] || 0) + 1;
+            });
+
+            // Per dest shipping rate
+            const destRates = destShippingRates[dest.id] || [];
+            const allRates = destRates.length > 0 ? destRates : (shippingRates || []);
+            const selectedRate = allRates.find(
+              (r: any) => r.service_type === dest.selectedShippingMethod
+            );
+
+            return {
+              firstName: dest.address?.firstName || "",
+              lastName: dest.address?.lastName || "",
+              companyName: dest.address?.company || "",
+              phone: dest.address?.phone || "",
+              addressLine1: dest.address?.address1 || "",
+              addressLine2: dest.address?.address2 || "",
+              city: dest.address?.city || "",
+              state: dest.address?.state || "",
+              zip: dest.address?.zip || "",
+              country: dest.address?.country || "",
+              shippingMethod: dest.selectedShippingMethod,
+
+              shippingCost: selectedRate ? Number(selectedRate.total_charge) : 0,
+              products: Object.entries(allocatedProducts).map(([productId, quantity]) => ({
+                product_id: Number(productId),
+                quantity,
+              })),
+            };
+          }),
+        };
+      }
+
+      // ✅ Single address — existing logic
+      return {
+        userType: token ? null : "guest",
+        deviceType: getDeviceType(),
+        firstName: data.firstName,
+        lastName: data.lastName,
+        companyName: data.company || "",
+        email: data.email,
+        phone: data.phone || "",
+        addressLine1: data.address1,
+        addressLine2: data.address2 || "",
+        city: data.city,
+        state: data.state || "",
+        zip: data.zip,
+        country: data.country,
+        paymentMethod: data.paymentMethod,
+        shippingMethod: data.shippingMethod,
+        discountAmount: discountAmount ? finalTotal : 0,
+        shippingCost: shipping,
+        comments: data.orderComment || "",
+        newsletter: data.newsletter || false,
+        paymentIntentId: data.paymentIntentId ?? "",
+        isMultiAddress: false,
+        products: cart.map((item) => ({
+          product_id: item.id,
+          quantity: item.quantity || 1,
+        })),
+      };
+    },
+    [cart, shipping, isMultiAddress, destinations, destShippingRates,
+      shippingRates, discountAmount, finalTotal, token]
   );
 
   const placeOrder = useCallback(
@@ -348,7 +527,7 @@ const CheckoutForm = () => {
         orderPayload
       );
       const orderData = orderResponse.data?.data || orderResponse.data;
-
+      localStorage.removeItem("shippingCost"); // ✅ Clear saved shipping cost after order is placed
       return orderData || null;
     },
     [buildOrderPayload]
@@ -410,6 +589,8 @@ const CheckoutForm = () => {
         dispatch(setLastOrder(orderData));
         dispatch(clearCart());
         dispatch(removeCoupon());
+        dispatch(resetMultiAddress());
+        dispatch(resetShippingRates());
         router.push("/order-success");
       } catch (err: any) {
         console.error("❌ Wallet payment failed:", err);
@@ -447,11 +628,33 @@ const CheckoutForm = () => {
   ]);
 
   // Step navigation handlers
+  // const handleContinueToShipping = async () => {
+  //   const isValid = await trigger(["email"]);
+  //   if (isValid) {
+  //     setCompletedSteps((prev) => [...new Set([...prev, 1])]);
+  //     setCurrentStep(2);
+  //   }
+  // };
   const handleContinueToShipping = async () => {
-    const isValid = await trigger(["email"]);
+    const isValid = await trigger(["email", "newsletter"]);
     if (isValid) {
+      const email = getValues("email");
+      const newsletter = getValues("newsletter");
+
+      // API call - apni endpoint laga lo
+      // try {
+      //   await fetch("/api/checkout/customer", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify({ email, newsletter: !!newsletter }),
+      //   });
+      // } catch (error) {
+      //   console.error("Customer API error:", error);
+      // }
       setCompletedSteps((prev) => [...new Set([...prev, 1])]);
       setCurrentStep(2);
+
+
     }
   };
 
@@ -619,18 +822,32 @@ const CheckoutForm = () => {
             type: "card",
             card: cardNumberElement,
             billing_details: {
-              name: `${data.firstName} ${data.lastName}`,
+              name: `${data.billingFirstName} ${data.billingLastName}`,
               email: data.email,
-              phone: data.phone,
+              phone: data.billingPhone,
               address: {
-                line1: data.address1,
-                line2: data.address2,
-                city: data.city,
-                state: data.state,
-                postal_code: data.zip,
-                country: data.country,
+                line1: data.billingAddress1,
+                line2: data.billingAddress2,
+                city: data.billingCity,
+                state: data.billingState,
+                postal_code: data.billingZip,
+                country: data.billingCountry,
               },
             },
+
+            // billing_details: {
+            //   name: `${data.firstName} ${data.lastName}`,
+            //   email: data.email,
+            //   phone: data.phone,
+            //   address: {
+            //     line1: data.address1,
+            //     line2: data.address2,
+            //     city: data.city,
+            //     state: data.state,
+            //     postal_code: data.zip,
+            //     country: data.country,
+            //   },
+            // },
           });
 
         if (pmError) {
@@ -656,6 +873,8 @@ const CheckoutForm = () => {
       dispatch(setLastOrder(orderData));
       dispatch(clearCart());
       dispatch(removeCoupon());
+      dispatch(resetMultiAddress());       // ✅ ADD
+      dispatch(resetShippingRates());
       router.push("/order-success");
     } catch (err: any) {
       console.error("❌ Error processing order:", err);
@@ -668,7 +887,32 @@ const CheckoutForm = () => {
       setIsProcessing(false);
     }
   };
-
+  // watchedBillingSame ke saath useEffect add karo
+  useEffect(() => {
+    if (watchedBillingSame && !isMultiAddress) {
+      setValue("billingFirstName", watchedFirstName);
+      setValue("billingLastName", watchedLastName);
+      setValue("billingCompany", watchedCompany);
+      setValue("billingPhone", watchedPhone);
+      setValue("billingAddress1", watchedAddress1);
+      setValue("billingAddress2", watchedAddress2);
+      setValue("billingCity", watchedCity);
+      setValue("billingState", watchedState);
+      setValue("billingCountry", watchedCountry);
+      setValue("billingZip", watchedZip);
+      setCompletedSteps((prev) => [...new Set([...prev, 3])]);
+    } else if (!watchedBillingSame) {
+      setValue("billingFirstName", "");
+      setValue("billingLastName", "");
+      setValue("billingCompany", "");
+      setValue("billingPhone", "");
+      setValue("billingAddress1", "");
+      setValue("billingAddress2", "");
+      setValue("billingCity", "");
+      setValue("billingZip", "");
+      setCompletedSteps((prev) => prev.filter((s) => s !== 3));
+    }
+  }, [watchedBillingSame, watchedState, watchedCountry, watchedFirstName, watchedLastName, watchedZip, watchedAddress2, watchedAddress1, watchedCompany, watchedPhone, watchedCity]);
   return (
     <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
       {paymentRequest && (
@@ -708,8 +952,11 @@ const CheckoutForm = () => {
                 register={register}
                 errors={errors}
                 control={control}
+                setValue={setValue}
                 onContinue={handleContinueToBilling}
                 countryList={countryList}
+                stateList={stateList}
+                cityList={cityList}
                 isActive={currentStep === 2}
                 isCompleted={completedSteps.includes(2)}
                 onEdit={handleEditShipping}

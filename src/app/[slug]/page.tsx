@@ -133,7 +133,7 @@ export default async function ProductPage({
             Loading...
           </div>}>
             {/* <ProductExtras products={product} /> */}
-            <ProductExtras products={products?.filter((p: any) => p.id !== product.id)} />
+            {product?.relatedProductsEnabled && <ProductExtras products={products?.filter((p: any) => p.id !== product.id)} />}
             <ProductRecent productId={product?.id} />
           </Suspense>
 
