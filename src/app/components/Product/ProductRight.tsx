@@ -33,9 +33,9 @@ const ProductRight: React.FC<ProductRightProps> = ({
 
   return (
     <>
-      <aside className="product-right w-full lg:w-[22%] xl:w-[20.3%] 2xl:w-[20%] mt-3">
+      <aside className="product-right w-[300px] mt-3">
         {/* Top: Price, Stock, Quantity, Add to Cart */}
-        {purchasabilityStatus ? <div className="border border-gray-300 rounded-lg w-full p-7 ">
+        {purchasabilityStatus ? <div className="border border-[#ebebeb] w-full p-7 ">
           <div className="text-[20px] font-semibold text-[#FF482E]">
             {price > 0 && (
               <ProductPrice
@@ -46,12 +46,12 @@ const ProductRight: React.FC<ProductRightProps> = ({
               />
             )}
           </div>
-          <p className="text-[#000000] text-[14px] mt-1">
+          <p className="text-[#333] text-[14px] mt-1 font-light">
             {product?.availabilityText || "In Stock"}
           </p>
 
           <div className="mt-4 flex flex-col gap-2 items-start">
-            <label className="text-[#000000] text-[13px] mb-1">Quantity:</label>
+            <label className="text-[#333] text-[13px] mb-1 font-light">Quantity:</label>
             <input
               type="number"
               min={1}
@@ -83,7 +83,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
                   }
                 }
               }}
-              className="w-17 h-13 text-center text-sm border border-gray-300 rounded bg-white text-[#000000] focus:outline-none"
+              className="w-17 h-13 text-center text-sm border border-[#ebebeb] rounded bg-white text-[#000000] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               aria-label="Quantity"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -94,7 +94,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
           <button
             type="button"
             onClick={onAddToCart}
-            className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[14px] rounded transition-colors"
+            className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white text-[14px] transition-colors font-light!"
           >
             Add to Cart
           </button>
@@ -112,14 +112,14 @@ const ProductRight: React.FC<ProductRightProps> = ({
         </div>}
 
         {/* Expert Team Support */}
-        <div className="border border-gray-300 rounded-lg w-full mt-6 p-7">
+        <div className="border border-[#ebebeb] w-full mt-6 p-7">
           <p className="text-center text-[#888888] text-[15px] font-medium uppercase tracking-wide">
             Expert Team Support
           </p>
-          <div className="flex justify-center gap-2 mt-4 flex-wrap">
+          <div className="flex justify-between gap-2 mt-4 flex-wrap">
             <a
               href="mailto:support@newtownspares.com"
-              className="px-4 py-2.5 bg-[#555555] hover:bg-[#444] text-white text-[12.6px] font-medium rounded shadow-sm transition-colors"
+              className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
             >
               Email
             </a>
@@ -127,7 +127,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
               href="https://wa.me/12096516864"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2.5 bg-[#555555] hover:bg-[#444] text-white text-[12.6px] font-medium rounded shadow-sm transition-colors"
+              className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
             >
               WhatsApp
             </a>
@@ -135,18 +135,18 @@ const ProductRight: React.FC<ProductRightProps> = ({
               href="https://join.skype.com/invite/example"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2.5 bg-[#555555] hover:bg-[#444] text-white text-[12.6px] font-medium rounded shadow-sm transition-colors"
+              className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
             >
               Skype
             </a>
           </div>
-          <p className="text-center text-[#000000] text-[14px] mt-4">
+          <p className="text-center text-[#333] text-[14px] mt-4">
             (209) 651-6864
           </p>
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="w-full mt-4 py-3 bg-white border border-[#333333] text-[#000000] font-medium text-[14px] rounded hover:bg-gray-50 transition-colors"
+            className="w-full mt-4 py-3 bg-white border border-[#333333] text-[#333] font-normal text-[14px] hover:bg-gray-50 transition-colors"
           >
             Request A Bulk Quote
           </button>

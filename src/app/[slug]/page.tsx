@@ -1,7 +1,11 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import Script from "next/script";
 import dynamic from "next/dynamic";
-import { fetchProductBySlug, fetchProductBySlugAndUrl, fetchProducts } from "@/lib/api/products";
+import {
+  fetchProductBySlug,
+  fetchProductBySlugAndUrl,
+  fetchProducts,
+} from "@/lib/api/products";
 import ProductCard from "@/app/components/Product/ProductCard";
 import ProductOverview from "@/app/components/Product/ProductOverview";
 import ProductExtras from "@/app/components/Product/ProductExtras";
@@ -9,6 +13,7 @@ import { Suspense } from "react";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import ProductRecent from "../components/Product/ProductRecent";
+import Link from "next/link";
 // import { useAppSelector } from "@/hooks/useReduxHooks";
 
 // ✅ Dynamic metadata for SEO
@@ -23,7 +28,6 @@ export async function generateMetadata({
   // ✅ Most reliable - Next.js sets this automatically
   const fullUrl = headersList.get("x-full-url");
   const pathname: any = headersList.get("x-pathname");
-
 
   const product = await fetchProductBySlugAndUrl(pathname);
 
@@ -125,18 +129,56 @@ export default async function ProductPage({
 
       <main role="main">
         <article>
+          {/* Breadcrumb */}
+          <nav
+            aria-label="breadcrumb"
+            className="flex items-center space-x-2 lg:mb-7 sm:mb-7 mb-7 flex-wrap"
+          >
+            <Link href={"/"}>
+              <span className="text-[#333333] text-[13px]">Home</span>
+            </Link>
+            {product?.categoryHierarchy?.map((cat: any, index: number) => (
+              <span key={cat.id}>
+                <span
+                  className="mt-2 mx-3 text-gray-400 text-[13px]"
+                  aria-hidden="true"
+                >
+                  /
+                </span>
+                <Link
+                  href={`/category/${cat?.slug}`}
+                  className={`text-[13px] ${
+                    index === product.categoryHierarchy.length - 1
+                      ? "!text-[#fd5430]"
+                      : "text-[#333333]"
+                  }`}
+                  itemProp="name"
+                >
+                  {cat.name}
+                </Link>
+              </span>
+            ))}
+            <hr className="w-full" />
+          </nav>
           <ProductCard product={product} />
           <ProductOverview product={product} />
 
           {/* Client-side component */}
-          <Suspense fallback={<div className="py-10 text-center text-sm text-gray-500">
-            Loading...
-          </div>}>
+          <Suspense
+            fallback={
+              <div className="py-10 text-center text-sm text-gray-500">
+                Loading...
+              </div>
+            }
+          >
             {/* <ProductExtras products={product} /> */}
-            {product?.relatedProductsEnabled && <ProductExtras products={products?.filter((p: any) => p.id !== product.id)} />}
+            {product?.relatedProductsEnabled && (
+              <ProductExtras
+                products={products?.filter((p: any) => p.id !== product.id)}
+              />
+            )}
             <ProductRecent productId={product?.id} />
           </Suspense>
-
         </article>
       </main>
     </>

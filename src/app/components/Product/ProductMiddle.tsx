@@ -1,20 +1,13 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
-import { Star, Plus, Minus } from "lucide-react";
-import Image from "next/image";
-import freelogo from "@/assets/card-icon/freelogo.png";
-import dhllogo from "@/assets/card-icon/dhl.svg";
-import upslogo from "@/assets/card-icon/ups.svg";
-import feedxlogo from "@/assets/card-icon/fedex.svg";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { toast } from "sonner";
-import { addToCart } from "@/redux/slices/cartSlice";
-import { useRouter } from "next/navigation";
-import ProductPrice from "../productprice/ProductPrice";
 import { fetchReviews, fetchStats } from "@/redux/slices/homeSlice";
-import Link from "next/link";
 import { RootState } from "@/redux/store";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import AddReviewModal from "../modal/AddReviewModal";
+import ProductPrice from "../productprice/ProductPrice";
 
 const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   const dispatch = useAppDispatch();
@@ -32,7 +25,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
       ? originalPrice - currentPrice
       : 0;
 
-  const purchasabilityStatus = product?.purchasabilityStatus == "available"
+  const purchasabilityStatus = product?.purchasabilityStatus == "available";
 
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
@@ -52,26 +45,16 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
       <div>
         <div className="flex flex-col gap-1">
           {/* <h6 className="h6-regular">{product?.brand?.name}</h6> */}
-          <h1
-            className="
-     uppercase 
-    text-[14px] leading-8 tracking-[0.0075em] text-[#333333] 
-    xl:text-[16.8px] 
-    2xl:text-[20px]
-  "
-          >
+          <h1 className="uppercase font-light text-[14px] leading-8 tracking-[0.0075em] text-[#333333] xl:text-[16.8px] 2xl:text-[20px]">
             {product?.name || "N/A"}
           </h1>
 
           <p className="text-[14px] text-[#333333] mt-1">
             Brand:{" "}
-            <span className="font-medium">
-              {product?.brand?.name || "N/A"}
-            </span>
+            <span>{product?.brand?.name || "N/A"}</span>
           </p>
           <p className="text-[14px] text-[#333333]">
-            SKU:{" "}
-            <span className="font-medium">{product?.sku || "N/A"}</span>
+            SKU: <span className="font-medium">{product?.sku || "N/A"}</span>
           </p>
 
           {/* Rating & Reviews */}
@@ -108,75 +91,76 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
         <hr className="mt-6" />
         {/* Price */}
         <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
-          {purchasabilityStatus ? <div className="flex flex-col items-start">
-            <p className="text-[15px] text-[#333333]">
-              Price:{" "}
-              {hasBothPrices ? (
-                <span className=" text-[#333333]">
+          {purchasabilityStatus ? (
+            <div className="flex flex-col items-start">
+              <p className="text-[15px] text-[#333333]">
+                Price:{" "}
+                {hasBothPrices ? (
+                  <span className=" text-[#333333]">
+                    <ProductPrice
+                      price={originalPrice}
+                      inline={true}
+                      className="!text-[15px] text-[#333333]"
+                    />
+                  </span>
+                ) : (
                   <ProductPrice
-                    price={originalPrice}
+                    price={currentPrice}
                     inline={true}
-                    className="!text-[15px] text-[#333333]"
+                    className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
                   />
-                </span>
-              ) : (
-                <ProductPrice
-                  price={currentPrice}
-                  inline={true}
-                  className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
-                />
-              )}
-            </p> : <p className="text-[15px] text-[#333333]">
-              Price:{" "}
-              {hasBothPrices ? (
-                <span className=" text-[#333333]">
-                  <ProductPrice
-                    price={originalPrice}
-                    inline={true}
-                    className="!text-[15px] text-[#333333]"
-                  />
-                </span>
-              ) : (
-                <ProductPrice
-                  price={currentPrice}
-                  inline={true}
-                  className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
-                />
-              )}
-            </p>
-            <h2 className="text-[20px] text-[#FF482E] !font-normal">
-              {currentPrice > 0 && (
-                <ProductPrice
-                  price={currentPrice}
-                  inline={true}
-                  textColor="#FF482E"
-                  className="!text-[20px] !font-normal"
-                />
-              )}
-            </h2>
-
-            {savings > 0 && (
-              <p className="text-[15px] text-[#CC0000] !font-normal">
-                You save{" "}
-                <ProductPrice
-                  price={savings}
-                  inline={true}
-                  textColor="#CC0000"
-                  className="!text-[15px] !font-normal"
-                />
+                )}
               </p>
-            )}
-          </div> : <div className="flex flex-col items-start">
-            <Link
-              href="tel:0296516864"
-              className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[18px] tracking-wide transition-colors"
-            >
-              CALL FOR PRICE
-            </Link>
-          </div>}
+              <h2 className="text-[20px] text-[#FF482E] !font-normal">
+                {currentPrice > 0 && (
+                  <ProductPrice
+                    price={currentPrice}
+                    inline={true}
+                    textColor="#FF482E"
+                    className="!text-[20px] !font-normal"
+                  />
+                )}
+              </h2>
+              {savings > 0 && (
+                <p className="text-[15px] text-[#CC0000] !font-normal">
+                  You save{" "}
+                  <ProductPrice
+                    price={savings}
+                    inline={true}
+                    textColor="#CC0000"
+                    className="!text-[15px] !font-normal"
+                  />
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-start">
+              <Link
+                href="tel:0296516864"
+                className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[18px] tracking-wide transition-colors"
+              >
+                CALL FOR PRICE
+              </Link>
+            </div>
+          )}
           <div className="mt-2 xl:mt-3 2xl:mt-4 flex items-center gap-2 text-xs xl:text-[11.2px] 2xl:text-[14px] text-[#121e4d] flex-wrap md:flex-nowrap whitespace-nowrap">
             <span className="inline-flex items-center justify-center rounded-full bg-[#E2E2FF] text-[#6656D5] text-[14px] font-semibold px-2 py-1 mr-1">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#6656D5" /><path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>Zero interest
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 mr-1"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <circle cx="8" cy="8" r="8" fill="#6656D5" />
+                <path
+                  d="M5.5 8.5L7.5 10.5L10.5 6.5"
+                  stroke="#fff"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Zero interest
             </span>
             <span className="whitespace-nowrap">
               or as low as $19/mo.&nbsp;
@@ -192,8 +176,19 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
               {/* Tick Icon, tick is #333333, bg none, size bardha di but text align with tick */}
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-7 h-7 mr-2 -ml-[2px]"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M5.5 8.5L7.5 10.5L10.5 6.5"
+                  stroke="#333333"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               <span className="leading-none">Free Shipping</span>
             </span>
@@ -205,8 +200,19 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           {/* Best Price */}
           <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-7 h-7 mr-2 -ml-[2px]"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M5.5 8.5L7.5 10.5L10.5 6.5"
+                  stroke="#333333"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               <span className="leading-none">Best Price</span>
             </span>
@@ -217,8 +223,19 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           {/* Customer Help */}
           <div className="px-10 py-3.5 flex flex-col justify-center border-t  border-r border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-7 h-7 mr-2 -ml-[2px]"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M5.5 8.5L7.5 10.5L10.5 6.5"
+                  stroke="#333333"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               <span className="leading-none">Customer Help</span>
             </span>
@@ -229,8 +246,19 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           {/* Secure Payment */}
           <div className="px-10 py-3.5 flex flex-col justify-center border-t border-gray-200">
             <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 mr-2 -ml-[2px]" fill="none" viewBox="0 0 16 16">
-                <path d="M5.5 8.5L7.5 10.5L10.5 6.5" stroke="#333333" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-7 h-7 mr-2 -ml-[2px]"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M5.5 8.5L7.5 10.5L10.5 6.5"
+                  stroke="#333333"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               <span className="leading-none">Secure Payment</span>
             </span>
@@ -239,7 +267,6 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             </span>
           </div>
         </div>
-
       </div>
       {/* Note with icon and text side by side */}
       <div className="mt-6 bg-[#F5F5F5] p-6 flex items-start">
@@ -250,7 +277,13 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           width={34}
           height={42}
           className="inline-block flex-shrink-0"
-          style={{ color: "#333333", minWidth: 34, minHeight: 42, maxWidth: 34, maxHeight: 42 }}
+          style={{
+            color: "#333333",
+            minWidth: 34,
+            minHeight: 42,
+            maxWidth: 34,
+            maxHeight: 42,
+          }}
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -264,8 +297,9 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
         </svg>
         {/* Text */}
         <p className="ml-5 text-[12px] text-[#333333]">
-          All Business Entities, Corporations, Public &amp; Private School Systems, Governmental
-          Organizations, Colleges, Universities &amp; Libraries are welcome to submit purchase orders.
+          All Business Entities, Corporations, Public &amp; Private School
+          Systems, Governmental Organizations, Colleges, Universities &amp;
+          Libraries are welcome to submit purchase orders.
         </p>
       </div>
 
@@ -297,20 +331,22 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           className="w-[114px] h-[40px] object-contain"
         />
       </div>
-      {isReviewModalOpen && <AddReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        product={
-          product
-            ? {
-              name: product.name ?? "",
-              image: product?.image?.[0]?.path,
-              sku: product?.sku ?? "",
-              id: product.id,
-            }
-            : undefined
-        }
-      />}
+      {isReviewModalOpen && (
+        <AddReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          product={
+            product
+              ? {
+                  name: product.name ?? "",
+                  image: product?.image?.[0]?.path,
+                  sku: product?.sku ?? "",
+                  id: product.id,
+                }
+              : undefined
+          }
+        />
+      )}
     </section>
   );
 };

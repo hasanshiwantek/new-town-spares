@@ -33,12 +33,11 @@ const ProductCard = ({ product }: { product: any }) => {
         sku: product?.sku,
         productUrl: product?.productUrl,
         name: product?.name,
-        image:
-          product?.image,
+        image: product?.image,
         price: Number(product?.price) || 0,
         id: product?.id,
         brand: product?.brand,
-      })
+      }),
     );
   }, [product]);
 
@@ -56,36 +55,6 @@ const ProductCard = ({ product }: { product: any }) => {
   return (
     <div className="max-w-full mx-auto">
       <div className="bg-white rounded-xl w-full">
-        {/* Breadcrumb */}
-        <nav
-          aria-label="breadcrumb"
-          className="flex items-center space-x-2 lg:mb-7 sm:mb-7 mb-7 flex-wrap"
-        >
-          <Link href={"/"}>
-            <span className="text-[#333333] text-[13px]">Home</span>
-          </Link>
-          {product?.categoryHierarchy?.map((cat: any, index: number) => (
-            <span key={cat.id}>
-              <span
-                className="mt-2 mx-3 text-gray-400 text-[13px]"
-                aria-hidden="true"
-              >
-                /
-              </span>
-              <Link href={`/category/${cat?.slug}`}
-                className={`text-[13px] ${index === product.categoryHierarchy.length - 1
-                  ? "!text-[#fd5430]"
-                  : "text-[#333333]"
-                  }`}
-                itemProp="name"
-              >
-                {cat.name}
-              </Link>
-            </span>
-          ))}
-
-        </nav>
-
         <div className="flex flex-wrap lg:flex-nowrap 2xl:gap-6 xl:gap-[20px] lg:gap-[25px] md:gap-5 sm:gap-4 gap-4 ">
           <ProductLeft
             images={images}
