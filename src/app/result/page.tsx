@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: "Shopping Cart",
     description:
       "View and manage your items in the shopping cart at New Town Spares. Add, remove, or update quantities before checkout.",
-    url: "https://server-blink.vercel.app/cart",
+    url: "https://newtownspares.com/cart",
     siteName: "New Town Spares",
     images: [
       {

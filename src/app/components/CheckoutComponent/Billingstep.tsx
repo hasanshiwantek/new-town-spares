@@ -14,7 +14,7 @@ import { UseFormRegister, FieldErrors, Control, Controller } from "react-hook-fo
 interface BillingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
-  control: Control<any>;
+  control: any;
   onContinue: () => void;
   countryList: Array<{ name: string; code: string }>;
   isActive: boolean;
@@ -77,9 +77,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
           <Input
             id="billingFirstName"
             type="text"
-            className={`w-full h-[40px] ${
-              errors.billingFirstName ? "border-red-500" : ""
-            }`}
+            className={`w-full h-[40px] ${errors.billingFirstName ? "border-red-500" : ""
+              }`}
             {...register("billingFirstName", {
               required: "First name is required",
             })}
@@ -98,9 +97,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
           <Input
             id="billingLastName"
             type="text"
-            className={`w-full h-[40px] ${
-              errors.billingLastName ? "border-red-500" : ""
-            }`}
+            className={`w-full h-[40px] ${errors.billingLastName ? "border-red-500" : ""
+              }`}
             {...register("billingLastName", {
               required: "Last name is required",
             })}
@@ -144,9 +142,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
         <Input
           id="billingAddress1"
           type="text"
-          className={`w-full h-[40px] ${
-            errors.billingAddress1 ? "border-red-500" : ""
-          }`}
+          className={`w-full h-[40px] ${errors.billingAddress1 ? "border-red-500" : ""
+            }`}
           {...register("billingAddress1", {
             required: "Address is required",
           })}
@@ -177,9 +174,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
         <Input
           id="billingCity"
           type="text"
-          className={`w-full h-[40px] ${
-            errors.billingCity ? "border-red-500" : ""
-          }`}
+          className={`w-full h-[40px] ${errors.billingCity ? "border-red-500" : ""
+            }`}
           {...register("billingCity", {
             required: "City is required",
           })}
@@ -202,9 +198,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
           render={({ field }) => (
             <Select onValueChange={field.onChange} value={field.value}>
               <SelectTrigger
-                className={`w-full h-[40px] ${
-                  errors.billingCountry ? "border-red-500" : ""
-                }`}
+                className={`w-full h-[40px] ${errors.billingCountry ? "border-red-500" : ""
+                  }`}
               >
                 <SelectValue placeholder="Select country" />
               </SelectTrigger>
@@ -245,9 +240,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
           <Input
             id="billingZip"
             type="text"
-            className={`w-full h-[40px] ${
-              errors.billingZip ? "border-red-500" : ""
-            }`}
+            className={`w-full h-[40px] ${errors.billingZip ? "border-red-500" : ""
+              }`}
             {...register("billingZip", {
               required: "Postal code is required",
             })}
