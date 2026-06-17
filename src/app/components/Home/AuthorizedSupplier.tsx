@@ -60,15 +60,15 @@ const AuthorizedSupplier: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         {/* Card 1: SAM.GOV */}
-        <div className="flex flex-col border border-gray-200 rounded-lg p-7" style={{ minHeight: '540px' }}>
+        <div className="flex flex-col border border-gray-200 rounded-lg p-7.5" style={{ minHeight: '540px' }}>
           {/* Logo — Top Center */}
-          <div className="flex justify-center items-center h-[121px]">
+          <div className="flex justify-center items-center m-10">
             <Image
               src="/samlogo.webp"
               alt="SAM.GOV Logo"
               width={342}
               height={121}
-              className="object-contain max-w-[342px] h-auto"
+              className="object-contain h-auto"
             />
           </div>
 
@@ -77,7 +77,7 @@ const AuthorizedSupplier: React.FC = () => {
             <h2 className="text-[2.1rem] !text-[#333333] mb-3">
               Authorized Supplier on SAM.gov
             </h2>
-            <p className="text-[1.42rem] !text-[#808080]">
+            <p className="text-[17px] text-[#808080]!">
               We feel tremendous pride in having achieved verified vendor status due to our ongoing commitment to
               adhering to the exacting requirements set by the US Federal Contractor Registration. We take great pride
               in our membership among the renowned ranks of SAM participants, which further establishes our standing
@@ -89,13 +89,13 @@ const AuthorizedSupplier: React.FC = () => {
         {/* Card 2: D&B */}
         <div className="flex flex-col border border-gray-200 rounded-lg p-7" style={{ minHeight: '540px' }}>
           {/* Logo — Top Center */}
-          <div className="flex justify-center items-center h-[121px]">
+          <div className="flex justify-center items-center m-10">
             <Image
               src="/dunlogo.webp"
               alt="Dun & Bradstreet Logo"
               width={342}
               height={121}
-              className="object-contain max-w-[342px] h-auto"
+              className="object-contain h-auto"
             />
           </div>
 

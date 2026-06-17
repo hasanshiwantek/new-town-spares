@@ -159,11 +159,11 @@ const FooterBottom = () => {
           <section className="bg-[#2C2D2C] flex justify-center items-center h-auto min-h-[7.91rem]">
             <div
               className="
-        w-full max-w-[1684px] mx-auto px-7 xl:px-28
-        flex flex-col md:flex-row items-center justify-around gap-2 md:gap-8 lg:gap-0
+        w-full
+        flex flex-col md:flex-row items-center justify-evenly gap-2 md:gap-8 lg:gap-0
       "
             >
-              <div className="hidden md:block text-center  md:text-center w-full md:w-[60%]  2xl:max-w-[50%]">
+              <div className="hidden md:block text-center  md:text-center">
                 <h3 className="text-[19px] !text-white">
                   Subscribe to our Newsletter
                 </h3>
@@ -179,22 +179,23 @@ const FooterBottom = () => {
                     setEmail("")
                   });
                 }
-              }} className="w-[80%] md:w-[45%] 2xl:max-w-[30%]  flex flex-col md:flex-row  items-center mt-4 md:mt-0">
+              }} className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 h-[42px]">
                 <input
                   type="email"
                   name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base h-[42px]"
+                  className="h-full w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base"
                 />
                 <button
                   type="submit" disabled={newsletterLoading}
-                  className="btn-primary !rounded-none !p-3 w-[40%] md:w-[30%] max-w-[9rem] h-[42px]"
+                  className="btn-primary !rounded-none h-full font-light! px-7!"
                 >
                   {newsletterLoading ? "Loading" : "Subscribe"}
                 </button>
               </form>
+              <div></div>
             </div>
           </section>
 
