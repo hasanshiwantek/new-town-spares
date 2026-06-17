@@ -18,12 +18,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shopping Cart",
     description:
-      "View and manage your items in the shopping cart at Server Blink. Add, remove, or update quantities before checkout.",
-    url: "https://server-blink.vercel.app/cart",
-    siteName: "Server Blink",
+      "View and manage your items in the shopping cart at New Town Spares. Add, remove, or update quantities before checkout.",
+    url: "https://newtownspares.com/cart",
+    siteName: "New Town Spares",
     images: [
       {
-        url: "/cart.png", // Replace with Server Blink specific image if needed
+        url: "/cart.png", // Replace with New Town Spares specific image if needed
         width: 1200,
         height: 630,
         alt: "Shopping Cart - New Town Spares",

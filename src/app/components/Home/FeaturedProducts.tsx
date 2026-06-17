@@ -26,9 +26,9 @@ interface FeaturedProductsProps {
 const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { products } = useAppSelector((state: any) => state.home);
+  // const { products } = useAppSelector((state: any) => state.home);
+  const [products, setProducts] = useState<any>([]);
   const productsData = products?.data || [];
-
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -78,7 +78,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
     setLocalError(null);
     dispatch(fetchProductsData(endpoint))
       .unwrap()
-      .then(() => setLocalError(null))
+      .then((fetchedProducts) => {
+        setProducts(fetchedProducts);
+        setLocalError(null);
+      })
       .catch((err: any) => setLocalError(err || `No ${title} found`))
       .finally(() => setLoading(false));
   }, [dispatch, endpoint, title]);
@@ -120,7 +123,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
   const totalCards = Math.min(productsData.length, 5);
   const dotsCount = totalCards - visibleCount; // extra cards jo scroll pe hain
   const showUI = dotsCount > 0;             // arrows + dots dono
-
+  if (productsData?.length === 0) return null;
   return (
     <div className="bg-transparent py-4">
 

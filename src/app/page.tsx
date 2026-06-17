@@ -78,7 +78,7 @@ const Page = async () => {
         <Banner />
         <AccountInfoBar />
         <FeaturedProducts
-          endpoint="web/products/featured-products"
+          endpoint="web/products/popular-products"
           title="Most Popular Products"
         />
         <FeaturedProducts
@@ -86,7 +86,7 @@ const Page = async () => {
           title="Featured Products"
         />
         <FeaturedProducts
-          endpoint="web/products/featured-products"
+          endpoint="web/products/last-week-orders"
           title="New Products"
         />
         <AuthorizedSupplier />
