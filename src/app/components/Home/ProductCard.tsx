@@ -105,12 +105,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="pb-3 flex flex-col flex-1">
         <Link href={`/brand/${brandSlug || ""}`}>
           <p className="text-[14px] text-[#333333] hover:text-[#D42020]">
-            <span className="font-bold">{brandName}</span> SKU: {product.sku}
+            <span className="font-bold">{brandName}</span>{" "}
+            <span className="font-[13px]">SKU: {product.sku}</span>
           </p>
         </Link>
 
         <Link href={`${product?.productUrl}`}>
-          <p className="text-xl font-medium mb-1 line-clamp-4 hover:text-[#D42020]">
+          <p className="text-[#212529] text-xl font-normal mb-1 line-clamp-4 hover:text-[#D42020]">
             {productName}
           </p>
         </Link>
@@ -125,7 +126,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   {(Number(product.price) + Number(product.msrp)).toFixed(2)}
                 </span>
               </span>
-              <span className="text-[20px] font-bold text-[#ff482e]">
+              <span className="text-[20px] font-light text-[#ff482e]">
                 ${Number(product.price)}
               </span>
             </>
@@ -137,13 +138,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* Divider */}
-        <hr className="border-t border-[#E0E0E0] mb-3" />
+        <hr className="border-t border-[#ebebeb] mb-3" />
 
         {/* In Stock */}
-        <p className="text-[14px] text-[#333333] mb-3">{product?.availabilityText ? product?.availabilityText : "In Stock"}</p>
+        <p className="text-[14px] text-[#333333] mb-3">
+          {product?.availabilityText ? product?.availabilityText : "In Stock"}
+        </p>
 
         {/* Quantity + Add to Cart Row */}
-        <div className="flex items-center gap-2 mt-auto">
+        <div className="flex items-center mt-auto">
           {/* Quantity Input */}
           <input
             type="number"
@@ -152,13 +155,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             value={quantity}
             onChange={handleQuantityChange}
             onBlur={handleQuantityBlur}
-            className="w-16 h-14 border border-[#CCCCCC] text-center text-[14px] font-medium text-[#333333] rounded focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-16 h-14 border text-center text-[14px] font-medium text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
 
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className="flex-1 h-14 bg-[#ff482e] hover:bg-[#D42020] text-white py-1 h-9 text-[14px] rounded transition-colors"
+            className="flex-1 h-14 bg-[#ff482e] hover:bg-[#D42020] text-white py-1 h-9 text-[14px] transition-colors"
           >
             Add to Cart
           </button>

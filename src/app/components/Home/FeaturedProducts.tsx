@@ -128,7 +128,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
     <div className="bg-transparent py-4">
 
       {/* ── Title ── */}
-      <h2 className="text-4xl text-[#333333] p-3 text-center w-full mb-4">{title}</h2>
+      <h2 className="text-4xl text-[#333333] p-3 text-center w-full my-4">{title}</h2>
 
       {/* ── Error ── */}
       {localError && <div className="text-red-500 text-center py-4">{localError}</div>}
@@ -137,7 +137,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
         <>
           {/* ── Skeleton ── */}
           {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
