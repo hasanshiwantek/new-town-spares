@@ -20,14 +20,15 @@ const FooterBottom = () => {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const router = useRouter();
-  const { newsletterLoading, newsletterSuccess, newsletterError } = useAppSelector((state: any) => state.contact);
+  const { newsletterLoading, newsletterSuccess, newsletterError } =
+    useAppSelector((state: any) => state.contact);
   const { webPages, error, loading } = useAppSelector(
-    (state: any) => state.storeFront
+    (state: any) => state.storeFront,
   );
   const handleSelect = (url: string) => {
     router.push(url);
   };
-
+  const footerFont = "Poppins, sans-serif";
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -44,126 +45,9 @@ const FooterBottom = () => {
     dispatch(getWebPages({ page: 1, perPage: 100 }));
   }, [dispatch]);
 
-
-
   return (
     <React.Fragment>
-      <div className="flex sm:hidden">
-        <footer className="bg-[#333333] text-white w-full mx-auto">
-
-          {/* Newsletter */}
-          <section className="bg-[#2C2D2C] flex justify-center items-center h-auto min-h-[7.91rem]">
-            <div
-              className="
-        w-full max-w-[1684px] mx-auto px-7 xl:px-28
-        flex flex-col md:flex-row items-center justify-around gap-2 md:gap-8 lg:gap-0
-      "
-            >
-              <div className="hidden md:block text-center  md:text-center w-full md:w-[60%]  2xl:max-w-[50%]">
-                <h3 className="text-[19px] !text-white">
-                  Subscribe to our Newsletter
-                </h3>
-                <p className="!text-gray-300 text-[14px]">
-                  Get the latest updates on new products and upcoming sales
-                </p>
-              </div>
-              <form className="w-[80%] md:w-[45%] 2xl:max-w-[30%]  flex flex-col md:flex-row  items-center mt-4 md:mt-0">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base h-[42px]"
-                />
-                <button
-                  type="submit"
-                  className="btn-primary !rounded-none !p-3 w-[40%] md:w-[30%] max-w-[9rem] h-[42px]"
-                >
-                  Subscribe
-                </button>
-              </form>
-            </div>
-          </section>
-
-          {/* Main Content */}
-          <section className="px-6 py-8 text-center space-y-8">
-
-            {/* Info */}
-            <div>
-              <h4 className="text-[18px] font-bold text-white mb-4">Info</h4>
-              <div className="flex flex-col gap-2 text-[14px] text-white">
-                <p className="font-semibold">Address :</p>
-                <p>MAILING ADDRESS: 1032 E BRANDON BLVD</p>
-                <p>Suite 1124 BRANDON, FL 33511</p>
-                <p className="mt-2">CALIFORNIA ADDRESS: 440 N Barranca Ave</p>
-                <p>Covina, CA 91723</p>
-                <a href="mailto:orders@newtownspares.com" className="mt-2 block">orders@newtownspares.com</a>
-                <a href="tel:2096516864" className="block">Call us : (209) 651-6864</a>
-              </div>
-            </div>
-
-            {/* Pages */}
-            <div>
-              <h4 className="text-[18px] font-bold text-white mb-4">Pages</h4>
-              <ul className="flex flex-col gap-3 text-[14px] text-white">
-                <li><Link href="/payment-options">Payment Options</Link></li>
-                <li><Link href="/privacyPolicy">Privacy Policy</Link></li>
-                <li><Link href="/shipping-policy">Shipping Policy</Link></li>
-                <li><Link href="/returnPolicy">Return Policy</Link></li>
-                <li><Link href="/terms-conditions">Terms & Conditions</Link></li>
-                <li><Link href="/about-us">About Us</Link></li>
-                <li><Link href="/contact-us">Contact Us</Link></li>
-                <li><Link href="/blogs">Blog</Link></li>
-                <li><Link href="/sitemap">Sitemap</Link></li>
-              </ul>
-            </div>
-
-            {/* Account */}
-            <div>
-              <h4 className="text-[18px] font-bold text-white mb-4">Account</h4>
-              <ul className="flex flex-col gap-3 text-[14px] text-white">
-                <li><Link href="/auth/login">Sign In</Link></li>
-                <li><Link href="/auth/signup">Sign Up</Link></li>
-                <li><Link href="/cart">My Cart</Link></li>
-              </ul>
-            </div>
-
-            {/* Follow Us */}
-            <div>
-              <h4 className="text-[18px] font-bold text-white mb-4">Follow Us</h4>
-              <div className="flex justify-center gap-3">
-                {/* Facebook */}
-                <a href="#" className="w-10 h-10 bg-[#1877F2] flex items-center justify-center rounded">
-                  <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-                    <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-                  </svg>
-                </a>
-                {/* LinkedIn */}
-                <a href="#" className="w-10 h-10 bg-[#0A66C2] flex items-center justify-center rounded">
-                  <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-                    <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" />
-                    <circle cx="4" cy="4" r="2" />
-                  </svg>
-                </a>
-                {/* Pinterest */}
-                <a href="#" className="w-10 h-10 bg-[#E60023] flex items-center justify-center rounded">
-                  <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-                    <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 01.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-
-          </section>
-
-          {/* Copyright */}
-          <div className="bg-[#2C2D2C] py-4 px-6 text-center">
-            <p className="text-white text-[14px]">
-              &copy; {new Date().getFullYear()} New Town Spares Inc.
-            </p>
-          </div>
-
-        </footer>
-      </div>
-      <div className="hidden sm:flex">
+      <div className="w-full">
         <footer className="bg-[#333333] text-white w-full mx-auto">
           {/* 🔹 Newsletter Section */}
           <section className="bg-[#2C2D2C] flex justify-center items-center h-auto min-h-[7.91rem]">
@@ -181,15 +65,20 @@ const FooterBottom = () => {
                   Get the latest updates on new products and upcoming sales
                 </p>
               </div>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                if (email.trim()) {
-                  dispatch(subscribeNewsletter({ email: email.trim() })).unwrap().then(() => {
-                    handleSelect("/result")
-                    setEmail("")
-                  });
-                }
-              }} className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 h-[42px]">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (email.trim()) {
+                    dispatch(subscribeNewsletter({ email: email.trim() }))
+                      .unwrap()
+                      .then(() => {
+                        handleSelect("/result");
+                        setEmail("");
+                      });
+                  }
+                }}
+                className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 h-[42px]"
+              >
                 <input
                   type="email"
                   name="email"
@@ -199,7 +88,8 @@ const FooterBottom = () => {
                   className="h-full w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base"
                 />
                 <button
-                  type="submit" disabled={newsletterLoading}
+                  type="submit"
+                  disabled={newsletterLoading}
                   className="btn-primary !rounded-none h-full font-light! px-7!"
                 >
                   {newsletterLoading ? "Loading" : "Subscribe"}
@@ -218,30 +108,62 @@ const FooterBottom = () => {
       py-6 text-center sm:text-start
     "
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-              <nav aria-label="Customer Services">
-                <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">Customer Services</h4>
-                <ul className="flex flex-col xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF] gap-5">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10"
+              style={{ fontFamily: footerFont }}
+            >
+              {/* INFO */}
+              <address className="not-italic text-[#FAFAFA] mt-3 sm:mt-0">
+                <h4 className="text-[18px] font-noraml mb-4 ">Info</h4>
+
+                <p className="mb-2 text-[14px]">Address :</p>
+
+                <p className="text-[13px]">
+                  MAILING ADDRESS: 1032 E BRANDON BLVD
+                </p>
+                <p className="text-[13px]">Suite 1124 BRANDON, FL 33511</p>
+
+                <div className="h-4" />
+
+                <p>CALIFORNIA ADDRESS: 440 N Barranca Ave</p>
+                <p className="text-[13px]">Covina, CA 91723</p>
+
+                <div className="h-12" />
+
+                <p>orders@newtownspares.com</p>
+                <p className="mt-4">Call us : (209) 651-6864</p>
+              </address>
+
+              {/* PAGES */}
+              <nav>
+                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                  Pages
+                </h4>
+
+                <ul className="space-y-2 text-[#FAFAFA]">
                   <li>
-                    <Link href="/privacyPolicy">Privacy policy</Link>
+                    <Link href="/payment-options">Payment Options</Link>
                   </li>
                   <li>
-                    <Link href="/shipping-policy">Shipping policy</Link>
+                    <Link href="/privacyPolicy">Privacy Policy</Link>
                   </li>
                   <li>
-                    <Link href="/returnPolicy">Return policy</Link>
+                    <Link href="/shipping-policy">Shipping Policy</Link>
                   </li>
                   <li>
-                    <Link href="/terms-conditions">Terms and conditions</Link>
+                    <Link href="/returnPolicy">Return Policy</Link>
                   </li>
                   <li>
-                    <Link href="/blogs">Blog</Link>
+                    <Link href="/terms-conditions">Terms & Conditions</Link>
                   </li>
                   <li>
-                    <Link href="/about-us">About</Link>
+                    <Link href="/about-us">About Us</Link>
                   </li>
                   <li>
                     <Link href="/contact-us">Contact Us</Link>
+                  </li>
+                  <li>
+                    <Link href="/blogs">Blog</Link>
                   </li>
                   <li>
                     <Link href="/sitemap">Sitemap</Link>
@@ -249,85 +171,123 @@ const FooterBottom = () => {
                 </ul>
               </nav>
 
-              <nav aria-label="My Account">
-                <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">My Account</h4>
-                <ul className="flex flex-col xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF] gap-5">
-                  <li>
-                    <Link href="/auth/login">Sign in</Link>
-                  </li>
-                  <li>
-                    <Link href="/auth/signup">Sign up</Link>
-                  </li>
-                  <li>
-                    <Link href="/cart">My cart</Link>
-                  </li>
+              {/* CATEGORIES */}
+              <nav className="hidden lg:block">
+                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                  Categories
+                </h4>
+
+                <ul className="space-y-2 text-[#FAFAFA]">
+                  {categories?.slice(0, 8).map((category) => (
+                    <li key={category.id}>
+                      <Link href={`/category/${category.slug}`}>
+                        {category.name}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
-                <h4 className="text-2xl font-bold !text-[#FFFFFF] mt-10">Follow Us</h4>
-                <div className="w-[120px] h-[48px] m-auto lg:m-0 mt-7">
-                  <Image
-                    src="/footer-logo.png"
-                    alt="Join Us Logo"
-                    width={120}
-                    height={48}
-                    className="object-contain"
-                  />
-                </div>
-
-
               </nav>
 
-              <section aria-label="Contact Us">
-                <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">Contact Us</h4>
-                <ul className="flex flex-col xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF]">
+              {/* BRANDS */}
+              <nav className="hidden lg:block">
+                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                  Brands
+                </h4>
+
+                <ul className="space-y-2 text-[#FAFAFA]">
                   <li>
-                    <a href="mailto:contact@newtownspares.com">
-                      contact@newtownspares.com
-                    </a>
+                    <Link href="#">HP</Link>
                   </li>
                   <li>
-                    <a href="tel:+4122123345677">+41 22 123345677</a>
+                    <Link href="#">Dell</Link>
+                  </li>
+                  <li>
+                    <Link href="#">Cisco</Link>
+                  </li>
+                  <li>
+                    <Link href="#">IBM</Link>
+                  </li>
+                  <li>
+                    <Link href="#">Seagate</Link>
+                  </li>
+                  <li>
+                    <Link href="#">Intel</Link>
+                  </li>
+                  <li>
+                    <Link href="#">Samsung</Link>
+                  </li>
+                  <li>
+                    <Link href="#">Lenovo</Link>
+                  </li>
+                  <li>
+                    <Link href="#">View All</Link>
                   </li>
                 </ul>
-              </section>
+              </nav>
 
-              <section aria-label="Contact Us">
+              {/* ACCOUNT */}
+              <nav>
+                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                  Account
+                </h4>
 
+                <ul className="space-y-2 text-[#FAFAFA]">
+                  <li>
+                    <Link href="/auth/login">Sign In</Link>
+                  </li>
+                  <li>
+                    <Link href="/auth/signup">Sign Up</Link>
+                  </li>
+                  <li>
+                    <Link href="/cart">My Cart</Link>
+                  </li>
+                </ul>
 
-                <nav aria-label="Categories">
-                  <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4 uppercase">
-                    Categories
-                  </h4>
+                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mt-12 mb-4">
+                  Follow Us
+                </h4>
 
-                  <ul className="flex flex-col gap-5 xl:gap-3 2xl:gap-4 text-[14px] !text-[#FFFFFF]">
-                    {categories && categories.length > 0 ? (
-                      categories.slice(0, 10).map((category) => (
-                        <li key={category.id || category.name}>
-                          <Link href={`/category/${category.slug}`}>
-                            {category.name}
-                          </Link>
-                        </li>
-                      ))
-                    ) : (
-                      // 🔹 Skeleton Loader
-                      Array.from({ length: 6 }).map((_, index) => (
-                        <li key={index}>
-                          <div className="h-4 w-40 bg-white/20 rounded animate-pulse" />
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                </nav>
+                <div className="flex gap-2 sm:gap-2 items-center justify-center sm:justify-start">
+                  {/* Facebook */}
+                  <a
+                    href="#"
+                    className="w-10 h-10 bg-white rounded flex items-center justify-center"
+                  >
+                    <svg viewBox="0 0 512 512" className="w-6 h-6">
+                      <path
+                        fill="#333333"
+                        d="M352.00 512.00L255.99 512.00L255.99 336.51A0.51 0.51 0.0 0 0 255.48 336.00L192.50 336.00Q192.00 336.00 192.00 335.50L192.00 256.50A0.50 0.50 0.0 0 1 192.50 256.00L255.48 256.00Q255.98 256.00 255.98 255.50Q256.04 228.22 255.99 201.00Q255.96 187.66 256.77 181.02C262.20 136.96 296.36 101.83 340.83 96.75Q346.69 96.08 360.80 96.03Q388.16 95.94 415.51 96.03Q416.00 96.03 416.00 96.51L416.00 175.49Q416.00 175.98 415.51 175.98Q394.47 176.04 373.51 175.98C365.51 175.96 356.57 176.74 353.35 184.43Q352.02 187.59 352.01 196.21Q351.97 225.87 352.02 255.51Q352.02 256.00 352.50 256.00L431.32 256.00A0.43 0.42 10.7 0 1 431.72 256.58L400.17 335.40Q399.93 336.00 399.28 336.00L352.51 336.00Q352.00 336.00 352.00 336.51L352.00 512.00Z"
+                      />
+                    </svg>
+                  </a>
 
+                  {/* LinkedIn */}
+                  <a
+                    href="#"
+                    className="w-10 h-10 bg-white rounded flex items-center justify-center"
+                  >
+                    <svg viewBox="0 0 512 512" className="w-6 h-6">
+                      <path
+                        fill="#333333"
+                        d="M49.56 0.00L462.56 0.00C489.83 1.61 510.31 22.07 512.00 49.32L512.00 462.81C509.59 490.18 490.23 510.48 462.43 512.00L49.94 512.00C22.38 510.07 1.65 490.55 0.00 462.68L0.00 49.19C1.87 21.95 22.26 1.52 49.56 0.00ZM161.21 115.20A46.01 46.01 0.0 0 0 115.20 69.19A46.01 46.01 0.0 0 0 69.19 115.20A46.01 46.01 0.0 0 0 115.20 161.21A46.01 46.01 0.0 0 0 161.21 115.20ZM281.50 235.14L281.50 205.25Q281.50 204.75 281.00 204.75L205.25 204.75A0.50 0.50 0.0 0 0 204.75 205.25L204.75 434.75Q204.75 435.25 205.25 435.25L280.99 435.25Q281.50 435.25 281.50 434.74Q281.49 368.03 281.52 301.31C281.54 270.28 315.47 249.38 341.96 268.64Q358.50 280.66 358.50 303.51Q358.49 369.10 358.51 434.75Q358.51 435.25 359.01 435.25L434.73 435.25A0.51 0.51 0.0 0 0 435.24 434.74Q435.29 366.43 435.22 298.05Q435.21 284.10 434.41 278.09C427.03 222.73 365.24 181.03 312.78 208.36C300.26 214.89 289.69 223.55 281.82 235.24A0.18 0.17 62.1 0 1 281.50 235.14ZM153.50 205.01A0.26 0.26 0.0 0 0 153.24 204.75L77.02 204.75A0.26 0.26 0.0 0 0 76.76 205.01L76.76 434.99A0.26 0.26 0.0 0 0 77.02 435.25L153.24 435.25A0.26 0.26 0.0 0 0 153.50 434.99L153.50 205.01Z"
+                      />
+                    </svg>
+                  </a>
 
-              </section>
-
-              <address className="not-italic">
-                <h4 className="text-2xl font-bold !text-[#FFFFFF] mb-4">Address</h4>
-                <p className="text-[14px] !text-[#FFFFFF]">
-                  123 Lakeview Avenue, Zurich
-                </p>
-                <p className="text-[14px] !text-[#FFFFFF]">Switzerland</p>
-              </address>
+                  {/* Pinterest */}
+                  <a
+                    href="#"
+                    className="w-10 h-10 bg-white rounded flex items-center justify-center"
+                  >
+                    <svg viewBox="0 0 512 512" className="w-6 h-6">
+                      <path
+                        fill="#333333"
+                        d="M66.81 0.00L445.55 0.00C482.34 3.04 509.83 29.95 512.00 66.82L512.00 445.55C509.51 482.38 481.49 509.85 444.68 512.00L67.93 512.00C30.48 509.74 2.04 482.50 0.00 444.93L0.00 66.20C2.65 29.51 29.99 2.76 66.81 0.00ZM236.04 304.90C247.60 321.38 266.71 328.26 286.45 326.88C351.77 322.29 381.53 255.90 379.59 198.73C377.70 143.35 332.96 102.74 279.25 97.02C217.99 90.50 153.67 120.37 136.17 183.28C126.89 216.62 132.88 264.58 169.26 280.69C174.51 283.02 177.61 280.81 179.08 275.51C180.39 270.80 185.13 257.64 181.75 253.53C172.41 242.23 168.32 231.53 168.07 216.52C167.03 155.05 223.21 116.50 281.58 129.82C309.12 136.11 328.58 155.02 333.55 183.10C337.39 204.84 333.20 230.46 325.87 251.15C318.07 273.22 299.43 298.40 272.56 295.16C256.16 293.19 243.38 277.80 247.46 260.99C250.43 248.77 254.33 236.89 257.75 224.80C262.32 208.69 269.87 185.88 254.80 172.69C246.38 165.33 232.85 166.21 224.02 171.67C200.90 185.97 200.10 221.08 209.33 243.29Q209.52 243.75 209.41 244.24Q197.96 292.75 186.52 341.26C180.93 364.92 181.72 390.08 185.39 413.89A2.27 2.27 0.0 0 0 188.32 415.71Q189.15 415.44 189.72 414.72C203.95 396.71 217.23 375.08 223.19 352.73Q229.55 328.92 235.49 305.00Q235.65 304.34 236.04 304.90Z"
+                      />
+                    </svg>
+                  </a>
+                </div>
+              </nav>
             </div>
           </section>
 
@@ -357,14 +317,3 @@ const FooterBottom = () => {
 };
 
 export default FooterBottom;
-
-
-
-
-
-
-
-
-
-
-
