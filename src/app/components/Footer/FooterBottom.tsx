@@ -7,6 +7,7 @@ import FooterSkeleton from "../loader/FooterSkeleton";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { useRouter } from "next/navigation";
+import { getWebPages } from "@/redux/slices/storeFrontSlice";
 interface Category {
   id: number;
   name: string;
@@ -21,7 +22,13 @@ const FooterBottom = () => {
   const router = useRouter();
   const { newsletterLoading, newsletterSuccess, newsletterError } =
     useAppSelector((state: any) => state.contact);
-
+  const { webPages, error, loading } = useAppSelector(
+    (state: any) => state.storeFront,
+  );
+  const handleSelect = (url: string) => {
+    router.push(url);
+  };
+  const footerFont = "Poppins, sans-serif";
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -34,10 +41,10 @@ const FooterBottom = () => {
 
     loadCategories();
   }, []); // ✅ run once on mount
-  const handleSelect = (url: string) => {
-    router.push(url);
-  };
-  const footerFont = "Poppins, sans-serif";
+  useEffect(() => {
+    dispatch(getWebPages({ page: 1, perPage: 100 }));
+  }, [dispatch]);
+
   return (
     <React.Fragment>
       <div className="w-full">
