@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-
+ const font3 = "Poppins, sans-serif";
 const AboutBanner = () => {
   return (
     <div className="w-full">
@@ -14,20 +14,20 @@ const AboutBanner = () => {
           / <span className="mx-1 text-[#333333] text-[13px]">About Us</span>
         </div>
 
-      <div className="max-w-[800px] mx-auto">
+      <div className="max-w-[800px] mx-auto text-[#333333]" style={{fontFamily:font3}}>
 
         {/* Page Title */}
-        <h1 className="text-3xl md:text-[28px] text-[#333333] mb-10 text-center">
+        <h1 className="text-3xl md:text-[28px] text-[#333333] !font-normal mb-10 text-center">
           About Us
         </h1>
 
         {/* Intro Section */}
         <div className="space-y-3 text-lg leading-relaxed">
-          <h2 className="text-2xl md:text-[24px] font-bold text-center">
+          <h2 className="text-2xl md:text-[22px] !font-medium text-center">
             Welcome to NewTownSpares – Elevate Your Tech Game!
           </h2>
 
-          <p className="text-[14px]">
+          <p className="text-[13px] !font-normal">
            At NewTownSpares, we're committed to provide you one stop solution to all 
            your IT hardware requirements keeping the best quality products which makes
             it easier for you to achieve your results. We are the best solution provider,
@@ -37,15 +37,15 @@ const AboutBanner = () => {
         </div>
 
         {/* Why Choose Us */}
-        <div className="mt-10 space-y-6">
-          <h2 className="text-lg md:text-2xl font-bold">
+        <div className="mt-4 space-y-4">
+          <h2 className="text-lg md:text-[18px] !font-medium">
             Why Choose NewTownSpares?
           </h2>
 
           <div className="space-y-4 text-lg leading-relaxed">
 
   <p className="text-[14px]">
-    <span className="font-semibold text-[14px]">
+    <span className="font-semibold text-[13px]">
       Premium Quality:
     </span>{" "}
      To make sure that our inventory meets the highest quality
@@ -55,7 +55,7 @@ const AboutBanner = () => {
   </p>
 
   <p className="text-[14px]">
-    <span className="font-semibold text-[14px]">
+    <span className="font-semibold text-[13px]">
       Expert Guidance:
     </span>{" "}
       While looking for your requirement our expert tech support will
@@ -66,8 +66,8 @@ const AboutBanner = () => {
           for your assistance.
   </p>
 
-  <p className="text-[14px]">
-    <span className="font-semibold text-[14px]">
+  <p className="text-[13px]">
+    <span className="font-semibold text-[13px]">
       Competitive Pricing:
     </span>{" "}
      As we understand that IT hardware is a costly and a long term 
@@ -76,8 +76,8 @@ const AboutBanner = () => {
        on the quality. We believe in elevating your tech game within your budget
   </p>
 
-  <p className="text-[14px]">
-    <span className="font-semibold text-[14px]">
+  <p className="text-[13px]">
+    <span className="font-semibold text-[13px]">
       Vast Product Range:
     </span>{" "}
     At your one stop solution, you will be having a complete range
@@ -86,8 +86,8 @@ const AboutBanner = () => {
       dreams into reality.
   </p>
 
-  <p className="text-[14px]">
-    <span className="font-semibold text-[14px]">
+  <p className="text-[13px]">
+    <span className="font-semibold text-[13px]">
       Reliable Customer Support:
     </span>{" "}
     To make your journey memorable with us, our dedicated customer
@@ -100,7 +100,7 @@ const AboutBanner = () => {
 
         {/* Closing Paragraph */}
         <div className="mt-7 text-lg leading-relaxed">
-          <p className="text-[14px]">
+          <p className="text-[13px]">
            As your trusted partner in IT hardware solution, we won’t 
            leave you alone throughout the process. Take a look at 
            our product catalog and for any query or concern with your

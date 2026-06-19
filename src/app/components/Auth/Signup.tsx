@@ -30,6 +30,7 @@ interface SignupFormValues {
   zip: string;
   useRole: 2;
 }
+ const SignUp = "Poppins, sans-serif";
 
 function FieldLabel({
   htmlFor,
@@ -44,12 +45,13 @@ function FieldLabel({
     <div className="flex items-center justify-between gap-2 mb-1">
       <Label
         htmlFor={htmlFor}
-        className="text-[14px] text-[#333333] font-normal leading-none"
+        className="text-[12px] text-[#333333] !font-normal leading-none"
+        style={{fontFamily:SignUp}}
       >
         {children}
       </Label>
       {required && (
-        <span className="text-[10px] text-[#333333] uppercase shrink-0">
+        <span className="text-[10px] text-[#333333] !font-normal uppercase shrink-0">
           REQUIRED
         </span>
       )}
@@ -102,20 +104,20 @@ const SignupPage = () => {
   const password = watch("password");
 
   const inputClass =
-    "w-full h-[42px] max-w-full bg-white border border-gray-300 rounded text-gray-800 text-[14px] focus:ring-2 focus:ring-[#FD5430] focus:border-[#FD5430]";
+    "w-full h-13 md:h-11 !text-[10px] !font-normal max-w-full bg-white border border-gray-300 rounded text-gray-800  focus:ring-2 focus:ring-[#FD5430] focus:border-[#FD5430]";
   const rowClass = "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6";
 
   return (
-    <section className="min-h-screen w-full py-8">
-       <div className="mb-6 text-sm md:text-base">
-          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
+    <section className="min-h-screen w-full  py-8" style={{fontFamily:SignUp}}>
+       <div className="hidden md:flex mb-6 text-sm md:text-base">
+          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] !text-[12px] !font-normal">
             Home
           </Link>{" "}
-          / <span className="mx-1 text-[#333333] text-[13px]">Create Accont</span>
+          / <span className="mx-1 text-[#333333] !text-[12px] !font-normal">Create Accont</span>
         </div>
       <div className="max-w-full mx-auto w-full">
 
-        <h1 className="text-2xl sm:text-4xl text-gray-800 my-8">
+        <h1 className="text-[26px] text-[#333333] !font-normal my-8">
           New Account
         </h1>
 
@@ -123,7 +125,7 @@ const SignupPage = () => {
           {/* Row 1: Email | Password */}
           <div className={rowClass}>
             <div>
-              <FieldLabel htmlFor="email" required>
+              <FieldLabel htmlFor="email" required >
                 Email Address
               </FieldLabel>
               <Input
@@ -146,14 +148,14 @@ const SignupPage = () => {
                 className={`${inputClass} pr-10`}
                 {...register("password", { required: true })}
               />
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
                 className="absolute right-2 top-13 text-gray-500 hover:text-gray-700"
                 aria-label="Toggle password"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+              </button> */}
               {errors.password && (
                 <p className="text-[10px] text-red-500 mt-0.5">Required</p>
               )}
@@ -175,7 +177,7 @@ const SignupPage = () => {
                   validate: (v) => v === password || "Passwords do not match",
                 })}
               />
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setShowConfirmPassword((p) => !p)}
                 className="absolute right-2 top-13 text-gray-500 hover:text-gray-700"
@@ -186,7 +188,7 @@ const SignupPage = () => {
                 ) : (
                   <Eye size={18} />
                 )}
-              </button>
+              </button> */}
               {errors.password_confirmation && (
                 <p className="text-[10px] text-red-500 mt-0.5">
                   {errors.password_confirmation.message || "Required"}
@@ -351,7 +353,7 @@ const SignupPage = () => {
             ) : (
               <Button
                 type="submit"
-                className="w-full md:w-[173px] bg-[#FD5430] hover:bg-[#e04a2a] text-white font-medium h-[42px] rounded text-[12px]"
+                className="w-full md:w-[170px] bg-[#FF482E] hover:bg-[#e04a2a] text-white font-normal h-[37px] rounded text-[11px]"
               >
                 Create Account
               </Button>
