@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 const MyAccountTabs = () => {
   const pathname = usePathname();
-
+const font2 = "Poppins, sans-serif";
   const tabs = [
     { name: "Orders", href: "/my-account/orders" },
     { name: "Returns", href: "/my-account/returns" },
@@ -24,7 +24,7 @@ const MyAccountTabs = () => {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="h5-regular mb-4 text-gray-600">
+      <div className="hidden md:flex gap-2 items-center text-[12px] mb-4 text-[#333333]">
         <span>Home</span> / <span>Your Account</span> /{" "}
         <span className="">{getActiveTab()}</span>
       </div>
@@ -40,10 +40,11 @@ const MyAccountTabs = () => {
             <Link
               key={tab.name}
               href={tab.href}
-              className={`text-2xl font-medium transition-colors duration-200 border-b-2
+              style={{fontFamily:font2}}
+              className={`text-[13px] font-medium transition-colors duration-200 border-b-2
         ${isActive
-                  ? "text-[#413836]  border-[#413836]"
-                  : "text-[#F15939] border-transparent hover:border-[#F15939]"
+                  ? "text-[#666666]  border-[#666666]"
+                  : "text-[#FF482E] border-transparent hover:border-[#F15939]"
                 }`}
             >
               {tab.name}

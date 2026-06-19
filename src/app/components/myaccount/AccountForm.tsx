@@ -39,7 +39,7 @@ const AccountForm = () => {
     email: auth?.user?.email || "",
   },
 });
-
+ const font2 = "Poppins, sans-serif";
   const password = watch("password");
 
   const onSubmit =async (data: AccountFormValues) => {
@@ -59,17 +59,30 @@ const AccountForm = () => {
     }
   };
 
-  const inputClass = "!w-full h-[50px] !max-w-full";
+  const inputClass = "!w-full h-12 !max-w-full !text-[10px] !font-normal";
 
   return (
-    <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6 text-center">Account Form</h2>
-
+    <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg ">
+      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* First Name & Last Name */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="firstName">First Name <span className="text-red-600">*</span></Label>
+             <div className="flex items-center justify-between gap-2 mb-1">
+                  <Label
+                    htmlFor="firstName"
+                    className="text-[12px] text-[#333333] !font-normal leading-none"
+                    
+                  >
+                    first Name
+                  </Label>
+                   
+                    <span className="text-[10px] text-[#333333] !font-normal uppercase shrink-0">
+                      REQUIRED
+                    </span>
+                
+                </div>
+            {/* <Label htmlFor="firstName" className="text-[12px] !font-normal">First Name <span className="text-red-600">*</span></Label> */}
             <Input
               id="firstName"
               {...register("firstName", { required: "First Name is required" })}
@@ -78,7 +91,21 @@ const AccountForm = () => {
             {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
           </div>
           <div>
-            <Label htmlFor="lastName">Last Name <span className="text-red-600">*</span></Label>
+             <div className="flex items-center justify-between gap-2 mb-1">
+                  <Label
+                    htmlFor="lastName"
+                    className="text-[12px] text-[#333333] !font-normal leading-none"
+                    
+                  >
+                    Last Name
+                  </Label>
+                   
+                    <span className="text-[10px] text-[#333333] !font-normal uppercase shrink-0">
+                      REQUIRED
+                    </span>
+                
+                </div>
+         
             <Input
               id="lastName"
               {...register("lastName", { required: "Last Name is required" })}
@@ -91,7 +118,7 @@ const AccountForm = () => {
         {/* Company & Phone Number */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="companyName">Company</Label>
+            <Label htmlFor="companyName"  className="text-[12px] !font-normal">Company</Label>
             <Input
               id="companyName"
               {...register("companyName")}
@@ -99,7 +126,7 @@ const AccountForm = () => {
             />
           </div>
           <div>
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone"  className="text-[12px] !font-normal">Phone Number</Label>
             <Input
               id="phone"
               {...register("phone")}
@@ -111,7 +138,21 @@ const AccountForm = () => {
         {/* Email & Password */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="email">Email Address <span className="text-red-600">*</span></Label>
+             <div className="flex items-center justify-between gap-2 mb-1">
+                  <Label
+                    htmlFor="email"
+                    className="text-[12px] text-[#333333] !font-normal leading-none"
+                    
+                  >
+                    Email Address
+                  </Label>
+                   
+                    <span className="text-[10px] text-[#333333] !font-normal uppercase shrink-0">
+                      REQUIRED
+                    </span>
+                
+                </div>
+           
             <Input
               id="email"
               type="email"
@@ -123,20 +164,20 @@ const AccountForm = () => {
           </div>
 
           <div className="relative">
-            <Label htmlFor="password">Password <span className="text-red-600">*</span></Label>
+            <Label htmlFor="password"  className="text-[12px] !font-normal">Password </Label>
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
               {...register("password", { required: "Password is required" })}
               className={`${inputClass} pr-12`}
             />
-            <button
+            {/* <button
               type="button"
               onClick={() => setShowPassword(prev => !prev)}
               className="absolute right-3 top-[65%] -translate-y-1/2 text-gray-500"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
+            </button> */}
             {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
           </div>
         </div>
@@ -144,7 +185,7 @@ const AccountForm = () => {
         {/* Confirm Password & Current Password */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <Label htmlFor="password_confirmation">Confirm Password <span className="text-red-600">*</span></Label>
+            <Label htmlFor="password_confirmation"  className="text-[12px] !font-normal">Confirm Password </Label>
             <Input
               id="password_confirmation"
               type={showConfirmPassword ? "text" : "password"}
@@ -154,38 +195,41 @@ const AccountForm = () => {
               })}
               className={`${inputClass} pr-12`}
             />
-            <button
+            {/* <button
               type="button"
               onClick={() => setShowConfirmPassword(prev => !prev)}
               className="absolute right-3 top-[65%] -translate-y-1/2 text-gray-500"
             >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
+            </button> */}
             {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation.message}</p>}
           </div>
 
           <div className="relative">
-            <Label htmlFor="currentPassword">Current Password</Label>
+            <Label htmlFor="currentPassword"  className="text-[12px] !font-normal">Current Password</Label>
             <Input
               id="currentPassword"
               type={showCurrentPassword ? "text" : "password"}
               {...register("currentPassword")}
               className={`${inputClass} pr-12`}
             />
-            <button
+            {/* <button
               type="button"
               onClick={() => setShowCurrentPassword(prev => !prev)}
               className="absolute right-3 top-[65%] -translate-y-1/2 text-gray-500"
             >
               {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
+            </button> */}
           </div>
         </div>
 
         {/* Submit */}
-        <Button type="submit" className="w-full py-6 rounded-full bg-[#F15939] text-white text-lg font-semibold">
-         {loading ? "Loading..." : "Update Account"}
+        <div className="flex justify-end">
+<Button type="submit" className="w-[138px] py-5  bg-[#F15939] text-white text-[13px] !font-normal">
+         {loading ? "Loading..." : "Update Details"}
         </Button>
+        </div>
+        
       </form>
     </div>
   );
