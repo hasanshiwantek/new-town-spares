@@ -39,7 +39,7 @@ const CartList = () => {
       }));
     }
   };
-
+const poppinsFont = "Poppins, sans-serif";
   const confirmDelete = () => {
     if (itemToDelete) {
       dispatch(removeFromCart(itemToDelete.id));
@@ -86,11 +86,12 @@ const CartList = () => {
 
   return (
     <div
-      className={`w-full border border-[#D6D6D6] rounded-lg 2xl:w-full p-7 ${isEmpty ? "min-h-[259px]" : ""
+      className={`w-full border-0 sm:border sm:border-[#D6D6D6] rounded-none  2xl:w-full p-7 ${isEmpty ? "min-h-[259px]" : ""
         }`}
+        style={{fontFamily:poppinsFont}}
     >
       {!isEmpty && (
-        <div className="hidden md:grid md:grid-cols-[1fr_100px_90px_90px_120px] md:gap-2 lg:gap-4 font-semibold pb-6 text-[14px] text-[#333333] border-b border-gray-300">
+        <div className="hidden md:grid md:grid-cols-[1fr_100px_90px_90px_120px] md:gap-2 lg:gap-4 font-semibold pb-5 text-[14px] text-[#333333] ">
           <span>Item</span>
           <span>SKU</span>
           <span>Price</span>
@@ -103,7 +104,7 @@ const CartList = () => {
         <>
           {cart.map((item) => (
             <div key={item?.id}>
-              <div className="border-b border-gray-300 py-4 md:py-0">
+              <div className="border-t border-gray-300 py-4 md:py-0">
                 <div className="md:hidden">
                   <div className="flex justify-center">
                     <Image
@@ -116,7 +117,7 @@ const CartList = () => {
                   </div>
 
                   <div className="text-center mt-3">
-                    <p className="text-[14px] text-[#777777]">{item.brand?.name || "—"}</p>
+                    <p className="text-[14px] text-[#959595]">{item.brand?.name || "—"}</p>
                     <Link href={`${item?.productUrl || "#"}`}>
                       <p className="text-[15px] text-[#333333] line-clamp-3 mt-1">
                         {item.name}
@@ -159,7 +160,7 @@ const CartList = () => {
                     </div>
                     <div>
                       <p className="text-[12px] text-[#777777]">Total</p>
-                      <p className="text-[14px] text-[#333333] font-bold">
+                      <p className="text-[14px] text-[#333333]  !font-semibold">
                         ${Number(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
@@ -171,7 +172,7 @@ const CartList = () => {
                         setItemToDelete(item);
                         setIsDialogOpen(true);
                       }}
-                      className="shrink-0 w-7 h-7 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition"
+                      className="shrink-0 w-7 h-7 rounded-full bg-[#FF482E] hover:bg-red-600 text-white flex items-center justify-center transition"
                       aria-label="Remove item"
                     >
                       <X className="w-4 h-4" />
@@ -245,7 +246,7 @@ const CartList = () => {
             Your cart is empty
           </p>
           <Link href="/products">
-            <button className="h-[40px] px-4 md:px-12 rounded bg-[#FF4F2F] hover:bg-[#F15939] transition text-white text-[14px] font-medium">
+            <button className="h-[40px] px-4 md:px-12 rounded bg-[#FF482E] hover:bg-[#F15939] transition text-white text-[14px] font-medium">
               Click here to continue shopping
             </button>
           </Link>
@@ -254,10 +255,10 @@ const CartList = () => {
 
       {/* Footer: Empty Cart / Continue Shopping */}
       {!isEmpty && (
-        <div className="flex justify-end items-center mt-6 px-6">
+        <div className="flex justify-center md:justify-end items-center mt-6 px-6">
           <button
             onClick={() => dispatch(clearCart())}
-            className="w-full md:w-[117px] py-2 px-5 border rounded-lg hover:bg-gray-100 transition"
+            className="w-[117px] py-2 px-5 border rounded-sm hover:bg-gray-100 transition"
           >
             Empty Cart
           </button>

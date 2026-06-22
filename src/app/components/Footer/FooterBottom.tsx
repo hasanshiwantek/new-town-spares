@@ -61,7 +61,7 @@ const FooterBottom = () => {
                 <h3 className="text-[19px] !text-white">
                   Subscribe to our Newsletter
                 </h3>
-                <p className="!text-gray-300 text-[14px]">
+                <p className="!text-[#FFFFFF] text-[14px]">
                   Get the latest updates on new products and upcoming sales
                 </p>
               </div>
@@ -77,7 +77,7 @@ const FooterBottom = () => {
                       });
                   }
                 }}
-                className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 h-[42px]"
+                className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 "
               >
                 <input
                   type="email"
@@ -85,12 +85,12 @@ const FooterBottom = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="h-full w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base"
+                  className=" w-[240px] md:h-[44px] md:w-full px-4 py-3 border border-white !font-normal text-[#333] bg-white focus:outline-none text-sm md:text-base"
                 />
                 <button
                   type="submit"
                   disabled={newsletterLoading}
-                  className="btn-primary !rounded-none h-full font-light! px-7!"
+                  className="btn-primary !mt-[6px] md:!bg-[#FD5430] !rounded-none h-[44px] text-[14px] !font-light !px-7 hover:!bg-[#FD5430] !text-white"
                 >
                   {newsletterLoading ? "Loading" : "Subscribe"}
                 </button>

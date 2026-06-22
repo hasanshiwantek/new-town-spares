@@ -7,7 +7,7 @@ const AboutBanner = () => {
   return (
     <div className="w-full">
          {/* Breadcrumb */}
-        <div className="mb-6 text-sm md:text-base">
+        <div className="hidden md:flex mb-6 text-sm md:text-base">
           <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
             Home
           </Link>{" "}
@@ -17,7 +17,7 @@ const AboutBanner = () => {
       <div className="max-w-[800px] mx-auto text-[#333333]" style={{fontFamily:font3}}>
 
         {/* Page Title */}
-        <h1 className="text-3xl md:text-[28px] text-[#333333] !font-normal mb-10 text-center">
+        <h1 className="text-3xl md:text-[28px] text-[#333333] !font-normal mb-10 mt-2 text-center">
           About Us
         </h1>
 

@@ -30,7 +30,7 @@ interface SignupFormValues {
   zip: string;
   useRole: 2;
 }
- const SignUp = "Poppins, sans-serif";
+ const poppinsFont = "Poppins, sans-serif";
 
 function FieldLabel({
   htmlFor,
@@ -46,7 +46,7 @@ function FieldLabel({
       <Label
         htmlFor={htmlFor}
         className="text-[12px] text-[#333333] !font-normal leading-none"
-        style={{fontFamily:SignUp}}
+        style={{fontFamily:poppinsFont}}
       >
         {children}
       </Label>
@@ -108,7 +108,7 @@ const SignupPage = () => {
   const rowClass = "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6";
 
   return (
-    <section className="min-h-screen w-full  py-8" style={{fontFamily:SignUp}}>
+    <section className="min-h-screen w-full  py-8" style={{fontFamily:poppinsFont}}>
        <div className="hidden md:flex mb-6 text-sm md:text-base">
           <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] !text-[12px] !font-normal">
             Home

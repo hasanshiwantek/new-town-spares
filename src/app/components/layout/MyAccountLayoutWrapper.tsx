@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 const MyAccountTabs = () => {
   const pathname = usePathname();
-const font2 = "Poppins, sans-serif";
+  const font2 = "Poppins, sans-serif";
   const tabs = [
     { name: "Orders", href: "/my-account/orders" },
     { name: "Returns", href: "/my-account/returns" },
@@ -40,12 +40,13 @@ const font2 = "Poppins, sans-serif";
             <Link
               key={tab.name}
               href={tab.href}
-              style={{fontFamily:font2}}
+              style={{ fontFamily: font2 }}
               className={`text-[13px] font-medium transition-colors duration-200 border-b-2
-        ${isActive
-                  ? "text-[#666666]  border-[#666666]"
-                  : "text-[#FF482E] border-transparent hover:border-[#F15939]"
-                }`}
+        ${
+          isActive
+            ? "text-[#666666]  border-[#666666]"
+            : "text-[#FF482E] border-transparent hover:border-[#F15939]"
+        }`}
             >
               {tab.name}
             </Link>
