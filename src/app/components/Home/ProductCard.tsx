@@ -38,8 +38,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const minQty = 10;
-  const maxQty = 90;
+  const minQty = product.minPurchaseQuantity || 1;
+  const maxQty = product.maxPurchaseQuantity;
   const [quantity, setQuantity] = useState<number>(minQty);
 
   // safe brand name
