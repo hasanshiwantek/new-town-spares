@@ -95,7 +95,7 @@ const OrderSummary = () => {
     router.push("/checkout");
   }, [cart.length, router]);
 
-
+const poppinsFont = "Poppins, sans-serif";
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -142,20 +142,20 @@ const OrderSummary = () => {
   }, []);
 
   return (
-    <div className="border rounded-lg 2xl:w-full">
+    <div className="md:border rounded-none 2xl:w-full" style={{fontFamily:poppinsFont}}>
       <div className="px-6 py-5">
-        <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333]">Total Items:</span>
+        <div className="flex justify-between items-center py-5 border-b border-gray-200">
+          <span className="text-[14px] text-[#333333]  !font-semibold">Total Items:</span>
           <span className="text-[14px] text-[#333333]">{totalItems}</span>
         </div>
 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333]">Subtotal:</span>
+          <span className="text-[14px] text-[#333333] !font-semibold">Subtotal:</span>
           <span className="text-[14px] text-[#333333]">${subtotal.toFixed(2)}</span>
         </div>
 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333]">Shipping:</span>
+          <span className="text-[14px] text-[#333333] !font-semibold">Shipping:</span>
           {shippingCost ? <button className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors" onClick={() => setShowShipping(!showShipping)}>
             {!showShipping ? `$${shippingCost.toFixed(2)}` : ""}
           </button> :
@@ -325,7 +325,7 @@ const OrderSummary = () => {
         )}
 
         <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333]">Coupon Code:</span>
+          <span className="text-[14px] text-[#333333] !font-semibold">Coupon Code:</span>
           {appliedCoupon ? (
             <div className="flex items-center gap-3">
               <span className="text-[14px] text-[#333333]">
@@ -375,7 +375,7 @@ const OrderSummary = () => {
               type="button"
               onClick={handleApplyCoupon}
               disabled={couponLoading}
-              className="text-[14px] text-white bg-[#F15939] border border-[#F15939] px-4 rounded h-10 shrink-0 disabled:opacity-60"
+              className="text-[14px] text-white bg-[#FF482E] border border-[#F15939] px-4 rounded h-10 shrink-0 disabled:opacity-60"
             >
               Apply
             </button>
@@ -401,14 +401,14 @@ const OrderSummary = () => {
         <button
           type="button"
           onClick={handleProceedToCheckout}
-          className="w-full bg-[#F15939] hover:bg-[#e04f33] text-[14px] text-white py-3 rounded-md mt-2 transition"
+          className="w-full bg-[#FF482E] hover:bg-[#e04f33] text-[14px] text-white py-3 rounded-sm mt-2 transition"
         >
           Check out
         </button>
 
-        <p className="text-center text-[14px] text-[#333333] py-6">-- or use --</p>
+        <p className="text-center text-[14px] text-[#333333] py-10">-- or use --</p>
 
-        <button className="mx-auto w-[90px] bg-black hover:bg-gray-900 !text-white py-2.5 rounded-lg flex items-center justify-center transition">
+        <button className="mx-auto w-[90px] bg-black hover:bg-gray-900 !text-white py-3 rounded-sm flex items-center justify-center transition">
           <img
             src="/checkouticon/googlepay.png"
             alt="Google Pay"

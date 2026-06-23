@@ -162,6 +162,9 @@ const ForgotPasswordPage = () => {
               onClick={() => {
                 setSuccessOpen(false);
                 router.push("/auth/login");
+
+
+                
               }}
             >
               GO TO LOGIN

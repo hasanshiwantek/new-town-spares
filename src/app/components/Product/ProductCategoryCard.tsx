@@ -40,12 +40,12 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     grid gap-4 items-start w-full transition-all duration-300
     grid-cols-1
     sm:grid-cols-3
-    lg:grid-cols-[200px_280px_200px]
+    lg:grid-cols-[180px_1fr_180px]
     p-7
   "
     >
       {/* Product Image (Left) */}
-      <div className="flex items-center justify-center shrink-0 mx-auto" style={{ width: 200, height: 200 }}>
+      <div className="flex items-center justify-center shrink-0 mx-auto" style={{height: 200 }}>
         <Link href={`${product?.productUrl}`} className="block w-full h-full">
           <Image
             src={imageUrl}

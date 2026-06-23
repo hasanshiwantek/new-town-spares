@@ -29,6 +29,7 @@ const BlogCategories = ({
   //   }
   //   return text;
   // };
+   const poppinsFont = "Poppins, sans-serif";
   const getExcerpt = (html: string, maxLength = 100) => {
     if (!html) return "";
     const text = html.replace(/<[^>]*>/g, "").trim();
@@ -48,7 +49,7 @@ const BlogCategories = ({
           </div>
         ) : blogPosts && blogPosts.length > 0 ? (
           // ✅ Grid UI
-          <div className="w-full mx-auto grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="w-full mx-auto grid gap-3 sm:grid-cols-2 lg:grid-cols-4" style={{fontFamily:poppinsFont}}>
             {blogPosts.map((blog) => (
               <Link
                 href={`blogs/${blog.slug}`}
@@ -83,15 +84,15 @@ const BlogCategories = ({
 
                 {/* Content */}
                 <div className="p-3">
-                  <p className="text-[13px] text-gray-500 mb-2">
+                  <p className="text-[13px] text-[#333333] mb-2">
                     {blog.author || "N/A"}  {/* ✅ API field: author */}
                   </p>
 
-                  <h3 className="text-xl text-gray-500 mb-3 hover:text-[#F15939] cursor-pointer transition-colors duration-300">
+                  <h3 className="text-[14px] text-[#333333] mb-3 hover:text-[#FF482E] cursor-pointer transition-colors duration-300">
                     {blog.title}  {/* ✅ API field: title */}
                   </h3>
 
-                  <p className="text-[14px] text-gray-600 text-sm line-clamp-3">
+                  <p className="text-[14px] text-[#333333] text-sm line-clamp-3">
                     {getExcerpt(blog.body, 100)}  {/* ✅ API field: body */}
                   </p>
                 </div>

@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { useRouter } from "next/navigation";
 import { getWebPages } from "@/redux/slices/storeFrontSlice";
+import {getBrands} from "@/redux/slices/homeSlice";
 interface Category {
   id: number;
   name: string;
@@ -25,10 +26,13 @@ const FooterBottom = () => {
   const { webPages, error, loading } = useAppSelector(
     (state: any) => state.storeFront,
   );
+  const { getBrand } = useAppSelector(
+  (state: any) => state.home
+);
   const handleSelect = (url: string) => {
     router.push(url);
   };
-  const footerFont = "Poppins, sans-serif";
+  const poppinsFont = "Poppins, sans-serif";
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -43,8 +47,10 @@ const FooterBottom = () => {
   }, []); // ✅ run once on mount
   useEffect(() => {
     dispatch(getWebPages({ page: 1, perPage: 100 }));
+    dispatch(getBrands())
   }, [dispatch]);
 
+  
   return (
     <React.Fragment>
       <div className="w-full">
@@ -61,7 +67,7 @@ const FooterBottom = () => {
                 <h3 className="text-[19px] !text-white">
                   Subscribe to our Newsletter
                 </h3>
-                <p className="!text-gray-300 text-[14px]">
+                <p className="!text-[#FFFFFF] text-[14px]">
                   Get the latest updates on new products and upcoming sales
                 </p>
               </div>
@@ -77,7 +83,7 @@ const FooterBottom = () => {
                       });
                   }
                 }}
-                className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 h-[42px]"
+                className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 "
               >
                 <input
                   type="email"
@@ -85,12 +91,12 @@ const FooterBottom = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="h-full w-full px-4 py-3 border border-white text-[#333] bg-white focus:outline-none text-sm md:text-base"
+                  className=" w-[240px] md:h-[44px] md:w-full px-4 py-3 border border-white !font-normal text-[#333] bg-white focus:outline-none text-sm md:text-base"
                 />
                 <button
                   type="submit"
                   disabled={newsletterLoading}
-                  className="btn-primary !rounded-none h-full font-light! px-7!"
+                  className="btn-primary !mt-[6px] md:!bg-[#FD5430] !rounded-none h-[44px] text-[14px] !font-light !px-7 hover:!bg-[#FD5430] !text-white"
                 >
                   {newsletterLoading ? "Loading" : "Subscribe"}
                 </button>
@@ -110,7 +116,7 @@ const FooterBottom = () => {
           >
             <div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10"
-              style={{ fontFamily: footerFont }}
+              style={{ fontFamily: poppinsFont }}
             >
               {/* INFO */}
               <address className="not-italic text-[#FAFAFA] mt-3 sm:mt-0">
@@ -140,7 +146,7 @@ const FooterBottom = () => {
                   Pages
                 </h4>
 
-                <ul className="space-y-2 text-[#FAFAFA]">
+                {/* <ul className="space-y-2 text-[#FAFAFA]">
                   <li>
                     <Link href="/payment-options">Payment Options</Link>
                   </li>
@@ -168,6 +174,15 @@ const FooterBottom = () => {
                   <li>
                     <Link href="/sitemap">Sitemap</Link>
                   </li>
+                </ul> */}
+                <ul className="space-y-2 text-[#FAFAFA]">
+                  {webPages?.data?.map((page: any) => (
+                    <li key={page.id}>
+                      <Link href={page.slugWithUrl || page.slug || "#"}>
+                        {page.pageName}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </nav>
 
@@ -194,7 +209,7 @@ const FooterBottom = () => {
                   Brands
                 </h4>
 
-                <ul className="space-y-2 text-[#FAFAFA]">
+                {/* <ul className="space-y-2 text-[#FAFAFA]">
                   <li>
                     <Link href="#">HP</Link>
                   </li>
@@ -222,7 +237,16 @@ const FooterBottom = () => {
                   <li>
                     <Link href="#">View All</Link>
                   </li>
-                </ul>
+                </ul> */}
+                <ul className="space-y-2 text-[#FAFAFA]">
+  {getBrand?.data?.slice(0, 8)?.map((item: any) => (
+    <li key={item?.brand?.id}>
+      <Link href={`/brand/${item?.brand?.slug || ""}`}>
+        {item?.brand?.name}
+      </Link>
+    </li>
+  ))}
+</ul>
               </nav>
 
               {/* ACCOUNT */}

@@ -124,7 +124,7 @@ const Navbar: React.FC = () => {
       e.currentTarget.blur();
     }
   };
-
+ const poppinsFont = "Poppins, sans-serif";
   const router = useRouter();
   const handleLogout = () => {
     const confirm = window.confirm("Confirm Logout?");
@@ -363,19 +363,19 @@ const Navbar: React.FC = () => {
               {isCartOpen && (
                 <div className="absolute right-0 top-full mt-3 w-[330px] bg-white border border-gray-200 shadow-xl rounded-md z-[120] overflow-hidden">
                   <div className="px-5 py-4 border-b border-gray-200">
-                    <h2 className="text-[#333333] text-3xl">Your Cart</h2>
+                    <h2 className="text-[#212529] text-[22px]">Your Cart</h2>
                   </div>
 
-                  <div className="px-5 py-4 border-b border-gray-200">
+                  {/* <div className="px-5 py-4 border-b border-gray-200">
                     <p className="text-[#959595] text-[14px] text-center">
                       {cart.length === 0
                         ? "Your Cart Is Empty."
                         : `${cart.reduce((sum, i) => sum + (i.quantity || 0), 0)} item(s) in cart`}
                     </p>
-                  </div>
+                  </div> */}
 
                   {cart.length > 0 && (
-                    <div className="max-h-[420px] overflow-y-auto">
+                    <div className="max-h-[420px] overflow-y-auto" style={{fontFamily:poppinsFont}}>
                       {cart.map((item) => {
                         const imageUrl =
                           item?.image?.[0]?.path ||
@@ -386,7 +386,7 @@ const Navbar: React.FC = () => {
                         return (
                           <div
                             key={item.id}
-                            className="px-5 py-4 border-b border-gray-200 flex gap-4"
+                            className="px-5 py-4  border-gray-200 flex gap-4"
                           >
                             <div className="shrink-0">
                               <Image
@@ -402,7 +402,7 @@ const Navbar: React.FC = () => {
                               <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
                                 {item?.name ?? "—"}
                               </p>
-                              <p className="text-[#333333] text-[14px] mt-1">
+                              <p className="text-[#212529] text-[14px] mt-1">
                                 {item?.sku ?? ""}
                               </p>
 
@@ -428,7 +428,7 @@ const Navbar: React.FC = () => {
                                         item.maxPurchaseQuantity
                                       )
                                     }
-                                    className="w-[35px] h-8 text-center outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-[35px] h-8 text-center !font-normal outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     aria-label="Quantity"
                                   />
                                 </div>
@@ -466,15 +466,15 @@ const Navbar: React.FC = () => {
                       return (
                         <>
                           <div className="flex justify-between border-t border-gray-200 pt-3">
-                            <span>Total Items:</span>
+                            <span className="text-[#212529] text-[14px]">Total Items:</span>
                             <span>{totalItems}</span>
                           </div>
                           <div className="flex justify-between border-t border-gray-200 pt-3">
-                            <span>Subtotal:</span>
+                            <span className="text-[#212529] text-[14px]">Subtotal:</span>
                             <span>${subtotal.toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between font-semibold border-t border-gray-200 pt-3">
-                            <span>Grand total:</span>
+                          <div className="flex justify-between  border-t border-gray-200 pt-3">
+                            <span className="text-[#212529] text-[14px]">Grand total:</span>
                             <span>${subtotal.toFixed(2)}</span>
                           </div>
                         </>
@@ -483,7 +483,7 @@ const Navbar: React.FC = () => {
                   </div>
 
                   <div className="px-5 pb-5">
-                    <div className="flex gap-2 border-t border-gray-200 pt-4">
+                    <div className="flex gap-2  border-gray-200 pt-2">
                       <Link
                         href="/cart"
                         onClick={() => setIsCartOpen(false)}

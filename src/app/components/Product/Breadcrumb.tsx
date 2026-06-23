@@ -43,7 +43,7 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
       {/* Breadcrumb Navigation */}
       <nav
         aria-label="Breadcrumb"
-        className="flex items-center space-x-2  mb-6 flex-wrap"
+        className="hidden md:flex items-center space-x-2  mb-6 flex-wrap"
         itemScope
         itemType="https://schema.org/BreadcrumbList"
       >

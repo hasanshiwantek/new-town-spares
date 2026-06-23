@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import dayjs from "dayjs";
+
+
+ const poppinsFont = "Poppins, sans-serif";
 const blogs = [
   {
     id: 1,
@@ -33,14 +36,14 @@ const OurLatestBlogs = () => {
         
         {/* Heading + Search */}
         {/* <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 md:gap-0"> */}
-             <div className="mb-6 text-sm md:text-base">
+             <div className="hidden md:flex mb-6 text-sm md:text-base">
           <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
             Home
           </Link>{" "}
           / <span className="mx-1 text-[#333333] text-[13px]"> Blog</span>
         </div>
 
-          <h1 className="text-3xl md:text-[28px] text-[#333333] mt-16">
+          <h1 className="text-3xl md:text-[28px] text-[#333333] mt-16" style={{fontFamily:poppinsFont}}>
           Blog
         </h1>
 
