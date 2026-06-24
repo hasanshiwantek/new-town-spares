@@ -7,6 +7,7 @@ import Link from "next/link";
 import { FaHeadphones, FaChevronDown } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { RootState } from "@/redux/store";
+import { fetchLogos } from "@/redux/slices/homeSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import GlobalSearchBar from "./GlobalSearchBar";
 import MobileSearchBar from "./MobileSearchBar";
@@ -27,6 +28,7 @@ import userIcon from "../../../../public/human-icon.png";
 import headphoneIcon from "../../../../public/headphone-icon.png";
 import { fetchCategories } from "@/lib/api/category";
 
+
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -36,6 +38,9 @@ const Navbar: React.FC = () => {
     (sum: number, item: any) => sum + (item?.quantity || 0),
     0
   );
+   const { logoUrl, faviconUrl, logoDimensions, logoType } = useAppSelector((state: any) => state?.home);
+
+ 
   const auth = useAppSelector((state: RootState) => state?.auth);
   const currencyRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -59,7 +64,9 @@ const Navbar: React.FC = () => {
     adding,
     handleAddBySku,
   } = useAddProductBySku();
-
+  useEffect(() => {
+    dispatch(fetchLogos());
+  }, []);
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchCurrencies());
@@ -195,15 +202,15 @@ const Navbar: React.FC = () => {
             {/* Logo */}
             <Link href={"/"}  onClick={() => setBurgerMenuOpen(false)}>
               <div className="relative  w-64 xl:w-72 2xl:w-[250px] h-[70px]">
-                <Image
-                  src={navlogo}
+                 {logoType == "upload" && <Image
+                  src={logoUrl || navlogo}
                   alt="Logo"
                   fill
                   fetchPriority="high"
                   className="object-contain"
                   priority
-                  sizes="(max-width: 768px) 120px, (max-width: 1200px) 200px, 253px"
-                />
+                  sizes="(max-width: 768px) 200px, (max-width: 1200px) 200px, 253px"
+                />}
               </div>
             </Link>
           </div>
