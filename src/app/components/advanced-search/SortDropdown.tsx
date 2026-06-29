@@ -10,7 +10,7 @@ const sortOptions = [
     { value: "PRICE ASCENDING", label: "PRICE ASCENDING" },
     { value: "PRICE DESCENDING", label: "PRICE DESCENDING" },
 ];
-
+ const poppinsFont = "Poppins, sans-serif";
 export default function SortDropdown({ filters, setFilters }: any) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ export default function SortDropdown({ filters, setFilters }: any) {
     }, []);
 
     return (
-        <div ref={ref} className="relative lg:w-80">
+        <div ref={ref} className="relative lg:w-40" style={{fontFamily:poppinsFont}}>
             {/* Trigger button */}
             <button
                 type="button"
@@ -36,7 +36,7 @@ export default function SortDropdown({ filters, setFilters }: any) {
                 className={`
           appearance-none w-full
           px-3 py-[8px] pr-9
-          text-[12px] font-medium tracking-wide text-left
+          text-[12px] font-normal tracking-wide text-left
           border border-[#8b8b8b] bg-white cursor-pointer
           transition-all
           ${open ? " " : ""}

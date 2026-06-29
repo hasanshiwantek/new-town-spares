@@ -24,7 +24,7 @@ export default function ProductListCartSidebar() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="hidden xl:block w-full max-w-[30.7%] rounded-lg border border-gray-200 shadow-sm overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto" style={{fontFamily:poppinsFont}}>
+    <div className="hidden xl:block w-full max-w-[30.7%] rounded-none border border-gray-200 shadow-sm overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto" style={{fontFamily:poppinsFont}}>
       <h2 className="text-[#333333] text-2xl lg:text-[22px] text-center pb-4 border-b border-gray-200">
         Your Cart
       </h2>

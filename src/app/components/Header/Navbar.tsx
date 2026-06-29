@@ -219,6 +219,7 @@ const Navbar: React.FC = () => {
           <div className="hidden lg:flex flex-1 justify-end items-center gap-1 2xl:gap-7 max-w-[64%]">
             <div className="relative flex-1 max-w-[498.52px]">
               <GlobalSearchBar />
+
             </div>
 
             <div className="flex items-center justify-end xl:max-w-[300px]">

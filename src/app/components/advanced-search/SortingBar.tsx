@@ -43,37 +43,74 @@ export default function SortingBar({
   };
 
   return (
-    <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col justify-between items-center border 2xl:py-[20px] 2xl:px-[30px] xl:py-[15px] xl:px-[22.5px]    p-5 w-full">
+    <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col justify-between items-center  2xl:py-[20px] 2xl:px-[30px] xl:py-[15px] xl:px-[22.5px]    p-5 w-full">
       {/* ✅ Dynamic heading */}
       <h4 className="text-[14px] hidden sm:block text-[#333333]"></h4>
 
       <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col items-center gap-3 ">
 
-        <span className="text-[14px] text-[#333333]">Sort by</span>
+        <span className="text-[13px] text-[#333333]">Sort by</span>
 
         {/* Sort Dropdown */}
         <SortDropdown filters={filters} setFilters={setFilters} />
 
 
         {/* View Toggle */}
-        <div className="hidden sm:flex items-center space-x-2">
+        <div className="hidden md:flex items-center space-x-2">
           <button
             onClick={() => setView("grid")}
-            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "grid"
-              ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
-              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+            className={`w-[20px] h-[20px] flex items-center justify-center  transition-colors ${view === "grid"
+                ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
+                : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
               }`}
           >
-            ▭▭
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="5" r="1" />
+              <circle cx="19" cy="5" r="1" />
+              <circle cx="5" cy="5" r="1" />
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="19" cy="12" r="1" />
+              <circle cx="5" cy="12" r="1" />
+              <circle cx="12" cy="19" r="1" />
+              <circle cx="19" cy="19" r="1" />
+              <circle cx="5" cy="19" r="1" />
+            </svg>
           </button>
           <button
             onClick={() => setView("list")}
-            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "list"
-              ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
-              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
+            className={`w-[23px] h-[23px] flex items-center justify-center  transition-colors ${view === "list"
+                ? "bg-[var(--primary-color)] text-white  shadow-md"
+                : "bg-white text-gray-black border-gray-300 hover:bg-gray-100"
               }`}
           >
-            ☰
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect width="7" height="7" x="3" y="3" rx="1" />
+              <rect width="7" height="7" x="3" y="14" rx="1" />
+              <path d="M14 4h7" />
+              <path d="M14 9h7" />
+              <path d="M14 15h7" />
+              <path d="M14 20h7" />
+            </svg>
           </button>
         </div>
       </div>
