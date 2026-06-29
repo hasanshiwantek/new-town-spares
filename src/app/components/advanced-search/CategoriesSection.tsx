@@ -54,6 +54,7 @@ const CategoriesSection = ({ categories }: { categories: any[] }) => {
       })
     }
   }
+   const poppinsFont = "Poppins, sans-serif";
 
   categories?.forEach((category: any) => {
     // Top-level with no children — show alone
@@ -67,14 +68,14 @@ const CategoriesSection = ({ categories }: { categories: any[] }) => {
   })
 
   return (
-    <div className="flex flex-col gap-y-[2px]">
+    <div className="flex flex-col gap-y-[2px]" style={{fontFamily:poppinsFont}}>
       {categoryChains?.map((chain, index) => (
         <div key={index} className="flex items-center flex-wrap text-[14px] leading-[22px]">
           {chain.map((cat, i) => (
             <React.Fragment key={cat.slug || i}>
               <Link
                 href={`/category/${cat.slug}`}
-                className="text-[#333] underline hover:text-black"
+                className="text-[#333333] underline hover:text-black"
               >
                 {cat.name}
               </Link>

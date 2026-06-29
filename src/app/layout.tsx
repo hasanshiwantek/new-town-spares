@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import LayoutWrapper from "./components/layout/LayoutWrapper";
+import DynamicFavicon from "@/components/DynamicFavicon";
 import { Inter, Jost, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 import "../styles/blog/api-content.css";
@@ -140,6 +141,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <LayoutWrapper>
+          <DynamicFavicon />
           <ScriptInjector />
           {children}
         </LayoutWrapper>
