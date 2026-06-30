@@ -33,7 +33,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
 
   return (
     <>
-      <aside className="product-right w-[300px] mt-3">
+      <aside className="product-right w-[265px] mt-3">
         {/* Top: Price, Stock, Quantity, Add to Cart */}
         {purchasabilityStatus ? <div className="border border-[#ebebeb] w-full p-7 ">
           <div className="text-[20px] font-semibold text-[#FF482E]">

@@ -170,10 +170,10 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               }
             }}
             className="
-      w-full px-4 md:px-4 xl:px-6 border-gray-300 border
-      py-2 md:py-2.5 lg:py-3 
-      bg-white text-gray-800 
-      focus:outline-none focus:ring-2 focus:ring-orange-400 
+      w-full px-4 md:px-4 xl:px-6 border-gray-300 border rounded-sm
+      py-2 md:py-2.5 lg:py-3
+      bg-white text-gray-800
+      focus:outline-none focus:ring-2 focus:ring-orange-400
       h-[42px]
     "
           />
@@ -204,9 +204,10 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               }}
               className="
         bg-[#FD5430]
-        w-16 
-        lg:w-14    
-        xl:w-[52px] h-[42px] 
+        w-16
+        lg:w-14
+        xl:w-[52px] h-[42px]
+        rounded-r-sm
         flex items-center justify-center
       "
             >
