@@ -5,6 +5,7 @@ import Brands from "./components/Home/Brands";
 import PopularProducts from "./components/Home/PopularProducts";
 import FeaturedProducts from "./components/Home/FeaturedProducts";
 import AccountInfoBar from "./components/Home/AccountInfoBar";
+import { fetchWebsiteSeo } from "@/lib/api/storeFront";
 
 // Lazy load below-the-fold components for better performance
 const TopIndustries = dynamic(() => import("./components/Home/TopIndustries"), {
@@ -26,50 +27,88 @@ const BlogHome = dynamic(() => import("./components/Home/BlogHome"), {
   loading: () => <div className="h-64 animate-pulse bg-gray-200" />,
 });
 const AOSWrapper = dynamic(() => import("./components/animation/AOSWrapper"));
-export const metadata: Metadata = {
-  metadataBase: new URL("https://nts-ecommerce.vercel.app"),
-  title: "Home | New Town Spares",
-  description:
-    "Welcome to New Town Spares – your one-stop shop for connectors, cables, motherboards, and electronics. Get the best prices and fast delivery.",
-  alternates: {
-    canonical: "https://nts-ecommerce.vercel.app",
-  },
-  openGraph: {
-    title: "New Town Spares – Home",
-    description:
-      "Shop electronics, connectors, and computer accessories at New Town Spares. Affordable, reliable, and delivered fast.",
-    url: "https://nts-ecommerce.vercel.app",
-    siteName: "New Town Spares",
-    images: [
-      {
-        url: "/navlogo.png", // ✅ apna OG image yaha dalna
-        width: 1200,
-        height: 630,
-        alt: "New Town Spares Homepage",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "New Town Spares – Home",
-    description:
-      "Buy electronics, connectors, cables, and computer parts at New Town Spares.",
-    images: ["/navlogo.png"], // ✅ same ya custom image
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
+// export const metadata: Metadata = {
+//   metadataBase: new URL("https://nts-ecommerce.vercel.app"),
+//   title: "Home | New Town Spares",
+//   description:
+//     "Welcome to New Town Spares – your one-stop shop for connectors, cables, motherboards, and electronics. Get the best prices and fast delivery.",
+//   alternates: {
+//     canonical: "https://nts-ecommerce.vercel.app",
+//   },
+//   openGraph: {
+//     title: "New Town Spares – Home",
+//     description:
+//       "Shop electronics, connectors, and computer accessories at New Town Spares. Affordable, reliable, and delivered fast.",
+//     url: "https://nts-ecommerce.vercel.app",
+//     siteName: "New Town Spares",
+//     images: [
+//       {
+//         url: "/navlogo.png", // ✅ apna OG image yaha dalna
+//         width: 1200,
+//         height: 630,
+//         alt: "New Town Spares Homepage",
+//       },
+//     ],
+//   },
+//   twitter: {
+//     card: "summary_large_image",
+//     title: "New Town Spares – Home",
+//     description:
+//       "Buy electronics, connectors, cables, and computer parts at New Town Spares.",
+//     images: ["/navlogo.png"], // ✅ same ya custom image
+//   },
+//   robots: {
+//     index: true,
+//     follow: true,
+//     nocache: false,
+//     googleBot: {
+//       index: true,
+//       follow: true,
+//       "max-video-preview": -1,
+//       "max-image-preview": "large",
+//       "max-snippet": -1,
+//     },
+//   },
+// };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await fetchWebsiteSeo();
+ 
+  const title = seo?.homePageTitle;
+  const description = seo?.metaDescription;
+  const keywords = seo?.metaKeywords || "";
+  const ogImage = seo?.ogImage;
+
+  return {
+    title: { absolute: title },
+    description,
+    keywords,
+    openGraph: {
+      title,
+      description,
+      siteName: "NewTownSpares",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      nocache: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-};
-
+  };
+}
 const Page = async () => {
 
   return (

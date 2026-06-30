@@ -191,9 +191,9 @@ const Testimonials = () => {
           />
        <span className="text-[13px]">
   Based on{" "}
-  <a href="#" className="border-b-2">
+  <Link href="#" className="border-b-2">
     {stats?.count || "18"} reviews
-  </a>
+  </Link>
 </span>
           <div className="flex items-center justify-center">
             <IoStarSharp size={35} color="#00b67a" />

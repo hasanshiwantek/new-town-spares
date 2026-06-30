@@ -62,10 +62,12 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             {stats?.count ? (
               <>
                 {stats?.rating && (
-                  <img
+                  <Image
+                   width={80}
+                   height={20}
                     src={stats.image}
                     alt={`${stats.rating} Stars`}
-                    className="w-20 cursor-pointer"
+                    className="w-20 h-auto cursor-pointer"
                     onClick={handleSeeMore}
                   />
                 )}

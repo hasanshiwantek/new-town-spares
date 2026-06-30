@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
 import banner from "@/assets/privacy-banner.png";
+import Link from "next/link";
 
 const Privacy = () => {
   // Enable smooth scroll globally
@@ -38,16 +39,16 @@ const Privacy = () => {
     </div>
     <div className="p-[1.25rem] overflow-y-auto max-h-[90vh]">
       <ul className="space-y-5 2xl:space-y-10 h5-regular">
-        <li><a href="#data-collection" className="hover:text-[#F15939] transition-colors duration-200">Transparent Data Collection</a></li>
-        <li><a href="#personal-data" className="hover:text-[#F15939] transition-colors duration-200">Utilization of Personal Data</a></li>
-        <li><a href="#phone-policy" className="hover:text-[#F15939] transition-colors duration-200">Mobile/ Phone Number Policy</a></li>
-        <li><a href="#sharing-personal-data" className="hover:text-[#F15939] transition-colors duration-200">Sharing and Protecting Personal Data</a></li>
-        <li><a href="#secure-your-data" className="hover:text-[#F15939] transition-colors duration-200">Secure Your Data</a></li>
-        <li><a href="#control-over-your-personal-data" className="hover:text-[#F15939] transition-colors duration-200">Giving You Control Over Your Personal Data</a></li>
-        <li><a href="#protecting-children-privacy" className="hover:text-[#F15939] transition-colors duration-200">Protecting Children's Privacy</a></li>
-        <li><a href="#update-to-privacy-policy" className="hover:text-[#F15939] transition-colors duration-200">Updates to the Privacy Policy</a></li>
-        <li><a href="#put-your-privacy-first" className="hover:text-[#F15939] transition-colors duration-200">We Put Your Privacy First</a></li>
-        <li><a href="#connect-with-us" className="hover:text-[#F15939] transition-colors duration-200">Connect with Us</a></li>
+        <li><Link href="#data-collection" className="hover:text-[#F15939] transition-colors duration-200">Transparent Data Collection</Link></li>
+        <li><Link href="#personal-data" className="hover:text-[#F15939] transition-colors duration-200">Utilization of Personal Data</Link></li>
+        <li><Link href="#phone-policy" className="hover:text-[#F15939] transition-colors duration-200">Mobile/ Phone Number Policy</Link></li>
+        <li><Link href="#sharing-personal-data" className="hover:text-[#F15939] transition-colors duration-200">Sharing and Protecting Personal Data</Link></li>
+        <li><Link href="#secure-your-data" className="hover:text-[#F15939] transition-colors duration-200">Secure Your Data</Link></li>
+        <li><Link href="#control-over-your-personal-data" className="hover:text-[#F15939] transition-colors duration-200">Giving You Control Over Your Personal Data</Link></li>
+        <li><Link href="#protecting-children-privacy" className="hover:text-[#F15939] transition-colors duration-200">Protecting Children's Privacy</Link></li>
+        <li><Link href="#update-to-privacy-policy" className="hover:text-[#F15939] transition-colors duration-200">Updates to the Privacy Policy</Link></li>
+        <li><Link href="#put-your-privacy-first" className="hover:text-[#F15939] transition-colors duration-200">We Put Your Privacy First</Link></li>
+        <li><Link href="#connect-with-us" className="hover:text-[#F15939] transition-colors duration-200">Connect with Us</Link></li>
       </ul>
     </div>
   </div>

@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useState } from "react";
 import { FaHeadphones, FaChevronDown } from "react-icons/fa";
 
@@ -13,12 +14,16 @@ const TopHeader = () => {
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2">
         {/* Left: Flags + Text */}
         <div className="flex items-center space-x-2 md:space-x-3">
-          <img
+          <Image
+           width={20}
+            height={20}
             src="https://flagcdn.com/us.svg"
             alt="USA"
             className="w-5 h-5 object-cover rounded-full"
           />
-          <img
+          <Image
+           width={20}
+            height={20}
             src="https://flagcdn.com/ca.svg"
             alt="Canada"
             className="w-5 h-5 object-cover rounded-full"

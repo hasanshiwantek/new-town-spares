@@ -19,6 +19,7 @@ import {
 import { calculatePackage } from "./Shippingstep";
 import { fetchShippingRates } from "@/redux/slices/shippingSlice";
 import { setDestShippingRatesAction } from "@/redux/slices/multiAddressSlice";
+import Image from "next/image";
 
 interface CartItem {
     id: string | number; name: string; quantity: number; price: number;
@@ -234,7 +235,7 @@ const AllocateModal: React.FC<{
                         return (
                             <div key={String(item.id)} className="grid grid-cols-12 gap-2 px-6 py-4 border-b items-center">
                                 <div className="col-span-6 flex items-center gap-3">
-                                    {img ? <img src={img} alt={item.name} className="w-12 h-12 object-contain border rounded flex-shrink-0" /> : <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0" />}
+                                    {img ? <Image width={48} height={48} src={img} alt={item.name} className="w-12 h-12 object-contain border rounded flex-shrink-0" /> : <div className="w-12 h-12 bg-gray-100 rounded flex-shrink-0" />}
                                     <span className="text-[16px] text-gray-700 line-clamp-3">{item.name}</span>
                                 </div>
                                 <div className="col-span-3 text-center text-[16px] text-gray-600">{left}</div>

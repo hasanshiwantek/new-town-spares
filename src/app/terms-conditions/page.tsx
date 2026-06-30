@@ -4,6 +4,7 @@ import React from "react";
 import { useEffect } from "react";
 import Image from "next/image";
 import banner from "@/assets/terms-banner.png";
+import Link from "next/link";
 
 const Page = () => {
   // Enable smooth scroll globally
@@ -41,180 +42,180 @@ const Page = () => {
             <div className="p-[1.25rem] overflow-y-auto max-h-[90vh]">
               <ul className="space-y-5 2xl:space-y-10 h5-regular">
                 <li>
-                  <a
+                  <Link
                     href="#data-we-collect"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Data We Collect
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#log-information"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Log Information
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#personal-data"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Personal Data
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#processing-your-personal-data"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Processing Your Personal Data
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#information-used-with-intent"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Information Used With Intent
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#protection-of-your-personal-data"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Protection of Your Personal Data
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#preservation-of-personal-data"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Preservation of Personal Data
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#payment-options"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Payment Options
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#inventory-accuracy-and-availability"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Inventory Accuracy and Availability
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#alternative-product-options"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Alternative Product Options
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#accurate-pricing-and-descriptions"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Accurate Pricing and Descriptions
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#children's-privacy"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Children's Privacy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#sharing-private-data-with-outside-parties"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Sharing Private Data with Outside Parties
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#international-data-transfers"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     International Data Transfers
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#your-legal-authority"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Your Legal Authority
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#options-regarding-privacy"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Options Regarding Privacy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#information-that-is-accurate"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Information That Is Accurate
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#engaging-with-regulatory-authorities-and-reporting-concerns"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Engaging with Regulatory Authorities
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#cookies-and-tracking"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Cookies and Tracking
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#capacity-of-our-policy"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Capacity of Our Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#modifications-to-this-policy"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Modifications to This Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#contact"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

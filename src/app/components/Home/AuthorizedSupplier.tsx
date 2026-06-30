@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface FeatureCard {
   icon: string;
@@ -47,9 +48,9 @@ const AuthorizedSupplier: React.FC = () => {
       </div>
       <h3 className="h3-secondary !text-[#2A2A2A] mb-3">{title}</h3>
       <p className="h5-regular !text-[#666666] mb-4">{description}</p>
-      <a href="#" className="h4-rwgular !text-[#F15939]">
+      <Link href="#" className="h4-rwgular !text-[#F15939]">
         Learn more
-      </a>
+      </Link>
     </div>
   );
 
