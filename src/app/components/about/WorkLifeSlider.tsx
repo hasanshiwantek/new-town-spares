@@ -11,6 +11,7 @@ import Autoplay from "embla-carousel-autoplay";
 import workLifeLeft from "@/assets/about/worf-life-left.png";
 import workLifeMiddle from "@/assets/about/worf-life-middle.png";
 import workLifeRight from "@/assets/about/worf-life-right.png";
+import Image from "next/image";
 
 const WorkLifeSlider = () => {
   const [api, setApi] = useState<CarouselApi>();
@@ -86,7 +87,9 @@ const WorkLifeSlider = () => {
             <CarouselItem key="left" className="pl-2 md:pl-4 basis-[85%] md:basis-[70%] lg:basis-[60%]">
               <div className="flex items-center justify-center h-[650px] px-2">
                 <div className="relative w-full max-w-[1300px] h-full flex items-center justify-center">
-                  <img
+                  <Image
+                  width={1300}
+                  height={650}
                     src={typeof workLifeLeft === 'string' ? workLifeLeft : workLifeLeft.src}
                     alt="Work-Life Harmony, Happiness & Customer Commitment - Left"
                     className="object-contain w-full h-full"
@@ -97,7 +100,9 @@ const WorkLifeSlider = () => {
             <CarouselItem key="middle" className="pl-2 md:pl-4 basis-[85%] md:basis-[70%] lg:basis-[60%]">
               <div className="flex items-center justify-center h-[650px] px-2">
                 <div className="relative w-full max-w-[1300px] h-full flex items-center justify-center">
-                  <img
+                  <Image
+                   width={1300}
+                  height={650}
                     src={typeof workLifeMiddle === 'string' ? workLifeMiddle : workLifeMiddle.src}
                     alt="Work-Life Harmony, Happiness & Customer Commitment - Middle"
                     className="object-contain w-full h-full"
@@ -108,7 +113,9 @@ const WorkLifeSlider = () => {
             <CarouselItem key="right" className="pl-2 md:pl-4 basis-[85%] md:basis-[70%] lg:basis-[60%]">
               <div className="flex items-center justify-center h-[650px] px-2">
                 <div className="relative w-full max-w-[1300px] h-full flex items-center justify-center">
-                  <img
+                  <Image
+                   width={1300}
+                  height={650}
                     src={typeof workLifeRight === 'string' ? workLifeRight : workLifeRight.src}
                     alt="Work-Life Harmony, Happiness & Customer Commitment - Right"
                     className="object-contain w-full h-full"

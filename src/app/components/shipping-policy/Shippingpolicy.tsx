@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react'
 import Image from "next/image";
 import banner from '@/assets/shipping-banner.png'
+import Link from 'next/link';
 const Shippingpolicy = () => {
   
     // Enable smooth scroll globally
@@ -36,34 +37,34 @@ const Shippingpolicy = () => {
     <div className="p-[1.25rem] overflow-y-auto max-h-[90vh]">
       <ul className="space-y-5 2xl:space-y-10 h5-regular">
         <li>
-          <a href="#intro" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#intro" className="hover:text-[#F15939] transition-colors duration-200">
             Introduction
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#shipping" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#shipping" className="hover:text-[#F15939] transition-colors duration-200">
             Shipping
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#delivery-estimate" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#delivery-estimate" className="hover:text-[#F15939] transition-colors duration-200">
             Delivery Estimate
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#shipping-cost" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#shipping-cost" className="hover:text-[#F15939] transition-colors duration-200">
             Shipping Cost
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#handling-time" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#handling-time" className="hover:text-[#F15939] transition-colors duration-200">
             Handling Time
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#shipping-partners" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#shipping-partners" className="hover:text-[#F15939] transition-colors duration-200">
             Shipping Partners
-          </a>
+          </Link>
         </li>
       </ul>
     </div>

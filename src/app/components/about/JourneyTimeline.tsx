@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useRef, useEffect, useState } from "react";
 
 const milestones = [
@@ -192,9 +193,11 @@ const JourneyTimeline = () => {
                       {milestone.year}
                     </div>
                   </div>
-                  <img
+                  <Image
                     src={milestone.image}
                     alt={milestone.title}
+                    width={300}
+                     height={220}
                     className="w-full h-[240px] sm:h-[300px] object-cover rounded-lg !border-2 !border-white"
                     style={{ border: '2px solid white' }}
                   />
@@ -226,7 +229,9 @@ const JourneyTimeline = () => {
                           {milestone.year}
                         </div>
                       </div>
-                      <img
+                      <Image
+                        width={220}
+                        height={300}
                         src={milestone.image}
                         alt={milestone.title}
                         className="absolute top-0 lg:-right-[160px] xl:-right-[160px] 2xl:-right-[220px] translate-x-4 w-64 h-[306px] object-cover rounded-lg !border-2 !border-white -translate-y-1/2 lg:w-[59.8%] xl:w-[59.8%] 2xl:w-[59.8%] z-20"
@@ -254,9 +259,11 @@ const JourneyTimeline = () => {
                           {milestone.year}
                         </div>
                       </div>
-                      <img
+                      <Image
                         src={milestone.image}
                         alt={milestone.title}
+                        width={256}
+                        height={306}
                         className="absolute top-0 lg:-right-[140px] xl:-right-[160px] 2xl:-right-[220px] translate-x-4 w-64 h-[306px] object-cover rounded-lg !border-2 !border-white -translate-y-1/2 lg:w-[59.8%] xl:w-[59.8%] 2xl:w-[59.8%] z-20"
                         style={{ border: '2px solid white' }}
                       />

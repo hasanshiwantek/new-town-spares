@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react'
 import Image from "next/image";
 import banner from '@/assets/return-banner.png'
+import Link from 'next/link';
 const Returnpolicy = () => {
     // Enable smooth scroll globally
   useEffect(() => {
@@ -38,29 +39,29 @@ const Returnpolicy = () => {
     <div className="p-[1.25rem] overflow-y-auto max-h-[90vh]">
       <ul className="space-y-5 2xl:space-y-10 h5-regular">
         <li>
-          <a href="#eligibility-return-policy" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#eligibility-return-policy" className="hover:text-[#F15939] transition-colors duration-200">
             Eligibility and Return Policy
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#easy-return-process" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#easy-return-process" className="hover:text-[#F15939] transition-colors duration-200">
             Easy Return Process
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#restocking-fees" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#restocking-fees" className="hover:text-[#F15939] transition-colors duration-200">
             Restocking Fees
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#return-shipping-charges" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#return-shipping-charges" className="hover:text-[#F15939] transition-colors duration-200">
             Return Shipping Charges
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#items-not-returnable" className="hover:text-[#F15939] transition-colors duration-200">
+          <Link href="#items-not-returnable" className="hover:text-[#F15939] transition-colors duration-200">
             Items Not Returnable
-          </a>
+          </Link>
         </li>
       </ul>
     </div>

@@ -117,28 +117,28 @@ const ProductRight: React.FC<ProductRightProps> = ({
             Expert Team Support
           </p>
           <div className="flex justify-between gap-2 mt-4 flex-wrap">
-            <a
+            <Link
               href="mailto:support@newtownspares.com"
               className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
             >
               Email
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://wa.me/12096516864"
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
             >
               WhatsApp
-            </a>
-            <a
+            </Link>
+            <Link
               href="https://join.skype.com/invite/example"
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
             >
               Skype
-            </a>
+            </Link>
           </div>
           <p className="text-center text-[#333] text-[14px] mt-4">
             (209) 651-6864

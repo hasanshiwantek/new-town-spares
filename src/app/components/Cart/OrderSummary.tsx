@@ -10,6 +10,7 @@ import { calculatePackage } from "../CheckoutComponent/Shippingstep";
 import { fetchShippingRates } from "@/redux/slices/shippingSlice";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Country, State, City } from "country-state-city";
+import Image from "next/image";
 
 const OrderSummary = () => {
   const cart = useAppSelector((state: RootState) => state.cart.items);
@@ -409,7 +410,9 @@ const poppinsFont = "Poppins, sans-serif";
         <p className="text-center text-[14px] text-[#333333] py-10">-- or use --</p>
 
         <button className="mx-auto w-[90px] bg-black hover:bg-gray-900 !text-white py-3 rounded-sm flex items-center justify-center transition">
-          <img
+          <Image
+           width={64}
+           height={32}
             src="/checkouticon/googlepay.png"
             alt="Google Pay"
             className="w-16 h-8 object-contain"
