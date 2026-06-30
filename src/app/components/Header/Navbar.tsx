@@ -210,7 +210,7 @@ const Navbar: React.FC = () => {
                   className="object-contain"
                   priority
                   sizes="(max-width: 768px) 200px, (max-width: 1200px) 200px, 253px"
-                />}
+                />
               </div>
             </Link>
           </div>
