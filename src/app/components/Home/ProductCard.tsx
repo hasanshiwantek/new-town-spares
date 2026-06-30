@@ -90,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] rounded shadow hover:shadow-md transition flex flex-col h-full p-7 border-1">
+    <div className="bg-[#FFFFFF] rounded shadow hover:shadow-md transition flex flex-col h-full p-7 border border-[#ebebeb]">
       {/* Image */}
       <div className="relative w-[97.3%] h-[252.63px] mb-2 mx-auto">
         <Image

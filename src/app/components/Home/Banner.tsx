@@ -49,7 +49,7 @@ const Banner = () => {
 
         {/* Left Image Section */}
         <div
-          className={`relative w-full h-[260px] md:h-[400px] lg:h-[400px] ${isLoggedIn ? "md:w-full lg:w-full" : "md:w-[64%] lg:w-[74.8%]"
+          className={`relative w-full aspect-[2/1] md:aspect-auto md:h-[400px] lg:h-[400px] ${isLoggedIn ? "md:w-full lg:w-full" : "md:w-[64%] lg:w-[74.8%]"
             }`}
         >
           <Image
@@ -65,7 +65,7 @@ const Banner = () => {
         {!isLoggedIn && (
           <form onSubmit={handleSubmit(onSubmit)} className="w-full md:w-[35%] lg:w-[23.9%] h-[332px] md:h-[400px] lg:h-[400px] bg-[#EBEBEB] flex flex-col justify-center px-7">
             <h2 className="text-lg xl:text-[20px] text-[#333333] mb-5 text-center">
-              Sign In
+              Sign in
             </h2>
 
             <label className="text-sm xl:text-[14px] text-[#333333] mb-2">
@@ -87,7 +87,7 @@ const Banner = () => {
             />
 
             <button disabled={loginLoading} type="submit" className="bg-[#FF482E] text-white py-3.5 rounded mb-4 hover:bg-orange-700 transition" >
-              {loginLoading ? "Loading..." : "Sign In"}
+              {loginLoading ? "Loading..." : "Sign in"}
             </button>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 mt-4">

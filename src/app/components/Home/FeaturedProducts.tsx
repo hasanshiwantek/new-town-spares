@@ -134,7 +134,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
         <>
           {/* ── Skeleton ── */}
           {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
@@ -176,10 +176,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
                 // overflow-x-auto scroll-smooth scrollbar-hide "
                 className="grid grid-rows-1 grid-flow-col gap-3
     auto-cols-[100%]
-    sm:auto-cols-[calc(50%-6px)] 
-    md:auto-cols-[calc(33.333%-8px)] 
-    lg:auto-cols-[calc(25%-9px)] 
-    2xl:auto-cols-[calc(20%-10px)]
+    sm:auto-cols-[calc(50%-6px)]
+    md:auto-cols-[calc(33.333%-8px)]
+    lg:auto-cols-[calc(25%-9px)]
     overflow-x-auto scroll-smooth
     [&::-webkit-scrollbar]:hidden
     [-ms-overflow-style:none]

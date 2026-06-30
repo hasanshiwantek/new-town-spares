@@ -45,7 +45,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
       <div>
         <div className="flex flex-col gap-1">
           {/* <h6 className="h6-regular">{product?.brand?.name}</h6> */}
-          <h1 className="uppercase font-light text-[14px] leading-8 tracking-[0.0075em] text-[#333333] xl:text-[16.8px] 2xl:text-[20px]">
+          <h1 className="font-light text-[14px] leading-8 tracking-[0.0075em] text-[#333333] xl:text-[16.8px] 2xl:text-[20px]">
             {product?.name || "N/A"}
           </h1>
 
@@ -163,9 +163,9 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               Zero interest
             </span>
             <span className="whitespace-nowrap">
-              or as low as $19/mo.&nbsp;
+              or as low as $19/mo with Affirm.&nbsp;
               <button type="button" className="underline font-semibold">
-                See what you can spend with Affirm.
+                See if you qualify
               </button>
             </span>
           </div>

@@ -172,9 +172,9 @@ const Navbar: React.FC = () => {
         <div
           className="
         flex items-center justify-between
-        gap-3 sm:gap-4 md:gap-6 lg:gap-8 xl:gap-10
-        h-[122.98px] 2xl:h-[122.98px]
-        w-full mx-auto px-7 xl:px-28 py-6
+        gap-3 sm:gap-4 md:gap-6 lg:gap-5 xl:gap-5
+        h-[90px] xl:h-[122.98px]
+        w-full mx-auto px-7 xl:px-28 py-[10px] xl:py-[21px]
       "
         >
           {/* Left: Hamburger + Logo */}
@@ -186,15 +186,15 @@ const Navbar: React.FC = () => {
               className="lg:hidden flex items-center justify-center w-10 h-10"
             >
               {burgerMenuOpen ? (
-                <X className="w-6 h-6 text-black" />
+                <X className="w-10 h-10 text-black" />
               ) : (
-                <Menu className="w-6 h-6 text-black" />
+                <Menu className="w-10 h-10 text-black" />
               )}
             </button>
 
             {/* Logo */}
             <Link href={"/"}  onClick={() => setBurgerMenuOpen(false)}>
-              <div className="relative  w-64 xl:w-72 2xl:w-[250px] h-[70px]">
+              <div className="relative w-[250px] h-[70px]">
                 <Image
                   src={navlogo}
                   alt="Logo"
@@ -208,9 +208,9 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          {/* Center: Search (Desktop only) */}
-          <div className="hidden lg:flex flex-1 justify-end items-center gap-1 2xl:gap-7 max-w-[64%]">
-            <div className="relative flex-1 max-w-[498.52px]">
+          {/* Center: Search (inline, xl+ only) */}
+          <div className="hidden xl:flex flex-1 justify-end items-center gap-1 xl:gap-7">
+            <div className="relative w-[25vw] max-w-[490px]">
               <GlobalSearchBar />
             </div>
 
@@ -220,7 +220,7 @@ const Navbar: React.FC = () => {
                 value={skuInput}
                 onChange={(e) => setSkuInput(e.target.value)}
                 placeholder="Add SKU to Cart"
-                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black"
+                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black rounded-l-sm"
               />
 
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -240,7 +240,7 @@ const Navbar: React.FC = () => {
                 type="button"
                 onClick={handleAddBySku}
                 disabled={adding}
-                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FD5430] text-xl text-white disabled:opacity-70"
+                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FD5430] text-xl text-white disabled:opacity-70 rounded-r-sm"
               >
                 {adding ? "..." : "Add to Cart"}
               </button>
@@ -248,7 +248,7 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Right Section (Desktop only) */}
-          <section className="hidden md:flex items-center gap-4">
+          <section className="hidden lg:flex items-center gap-4">
             {/* Currency */}
             {/* <div className="relative" ref={currencyRef}>
               <button
@@ -290,7 +290,7 @@ const Navbar: React.FC = () => {
                   <FaUser className="text-black w-full h-full" />
                 </div>
 
-                <div className="hidden 2xl:flex items-center gap-1">
+                <div className="hidden min-[1500px]:flex items-center gap-1">
                   <span className="text-black text-xl">Account</span>
                   <svg
                     className={`w-5 h-5 text-black transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
@@ -361,7 +361,7 @@ const Navbar: React.FC = () => {
               </button>
 
               {isCartOpen && (
-                <div className="absolute right-0 top-full mt-3 w-[330px] bg-white border border-gray-200 shadow-xl rounded-md z-[120] overflow-hidden">
+                <div className="absolute right-0 top-full mt-3 w-[330px] bg-white border border-gray-200 shadow-xl z-[120] overflow-hidden">
                   <div className="px-5 py-4 border-b border-gray-200">
                     <h2 className="text-[#333333] text-3xl">Your Cart</h2>
                   </div>
@@ -512,6 +512,46 @@ const Navbar: React.FC = () => {
             </div>
           </section>
         </div>
+
+        {/* Wrapped search + SKU row (lg only: 1024–1279) */}
+        <div className="hidden lg:flex xl:hidden items-center justify-between gap-4 px-7 pb-[32px]">
+          <div className="relative w-[42%] max-w-[470px]">
+            <GlobalSearchBar />
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="text"
+              value={skuInput}
+              onChange={(e) => setSkuInput(e.target.value)}
+              placeholder="Add SKU to Cart"
+              className="w-[170px] h-[42px] border px-2 border-gray-300 outline-none text-black rounded-l-sm"
+            />
+
+            <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
+              <input
+                type="number"
+                min={1}
+                value={qty}
+                onChange={(e) =>
+                  setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
+                }
+                className="w-full h-full text-center text-sm bg-transparent outline-none"
+                style={{ appearance: "textfield" }}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddBySku}
+              disabled={adding}
+              className="h-[42px] px-[11px] bg-[#FD5430] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
+            >
+              {adding ? "..." : "Add to Cart"}
+            </button>
+          </div>
+        </div>
+
         <div className="lg:hidden px-3 pb-3">
           <GlobalSearchBar onHideMenu={() => setBurgerMenuOpen(false)} />
         </div>
