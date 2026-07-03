@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import {
@@ -10,11 +10,14 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { bulkInquiry } from "@/redux/slices/homeSlice";
+import { sitekey } from "@/lib/axiosInstance";
+import { toast } from "react-toastify";
 interface BulkInquiryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,6 +41,8 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
     comments: "",
   });
   const dispatch = useAppDispatch();
+   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -46,9 +51,26 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
       [e.target.name]: e.target.value,
     });
   };
+  useEffect(() => {
+  setFormData({
+    fullName: "",
+    email: "",
+    phone: "",
+    quantity: "",
+    comments: "",
+  });
+
+  setCaptchaToken(null);
+  recaptchaRef.current?.reset();
+}, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+      // ✅ Captcha check
+    if (!captchaToken) {
+      toast.error("Please verify the captcha.");
+      return;
+    }
     const payload = {
       sku: product?.sku ?? "",
       ...formData,
@@ -157,7 +179,13 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939] resize-none"
               />
-
+             {/* ✅ ReCAPTCHA */}
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={sitekey}
+                onChange={(token) => setCaptchaToken(token)}
+                onExpired={() => setCaptchaToken(null)}
+              />
               <Button
                 type="submit"
                 className="w-full bg-[#F15939] text-white !p-5 !text-lg rounded-md font-medium hover:bg-[#d94d30] transition-colors duration-200"

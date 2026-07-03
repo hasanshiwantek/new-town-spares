@@ -1,5 +1,5 @@
 "use client";
-
+import ReCAPTCHA from "react-google-recaptcha";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import countries from "world-countries";
@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import {sitekey } from "@/lib/axiosInstance";
 
 interface SignupFormValues {
   firstName: string;
@@ -77,10 +78,15 @@ const SignupPage = () => {
   const dispatch = useAppDispatch();
   const { registerLoading } = useAppSelector((state: RootState) => state?.auth);
   const router = useRouter();
+   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onSubmit = async (data: SignupFormValues) => {
+      if (!captchaToken) {
+      alert("Please verify the captcha.");
+      return;
+    }
     try {
       const payload = {
         userRole: 2,
@@ -336,6 +342,14 @@ const SignupPage = () => {
             {errors.zip && (
               <p className="text-[10px] text-red-500 mt-0.5">Required</p>
             )}
+          </div>
+           <div className="mt-6">
+            <ReCAPTCHA
+              sitekey={sitekey}
+              onChange={(token: any) => {
+                setCaptchaToken(token);
+              }}
+            />
           </div>
 
           {/* Submit */}
