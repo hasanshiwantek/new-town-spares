@@ -84,7 +84,7 @@ const SignupPage = () => {
 
   const onSubmit = async (data: SignupFormValues) => {
       if (!captchaToken) {
-      alert("Please verify the captcha.");
+      toast("Please verify the captcha.");
       return;
     }
     try {
