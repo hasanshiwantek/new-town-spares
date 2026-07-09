@@ -13,9 +13,14 @@ const jost = Jost({
 });
 
 
+// Live (newtownspares.com) loads ONLY Poppins Light (300) and lets the browser
+// synthesize bolder weights from it — so its whole baseline reads as 300. We mirror
+// that exactly: load only 300, and CSS font-matching makes 400/500 fall to 300 while
+// 600/700 get synthesized bold. This keeps our text the same visual weight as live
+// site-wide, without per-page tweaks. (See CLAUDE.md "Font weight".)
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300"],
   display: "swap",
   preload: true,
 });

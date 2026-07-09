@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const ProductLeft = ({ images, selectedImage, setSelectedImage }: any) => {
   return (
-    <div className=" product-left flex flex-col w-full lg:w-[37%] xl:w-[37.6%] 2xl:w-[37.6%]">
+    <div className=" product-left flex flex-col w-full [grid-area:image]">
       <div className="flex flex-col gap-[10px] border">
         {/* Main Image */}
          <figure

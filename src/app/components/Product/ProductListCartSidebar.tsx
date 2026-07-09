@@ -23,7 +23,7 @@ export default function ProductListCartSidebar() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="hidden xl:block w-full max-w-[30.7%] rounded-lg border border-gray-200 shadow-sm overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto">
+    <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto">
       <h2 className="text-[#333333] text-2xl lg:text-[22px] text-center pb-4 border-b border-gray-200">
         Your Cart
       </h2>
@@ -74,13 +74,13 @@ export default function ProductListCartSidebar() {
           <span>Subtotal:</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between font-semibold text-[14px] border-t border-gray-200 pt-3">
+        <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Grand total:</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
       </div>
 
-      <div className="flex gap-2 border-t border-gray-200 bg-gray-50">
+      <div className="flex gap-2 bg-gray-50">
         <Link
           href="/cart"
           className="flex-1 h-[37.58px] flex items-center justify-center rounded border border-gray-300 bg-white text-gray-700 text-[14px] font-medium hover:bg-gray-50"

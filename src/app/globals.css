@@ -46,6 +46,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* ✅ Add your Figma-based breakpoints here */
+  --breakpoint-xs: 375px;
   --breakpoint-sm: 640px;
   /* 640px */
   --breakpoint-md: 768px;

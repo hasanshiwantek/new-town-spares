@@ -41,10 +41,10 @@ function FieldLabel({
   required?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 mb-1">
+    <div className="flex items-center justify-between gap-2 mb-[7px]">
       <Label
         htmlFor={htmlFor}
-        className="text-[14px] text-[#333333] font-normal leading-none"
+        className="text-[14px] text-[#333333] font-light leading-none"
       >
         {children}
       </Label>
@@ -102,24 +102,26 @@ const SignupPage = () => {
   const password = watch("password");
 
   const inputClass =
-    "w-full h-[42px] max-w-full bg-white border border-gray-300 rounded text-gray-800 text-[14px] focus:ring-2 focus:ring-[#FD5430] focus:border-[#FD5430]";
-  const rowClass = "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6";
+    "w-full h-[42px] !max-w-full !text-[14px] bg-white border border-[#ebebeb] rounded-[4px] px-[14px] text-[#333333] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]";
+  const rowClass = "grid grid-cols-1 min-[551px]:grid-cols-2 gap-7 min-[551px]:gap-5";
 
   return (
-    <section className="min-h-screen w-full py-8">
-       <div className="mb-6 text-sm md:text-base">
-          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
-            Home
-          </Link>{" "}
-          / <span className="mx-1 text-[#333333] text-[13px]">Create Accont</span>
-        </div>
+    <section className="w-full mt-[9px] mb-20">
+      {/* Breadcrumb (live hides it below 551px) */}
+      <div className="hidden min-[551px]:block mb-0 text-sm">
+        <Link href="/" className="hover:text-[#F15939] transition-colors text-[#333333] text-[13px] underline">
+          Home
+        </Link>
+        <span className="mx-2">/</span>
+        <span className="text-[#333333] text-[13px]">Create Account</span>
+      </div>
       <div className="max-w-full mx-auto w-full">
 
-        <h1 className="text-2xl sm:text-4xl text-gray-800 my-8">
+        <h1 className="text-[28px] leading-[34px] tracking-[0.25px] text-[#333333] mt-[26.25px] mb-[26.25px]">
           New Account
         </h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-7">
           {/* Row 1: Email | Password */}
           <div className={rowClass}>
             <div>
@@ -149,7 +151,7 @@ const SignupPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-2 top-13 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-[45px] text-gray-500 hover:text-gray-700"
                 aria-label="Toggle password"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -178,7 +180,7 @@ const SignupPage = () => {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((p) => !p)}
-                className="absolute right-2 top-13 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-[45px] text-gray-500 hover:text-gray-700"
                 aria-label="Toggle password"
               >
                 {showConfirmPassword ? (
@@ -295,7 +297,7 @@ const SignupPage = () => {
                 className={`${inputClass} cursor-pointer`}
                 {...register("country", { required: true })}
               >
-                <option value="">Select Country</option>
+                <option value="">Choose a Country</option>
                 {countryList.map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.name}
@@ -322,7 +324,7 @@ const SignupPage = () => {
           </div>
 
           {/* Row 7: Zip (single field row) */}
-          <div className="w-full sm:w-[49.3%]">
+          <div className="w-full min-[551px]:w-[49.3%]">
             <FieldLabel htmlFor="zip" required>
               Zip/Postcode
             </FieldLabel>
@@ -337,7 +339,7 @@ const SignupPage = () => {
           </div>
 
           {/* Submit */}
-          <div className="flex flex-col sm:flex-row justify-between items-center pt-4 gap-4">
+          <div className="flex flex-col min-[551px]:flex-row justify-between items-center pt-4 gap-4">
             <p className="text-[14px] text-gray-600 mb-0">
               {/* Already have an account?{" "}
               <Link href="/auth/login" className="text-[#FD5430] hover:underline">
@@ -345,13 +347,13 @@ const SignupPage = () => {
               </Link> */}
             </p>
             {registerLoading ? (
-              <div className="flex justify-center sm:justify-end w-full sm:w-[173px]">
-                <div className="w-8 h-8 border-4 border-t-transparent border-[#FD5430] rounded-full animate-spin" />
+              <div className="flex justify-center min-[551px]:justify-end w-full min-[551px]:w-[174px]">
+                <div className="w-8 h-8 border-4 border-t-transparent border-[#FF482E] rounded-full animate-spin" />
               </div>
             ) : (
               <Button
                 type="submit"
-                className="w-full md:w-[173px] bg-[#FD5430] hover:bg-[#e04a2a] text-white font-medium h-[42px] rounded text-[12px]"
+                className="w-full min-[551px]:w-[174px] bg-[#FF482E] hover:bg-[#e04a2a] text-white font-light h-[40px] rounded-[4px] text-[14px]"
               >
                 Create Account
               </Button>

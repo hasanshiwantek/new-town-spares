@@ -65,8 +65,8 @@ export default function PageTransition({
             "/contact-us",
             "/about-us",
           ].some((p) => pathname.includes(p))
-            ? "w-full max-w-[1684px] mx-auto px-7 xl:px-28 py-6"
-            : "py-6 md:px-[7%] lg:px-[5.2%] xl:px-[84px] 2xl:px-[84px] px-[7%]"
+            ? "w-full max-w-[1684px] mx-auto px-7 xl:px-28 pt-[12px] pb-[42px]"
+            : "pt-[12px] pb-[42px] px-[5%] min-[801px]:px-[84px]"
         }`}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}

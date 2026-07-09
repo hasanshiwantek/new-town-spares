@@ -926,10 +926,12 @@ const CheckoutForm = () => {
           {/* LEFT SECTION - Multi-step form */}
           <div className="lg:col-span-2 space-y-0">
             {/* STEP 1: Customer */}
-            <div className="p-6 border-b-[1px] border-b-[#8b8b8b]">
-              <h2 className="text-[2.1rem] font-normal mb-4 text-[#545454]">
-                Customer
-              </h2>
+            <div className="p-6 border-b border-b-[#ebebeb]">
+              <div className={completedSteps.includes(1) && currentStep !== 1 ? "flex items-center gap-6" : ""}>
+                <h2 className={`text-[25px] leading-[31px] font-normal text-[#333333] ${completedSteps.includes(1) && currentStep !== 1 ? "shrink-0" : "mb-4"}`}>
+                  Customer
+                </h2>
+                <div className={completedSteps.includes(1) && currentStep !== 1 ? "flex-1 min-w-0" : ""}>
               <CustomerStep
                 register={register}
                 errors={errors}
@@ -941,13 +943,17 @@ const CheckoutForm = () => {
                 onEdit={handleEditCustomer}
                 emailValue={watch("email")}
               />
+                </div>
+              </div>
             </div>
 
             {/* STEP 2: Shipping */}
-            <div className="p-6  border-b-[1px] border-b-[#8b8b8b]">
-              <h2 className="text-[2.1rem] font-normal mb-4 text-[#545454]">
-                Shipping
-              </h2>
+            <div className="p-6  border-b border-b-[#ebebeb]">
+              <div className={completedSteps.includes(2) && currentStep !== 2 ? "flex items-start gap-6" : ""}>
+                <h2 className={`text-[25px] leading-[31px] font-normal text-[#333333] ${completedSteps.includes(2) && currentStep !== 2 ? "w-[165px] shrink-0" : "mb-4"}`}>
+                  Shipping
+                </h2>
+                <div className={completedSteps.includes(2) && currentStep !== 2 ? "flex-1 min-w-0" : ""}>
               <ShippingStep
                 register={register}
                 errors={errors}
@@ -971,13 +977,17 @@ const CheckoutForm = () => {
                 }}
                 watchedShippingMethod={watchedShippingMethod}
               />
+                </div>
+              </div>
             </div>
 
             {/* STEP 3: Billing */}
-            <div className="p-6  border-b-[1px] border-b-[#8b8b8b]">
-              <h2 className="text-[2.1rem] font-normal mb-4 text-[#545454]">
-                Billing
-              </h2>
+            <div className="p-6  border-b border-b-[#ebebeb]">
+              <div className={completedSteps.includes(3) && currentStep !== 3 ? "flex items-start gap-6" : ""}>
+                <h2 className={`text-[25px] leading-[31px] font-normal text-[#333333] ${completedSteps.includes(3) && currentStep !== 3 ? "w-[165px] shrink-0" : "mb-4"}`}>
+                  Billing
+                </h2>
+                <div className={completedSteps.includes(3) && currentStep !== 3 ? "flex-1 min-w-0" : ""}>
               {!watchedBillingSame && (
                 <BillingStep
                   register={register}
@@ -999,13 +1009,17 @@ const CheckoutForm = () => {
                   }}
                 />
               )}
+                </div>
+              </div>
             </div>
 
             {/* STEP 4: Payment */}
-            <div className="p-6  border-b-[1px] border-b-[#8b8b8b]">
-              <h2 className="text-[2.1rem] font-normal mb-4 text-[#545454]">
-                Payment
-              </h2>
+            <div className="p-6  border-b border-b-[#ebebeb]">
+              <div className={completedSteps.includes(4) && currentStep !== 4 ? "flex items-start gap-6" : ""}>
+                <h2 className={`text-[25px] leading-[31px] font-normal text-[#333333] ${completedSteps.includes(4) && currentStep !== 4 ? "w-[165px] shrink-0" : "mb-4"}`}>
+                  Secure <br />Payment
+                </h2>
+                <div className={completedSteps.includes(4) && currentStep !== 4 ? "flex-1 min-w-0" : ""}>
               <PaymentStep
                 register={register}
                 errors={errors}
@@ -1031,6 +1045,8 @@ const CheckoutForm = () => {
                         : "Credit Card"
                 }
               />
+                </div>
+              </div>
             </div>
           </div>
 

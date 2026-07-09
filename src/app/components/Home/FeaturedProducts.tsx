@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import ProductCard from "./ProductCard";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchProductsData } from "@/redux/slices/homeSlice";
+import React, { useEffect, useRef, useState } from "react";
+import ProductCard from "./ProductCard";
 
 // Skeleton loader
 const ProductSkeleton = () => (
@@ -23,7 +23,10 @@ interface FeaturedProductsProps {
   title?: string;
 }
 
-const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) => {
+const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
+  endpoint,
+  title,
+}) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const { products } = useAppSelector((state: any) => state.home);
@@ -43,7 +46,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
 
     const scrollable = el.scrollWidth > el.clientWidth + 1;
     setCanScrollLeft(scrollable && el.scrollLeft > 0);
-    setCanScrollRight(scrollable && el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    setCanScrollRight(
+      scrollable && el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    );
 
     const colWidth = el.firstElementChild
       ? (el.firstElementChild as HTMLElement).offsetWidth
@@ -89,18 +94,27 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
     const check = () => {
       const cur = trackRef.current?.scrollLeft || 0;
       if (Math.abs(cur - last) < 1) updateScroll();
-      else { last = cur; requestAnimationFrame(check); }
+      else {
+        last = cur;
+        requestAnimationFrame(check);
+      }
     };
     requestAnimationFrame(check);
   };
 
   const scrollLeft = () => {
-    trackRef.current?.scrollBy({ left: -(trackRef.current.offsetWidth), behavior: "smooth" });
+    trackRef.current?.scrollBy({
+      left: -trackRef.current.offsetWidth,
+      behavior: "smooth",
+    });
     trackScroll();
   };
 
   const scrollRight = () => {
-    trackRef.current?.scrollBy({ left: trackRef.current.offsetWidth, behavior: "smooth" });
+    trackRef.current?.scrollBy({
+      left: trackRef.current.offsetWidth,
+      behavior: "smooth",
+    });
     trackScroll();
   };
 
@@ -119,22 +133,25 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
   // e.g. 5 cards, 5 visible → 0 dots (no arrows, no dots)
   const totalCards = Math.min(productsData.length, 5);
   const dotsCount = totalCards - visibleCount; // extra cards jo scroll pe hain
-  const showUI = dotsCount > 0;             // arrows + dots dono
+  const showUI = dotsCount > 0; // arrows + dots dono
 
   return (
-    <div className="bg-transparent py-4">
-
+    <div className="bg-transparent">
       {/* ── Title ── */}
-      <h2 className="text-4xl text-[#333333] p-3 text-center w-full my-4">{title}</h2>
+      <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center w-full my-[26px]">
+        {title}
+      </h2>
 
       {/* ── Error ── */}
-      {localError && <div className="text-red-500 text-center py-4">{localError}</div>}
+      {localError && (
+        <div className="text-red-500 text-center py-4">{localError}</div>
+      )}
 
       {!localError && (
         <>
           {/* ── Skeleton ── */}
           {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 min-[551px]:grid-cols-2 min-[801px]:grid-cols-3 min-[1261px]:grid-cols-4 gap-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
@@ -143,24 +160,26 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
 
           {/* ── Empty ── */}
           {!loading && productsData.length === 0 && (
-            <div className="py-12 text-center text-gray-500 text-sm">No products found</div>
+            <div className="py-12 text-center text-gray-500 text-sm">
+              No products found
+            </div>
           )}
 
           {/* ── Slider ── */}
           {!loading && productsData.length > 0 && (
             <div className="relative">
-
               {/* Left Arrow */}
               {showUI && (
                 <button
                   onClick={scrollLeft}
                   disabled={!canScrollLeft}
-                  style={{ width: 20, height: 41, fontSize: 30, lineHeight: 1 }}
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 z-10  shadow-md rounded
-                    flex items-center justify-center font-bold transition-opacity duration-200
-                    ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+                  aria-label="Previous products"
+                  className={`absolute -left-7 xl:-left-[47px] top-1/2 -translate-y-1/2 z-10 w-10 h-[61px]
+                    flex items-center justify-center text-[34px] leading-none font-light text-[#333333]
+                    transition-opacity duration-200
+                    ${!canScrollLeft ? "opacity-10 pointer-events-none" : "opacity-100"}`}
                 >
-                  &#8249;
+                  &#10094;
                 </button>
               )}
 
@@ -169,16 +188,16 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
                 ref={trackRef}
                 //             className="grid grid-rows-1 grid-flow-col gap-3
                 // auto-cols-[100%]
-                // sm:auto-cols-[calc(50%-6px)] 
-                // md:auto-cols-[calc(33.333%-8px)] 
-                // lg:auto-cols-[calc(25%-9px)] 
+                // sm:auto-cols-[calc(50%-6px)]
+                // md:auto-cols-[calc(33.333%-8px)]
+                // lg:auto-cols-[calc(25%-9px)]
                 // 2xl:auto-cols-[calc(20%-10px)]
                 // overflow-x-auto scroll-smooth scrollbar-hide "
                 className="grid grid-rows-1 grid-flow-col gap-3
     auto-cols-[100%]
-    sm:auto-cols-[calc(50%-6px)]
-    md:auto-cols-[calc(33.333%-8px)]
-    lg:auto-cols-[calc(25%-9px)]
+    min-[551px]:auto-cols-[calc(50%-6px)]
+    min-[801px]:auto-cols-[calc(33.333%-8px)]
+    min-[1261px]:auto-cols-[calc(25%-9px)]
     overflow-x-auto scroll-smooth
     [&::-webkit-scrollbar]:hidden
     [-ms-overflow-style:none]
@@ -194,29 +213,33 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ endpoint, title }) 
                 <button
                   onClick={scrollRight}
                   disabled={!canScrollRight}
-                  style={{ width: 20, height: 41, fontSize: 30, lineHeight: 1 }}
-                  className={`absolute right-0 top-1/2 -translate-y-1/2 z-10  shadow-md rounded
-                    flex items-center justify-center font-bold transition-opacity duration-200
-                    ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+                  aria-label="Next products"
+                  className={`absolute -right-7 xl:-right-[47px] top-1/2 -translate-y-1/2 z-10 w-10 h-[61px]
+                    flex items-center justify-center text-[34px] leading-none font-light text-[#333333]
+                    transition-opacity duration-200
+                    ${!canScrollRight ? "opacity-10 pointer-events-none" : "opacity-100"}`}
                 >
-                  &#8250;
+                  &#10095;
                 </button>
               )}
 
               {/* ── Dots ── */}
               {showUI && (
-                <div className="flex justify-center gap-2 mt-3">
+                <div className="h-[25px] flex items-end justify-center gap-2 mt-[11px]">
                   {Array.from({ length: dotsCount + 1 }).map((_, i) => (
                     <button
                       key={i}
                       onClick={() => scrollToIndex(i)}
-                      className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${activeIndex === i ? "bg-[#333333]" : "bg-transparent"
-                        }`}
+                      aria-label={`Go to slide ${i + 1}`}
+                      className={`h-[10px] w-[10px] rounded-full border border-black transition-all duration-300 ${
+                        activeIndex === i
+                          ? "opacity-100 bg-black"
+                          : "opacity-25"
+                      }`}
                     />
                   ))}
                 </div>
               )}
-
             </div>
           )}
         </>

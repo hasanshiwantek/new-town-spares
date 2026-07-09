@@ -1,5 +1,45 @@
 import SortDropdown from "./SortDropdown";
 
+const List = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <rect x="3" y="3" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="3" y="10" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="3" y="17" width="5" height="5" rx="1" fill="currentColor" />
+
+    <rect x="10" y="3.5" width="11" height="4" rx="1" fill="currentColor" />
+    <rect x="10" y="10.5" width="11" height="4" rx="1" fill="currentColor" />
+    <rect x="10" y="17.5" width="11" height="4" rx="1" fill="currentColor" />
+  </svg>
+);
+
+const LayoutGrid = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+  >
+    <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="9.5" y="2" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="17" y="2" width="5" height="5" rx="1" fill="currentColor" />
+
+    <rect x="2" y="9.5" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="9.5" y="9.5" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="17" y="9.5" width="5" height="5" rx="1" fill="currentColor" />
+
+    <rect x="2" y="17" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="9.5" y="17" width="5" height="5" rx="1" fill="currentColor" />
+    <rect x="17" y="17" width="5" height="5" rx="1" fill="currentColor" />
+  </svg>
+);
+
 interface Props {
   total: number;
   view: "list" | "grid";
@@ -69,37 +109,62 @@ export default function SortingBar({
   };
 
   return (
-    <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col justify-between items-center border 2xl:py-[20px] 2xl:px-[30px] xl:py-[15px] xl:px-[22.5px]    p-5 w-full">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 py-4 w-full">
       {/* ✅ Dynamic heading */}
-      <h4 className="text-[14px] hidden sm:block text-[#333333]">{getFilterTitle()}</h4>
+      <h4 className="text-[13px] hidden sm:block text-[#333333]">
+        {getFilterTitle()}
+      </h4>
 
-      <div className="flex xl:flex-row lg:flex-row md:flex-col sm:flex-col flex-col items-center gap-3 ">
-
-        <span className="text-[14px] text-[#333333]">Sort by</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <span className="text-[13px] font-light text-[#333333]">Sort By:</span>
 
         {/* Sort Dropdown */}
         <SortDropdown filters={filters} setFilters={setFilters} />
 
+        {/* Page size — live: bold "Show" + underlined links, current one plain */}
+        <div className="hidden sm:flex items-center">
+          <span className="text-[13px] font-bold text-[#333333] mr-[11px]">
+            Show
+          </span>
+          {[12, 24, 36, 48, 96].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() =>
+                setFilters((prev: any) => ({ ...prev, pageSize: n, page: 1 }))
+              }
+              className={`text-[13px] text-[#333333] mr-[11px] hover:text-[#FF482E] ${
+                filters.pageSize === n ? "" : "underline"
+              }`}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
 
         {/* View Toggle */}
-        <div className="hidden sm:flex items-center space-x-2">
+        <div className="hidden lg:flex items-center gap-2">
           <button
             onClick={() => setView("grid")}
-            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "grid"
-              ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
-              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
-              }`}
+            aria-label="Grid view"
+            className={`transition-colors ${
+              view === "grid"
+                ? "text-[var(--primary-color)]"
+                : "text-[#333333] hover:bg-gray-100"
+            }`}
           >
-            ▭▭
+            <LayoutGrid />
           </button>
           <button
             onClick={() => setView("list")}
-            className={`px-3 py-2 rounded-md border transition-colors text-base font-medium ${view === "list"
-              ? "bg-[var(--primary-color)] text-white border-orange-500 shadow-md"
-              : "bg-white text-gray-600 border-gray-300 hover:bg-gray-100"
-              }`}
+            aria-label="List view"
+            className={`transition-colors ${
+              view === "list"
+                ? "text-[var(--primary-color)]"
+                : "text-[#333333] hover:bg-gray-100"
+            }`}
           >
-            ☰
+            <List />
           </button>
         </div>
       </div>

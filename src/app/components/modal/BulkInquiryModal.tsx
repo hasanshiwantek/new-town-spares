@@ -70,44 +70,37 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!max-w-[70rem] w-full max-h-[90vh] overflow-y-auto p-0 rounded-lg shadow-sm">
-        {/* Header with Close */}
-        {/* <DialogHeader className="flex justify-end p-4"> */}
-        {/* <DialogClose className="text-gray-500 hover:text-gray-700">
-            <X className="w-6 h-6" />
-          </DialogClose> */}
-        {/* </DialogHeader> */}
-
+      <DialogContent className="!max-w-[780px] w-full max-h-[90vh] overflow-y-auto p-0 rounded-[10px] shadow-none border-none outline-none">
         <div className="flex flex-col md:flex-row">
           {/* Left Side - Product Image */}
-          <div className="md:w-3/5 bg-white p-8 flex flex-col items-center justify-center">
+          <div className="md:w-1/2 bg-white p-[20px] flex flex-col justify-center">
             {product?.image ? (
               <Image
                 src={product.image}
                 alt={product.name || "Product"}
-                width={300}
-                height={300}
-                className="object-contain"
+                width={350}
+                height={350}
+                className="w-full h-auto max-w-[350px] mx-auto object-contain"
               />
             ) : (
-              <div className="w-48 h-48 bg-gray-200 flex items-center justify-center">
+              <div className="w-48 h-48 bg-gray-200 mx-auto my-[20px] flex items-center justify-center">
                 <span className="text-gray-400">No Image</span>
               </div>
             )}
             {product?.name && (
-              <p className="mt-4 text-base text-gray-700 text-center font-medium">
+              <p className="text-[14px] leading-[21px] font-bold text-[#333333]">
                 {product.name}
               </p>
             )}
           </div>
 
           {/* Right Side - Form */}
-          <div className="md:w-3/5 p-8 bg-[#f7f7f7]">
-            <DialogTitle className="text-2xl font-semibold text-gray-800 mb-6">
+          <div className="md:w-1/2 p-[20px] bg-[#f7f7f7]">
+            <DialogTitle className="text-[25px] leading-[30px] font-normal text-[#333333] mt-[32px] mb-[11px]">
               Request A Bulk Quote
             </DialogTitle>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-[10px]">
               <Input
                 type="text"
                 name="fullName"
@@ -115,7 +108,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 value={formData.fullName}
                 onChange={handleChange}
                 required
-                className="w-full !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939]"
+                className="w-full !max-w-full h-[45px] px-[10px] py-0 border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939]"
               />
 
               <Input
@@ -125,7 +118,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="w-full !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939]"
+                className="w-full !max-w-full h-[45px] px-[10px] py-0 border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939]"
               />
 
               <Input
@@ -135,7 +128,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                className="w-full !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939]"
+                className="w-full !max-w-full h-[45px] px-[10px] py-0 border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939]"
               />
 
               <Input
@@ -146,7 +139,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 onChange={handleChange}
                 required
                 min={1}
-                className="w-full !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939]"
+                className="w-full !max-w-full h-[45px] px-[10px] py-0 border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939]"
               />
 
               <Textarea
@@ -154,13 +147,13 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 placeholder="Comments"
                 value={formData.comments}
                 onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939] resize-none"
+                rows={2}
+                className="w-full !min-h-0 h-[50px] px-[10px] py-[6px] border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939] resize-none"
               />
 
               <Button
                 type="submit"
-                className="w-full bg-[#F15939] text-white !p-5 !text-lg rounded-md font-medium hover:bg-[#d94d30] transition-colors duration-200"
+                className="w-full h-[39px] bg-[#FF482E] !text-[14px] font-light text-white rounded-[4px] hover:bg-[#d94d30] transition-colors duration-200 !mt-[30px]"
               >
                 Submit Form
               </Button>

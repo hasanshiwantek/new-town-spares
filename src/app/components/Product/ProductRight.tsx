@@ -33,10 +33,10 @@ const ProductRight: React.FC<ProductRightProps> = ({
 
   return (
     <>
-      <aside className="product-right w-[265px] mt-3">
+      <aside className="product-right w-full mt-3 [grid-area:buy]">
         {/* Top: Price, Stock, Quantity, Add to Cart */}
         {purchasabilityStatus ? <div className="border border-[#ebebeb] w-full p-7 ">
-          <div className="text-[20px] font-semibold text-[#FF482E]">
+          <div className="text-[20px] font-semibold text-[#FF482E] mb-[16px]">
             {price > 0 && (
               <ProductPrice
                 price={price}
@@ -46,7 +46,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
               />
             )}
           </div>
-          <p className="text-[#333] text-[14px] mt-1 font-light">
+          <p className="text-[#333] text-[14px] mt-[8px] font-light">
             {product?.availabilityText || "In Stock"}
           </p>
 
@@ -83,7 +83,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
                   }
                 }
               }}
-              className="w-17 h-13 text-center text-sm border border-[#ebebeb] rounded bg-white text-[#000000] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              className="font-bold! w-[50px] h-[40px] text-center text-[14px] border border-[#ebebeb] rounded bg-white text-[#000000] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               aria-label="Quantity"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -112,14 +112,14 @@ const ProductRight: React.FC<ProductRightProps> = ({
         </div>}
 
         {/* Expert Team Support */}
-        <div className="border border-[#ebebeb] w-full mt-6 p-7">
-          <p className="text-center text-[#888888] text-[15px] font-medium uppercase tracking-wide">
+        <div className="border border-[#ebebeb] w-full mt-6 p-7 hidden min-[801px]:block">
+          <p className="text-center text-[#888888] text-[15px] leading-[22.5px] font-normal uppercase tracking-wide">
             Expert Team Support
           </p>
-          <div className="flex justify-between gap-2 mt-4 flex-wrap">
+          <div className="flex gap-2 justify-between items-center flex-nowrap mt-4">
             <a
               href="mailto:support@newtownspares.com"
-              className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
+              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors"
             >
               Email
             </a>
@@ -127,7 +127,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
               href="https://wa.me/12096516864"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
+              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors"
             >
               WhatsApp
             </a>
@@ -135,7 +135,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
               href="https://join.skype.com/invite/example"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2.5 bg-[#2c2d2c] text-white text-[12.6px] font-normal shadow-sm transition-colors"
+              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors"
             >
               Skype
             </a>
@@ -146,7 +146,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="w-full mt-4 py-3 bg-white border border-[#333333] text-[#333] font-normal text-[14px] hover:bg-gray-50 transition-colors"
+            className="w-full mt-4 py-3 bg-white border border-[#333333] text-[#333] font-normal text-[14px] hover:bg-[#333] hover:text-white transition-colors"
           >
             Request A Bulk Quote
           </button>

@@ -1,22 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 // import { motion, AnimatePresence } from "framer-motion";
-import CategoryFilter from "./CategoryFilter";
-import BrandFilter from "./BrandFilter";
-import PriceFilter from "./PriceFilter";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import { useRouter, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import { useParams, useRouter } from "next/navigation";
+import CategoryFilter from "./CategoryFilter";
+import PriceFilter from "./PriceFilter";
 
 // Dynamically import only the motion.div wrapper
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false }
+  { ssr: false },
 );
 const AnimatePresence = dynamic(
   () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false }
+  { ssr: false },
 );
 export default function Sidebar({
   categories,
@@ -40,20 +38,22 @@ export default function Sidebar({
   isCategoryPage?: boolean;
 }) {
   const [expandedSection, setExpandedSection] = useState<string | null>(
-    "Top Brands"
+    "Top Brands",
   );
   // const [expandedCategorySection, setExpandedCategorySection] = useState<
   //   string | null
   // >(null);
-  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<Set<number>>(
+    new Set(),
+  );
 
   const router = useRouter();
   const params = useParams();
   // const toggleCategorySection = (section: string) => {
   //   setExpandedCategorySection((prev) => (prev === section ? null : section));
   // };
-   
- const handleToggleExpand = (categoryId: number) => {
+
+  const handleToggleExpand = (categoryId: number) => {
     setExpandedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(categoryId)) {
@@ -105,7 +105,7 @@ export default function Sidebar({
   const findParentChain: any = (
     cats: any[],
     slug: string,
-    chain: any[] = []
+    chain: any[] = [],
   ) => {
     for (const cat of cats) {
       if (cat.slug === slug) return [...chain, cat];
@@ -118,7 +118,7 @@ export default function Sidebar({
   };
 
   // ✅ When URL slug changes, auto-expand matching categories
- useEffect(() => {
+  useEffect(() => {
     if (params?.slug && categories?.length > 0) {
       const chain = findParentChain(categories, params.slug);
       if (chain && chain.length > 0) {
@@ -132,10 +132,7 @@ export default function Sidebar({
   return (
     <aside
       className="
-      flex flex-col gap-5 w-full bg-white rounded-xl
-      2xl:px-3 p-0
-      transition-all duration-300
-    "
+      flex flex-col w-full bg-white rounded-xl pr-[11px] p-0 transition-all duration-300"
     >
       <div>
         {/* Category Section */}
@@ -143,9 +140,9 @@ export default function Sidebar({
           <h2 className="h3-secondary">Category</h2>
         </div> */}
 
-        <ul className="py-2 space-y-2">
+        <ul className="space-y-2">
           {/* Top Brands */}
-          
+
           {/* <li>
             <div
               onClick={() => toggleSection("Top Brands")}
@@ -228,7 +225,7 @@ export default function Sidebar({
               </AnimatePresence>
             </li>
           ))} */}
-           <CategoryFilter
+          <CategoryFilter
             categories={categories}
             handleCategoryClick={handleCategoryClick}
             activeCategoryId={filters?.categoryIds?.[0]}
@@ -237,12 +234,10 @@ export default function Sidebar({
           />
         </ul>
       </div>
-
+      <hr className="my-[28px]" />
       {/* Shop By Price - clean list UI */}
       <div className="w-full">
-        <h2 className="text-[#333333] text-xl mb-3">
-          Shop By Price
-        </h2>
+        <h2 className="text-[#333333] text-xl mb-3">Shop By Price</h2>
         <PriceFilter filters={filters} setFilters={setFilters} />
         {/* <div className="mt-4 text-sm text-gray-600">
           {products?.length ?? 0} products
