@@ -143,8 +143,8 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </Link>
             </div>
           )}
-          <div className="mt-3 flex items-center gap-2 text-[14px] text-[#121e4d] flex-wrap md:flex-nowrap whitespace-nowrap">
-            <span className="inline-flex items-center justify-center rounded-lg bg-[#E2E2FF] text-[#6656D5] text-[14px] font-normal px-2 mr-1">
+          <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
+            <span className="inline-flex items-center align-middle justify-center rounded-lg bg-[#E2E2FF] text-[#6656D5] text-[14px] font-normal px-2 mr-2 whitespace-nowrap">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-4 h-4 mr-1"
@@ -162,12 +162,8 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </svg>
               Zero interest
             </span>
-            <span className="whitespace-nowrap">
-              or as low as $19/mo with Affirm.&nbsp;
-              <button type="button" className="underline">
-                See if you qualify
-              </button>
-            </span>
+            or as low as $19/mo with Affirm.{" "}
+            <span className="underline cursor-pointer">See if you qualify</span>
           </div>
         </div>
 

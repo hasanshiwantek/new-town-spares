@@ -1,17 +1,24 @@
 "use client";
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { updatecustomer } from "@/redux/slices/myaccountSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { updatecustomer } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import countries from "world-countries";
+import {
+  FieldLabel,
+  ErrorMsg,
+  addrInputCls,
+  addrSelectCls,
+} from "./addressFormHelpers";
 
 interface AddressFormValues {
-  address1?: string;
+  firstName: string;
+  lastName: string;
+  companyName?: string;
+  phoneNumber?: string;
+  address1: string;
   address2?: string;
   suburb: string;
   country: string;
@@ -20,34 +27,47 @@ interface AddressFormValues {
 }
 
 const AddressForm = () => {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<AddressFormValues>();
-  const { loading, error } = useAppSelector((state: RootState) => state.myaccount);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<AddressFormValues>();
+  const { loading } = useAppSelector((state: RootState) => state.myaccount);
   const auth = useAppSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
+  const countryList = countries
+    .map((c) => ({ name: c.name.common, code: c.cca2 }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   const onSubmit = async (data: AddressFormValues) => {
     try {
-      // Only addresses in payload
       const mergedData = {
         addresses: [
           {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            companyName: data.companyName || "",
+            phoneNumber: data.phoneNumber || "",
             addressLine1: data.address1 || "",
             addressLine2: data.address2 || "",
             city: data.suburb,
             state: data.state,
             zip: data.postcode,
             country: data.country,
-          }
-        ]
+          },
+        ],
       };
 
       const result = await dispatch(
-        updatecustomer({ id: auth?.user?.id, data: mergedData })
+        updatecustomer({ id: auth?.user?.id, data: mergedData }),
       );
 
       if (updatecustomer.fulfilled.match(result)) {
         reset();
+        router.push("/my-account/addresses");
       } else {
         const errorMessage =
           result.error?.message || "Update address failed. Please try again.";
@@ -58,95 +78,162 @@ const AddressForm = () => {
     }
   };
 
-  const inputClass = "!w-full h-[50px] !max-w-full";
+  const rowClass =
+    "grid grid-cols-1 min-[551px]:grid-cols-2 gap-7 min-[551px]:gap-5";
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6 text-center">New Address</h2>
+    <div className="max-w-[800px] mx-auto">
+      <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center my-[26.25px]">
+        Add New Address
+      </h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Row 1: Address Line 1 & Address Line 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-7">
+        {/* Row 1: First Name | Last Name */}
+        <div className={rowClass}>
           <div>
-            <Label htmlFor="address1">Address Line 1 <span className="text-red-600">*</span></Label>
-            <Input
-              id="address1"
-              {...register("address1", { required: "Address Line 1 is required" })}
-              className={inputClass}
+            <FieldLabel htmlFor="firstName" required>
+              First Name
+            </FieldLabel>
+            <input
+              id="firstName"
+              className={addrInputCls(!!errors.firstName)}
+              {...register("firstName", { required: true })}
             />
-            {errors.address1 && <p className="text-sm text-red-500">{errors.address1.message}</p>}
+            <ErrorMsg show={!!errors.firstName} label="First Name" />
           </div>
           <div>
-            <Label htmlFor="address2">Address Line 2</Label>
-            <Input
-              id="address2"
-              {...register("address2")}
-              className={inputClass}
+            <FieldLabel htmlFor="lastName" required>
+              Last Name
+            </FieldLabel>
+            <input
+              id="lastName"
+              className={addrInputCls(!!errors.lastName)}
+              {...register("lastName", { required: true })}
+            />
+            <ErrorMsg show={!!errors.lastName} label="Last Name" />
+          </div>
+        </div>
+
+        {/* Row 2: Company Name | Phone Number */}
+        <div className={rowClass}>
+          <div>
+            <FieldLabel htmlFor="companyName">Company Name</FieldLabel>
+            <input
+              id="companyName"
+              className={addrInputCls()}
+              {...register("companyName")}
+            />
+          </div>
+          <div>
+            <FieldLabel htmlFor="phoneNumber">Phone Number</FieldLabel>
+            <input
+              id="phoneNumber"
+              className={addrInputCls()}
+              {...register("phoneNumber")}
             />
           </div>
         </div>
 
-        {/* Row 2: Suburb/City & Country */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Row 3: Address Line 1 | Address Line 2 */}
+        <div className={rowClass}>
           <div>
-            <Label htmlFor="suburb">Suburb / City <span className="text-red-600">*</span></Label>
-            <Input
-              id="suburb"
-              {...register("suburb", { required: "Suburb/City is required" })}
-              className={inputClass}
+            <FieldLabel htmlFor="address1" required>
+              Address Line 1
+            </FieldLabel>
+            <input
+              id="address1"
+              className={addrInputCls(!!errors.address1)}
+              {...register("address1", { required: true })}
             />
-            {errors.suburb && <p className="text-sm text-red-500">{errors.suburb.message}</p>}
+            <ErrorMsg show={!!errors.address1} label="Address Line 1" />
           </div>
           <div>
-            <Label htmlFor="country">Country <span className="text-red-600">*</span></Label>
+            <FieldLabel htmlFor="address2">Address Line 2</FieldLabel>
+            <input
+              id="address2"
+              className={addrInputCls()}
+              {...register("address2")}
+            />
+          </div>
+        </div>
+
+        {/* Row 4: Suburb/City | Country */}
+        <div className={rowClass}>
+          <div>
+            <FieldLabel htmlFor="suburb" required>
+              Suburb/City
+            </FieldLabel>
+            <input
+              id="suburb"
+              className={addrInputCls(!!errors.suburb)}
+              {...register("suburb", { required: true })}
+            />
+            <ErrorMsg show={!!errors.suburb} label="Suburb/City" />
+          </div>
+          <div>
+            <FieldLabel htmlFor="country" required>
+              Country
+            </FieldLabel>
             <select
               id="country"
-              {...register("country", { required: "Country is required" })}
-              className={`${inputClass} border border-gray-300 rounded`}
+              className={addrSelectCls(!!errors.country)}
+              defaultValue=""
+              {...register("country", { required: true })}
             >
-              <option value="">Select Country</option>
-              <option value="Pakistan">Pakistan</option>
-              <option value="USA">USA</option>
-              <option value="UK">UK</option>
+              <option value="" disabled>
+                Choose a Country
+              </option>
+              {countryList.map((c) => (
+                <option key={c.code} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
             </select>
-            {errors.country && <p className="text-sm text-red-500">{errors.country.message}</p>}
+            <ErrorMsg show={!!errors.country} label="Country" />
           </div>
         </div>
 
-        {/* Row 3: State/Province & Zip/Postcode */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Row 5: State/Province | Zip/Postcode */}
+        <div className={rowClass}>
           <div>
-            <Label htmlFor="state">State / Province <span className="text-red-600">*</span></Label>
-            <Input
+            <FieldLabel htmlFor="state" required>
+              State/Province
+            </FieldLabel>
+            <input
               id="state"
-              {...register("state", { required: "State/Province is required" })}
-              className={inputClass}
+              className={addrInputCls(!!errors.state)}
+              {...register("state", { required: true })}
             />
-            {errors.state && <p className="text-sm text-red-500">{errors.state.message}</p>}
+            <ErrorMsg show={!!errors.state} label="State/Province" />
           </div>
           <div>
-            <Label htmlFor="postcode">Zip / Postcode <span className="text-red-600">*</span></Label>
-            <Input
+            <FieldLabel htmlFor="postcode" required>
+              Zip/Postcode
+            </FieldLabel>
+            <input
               id="postcode"
-              {...register("postcode", { required: "Zip/Postcode is required" })}
-              className={inputClass}
+              className={addrInputCls(!!errors.postcode)}
+              {...register("postcode", { required: true })}
             />
-            {errors.postcode && <p className="text-sm text-red-500">{errors.postcode.message}</p>}
+            <ErrorMsg show={!!errors.postcode} label="Zip/Postcode" />
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col gap-4 mt-4">
-          <Button type="submit" className="w-full py-6 rounded-full bg-[#F15939] text-white font-bold">
+        {/* Buttons — right-aligned like live */}
+        <div className="flex justify-end items-center gap-[11px] mt-[4px]">
+          <button
+            type="submit"
+            className="h-[39px] px-[32px] rounded-[4px] bg-[#FF482E] text-white text-[14px] font-light hover:bg-[#D42020] transition-colors"
+          >
             {loading ? "Saving..." : "Save Address"}
-          </Button>
-          <Button 
+          </button>
+          <button
+            type="button"
             onClick={() => router.back()}
-            type="button" 
-            className="w-full py-6 rounded-full border border-[#F15939] text-[#F15939] font-bold hover:bg-[#F15939] hover:text-white transition"
+            className="h-[39px] px-[32px] rounded-[4px] bg-white border border-[#ebebeb] text-[#333333] text-[14px] font-light hover:border-[#FF482E] transition-colors"
           >
             Cancel
-          </Button>
+          </button>
         </div>
       </form>
     </div>

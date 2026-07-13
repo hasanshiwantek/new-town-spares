@@ -1,30 +1,57 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, X } from "lucide-react";
-import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
 import {
   deletecustomeraddress,
   fetchAccountAddress,
   updatecustomer,
 } from "@/redux/slices/myaccountSlice";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { RootState } from "@/redux/store";
+import { X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import countries from "world-countries";
+import {
+  ErrorMsg,
+  FieldLabel,
+  addrInputCls,
+  addrSelectCls,
+} from "./addressFormHelpers";
+
+interface AddressFormValues {
+  firstName: string;
+  lastName: string;
+  companyName?: string;
+  phoneNumber?: string;
+  address1: string;
+  address2?: string;
+  suburb: string;
+  country: string;
+  state: string;
+  postcode: string;
+}
 
 const MyAddress = () => {
   const dispatch = useAppDispatch();
 
   const { address, loading, error } = useAppSelector(
-    (state: RootState) => state.myaccount
+    (state: RootState) => state.myaccount,
   );
 
   const auth = useAppSelector((state: RootState) => state.auth);
 
   const [showModal, setShowModal] = useState(false);
-  const [editData, setEditData] = useState<any>(null);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AddressFormValues>();
+
+  const countryList = countries
+    .map((c) => ({ name: c.name.common, code: c.cca2 }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   useEffect(() => {
     dispatch(fetchAccountAddress());
@@ -32,7 +59,7 @@ const MyAddress = () => {
 
   const handleDelete = async (id: number | string) => {
     const confirmDelete = confirm(
-      `Are you sure you want to delete address with ID: ${id}?`
+      `Are you sure you want to delete address with ID: ${id}?`,
     );
     if (confirmDelete) {
       try {
@@ -45,30 +72,37 @@ const MyAddress = () => {
   };
 
   const openEditModal = (item: any) => {
-    setEditData({
-      addressId: item.addressId,
-      addressLine1: item.addressLine1,
-      addressLine2: item.addressLine2,
-      city: item.city,
-      state: item.state,
-      zip: item.zip,
-      country: item.country,
+    setEditingId(item.addressId ?? null);
+    reset({
+      firstName: item.firstName || "",
+      lastName: item.lastName || "",
+      companyName: item.companyName || "",
+      phoneNumber: item.phoneNumber || "",
+      address1: item.addressLine1 || "",
+      address2: item.addressLine2 || "",
+      suburb: item.city || "",
+      country: item.country || "",
+      state: item.state || "",
+      postcode: item.zip || "",
     });
-
     setShowModal(true);
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate = async (data: AddressFormValues) => {
     const payload = {
       addresses: [
         {
-          id: editData.addressId,
-          addressLine1: editData.addressLine1,
-          addressLine2: editData.addressLine2,
-          city: editData.city,
-          state: editData.state,
-          zip: editData.zip,
-          country: editData.country,
+          id: editingId,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          companyName: data.companyName || "",
+          phoneNumber: data.phoneNumber || "",
+          addressLine1: data.address1 || "",
+          addressLine2: data.address2 || "",
+          city: data.suburb,
+          state: data.state,
+          zip: data.postcode,
+          country: data.country,
         },
       ],
     };
@@ -78,7 +112,7 @@ const MyAddress = () => {
         updatecustomer({
           id: auth?.user?.id,
           data: payload,
-        })
+        }),
       ).unwrap();
 
       setShowModal(false);
@@ -89,184 +123,253 @@ const MyAddress = () => {
   };
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-[800px] mx-auto">
       {/* Skeleton Loader */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-wrap -mx-[11px]">
           {[...Array(2)].map((_, idx) => (
             <div
               key={idx}
-              className="bg-white shadow-md rounded-lg p-6 flex flex-col gap-4 animate-pulse h-48"
+              className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]"
             >
-              <div className="h-6 bg-gray-300 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-300 rounded w-full"></div>
-              <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-              <div className="h-10 bg-gray-300 rounded w-full mt-auto"></div>
+              <div className="border border-[#ebebeb] p-[21px] flex flex-col gap-4 animate-pulse min-h-[215px]">
+                <div className="h-5 bg-gray-200 w-3/4"></div>
+                <div className="h-4 bg-gray-200 w-full"></div>
+                <div className="h-4 bg-gray-200 w-5/6"></div>
+              </div>
             </div>
           ))}
         </div>
       )}
 
       {error && (
-  <p className="text-red-500">
-    Failed to fetch address. {error}
-  </p>
-)}
-
+        <p className="text-red-500">Failed to fetch address. {error}</p>
+      )}
 
       {!loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ul className="flex flex-wrap -mx-[11px] list-none p-0 m-0">
           {/* Address List */}
           {address?.addresses?.map((item: any) => (
-            <div
+            <li
               key={item.addressId}
-              className="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between h-full"
+              className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]"
             >
-              <div className="flex flex-col gap-1 mb-4">
-                <p className="h6-18-px-medium">
+              <div className="relative min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
+                <h5 className="text-[15px] leading-[18px] font-normal text-[#333333] mb-[11px]">
                   {item.customerName || "N/A"}
-                </p>
-                <p className="text-lg">{item.addressLine1}</p>
-                {item.addressLine2 && (
-                  <p className="text-lg">{item.addressLine2}</p>
-                )}
-                <p className="text-lg">
+                </h5>
+                <p>{item.addressLine1}</p>
+                {item.addressLine2 && <p>{item.addressLine2}</p>}
+                <p>
                   {item.city} {item.zip}
                 </p>
-                <p className="text-lg">{item.country}</p>
-              </div>
+                <p>{item.country}</p>
 
-              <div className="flex flex-col gap-2 mt-auto">
-                <button
-                  onClick={() => openEditModal(item)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded font-bold bg-[#F15939] text-white border border-[#F15939] hover:bg-white hover:text-[#F15939] transition"
-                >
-                  <Edit size={16} />
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => handleDelete(item.addressId)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded font-bold bg-white text-[#F15939] border border-[#F15939] hover:bg-[#F15939] hover:text-white transition"
-                >
-                  <Trash2 size={16} />
-                  Delete
-                </button>
+                {/* Edit | Delete — anchored bottom-left like live */}
+                <div className="mt-4 flex items-center text-[14px] leading-[21px] text-[#333333]">
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className="underline hover:text-[#FF482E]"
+                  >
+                    Edit
+                  </button>
+                  <span className="mx-[5px]">|</span>
+                  <button
+                    onClick={() => handleDelete(item.addressId)}
+                    className="underline hover:text-[#FF482E]"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
+            </li>
           ))}
 
-          {/* New Address Button */}
-          <div className="bg-white shadow-md rounded-lg p-6 flex flex-col items-center justify-center h-full hover:bg-gray-50 cursor-pointer">
+          {/* New Address tile */}
+          <li className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]">
             <Link
               href="/my-account/addresses/new-address"
-              className="flex flex-col items-center justify-center gap-2"
+              className="flex flex-col items-center justify-center min-h-[215px] bg-white border border-[#ebebeb] text-center text-[#333333] hover:text-[#FF482E] transition-colors"
             >
-              <Plus size={24} />
-              <span className="font-medium">New Address</span>
+              <span className="text-[50px] leading-[50px]">+</span>
+              <span className="text-[15px] leading-[18px]">New Address</span>
             </Link>
-          </div>
-        </div>
+          </li>
+        </ul>
       )}
 
       {/* -------------------- EDIT MODAL -------------------- */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <form
+            onSubmit={handleSubmit(handleUpdate)}
+            className="bg-white rounded-[6px] shadow-lg w-full max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden relative"
+          >
             {/* Close Btn */}
             <button
+              type="button"
               onClick={() => setShowModal(false)}
-              className="absolute right-4 top-4 text-gray-600 hover:text-black"
+              className="absolute right-[16px] top-[16px] text-[#333333] hover:text-black z-10"
+              aria-label="Close"
             >
-              <X size={22} />
+              <X size={20} />
             </button>
 
-            <h2 className="text-xl font-semibold mb-4">Edit Address</h2>
+            {/* Header (fixed) */}
+            <div className="shrink-0 px-[21px] pt-[21px] pb-[16px]">
+              <h2 className="text-[20px] leading-[24px] font-normal text-[#333333] pr-8">
+                Edit Address
+              </h2>
+            </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              {/* Address Line 1 */}
-              <div>
-                <Label>Address Line 1</Label>
-                <Input
-                  value={editData.addressLine1}
-                  onChange={(e) =>
-                    setEditData({ ...editData, addressLine1: e.target.value })
-                  }
-                />
-              </div>
+            {/* Body (scrollable) — same fields + errors as the New Address form */}
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-none px-[21px] pb-[21px]">
+              <div className="flex flex-col gap-5">
+                <div>
+                  <FieldLabel htmlFor="edit-firstName" required>
+                    First Name
+                  </FieldLabel>
+                  <input
+                    id="edit-firstName"
+                    className={addrInputCls(!!errors.firstName)}
+                    {...register("firstName", { required: true })}
+                  />
+                  <ErrorMsg show={!!errors.firstName} label="First Name" />
+                </div>
 
-              {/* Address Line 2 */}
-              <div>
-                <Label>Address Line 2</Label>
-                <Input
-                  value={editData.addressLine2}
-                  onChange={(e) =>
-                    setEditData({ ...editData, addressLine2: e.target.value })
-                  }
-                />
-              </div>
+                <div>
+                  <FieldLabel htmlFor="edit-lastName" required>
+                    Last Name
+                  </FieldLabel>
+                  <input
+                    id="edit-lastName"
+                    className={addrInputCls(!!errors.lastName)}
+                    {...register("lastName", { required: true })}
+                  />
+                  <ErrorMsg show={!!errors.lastName} label="Last Name" />
+                </div>
 
-              {/* City */}
-              <div>
-                <Label>City</Label>
-                <Input
-                  value={editData.city}
-                  onChange={(e) =>
-                    setEditData({ ...editData, city: e.target.value })
-                  }
-                />
-              </div>
+                <div>
+                  <FieldLabel htmlFor="edit-companyName">
+                    Company Name
+                  </FieldLabel>
+                  <input
+                    id="edit-companyName"
+                    className={addrInputCls()}
+                    {...register("companyName")}
+                  />
+                </div>
 
-              {/* State */}
-              <div>
-                <Label>State</Label>
-                <Input
-                  value={editData.state}
-                  onChange={(e) =>
-                    setEditData({ ...editData, state: e.target.value })
-                  }
-                />
-              </div>
+                <div>
+                  <FieldLabel htmlFor="edit-phoneNumber">
+                    Phone Number
+                  </FieldLabel>
+                  <input
+                    id="edit-phoneNumber"
+                    className={addrInputCls()}
+                    {...register("phoneNumber")}
+                  />
+                </div>
 
-              {/* Zip */}
-              <div>
-                <Label>Zip Code</Label>
-                <Input
-                  value={editData.zip}
-                  onChange={(e) =>
-                    setEditData({ ...editData, zip: e.target.value })
-                  }
-                />
-              </div>
+                <div>
+                  <FieldLabel htmlFor="edit-address1" required>
+                    Address Line 1
+                  </FieldLabel>
+                  <input
+                    id="edit-address1"
+                    className={addrInputCls(!!errors.address1)}
+                    {...register("address1", { required: true })}
+                  />
+                  <ErrorMsg show={!!errors.address1} label="Address Line 1" />
+                </div>
 
-              {/* Country */}
-              <div>
-                <Label>Country</Label>
-                <Input
-                  value={editData.country}
-                  onChange={(e) =>
-                    setEditData({ ...editData, country: e.target.value })
-                  }
-                />
+                <div>
+                  <FieldLabel htmlFor="edit-address2">
+                    Address Line 2
+                  </FieldLabel>
+                  <input
+                    id="edit-address2"
+                    className={addrInputCls()}
+                    {...register("address2")}
+                  />
+                </div>
+
+                <div>
+                  <FieldLabel htmlFor="edit-suburb" required>
+                    Suburb/City
+                  </FieldLabel>
+                  <input
+                    id="edit-suburb"
+                    className={addrInputCls(!!errors.suburb)}
+                    {...register("suburb", { required: true })}
+                  />
+                  <ErrorMsg show={!!errors.suburb} label="Suburb/City" />
+                </div>
+
+                <div>
+                  <FieldLabel htmlFor="edit-country" required>
+                    Country
+                  </FieldLabel>
+                  <select
+                    id="edit-country"
+                    className={addrSelectCls(!!errors.country)}
+                    {...register("country", { required: true })}
+                  >
+                    <option value="" disabled>
+                      Choose a Country
+                    </option>
+                    {countryList.map((c) => (
+                      <option key={c.code} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ErrorMsg show={!!errors.country} label="Country" />
+                </div>
+
+                <div>
+                  <FieldLabel htmlFor="edit-state" required>
+                    State/Province
+                  </FieldLabel>
+                  <input
+                    id="edit-state"
+                    className={addrInputCls(!!errors.state)}
+                    {...register("state", { required: true })}
+                  />
+                  <ErrorMsg show={!!errors.state} label="State/Province" />
+                </div>
+
+                <div>
+                  <FieldLabel htmlFor="edit-postcode" required>
+                    Zip/Postcode
+                  </FieldLabel>
+                  <input
+                    id="edit-postcode"
+                    className={addrInputCls(!!errors.postcode)}
+                    {...register("postcode", { required: true })}
+                  />
+                  <ErrorMsg show={!!errors.postcode} label="Zip/Postcode" />
+                </div>
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col gap-4">
-              <Button
-                onClick={handleUpdate}
-                className="w-full bg-[#F15939] text-white"
+            {/* Footer (fixed) */}
+            <div className="shrink-0 px-[21px] py-[16px] border-t border-[#ebebeb] flex flex-col sm:flex-row sm:justify-end items-stretch sm:items-center gap-[11px]">
+              <button
+                type="submit"
+                className="h-[39px] px-[32px] rounded-[4px] bg-[#FF482E] text-white text-[14px] font-light hover:bg-[#D42020] transition-colors w-full sm:w-auto"
               >
                 Save Changes
-              </Button>
-              <Button
+              </button>
+              <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="w-full border border-[#F15939] text-[#F15939]"
-                variant="outline"
+                className="h-[39px] px-[32px] rounded-[4px] bg-white border border-[#ebebeb] text-[#333333] text-[14px] font-light hover:border-[#FF482E] transition-colors w-full sm:w-auto"
               >
                 Cancel
-              </Button>
+              </button>
             </div>
-          </div>
+          </form>
         </div>
       )}
       {/* -------------------- END MODAL -------------------- */}

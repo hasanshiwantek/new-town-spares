@@ -66,14 +66,14 @@ const ProductOverview = ({ product }: { product: any }) => {
 
         {/* Product Details Section */}
         <section className="border" aria-labelledby="product-details-heading">
-          <div className=" p-4">
-            <h2 className="text-[20px] leading-[24px] font-light text-[#333333]">Description</h2>
+          <div className="px-[21px] pt-[21px]">
+            <h2 className="text-[20px] leading-[24px] font-light text-[#333333] mb-[14px]">Description</h2>
           </div>
-          <div className="px-4">
+          <div className="px-[21px]">
             <h2 className="text-[16px] leading-[24px] text-[#333333] mb-2">{product?.metaDescription || "N/A"}</h2>
           </div>
           {product?.customFields.length > 0 && <>
-            <div className=" p-4">
+            <div className="px-[21px] pt-[21px]">
               <h2 className="text-[20px] leading-[24px] font-light text-[#333333]">Details</h2>
             </div>
             <hr className="border-t border-2 border-[#333333] opacity-80 w-[98%] mx-auto mb-3" />
@@ -86,7 +86,7 @@ const ProductOverview = ({ product }: { product: any }) => {
                 }) => [item.name, item.value])
               ].map(([key, value], index) => (
                 <div
-                  key={key}
+                  key={`${key}-${index}`}
                   className={`!grid  !grid-cols-[180px_1fr] lg:!grid-cols-[350px_1fr] !items-center !p-2 ${index % 2 === 1 ? "" : "bg-[#F2F2F2]"
                     }`}
                 >

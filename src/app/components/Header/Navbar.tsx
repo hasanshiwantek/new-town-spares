@@ -167,7 +167,7 @@ const Navbar: React.FC = () => {
           className="
         flex items-center justify-between
         gap-3 sm:gap-4 md:gap-6 lg:gap-5 xl:gap-5
-        h-[90px] xl:h-[122.98px]
+        h-[106px] lg:h-[90px] xl:h-[122.98px]
         w-full mx-auto px-7 xl:px-28 py-[10px] xl:py-[21px]
       "
         >
@@ -204,7 +204,7 @@ const Navbar: React.FC = () => {
 
           {/* Center: Search (inline, xl+ only) */}
           <div className="hidden xl:flex flex-1 justify-end items-center gap-1 xl:gap-7">
-            <div className="relative w-[25vw] max-w-[490px]">
+            <div className="relative w-[calc(50vw_-_307px)] max-w-[490px]">
               <GlobalSearchBar />
             </div>
 
@@ -214,7 +214,7 @@ const Navbar: React.FC = () => {
                 value={skuInput}
                 onChange={(e) => setSkuInput(e.target.value)}
                 placeholder="Add SKU to Cart"
-                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black rounded-l-sm"
+                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
               />
 
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -225,7 +225,7 @@ const Navbar: React.FC = () => {
                   onChange={(e) =>
                     setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                   }
-                  className="w-full h-full text-center text-sm bg-transparent outline-none"
+                  className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
                   style={{ appearance: "textfield" }}
                 />
               </div>
@@ -234,7 +234,7 @@ const Navbar: React.FC = () => {
                 type="button"
                 onClick={handleAddBySku}
                 disabled={adding}
-                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FD5430] text-xl text-white disabled:opacity-70 rounded-r-sm"
+                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FF482E] text-[14px] text-white disabled:opacity-70 rounded-r-sm"
               >
                 {adding ? "..." : "Add to Cart"}
               </button>
@@ -281,7 +281,7 @@ const Navbar: React.FC = () => {
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <div className="w-7 h-7 flex items-center justify-center">
-                  <FaUser className="text-black w-full h-full" />
+                  <FaUser className="text-black hover:text-[#FF482E] w-full h-full" />
                 </div>
 
                 <div className="hidden min-[1500px]:flex items-center gap-1">
@@ -306,35 +306,30 @@ const Navbar: React.FC = () => {
 
               {auth?.isAuthenticated && (
                 <div
-                  className={`absolute left-0 mt-3 w-44 bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
+                  className={`absolute right-0 mt-5 w-max bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
                     isAccountOpen
                       ? "opacity-100 visible"
                       : "opacity-0 invisible"
                   }`}
                 >
-                  <ul className="py-2 text-sm text-gray-700">
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/orders"}>Orders</Link>
+                  <ul className="flex flex-col gap-3 px-6 py-4 text-[14px] text-gray-700 font-normal *:underline *:decoration-current *:hover:text-[#FF482E] cursor-pointer">
+                    <li>
+                      <Link href="/my-account/orders">Orders</Link>
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/addresses"}>Addresses</Link>
+                    <li>
+                      <Link href="/my-account/addresses">Addresses</Link>
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/recently-viewed"}>
+                    <li>
+                      <Link href="/my-account/recently-viewed">
                         Recently Viewed
                       </Link>
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/account-settings"}>
+                    <li>
+                      <Link href="/my-account/account-settings">
                         Account Settings
                       </Link>
                     </li>
-                    <li
-                      onClick={handleLogout}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl"
-                    >
-                      Sign out
-                    </li>
+                    <li onClick={handleLogout}>Sign out</li>
                   </ul>
                 </div>
               )}
@@ -524,7 +519,7 @@ const Navbar: React.FC = () => {
 
         {/* Wrapped search + SKU row (lg only: 1024–1279) */}
         <div className="hidden lg:flex xl:hidden items-center justify-between gap-4 px-7 pb-[32px]">
-          <div className="relative w-[42%] max-w-[470px]">
+          <div className="relative w-[52%] max-w-[500px]">
             <GlobalSearchBar />
           </div>
 
@@ -534,7 +529,7 @@ const Navbar: React.FC = () => {
               value={skuInput}
               onChange={(e) => setSkuInput(e.target.value)}
               placeholder="Add SKU to Cart"
-              className="w-[170px] h-[42px] border px-2 border-gray-300 outline-none text-black rounded-l-sm"
+              className="w-[170px] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
             />
 
             <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -545,7 +540,7 @@ const Navbar: React.FC = () => {
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }
-                className="w-full h-full text-center text-sm bg-transparent outline-none"
+                className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
                 style={{ appearance: "textfield" }}
               />
             </div>
@@ -554,14 +549,14 @@ const Navbar: React.FC = () => {
               type="button"
               onClick={handleAddBySku}
               disabled={adding}
-              className="h-[42px] px-[11px] bg-[#FD5430] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
+              className="h-[42px] px-[11px] bg-[#FF482E] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
             >
               {adding ? "..." : "Add to Cart"}
             </button>
           </div>
         </div>
 
-        <div className="lg:hidden px-3 pb-3">
+        <div className="lg:hidden px-[21px] pt-[11px] pb-[21px]">
           <GlobalSearchBar onHideMenu={() => setBurgerMenuOpen(false)} />
         </div>
         {/* Mobile Burger Dropdown Menu (Only below lg) */}
@@ -611,7 +606,7 @@ const Navbar: React.FC = () => {
                     value={skuInput}
                     onChange={(e) => setSkuInput(e.target.value)}
                     placeholder="Add SKU to Cart"
-                    className="w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black"
+                    className="w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black !text-[14px]"
                   />
 
                   <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -620,7 +615,7 @@ const Navbar: React.FC = () => {
                       onChange={(e) =>
                         setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                       }
-                      className="w-full h-full text-center text-sm bg-transparent outline-none cursor-pointer"
+                      className="w-full h-full text-center !text-[14px] bg-transparent outline-none cursor-pointer"
                       aria-label="Quantity"
                     >
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
@@ -635,7 +630,7 @@ const Navbar: React.FC = () => {
                     type="button"
                     onClick={handleAddBySku}
                     disabled={adding}
-                    className="flex-1 h-[42px] bg-[#FD5430] text-white text-sm disabled:opacity-70"
+                    className="flex-1 h-[42px] bg-[#FF482E] text-white text-[14px] disabled:opacity-70"
                   >
                     {adding ? "..." : "Add"}
                   </button>

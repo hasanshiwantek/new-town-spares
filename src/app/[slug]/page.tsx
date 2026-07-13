@@ -127,13 +127,13 @@ export default async function ProductPage({
           {/* Breadcrumb */}
           <nav
             aria-label="breadcrumb"
-            className="flex items-center space-x-2 mb-[42px] flex-wrap"
+            className="mb-[42px] leading-[24px]"
           >
             <Link href={"/"} className="underline">
               <span className="text-[#333333] text-[13px]">Home</span>
             </Link>
-            {product?.categoryHierarchy?.map((cat: any, index: number) => (
-              <span key={cat.id}>
+            {product?.categoryHierarchy?.map((cat: any) => (
+              <span key={cat.id} className="whitespace-nowrap">
                 <span
                   className="mt-2 mx-3 text-gray-400 text-[13px]"
                   aria-hidden="true"
@@ -142,17 +142,26 @@ export default async function ProductPage({
                 </span>
                 <Link
                   href={`/category/${cat?.slug}`}
-                  className={`text-[13px] ${
-                    index === product.categoryHierarchy.length - 1
-                      ? ""
-                      : "underline"
-                  }`}
+                  className="text-[13px] text-[#333333] underline"
                   itemProp="name"
                 >
                   {cat.name}
                 </Link>
               </span>
             ))}
+            {product?.name && (
+              <span>
+                <span
+                  className="mt-2 mx-3 text-gray-400 text-[13px]"
+                  aria-hidden="true"
+                >
+                  /
+                </span>
+                <span className="text-[13px] text-[#333333]">
+                  {product.name}
+                </span>
+              </span>
+            )}
             <hr className="mx-[-5%] w-[calc(100%+10%)] min-[801px]:mx-[-84px] min-[801px]:w-[calc(100%+168px)] mt-4" />
           </nav>
           <ProductCard product={product} />

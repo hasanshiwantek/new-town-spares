@@ -1,12 +1,13 @@
-import AddressForm from '@/app/components/myaccount/AddressForm'
-import React from 'react'
+"use client";
+
+import AddressForm from "@/app/components/myaccount/AddressForm";
 
 const page = () => {
   return (
     <div>
-        <AddressForm/>
+      <AddressForm />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;
