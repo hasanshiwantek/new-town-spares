@@ -1,41 +1,65 @@
-import React from "react";
+
 import Link from "next/link";
-import { storeId } from "@/lib/axiosInstance";
-// Base URL
-const BASE_URL = "https://newtownspares.advertsedge.com";
+import { baseURL, storeId } from "@/lib/axiosInstance";
+import WebDynamicList from "../components/sitemap/WebDynamicList";
 
-// Fetch categories
+const SHOW_BRANDS_LIMIT = 19;
+const SHOW_CATEGORIES_LIMIT = 3;
+
 async function fetchCategories() {
-  const res = await fetch(
-    "https://ecom.brokercell.com/api/web/categories/get-categories",
-    { headers: { storeId: storeId }, cache: "no-store" }
-  );
-  const data = await res.json();
-  return data.data || [];
+  try {
+    const res = await fetch(`${baseURL}web/categories/get-categories`, {
+      headers: { storeId: storeId },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch {
+    return [];
+  }
 }
 
-// Fetch brands
 async function fetchBrands() {
-  const res = await fetch("https://ecom.brokercell.com/api/web/brands/brands", {
-    headers: { storeId: storeId },
-    cache: "no-store",
-  });
-  const data = await res.json();
-  return data.data || [];
+  try {
+    const res = await fetch(`${baseURL}web/brands/brands`, {
+      headers: { storeId: storeId },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch {
+    return [];
+  }
 }
 
-// Recursive function to render categories as nested list
-const CategoryList: React.FC<{ categories: any[] }> = ({ categories }) => {
+async function fetchWebPages() {
+  try {
+    const res = await fetch(`${baseURL}web/webpages/web-pages?page=1&perPage=100`, {
+      headers: { storeId: storeId },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data || [];
+  } catch {
+    return [];
+  }
+}
+
+const CategoryList: React.FC<{ categories: any[]; categoriesLength?: number }> = ({
+  categories,
+  categoriesLength,
+}) => {
   if (!categories || categories.length === 0) return null;
+  const visibleCategories = categories.slice(0, SHOW_CATEGORIES_LIMIT);
 
   return (
-    <ul className="list-disc list-inside ml-4 space-y-3">
-      {categories.map((cat) => (
+    <ul className="list-disc list-inside ml-4 space-y-1">
+      {visibleCategories.map((cat) => (
         <li key={cat.slug}>
-          <Link
-            href={`/category/${cat.slug}`}
-            className="text-[#444] hover:underline"
-          >
+          <Link href={`/category/${cat.slug}`} className="text-[#333333] !font-normal text-[14px] underline">
             {cat.name}
           </Link>
           {cat.subcategories && cat.subcategories.length > 0 && (
@@ -43,69 +67,66 @@ const CategoryList: React.FC<{ categories: any[] }> = ({ categories }) => {
           )}
         </li>
       ))}
+      {categoriesLength !== undefined && categoriesLength > SHOW_CATEGORIES_LIMIT && (
+        <li style={{ listStyleType: "circle" }}>
+          <Link href="/sitemap/categories" className="text-[#333333] !font-normal text-[14px] underline">
+            Show All
+          </Link>
+        </li>
+      )}
     </ul>
   );
 };
 
+function BrandsList({ brands }: { brands: any[] }) {
+  const visibleBrands = brands.slice(0, SHOW_BRANDS_LIMIT);
+
+  return (
+    <ul className="list-disc list-inside ml-4 space-y-1">
+      {visibleBrands.map((brand: any) => (
+        <li key={brand.slug} style={{ listStyleType: "circle" }}>
+          <Link href={`/brand/${brand.brand.slug}`} className="text-[#333333] text-[14px]  !font-normal underline">
+            {brand.brand.name}
+          </Link>
+        </li>
+      ))}
+      {brands.length > SHOW_BRANDS_LIMIT && (
+        <li style={{ listStyleType: "circle" }}>
+          <Link href="/sitemap/brands" className="text-[#333333] !font-normal text-[14px] underline">
+            Show All
+          </Link>
+        </li>
+      )}
+    </ul>
+  );
+}
+
 export default async function SitemapPage() {
   const categories = await fetchCategories();
   const brands = await fetchBrands();
-
-  // Static pages
-  const staticPages = [
-    { name: "Home", url: "/" },
-    { name: "About", url: "/about-us" },
-    { name: "Contact", url: "/contact-us" },
-    { name: "Login", url: "/auth/login" },
-    { name: "Signup", url: "/auth/signup" },
-
-    { name: "Privacy policy", url: "/privacyPolicy" },
-    { name: "Shipping policy", url: "/shipping-policy" },
-    { name: "Return policy", url: "/returnPolicy" },
-    { name: "Terms and Conditions", url: "/terms-conditions" },
-    { name: "Blogs", url: "/blogs" },
-  ];
+  const webPages = await fetchWebPages();
 
   return (
-    <main className="p-4">
-      <h1 className="text-3xl font-bold mb-6">Sitemap</h1>
+    <main className="w-full max-w-[1170px]  mx-auto mt-8 lg:px-6 xl:px-4">
+      <h1 className="text-[28px] text-[#333333] !font-normal mb-6">Sitemap</h1>
 
-      {/* Static Pages */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-2">Pages</h2>
-        <ul className="list-disc list-inside space-y-2">
-          {staticPages.map((page) => (
-            <li key={page.url}>
-              <Link href={page.url} className="text-[#444] hover:underline">
-                {page.name} ({page.url})
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {webPages?.length > 0 && (
+        <WebDynamicList webPages={webPages} />
+      )}
 
-      {/* Brands */}
-      <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-2">Brands</h2>
-        <ul className="list-disc list-inside space-y-2">
-          {brands.map((brand: any) => (
-            <li key={brand.slug}>
-              <Link
-                href={`/brand/${brand.brand.slug}`}
-                className="text-[#444] hover:underline"
-              >
-                {brand.brand.name} (/brand/{brand.brand.slug})
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {categories?.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-[22px] text-[#333333] !font-normal mb-2">• Categories</h2>
+          <CategoryList categories={categories} categoriesLength={categories.length} />
+        </section>
+      )}
 
-      {/* Categories */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-2">Categories</h2>
-        <CategoryList categories={categories} />
-      </section>
+      {brands?.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-[22px] text-[#333333] !font-normal mb-2">• Brands</h2>
+          <BrandsList brands={brands} />
+        </section>
+      )}
     </main>
   );
 }

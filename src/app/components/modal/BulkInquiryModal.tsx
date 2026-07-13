@@ -66,7 +66,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-      // ✅ Captcha check
+      // captcha check
     if (!captchaToken) {
       toast.error("Please verify the captcha.");
       return;
@@ -171,6 +171,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 className="w-full !max-w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939]"
               />
 
+
               <Textarea
                 name="comments"
                 placeholder="Comments"
@@ -179,6 +180,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#F15939] resize-none"
               />
+
              {/* ✅ ReCAPTCHA */}
               <ReCAPTCHA
                 ref={recaptchaRef}
@@ -201,3 +203,10 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
 };
 
 export default BulkInquiryModal;
+
+
+
+
+
+
+

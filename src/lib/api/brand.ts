@@ -17,7 +17,6 @@ export const fetchBrands = async () => {
   if (!res.ok) throw new Error("Failed to fetch brands");
 
   const data = await res.json();
-  console.log("Brands data: ", data.data);
 
   return data?.data || [];
 };

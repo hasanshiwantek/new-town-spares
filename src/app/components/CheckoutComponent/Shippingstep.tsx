@@ -229,7 +229,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
       );
     }
     return (
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between w-full">
         <div className="text-base text-gray-600">
           <p>
             {shippingInfo?.firstName} {shippingInfo?.lastName}
