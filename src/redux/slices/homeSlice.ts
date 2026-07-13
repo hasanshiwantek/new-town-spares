@@ -24,7 +24,6 @@ export const getBrands = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axiosInstance.get(`web/brands/brands`);
-      console.log("brands data: ", res.data);
 
       return res.data;
     } catch (err: any) {
