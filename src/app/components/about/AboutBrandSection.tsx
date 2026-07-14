@@ -1,5 +1,6 @@
 import React from "react";
 import { fetchBrands } from "@/lib/api/brand";
+import Image from "next/image";
 
 let brandsData: any[] = [];
 
@@ -59,9 +60,11 @@ const AboutBrandSection = () => {
                   key={brand.id || index}
                   className="grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 flex items-center justify-center"
                 >
-                  <img
+                  <Image
                     src={brand.logo}
                     alt={brand.name}
+                    width={100}
+                    height={150}
                     className="2xl:h-[150px]  2xl:w-[200px]  xl:h-[100px]  xl:w-[100px]  h-10  w-auto   object-contain"
                   />
                 </div>
@@ -79,9 +82,11 @@ const AboutBrandSection = () => {
                   key={brand.id || index}
                   className="grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 flex items-center justify-center"
                 >
-                  <img
+                  <Image
                     src={brand.logo}
                     alt={brand.name}
+                     width={300}
+                     height={200}
                     className="2xl:h-[150px]  2xl:w-[200px]  xl:h-[100px]  xl:w-[100px]  h-10  w-auto   object-contain"
                   />
                 </div>

@@ -4,6 +4,7 @@ import React from "react";
 import { useEffect } from "react";
 import Image from "next/image";
 import banner from "@/assets/privacy-banner.png";
+import Link from "next/link";
 
 const Page = () => {
   // Enable smooth scroll globally
@@ -42,44 +43,44 @@ const Page = () => {
             <div className="p-[1.25rem] overflow-y-auto max-h-[80vh]">
               <ul className="space-y-5 2xl:space-y-10 h5-regular">
                 <li>
-                  <a
+                  <Link
                     href="#affirm"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Affirm
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#stripe"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Stripe
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#google-pay"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Google Pay
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#wire-transfer"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Wire Transfer
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
+                  <Link
                     href="#net-terms"
                     className="hover:text-[#F15939] transition-colors duration-200"
                   >
                     Net Terms
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

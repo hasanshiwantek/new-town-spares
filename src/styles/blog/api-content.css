@@ -225,7 +225,7 @@
 
 /* ================= Generated IMG Tag Styling ================= */
 
-/* api-content-wrapper ke andar ke sabhi <img> tags ko target karein */
+/* api-content-wrapper ke andar ke sabhi <Img> tags ko target karein */
 .api-content-wrapper img {
     /* 1. Full Width aur Left Align (Jo ab kaam kar raha hai) */
     max-width: 100% !important;

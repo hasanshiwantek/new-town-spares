@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
                 state: data.region,              // "SD"  ← code
                 state_name: data.regionName,
                 city: data.city,                 
-                zip: data.zip,                    // "75500"
+                zip: data.zip,                    
                 ip,
             });
         }

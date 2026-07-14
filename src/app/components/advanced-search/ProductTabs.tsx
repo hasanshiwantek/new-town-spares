@@ -25,7 +25,7 @@ export default function ProductTabs({ tabs, activeTab: controlledActive, onTabCh
   ];
 
   const items = tabs || defaultTabs;
-
+ const poppinsFont = "Poppins, sans-serif";
   const handleClick = (index: number) => {
     if (onTabChange) {
       onTabChange(index);
@@ -35,17 +35,17 @@ export default function ProductTabs({ tabs, activeTab: controlledActive, onTabCh
   };
 
   return (
-    <div className="flex items-center w-full  gap-3.5 border-b border-gray-200 pb-2 mt-2 text-[14px] font-semibold">
+    <div className="flex items-center w-full gap-1 sm:gap-3.5  border-gray-200 pb-2 mt-2 text-[13px] !font-normal" style={{fontFamily:poppinsFont}}>
       {items.map((tab, index) => (
-        <div key={index} className="flex items-center gap-3.5">
+        <div key={index} className="flex items-center  sm:gap-3.5">
           {tab.isDivided && (
-            <div className="w-px h-7 bg-gray-400" />
+            <div className="hidden md:flexn w-px h-7 bg-gray-400" />
           )}
           <button
             onClick={() => handleClick(index)}
             className={`uppercase tracking-wide transition-colors ${
               activeIndex === index
-                ? "text-[#333] border-b-1 border-[#333] "
+                ? "text-[#333333] border-b-1 border-[#333] "
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >

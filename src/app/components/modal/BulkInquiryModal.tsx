@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import {
@@ -10,11 +10,14 @@ import {
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
+import ReCAPTCHA from "react-google-recaptcha";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { bulkInquiry } from "@/redux/slices/homeSlice";
+import { sitekey } from "@/lib/axiosInstance";
+import { toast } from "react-toastify";
 interface BulkInquiryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -38,6 +41,8 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
     comments: "",
   });
   const dispatch = useAppDispatch();
+   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -46,9 +51,26 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
       [e.target.name]: e.target.value,
     });
   };
+  useEffect(() => {
+  setFormData({
+    fullName: "",
+    email: "",
+    phone: "",
+    quantity: "",
+    comments: "",
+  });
+
+  setCaptchaToken(null);
+  recaptchaRef.current?.reset();
+}, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+      // captcha check
+    if (!captchaToken) {
+      toast.error("Please verify the captcha.");
+      return;
+    }
     const payload = {
       sku: product?.sku ?? "",
       ...formData,
@@ -142,6 +164,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 className="w-full !max-w-full h-[45px] px-[10px] py-0 border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939]"
               />
 
+
               <Textarea
                 name="comments"
                 placeholder="Comments"
@@ -151,6 +174,13 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
                 className="w-full !min-h-0 h-[50px] px-[10px] py-[6px] border border-[#cccccc] bg-white rounded-[2px] !text-[17px] focus:outline-none focus:ring-2 focus:ring-[#F15939] resize-none"
               />
 
+             {/* ✅ ReCAPTCHA */}
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={sitekey}
+                onChange={(token) => setCaptchaToken(token)}
+                onExpired={() => setCaptchaToken(null)}
+              />
               <Button
                 type="submit"
                 className="w-full h-[39px] bg-[#FF482E] !text-[14px] font-light text-white rounded-[4px] hover:bg-[#d94d30] transition-colors duration-200 !mt-[30px]"
@@ -166,3 +196,10 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
 };
 
 export default BulkInquiryModal;
+
+
+
+
+
+
+
