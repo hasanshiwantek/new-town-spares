@@ -152,6 +152,7 @@ const RelatedProducts = ({ products = [] }: { products?: RelatedProductItem[] })
               min-[551px]:auto-cols-[calc(50%-6px)]
               min-[801px]:auto-cols-[calc(33.333%-8px)]
               min-[1261px]:auto-cols-[calc(25%-9px)]
+              min-[1441px]:auto-cols-[calc(20%-9.6px)]
               overflow-x-auto scroll-smooth scrollbar-hide"
           >
             {productsData.slice(0, 5).map((product: any) => (

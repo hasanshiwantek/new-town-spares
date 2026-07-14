@@ -124,12 +124,15 @@ const handleQuantityBlur = () => {
 
       {/* Info Wrapper */}
       <div className="flex flex-col flex-1">
-        <Link className="mb-2" href={`/brand/${brandSlug || ""}`}>
-          <p className="text-[14px] leading-[21px] text-[#333333] hover:text-[#D42020]">
-            <span className="font-bold">{brandName}</span>{" "}
-            <span className="text-[13px]">SKU: {product.sku}</span>
-          </p>
-        </Link>
+        <p className="text-[14px] leading-[21px] text-[#333333] mb-2">
+          <Link
+            href={`/brand/${brandSlug || ""}`}
+            className="font-bold hover:text-[#D42020]"
+          >
+            {brandName}
+          </Link>{" "}
+          <span className="text-[13px]">SKU: {product.sku}</span>
+        </p>
 
         <Link href={`${product?.productUrl}`}>
           <p className="text-[#212529] text-[15px] leading-[18px] font-normal mb-[7px] line-clamp-4 hover:text-[#D42020]">
