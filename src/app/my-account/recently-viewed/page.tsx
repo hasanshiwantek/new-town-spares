@@ -1,12 +1,11 @@
-import RecentViewedPoduct from '@/app/components/myaccount/RecentViewedPoduct'
-import React from 'react'
+import RecentViewedProduct from "@/app/components/myaccount/RecentViewedPoduct";
 
 const page = () => {
   return (
     <div>
-      <RecentViewedPoduct/>
+      <RecentViewedProduct />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

@@ -36,24 +36,22 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
   return (
     <div
       className="
-    border border-gray-200 rounded-md bg-white
+    bg-white shadow-[0_0_1px_0_rgba(51,51,51,0.5)]
     grid gap-4 items-start w-full transition-all duration-300
     grid-cols-1
-    sm:grid-cols-3
-    lg:grid-cols-[180px_1fr_180px]
-    p-7
+    sm:grid-cols-[150px_minmax(0,1fr)_180px]
+    p-[21px]
   "
     >
       {/* Product Image (Left) */}
-      <div className="flex items-center justify-center shrink-0 mx-auto" style={{height: 200 }}>
-        <Link href={`${product?.productUrl}`} className="block w-full h-full">
+      <div className="flex items-center justify-center shrink-0 mx-auto w-full max-w-[150px] aspect-square">
+        <Link href={`${product?.productUrl}`} className="flex items-center justify-center w-full h-full">
           <Image
             src={imageUrl}
             alt={product?.name ?? ""}
-            width={200}
-            height={108}
-            className="object-contain w-full h-auto mx-auto"
-            style={{ maxWidth: 200, maxHeight: 108 }}
+            width={150}
+            height={150}
+            className="object-contain w-full h-full"
           />
         </Link>
       </div>
@@ -62,7 +60,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       <div className="flex flex-col justify-center gap-1 text-left w-full min-w-0 sm:mt-6">
         <div className="flex flex-wrap items-baseline gap-1">
           {brandName && (
-            <span className="font-bold text-[#333333] text-[13px]">{brandName}</span>
+            <span className="font-bold text-[#333333] text-[14px]">{brandName}</span>
           )}
           <span className="text-[#333333] text-[13px]">
             SKU: {product?.sku ?? "—"}
@@ -95,7 +93,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
           </p>
           <Link
             href={`${product?.productUrl}`}
-            className="w-full mt-2 flex items-center justify-center rounded-md bg-[#FD5430] hover:bg-[#e04a2a] text-white  text-[14px] py-3.5 transition-colors"
+            className="w-full mt-2 flex items-center justify-center bg-[#FD5430] hover:bg-[#e04a2a] text-white text-[14px] font-light h-[42px] transition-colors"
           >
             Choose Options
           </Link>

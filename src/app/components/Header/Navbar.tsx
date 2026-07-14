@@ -1,33 +1,29 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
-import { Search, ShoppingCart, Menu, X, User } from "lucide-react";
 import navlogo from "@/assets/navlogoreal.webp";
+import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { logout } from "@/redux/slices/authSlice";
+import { removeFromCart, updateQty } from "@/redux/slices/cartSlice";
+import { fetchCurrencies } from "@/redux/slices/currencySlice";
+import { RootState } from "@/redux/store";
+import { ChevronRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { FaHeadphones, FaChevronDown } from "react-icons/fa";
-import { Input } from "@/components/ui/input";
-import { RootState } from "@/redux/store";
-import { fetchLogos } from "@/redux/slices/homeSlice";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  FaChevronDown,
+  FaHeadphones,
+  FaShoppingCart,
+  FaUser,
+} from "react-icons/fa";
+import { toast } from "react-toastify";
 import GlobalSearchBar from "./GlobalSearchBar";
 import MobileSearchBar from "./MobileSearchBar";
-import { useRouter } from "next/navigation";
-import { logout } from "@/redux/slices/authSlice";
-import { toast } from "react-toastify";
-import {
-  fetchCurrencies,
-  setSelectedCurrency,
-} from "@/redux/slices/currencySlice";
-import { FaUser, FaShoppingCart } from "react-icons/fa";
-import { useAddProductBySku } from "@/hooks/useAddProductBySku";
-import { removeFromCart, updateQty } from "@/redux/slices/cartSlice";
 
 // ✅ Optimized imports (Next Image optimized assets)
-import usaFlag from "../../../../public/usa-logo.png";
-import userIcon from "../../../../public/human-icon.png";
-import headphoneIcon from "../../../../public/headphone-icon.png";
 import { fetchCategories } from "@/lib/api/category";
-
+import usaFlag from "../../../../public/usa-logo.png";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -36,16 +32,13 @@ const Navbar: React.FC = () => {
   const cart = useAppSelector((state: RootState) => state.cart.items);
   const totalCartItems = cart.reduce(
     (sum: number, item: any) => sum + (item?.quantity || 0),
-    0
+    0,
   );
-   const { logoUrl, faviconUrl, logoDimensions, logoType } = useAppSelector((state: any) => state?.home);
-
- 
   const auth = useAppSelector((state: RootState) => state?.auth);
   const currencyRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
   const { currencies, status, selectedCurrency } = useAppSelector(
-    (state: RootState) => state.currency
+    (state: RootState) => state.currency,
   );
   const [categories, setCategories] = useState<any[]>([]);
 
@@ -53,20 +46,12 @@ const Navbar: React.FC = () => {
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement | null>(null);
-  const [quantities, setQuantities] = useState<{ [key: string]: number | string }>(
-    {}
-  );
-  const {
-    skuInput,
-    setSkuInput,
-    qty,
-    setQty,
-    adding,
-    handleAddBySku,
-  } = useAddProductBySku();
-  useEffect(() => {
-    dispatch(fetchLogos());
-  }, []);
+  const [quantities, setQuantities] = useState<{
+    [key: string]: number | string;
+  }>({});
+  const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
+    useAddProductBySku();
+
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchCurrencies());
@@ -108,7 +93,7 @@ const Navbar: React.FC = () => {
   const handleManualQtyUpdate = (
     e: React.KeyboardEvent<HTMLInputElement>,
     id: string,
-    maxPurchaseQuantity?: number
+    maxPurchaseQuantity?: number,
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -131,7 +116,7 @@ const Navbar: React.FC = () => {
       e.currentTarget.blur();
     }
   };
- const poppinsFont = "Poppins, sans-serif";
+
   const router = useRouter();
   const handleLogout = () => {
     const confirm = window.confirm("Confirm Logout?");
@@ -167,11 +152,13 @@ const Navbar: React.FC = () => {
   }, []);
   useEffect(() => {
     if (burgerMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [burgerMenuOpen]);
   return (
     <header className="text-white z-50 border-b-2 border-[#FD5430]">
@@ -180,7 +167,7 @@ const Navbar: React.FC = () => {
           className="
         flex items-center justify-between
         gap-3 sm:gap-4 md:gap-6 lg:gap-5 xl:gap-5
-        h-[90px] xl:h-[122.98px]
+        h-[106px] lg:h-[90px] xl:h-[122.98px]
         w-full mx-auto px-7 xl:px-28 py-[10px] xl:py-[21px]
       "
         >
@@ -200,7 +187,7 @@ const Navbar: React.FC = () => {
             </button>
 
             {/* Logo */}
-            <Link href={"/"}  onClick={() => setBurgerMenuOpen(false)}>
+            <Link href={"/"} onClick={() => setBurgerMenuOpen(false)}>
               <div className="relative w-[250px] h-[70px]">
                 <Image
                   src={navlogo}
@@ -209,7 +196,7 @@ const Navbar: React.FC = () => {
                   fetchPriority="high"
                   className="object-contain"
                   priority
-                  sizes="(max-width: 768px) 200px, (max-width: 1200px) 200px, 253px"
+                  sizes="(max-width: 768px) 120px, (max-width: 1200px) 200px, 253px"
                 />
               </div>
             </Link>
@@ -217,9 +204,8 @@ const Navbar: React.FC = () => {
 
           {/* Center: Search (inline, xl+ only) */}
           <div className="hidden xl:flex flex-1 justify-end items-center gap-1 xl:gap-7">
-            <div className="relative w-[25vw] max-w-[490px]">
+            <div className="relative w-[calc(50vw_-_307px)] max-w-[490px]">
               <GlobalSearchBar />
-
             </div>
 
             <div className="flex items-center justify-end xl:max-w-[300px]">
@@ -228,7 +214,7 @@ const Navbar: React.FC = () => {
                 value={skuInput}
                 onChange={(e) => setSkuInput(e.target.value)}
                 placeholder="Add SKU to Cart"
-                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black rounded-l-sm"
+                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
               />
 
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -239,7 +225,7 @@ const Navbar: React.FC = () => {
                   onChange={(e) =>
                     setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                   }
-                  className="w-full h-full text-center text-sm bg-transparent outline-none"
+                  className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
                   style={{ appearance: "textfield" }}
                 />
               </div>
@@ -248,7 +234,7 @@ const Navbar: React.FC = () => {
                 type="button"
                 onClick={handleAddBySku}
                 disabled={adding}
-                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FD5430] text-xl text-white disabled:opacity-70 rounded-r-sm"
+                className="w-[30%] xl:w-[34%] h-[42px] bg-[#FF482E] text-[14px] text-white disabled:opacity-70 rounded-r-sm"
               >
                 {adding ? "..." : "Add to Cart"}
               </button>
@@ -295,14 +281,15 @@ const Navbar: React.FC = () => {
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <div className="w-7 h-7 flex items-center justify-center">
-                  <FaUser className="text-black w-full h-full" />
+                  <FaUser className="text-black hover:text-[#FF482E] w-full h-full" />
                 </div>
 
                 <div className="hidden min-[1500px]:flex items-center gap-1">
                   <span className="text-black text-xl">Account</span>
                   <svg
-                    className={`w-5 h-5 text-black transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
-                      }`}
+                    className={`w-5 h-5 text-black transition-transform duration-200 ${
+                      isAccountOpen ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -319,33 +306,30 @@ const Navbar: React.FC = () => {
 
               {auth?.isAuthenticated && (
                 <div
-                  className={`absolute left-0 mt-3 w-44 bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${isAccountOpen ? "opacity-100 visible" : "opacity-0 invisible"
-                    }`}
+                  className={`absolute right-0 mt-5 w-max bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
+                    isAccountOpen
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible"
+                  }`}
                 >
-                  <ul className="py-2 text-sm text-gray-700">
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/orders"}>
-                        Orders
-                      </Link>
+                  <ul className="flex flex-col gap-3 px-6 py-4 text-[14px] text-gray-700 font-normal *:underline *:decoration-current *:hover:text-[#FF482E] cursor-pointer">
+                    <li>
+                      <Link href="/my-account/orders">Orders</Link>
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/addresses"}>
-                        Addresses
-                      </Link>
+                    <li>
+                      <Link href="/my-account/addresses">Addresses</Link>
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/recently-viewed"}>
+                    <li>
+                      <Link href="/my-account/recently-viewed">
                         Recently Viewed
                       </Link>
                     </li>
-                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      <Link href={"/my-account/account-settings"}>
+                    <li>
+                      <Link href="/my-account/account-settings">
                         Account Settings
                       </Link>
                     </li>
-                    <li onClick={handleLogout} className="px-4 py-2 hover:bg-gray-100 cursor-pointer underline text-xl">
-                      Sign out
-                    </li>
+                    <li onClick={handleLogout}>Sign out</li>
                   </ul>
                 </div>
               )}
@@ -369,150 +353,162 @@ const Navbar: React.FC = () => {
               </button>
 
               {isCartOpen && (
-                <div className="absolute right-0 top-full mt-3 w-[330px] bg-white border border-gray-200 shadow-xl z-[120] overflow-hidden">
-                  <div className="px-5 py-4 border-b border-gray-200">
-                    <h2 className="text-[#212529] text-[22px]">Your Cart</h2>
+                <div className="absolute right-0 top-[110%] mt-4 w-[330px] bg-white border border-gray-200 shadow-xl z-[120]">
+                  <div className="absolute -top-7 right-1 z-[120]">
+                    <ChevronRight className="w-8 h-8 rotate-[-90deg] text-black opacity-20 drop-shadow-md" />
                   </div>
+                  <div>
+                    <div className="px-5 py-4 border-b border-gray-200">
+                      <h2 className="text-[#333333] text-3xl">Your Cart</h2>
+                    </div>
 
-                  {/* <div className="px-5 py-4 border-b border-gray-200">
-                    <p className="text-[#959595] text-[14px] text-center">
-                      {cart.length === 0
-                        ? "Your Cart Is Empty."
-                        : `${cart.reduce((sum, i) => sum + (i.quantity || 0), 0)} item(s) in cart`}
-                    </p>
-                  </div> */}
+                    <div className="px-5 py-4 border-b border-gray-200">
+                      <p className="text-[#959595] text-[14px] text-center">
+                        {cart.length === 0
+                          ? "Your Cart Is Empty."
+                          : `${cart.reduce((sum, i) => sum + (i.quantity || 0), 0)} item(s) in cart`}
+                      </p>
+                    </div>
 
-                  {cart.length > 0 && (
-                    <div className="max-h-[420px] overflow-y-auto" style={{fontFamily:poppinsFont}}>
-                      {cart.map((item) => {
-                        const imageUrl =
-                          item?.image?.[0]?.path ||
-                          item?.image?.path ||
-                          item?.image ||
-                          "/default-product-image.svg";
-                        const itemPrice = Number(item?.price || 0);
-                        return (
-                          <div
-                            key={item.id}
-                            className="px-5 py-4  border-gray-200 flex gap-4"
-                          >
-                            <div className="shrink-0">
-                              <Image
-                                src={imageUrl}
-                                alt={item?.name ?? ""}
-                                width={56}
-                                height={56}
-                                className="object-contain w-18 h-18"
-                              />
-                            </div>
+                    {cart.length > 0 && (
+                      <div className="max-h-[420px] overflow-y-auto">
+                        {cart.map((item) => {
+                          const imageUrl =
+                            item?.image?.[0]?.path ||
+                            item?.image?.path ||
+                            item?.image ||
+                            "/default-product-image.svg";
+                          const itemPrice = Number(item?.price || 0);
+                          return (
+                            <div
+                              key={item.id}
+                              className="px-5 py-4 border-b border-gray-200 flex gap-4"
+                            >
+                              <div className="shrink-0">
+                                <Image
+                                  src={imageUrl}
+                                  alt={item?.name ?? ""}
+                                  width={56}
+                                  height={56}
+                                  className="object-contain w-18 h-18"
+                                />
+                              </div>
 
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
-                                {item?.name ?? "—"}
-                              </p>
-                              <p className="text-[#212529] text-[14px] mt-1">
-                                {item?.sku ?? ""}
-                              </p>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
+                                  {item?.name ?? "—"}
+                                </p>
+                                <p className="text-[#333333] text-[14px] mt-1">
+                                  {item?.sku ?? ""}
+                                </p>
 
-                              <div className="mt-2 flex items-center gap-2">
-                                <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
-                                  <input
-                                    type="number"
-                                    value={
-                                      quantities[item.id] === undefined
-                                        ? item.quantity
-                                        : quantities[item.id]
+                                <div className="mt-2 flex items-center gap-2">
+                                  <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
+                                    <input
+                                      type="number"
+                                      value={
+                                        quantities[item.id] === undefined
+                                          ? item.quantity
+                                          : quantities[item.id]
+                                      }
+                                      // onChange={(e) =>
+                                      //   handleQtyChange(item.id, e.target.value)
+                                      // }
+                                      onChange={(e) =>
+                                        handleQtyChange(
+                                          item.id,
+                                          e.target.value,
+                                          item.maxPurchaseQuantity,
+                                        )
+                                      }
+                                      onKeyDown={(e) =>
+                                        handleManualQtyUpdate(
+                                          e,
+                                          item.id,
+                                          item.maxPurchaseQuantity,
+                                        )
+                                      }
+                                      className="w-[35px] h-8 text-center outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                      aria-label="Quantity"
+                                    />
+                                  </div>
+                                  <span className="text-[#333333]">×</span>
+                                  <span className="text-[#FD5430] text-[14px]">
+                                    ${itemPrice.toFixed(2)}
+                                  </span>
+                                  <div className="flex-1" />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      dispatch(removeFromCart(item.id))
                                     }
-                                    // onChange={(e) =>
-                                    //   handleQtyChange(item.id, e.target.value)
-                                    // }
-                                    onChange={(e) =>
-                                      handleQtyChange(item.id, e.target.value, item.maxPurchaseQuantity)
-                                    }
-                                    onKeyDown={(e) =>
-                                      handleManualQtyUpdate(
-                                        e,
-                                        item.id,
-                                        item.maxPurchaseQuantity
-                                      )
-                                    }
-                                    className="w-[35px] h-8 text-center !font-normal outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                    aria-label="Quantity"
-                                  />
+                                    className="shrink-0 w-6 h-6 rounded-full bg-[#FD5430] text-white flex items-center justify-center"
+                                    aria-label="Remove item"
+                                  >
+                                    <X size={14} strokeWidth={3} />
+                                  </button>
                                 </div>
-                                <span className="text-[#333333]">×</span>
-                                <span className="text-[#FD5430] text-[14px]">
-                                  ${itemPrice.toFixed(2)}
-                                </span>
-                                <div className="flex-1" />
-                                <button
-                                  type="button"
-                                  onClick={() => dispatch(removeFromCart(item.id))}
-                                  className="shrink-0 w-8 h-8 rounded-full bg-[#FD5430] text-white flex items-center justify-center"
-                                  aria-label="Remove item"
-                                >
-                                  ×
-                                </button>
                               </div>
                             </div>
-                          </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    <div className="px-5 py-4 space-y-3 text-[14px] text-[#333333]">
+                      {(() => {
+                        const totalItems = cart.reduce(
+                          (sum, i) => sum + (i.quantity || 0),
+                          0,
                         );
-                      })}
+                        const subtotal = cart.reduce(
+                          (sum, i) =>
+                            sum + Number(i.price || 0) * (i.quantity || 0),
+                          0,
+                        );
+                        return (
+                          <>
+                            <div className="flex justify-between border-t border-gray-200 pt-3">
+                              <span>Total Items:</span>
+                              <span>{totalItems}</span>
+                            </div>
+                            <div className="flex justify-between border-t border-gray-200 pt-3">
+                              <span>Subtotal:</span>
+                              <span>${subtotal.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between border-t border-gray-200 pt-3">
+                              <span>Grand total:</span>
+                              <span>${subtotal.toFixed(2)}</span>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
-                  )}
 
-                  <div className="px-5 py-4 space-y-3 text-[14px] text-[#333333]">
-                    {(() => {
-                      const totalItems = cart.reduce(
-                        (sum, i) => sum + (i.quantity || 0),
-                        0
-                      );
-                      const subtotal = cart.reduce(
-                        (sum, i) => sum + Number(i.price || 0) * (i.quantity || 0),
-                        0
-                      );
-                      return (
-                        <>
-                          <div className="flex justify-between border-t border-gray-200 pt-3">
-                            <span className="text-[#212529] text-[14px]">Total Items:</span>
-                            <span>{totalItems}</span>
-                          </div>
-                          <div className="flex justify-between border-t border-gray-200 pt-3">
-                            <span className="text-[#212529] text-[14px]">Subtotal:</span>
-                            <span>${subtotal.toFixed(2)}</span>
-                          </div>
-                          <div className="flex justify-between  border-t border-gray-200 pt-3">
-                            <span className="text-[#212529] text-[14px]">Grand total:</span>
-                            <span>${subtotal.toFixed(2)}</span>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-
-                  <div className="px-5 pb-5">
-                    <div className="flex gap-2  border-gray-200 pt-2">
-                      <Link
-                        href="/cart"
-                        onClick={() => setIsCartOpen(false)}
-                        className="flex-1 h-[37.58px] flex items-center justify-center rounded border border-gray-300 bg-white text-gray-700 text-[14px] font-medium hover:bg-gray-50"
-                      >
-                        View Cart
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (cart.length === 0) {
-                            toast.error("Your cart is empty");
-                            return;
-                          }
-                          setIsCartOpen(false);
-                          router.push("/checkout");
-                        }}
-                        className="flex-1 h-[37.58px] rounded bg-[#FD5430] hover:bg-[#e04a2a] text-white text-[14px] font-medium"
-                      >
-                        Check out
-                      </button>
+                    <div className="px-5 pb-5">
+                      <div className="flex gap-2">
+                        <Link
+                          href="/cart"
+                          onClick={() => setIsCartOpen(false)}
+                          className="flex-1 h-[37.58px] flex items-center justify-center rounded border border-gray-300 bg-white text-gray-700 text-[14px] font-medium hover:bg-gray-50"
+                        >
+                          View Cart
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (cart.length === 0) {
+                              toast.error("Your cart is empty");
+                              return;
+                            }
+                            setIsCartOpen(false);
+                            router.push("/checkout");
+                          }}
+                          className="flex-1 h-[37.58px] rounded bg-[#FD5430] hover:bg-[#e04a2a] text-white text-[14px] font-medium"
+                        >
+                          Check out
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -523,7 +519,7 @@ const Navbar: React.FC = () => {
 
         {/* Wrapped search + SKU row (lg only: 1024–1279) */}
         <div className="hidden lg:flex xl:hidden items-center justify-between gap-4 px-7 pb-[32px]">
-          <div className="relative w-[42%] max-w-[470px]">
+          <div className="relative w-[52%] max-w-[500px]">
             <GlobalSearchBar />
           </div>
 
@@ -533,7 +529,7 @@ const Navbar: React.FC = () => {
               value={skuInput}
               onChange={(e) => setSkuInput(e.target.value)}
               placeholder="Add SKU to Cart"
-              className="w-[170px] h-[42px] border px-2 border-gray-300 outline-none text-black rounded-l-sm"
+              className="w-[170px] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
             />
 
             <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -544,7 +540,7 @@ const Navbar: React.FC = () => {
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }
-                className="w-full h-full text-center text-sm bg-transparent outline-none"
+                className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
                 style={{ appearance: "textfield" }}
               />
             </div>
@@ -553,21 +549,20 @@ const Navbar: React.FC = () => {
               type="button"
               onClick={handleAddBySku}
               disabled={adding}
-              className="h-[42px] px-[11px] bg-[#FD5430] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
+              className="h-[42px] px-[11px] bg-[#FF482E] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
             >
               {adding ? "..." : "Add to Cart"}
             </button>
           </div>
         </div>
 
-        <div className="lg:hidden px-3 pb-3">
+        <div className="lg:hidden px-[21px] pt-[11px] pb-[21px]">
           <GlobalSearchBar onHideMenu={() => setBurgerMenuOpen(false)} />
         </div>
         {/* Mobile Burger Dropdown Menu (Only below lg) */}
         {burgerMenuOpen && (
           // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200 overflow-visible">
           <div className="lg:hidden fixed inset-0 top-[172.98px] left-0 right-0 bottom-0 bg-white !z-[150] p-6 overflow-y-auto overflow-x-visible">
-
             {/* // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200"> */}
             <div className="space-y-6">
               {/* Search Section */}
@@ -579,14 +574,22 @@ const Navbar: React.FC = () => {
               </div> */}
               <Link href={"/"} onClick={() => setBurgerMenuOpen(false)}>
                 <div className="flex items-end justify-between px-4 py-2 border-b border-gray-100 hover:bg-gray-50">
-                  <span className="text-gray-500 text-[15px] ">All Categories</span>
+                  <span className="text-gray-500 text-[15px] ">
+                    All Categories
+                  </span>
                   <span className="text-gray-400 text-lg">›</span>
                 </div>
               </Link>
               {categories.map((cat) => (
-                <Link key={cat.id} href={`/category/${cat.slug}`} onClick={() => setBurgerMenuOpen(false)}>
+                <Link
+                  key={cat.id}
+                  href={`/category/${cat.slug}`}
+                  onClick={() => setBurgerMenuOpen(false)}
+                >
                   <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50">
-                    <span className="text-gray-500 text-[15px]">{cat.name}</span>
+                    <span className="text-gray-500 text-[15px]">
+                      {cat.name}
+                    </span>
                     <span className="text-gray-400 text-lg">›</span>
                   </div>
                 </Link>
@@ -603,7 +606,7 @@ const Navbar: React.FC = () => {
                     value={skuInput}
                     onChange={(e) => setSkuInput(e.target.value)}
                     placeholder="Add SKU to Cart"
-                    className="w-[50%] h-[42px] border px-2 border-gray-300 outline-none text-black"
+                    className="w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black !text-[14px]"
                   />
 
                   <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -612,7 +615,7 @@ const Navbar: React.FC = () => {
                       onChange={(e) =>
                         setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                       }
-                      className="w-full h-full text-center text-sm bg-transparent outline-none cursor-pointer"
+                      className="w-full h-full text-center !text-[14px] bg-transparent outline-none cursor-pointer"
                       aria-label="Quantity"
                     >
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
@@ -627,12 +630,11 @@ const Navbar: React.FC = () => {
                     type="button"
                     onClick={handleAddBySku}
                     disabled={adding}
-                    className="flex-1 h-[42px] bg-[#FD5430] text-white text-sm disabled:opacity-70"
+                    className="flex-1 h-[42px] bg-[#FF482E] text-white text-[14px] disabled:opacity-70"
                   >
                     {adding ? "..." : "Add"}
                   </button>
                 </div>
-
               </div>
 
               {/* account */}

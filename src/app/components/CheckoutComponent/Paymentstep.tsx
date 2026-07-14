@@ -62,14 +62,16 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   if (isCompleted && !isActive) {
     // Show completed state with payment method and edit button
     return (
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-gray-600">{paymentMethodLabel || "Credit Card"}</span>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-[13px] text-[#333333]">
+          {paymentMethodLabel || "Credit Card"}
+        </span>
         <button
           type="button"
           onClick={onEdit}
-          className="btn-primary"
+          className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
         >
-          EDIT
+          Edit
         </button>
       </div>
     );
@@ -79,10 +81,11 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Stripe Credit Card */}
-      <label className="flex flex-col bg-white border rounded-lg p-4 cursor-pointer has-[:checked]:border-red-600">
+      <p className="text-[15px] text-[#333333]">Payment Methods</p>
+      {/* Credit Card */}
+      <label className="flex flex-col bg-[#ebebeb] rounded p-[22px] cursor-pointer">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             <input
               type="radio"
               value="credit_card"
@@ -91,26 +94,27 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
               })}
               checked={watchedPaymentMethod === "credit_card"}
               onChange={() => handlePaymentSelection("credit_card")}
+              className="accent-[#FF482E] scale-[2]"
             />
-            <span className="font-semibold text-gray-800">Stripe</span>
+            <span className="text-[15px] font-bold text-[#333333]">Credit Card</span>
           </div>
           <div className="flex items-center gap-2">
             <Image
               src="/checkouticon/card.png"
               alt="Cards"
-              width={120}
-              height={30}
+              width={200}
+              height={80}
             />
           </div>
         </div>
 
         {stripeCardMethods.includes(watchedPaymentMethod) && (
-          <div className="space-y-4 mt-4">
+          <div className="space-y-4 mt-4 pl-[30px]">
             <div>
-              <label className="text-base mb-2 block text-gray-700">
-                Card number
+              <label className="text-[13px] font-medium mb-2 block text-[#333333]">
+                Credit Card Number
               </label>
-              <div className="border border-gray-400 rounded-md p-3  hover:border-gray-400 focus-within:border-red-600">
+              <div className="border border-[#ebebeb] rounded p-3 bg-white  hover:border-gray-400 focus-within:border-red-600">
                 <CardNumberElement
                   onChange={(event) => {
                     setCardCompletion((prev) => ({
@@ -139,10 +143,10 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-base mb-2 block text-gray-700">
-                  Expiration date
+                <label className="text-[13px] font-medium mb-2 block text-[#333333]">
+                  Expiration
                 </label>
-                <div className="border  border-gray-400 rounded-md p-3 hover:border-gray-400 focus-within:border-red-600">
+                <div className="border  border-[#ebebeb] rounded p-3 bg-white hover:border-gray-400 focus-within:border-red-600">
                   <CardExpiryElement
                     onChange={(event) => {
                       setCardCompletion((prev) => ({
@@ -170,10 +174,10 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
               </div>
 
               <div>
-                <label className="text-base mb-2 block text-gray-700">
-                  Security code
+                <label className="text-[13px] font-medium mb-2 block text-[#333333]">
+                  CVV
                 </label>
-                <div className="border  border-gray-400 rounded-md p-3 hover:border-gray-400 focus-within:border-red-600">
+                <div className="border  border-[#ebebeb] rounded p-3 bg-white hover:border-gray-400 focus-within:border-red-600">
                   <CardCvcElement
                     onChange={(event) => {
                       setCardCompletion((prev) => ({
@@ -201,9 +205,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
               </div>
             </div>
 
-            {cardError && (
-              <p className="text-sm text-red-500">{cardError}</p>
-            )}
+            {cardError && <p className="text-sm text-red-500">{cardError}</p>}
           </div>
         )}
       </label>
@@ -272,9 +274,9 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
       <button
         type="submit"
         disabled={isProcessing || !stripe}
-        className="btn-primary"
+        className="h-[54px] w-full bg-[#FD5430] text-[18px] text-white rounded-sm"
       >
-        {isProcessing ? "Processing..." : "PLACE ORDER"}
+        {isProcessing ? "Processing..." : "PLACE YOUR ORDER"}
       </button>
     </div>
   );

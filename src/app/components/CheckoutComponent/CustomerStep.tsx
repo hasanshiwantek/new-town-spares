@@ -38,31 +38,37 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
     <>
       {isCompleted && !isActive ? (
         // Show completed state with email and edit button
-        <div className="flex items-center justify-between">
-          <span className="text-base text-gray-600">{emailValue}</span>
+        <div className="flex items-start justify-between gap-4">
+          <span className="text-[13px] leading-[19.5px] text-[#333333]">
+            {emailValue}
+          </span>
           <button
             type="button"
             onClick={onEdit}
-            className="btn-primary"
+            className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
           >
-            EDIT
+            Edit
           </button>
         </div>
       ) : isActive ? (
         // Show active form
         <div className="space-y-4">
           <div className="flex flex-col">
-            <label htmlFor="email" className="text-sm mb-2 text-gray-700">
+            <label
+              htmlFor="email"
+              className="text-[13px] font-medium mb-2 text-[#333333]"
+            >
               Email Address
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-6">
               <Input
                 id="email"
                 type="email"
-                className={`flex-1 h-[40px] ${errors.email ? "border-red-500" : ""
-                  }`}
+                className={`flex-1 h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                  errors.email ? "border-red-500" : ""
+                }`}
                 {...register("email", {
-                  required: "Email is required",
+                  required: "Email address is required",
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                     message: "Invalid email address",
@@ -72,7 +78,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
               <button
                 type="button"
                 onClick={onContinue}
-                className="btn-primary"
+                className="h-[45px] w-1/3 bg-[#FD5430] text-[13px] text-white rounded-sm px-[6.5px]"
               >
                 CONTINUE
               </button>
@@ -89,22 +95,24 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
               type="checkbox"
               id="newsletter"
               {...register("newsletter")}
-              className="w-4 h-4"
+              className="w-4 h-4 accent-[#FF482E]"
             />
-            <label htmlFor="newsletter" className="text-base text-gray-700">
+            <label htmlFor="newsletter" className="text-[13px] text-[#333333]">
               Subscribe to our newsletter.
             </label>
           </div>
 
           {!isLoggedIn && (
-            <div className="text-base text-gray-700">
+            <div className="text-[13px] text-[#333333]">
               Already have an account?{" "}
-              <Link href="/auth/login" className="text-[var(--primary-color)]">
+              <Link
+                href="/auth/login"
+                className="hover:text-[var(--primary-color)]"
+              >
                 Sign in now
               </Link>
             </div>
           )}
-
 
           {/* Apple Pay Button */}
 
@@ -136,7 +144,6 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
               height={30}
             />
           </button>
-
         </div>
       ) : null}
     </>

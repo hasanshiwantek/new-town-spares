@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { Menu, ChevronDown, ChevronRight } from "lucide-react";
-import { fetchCategories } from "@/lib/api/category";
-import dynamic from "next/dynamic";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { fetchCategories } from "@/lib/api/category";
+import {
+  fetchCurrencies,
+  setSelectedCurrency,
+} from "@/redux/slices/currencySlice";
 import { RootState } from "@/redux/store";
-import { fetchCurrencies, setSelectedCurrency } from "@/redux/slices/currencySlice";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
 
@@ -21,22 +24,22 @@ interface Category {
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false }
+  { ssr: false },
 );
 
 const MotionUl = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.ul),
-  { ssr: false }
+  { ssr: false },
 );
 
 const MotionLi = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.li),
-  { ssr: false }
+  { ssr: false },
 );
 
 const AnimatePresence = dynamic(
   () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false }
+  { ssr: false },
 );
 
 const DropdownColumn = ({
@@ -58,9 +61,11 @@ const DropdownColumn = ({
   return (
     <div className="xl:w-[25.8rem] 2xl:w-[34.2rem] bg-white text-black border-r relative">
       {/* Column Heading (static, no animation) */}
-      {heading && <div className="px-4 py-2 h3-secondary !text-[#F15939] border-b">
-        {heading}
-      </div>}
+      {heading && (
+        <div className="px-4 py-2 h3-secondary !text-[#F15939] border-b">
+          {heading}
+        </div>
+      )}
 
       {/* Animated List */}
       <MotionUl
@@ -125,7 +130,7 @@ const LinkHeader = () => {
   const currencyRef = useRef<HTMLDivElement | null>(null);
 
   const { currencies, status, selectedCurrency } = useAppSelector(
-    (state: RootState) => state.currency
+    (state: RootState) => state.currency,
   );
   const dispatch = useAppDispatch();
 
@@ -166,7 +171,7 @@ const LinkHeader = () => {
   const visibleCategories = categories.slice(0, 7); // same count as before
 
   return (
-    <header className=" hidden lg:block border-b-2">
+    <header className=" hidden lg:block border-b">
       <nav
         className="w-full max-w-[1684px] mx-auto flex items-center justify-between 
        px-7 xl:px-28 relative h-[54.5px] lg:h-[66.67px]"
@@ -182,14 +187,15 @@ const LinkHeader = () => {
           <button
             onClick={toggleDropdown}
             onMouseEnter={toggleDropdown}
-            className="flex items-center justify-center gap-1 sm:gap-2 hover:text-gray-300 focus:outline-none w-[12.3rem] lg:w-[13.3rem] h-[54.5px] border-r-2 lg:mb-4 border-b-2 border-b-transparent hover:border-b-[#FF482E]"
+            className="flex items-center justify-center gap-1 sm:gap-2 hover:text-gray-300 focus:outline-none w-[12.3rem] lg:w-[13.3rem] h-[54.5px] border-r lg:mb-4 border-b-2 border-b-transparent hover:border-b-[#FF482E]"
           >
-            <span className="text-sm md:text-xl text-[#333333]">
+            <span className="text-sm md:text-xl font-light text-[#333333]">
               All Categories
             </span>
             <ChevronDown
-              className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-                }`}
+              className={`w-4 h-4 md:w-5 md:h-5 ml-1 mt-1 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200 ${
+                isOpen ? "rotate-180" : ""
+              }`}
             />
           </button>
 
@@ -220,21 +226,24 @@ const LinkHeader = () => {
               <Link href="/blogs">Blog</Link>
             </li>
           </ul> */}
-          <ul className="hidden md:flex items-center whitespace-nowrap text-sm md:text-xl text-[#333333] lg:mb-4">
-            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
+          <ul className="hidden md:flex items-center whitespace-nowrap text-sm md:text-xl font-light text-[#333333] lg:mb-4">
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
               <Link href="/about-us">About Us</Link>
             </li>
-            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
               <Link href="/contact-us">Contact Us</Link>
             </li>
-            <li className="w-[12.3rem] lg:w-[13.3rem] border-r-2 flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
+            <li className="w-[12.3rem] lg:w-[13.3rem] border-r flex justify-center items-center h-[54.5px] border-b-2 border-b-transparent hover:border-b-[#FF482E] transition-colors duration-200">
               <Link href="/blogs">Blog</Link>
             </li>
           </ul>
         </div>
 
         {/* Right Section: Currency */}
-        <div className="relative hidden lg:flex items-center gap-1 sm:gap-6" ref={currencyRef}>
+        <div
+          className="relative hidden lg:flex items-center gap-1 sm:gap-6"
+          ref={currencyRef}
+        >
           <div className="flex flex-col leading-tight relative">
             <button
               aria-label="currency"

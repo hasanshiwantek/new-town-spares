@@ -1,12 +1,11 @@
-import ReturnOrder from '@/app/components/myaccount/ReturnOrder'
-import React from 'react'
+import ReturnOrder from "@/app/components/myaccount/ReturnOrder";
 
 const page = () => {
   return (
     <div>
-      <ReturnOrder/>
+      <ReturnOrder />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

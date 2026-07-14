@@ -41,24 +41,24 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   }, [dispatch]);
 
   return (
-    <section className=" product-middle  flex flex-col h-full w-full lg:w-[38%] xl:w-[37.6%] 2xl:w-[37.6%]">
+    <section className=" product-middle  flex flex-col h-full w-full [grid-area:info]">
       <div>
         <div className="flex flex-col gap-1">
           {/* <h6 className="h6-regular">{product?.brand?.name}</h6> */}
-          <h1 className="font-light text-[14px] leading-8 tracking-[0.0075em] text-[#333333] xl:text-[16.8px] 2xl:text-[20px]">
+          <h1 className="font-light text-[20px] leading-[24px] tracking-[0.0075em] text-[#333333]">
             {product?.name || "N/A"}
           </h1>
 
-          <p className="text-[14px] text-[#333333] mt-1">
+          <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
             Brand:{" "}
             <span>{product?.brand?.name || "N/A"}</span>
           </p>
-          <p className="text-[14px] text-[#333333]">
-            SKU: <span className="font-medium">{product?.sku || "N/A"}</span>
+          <p className="text-[14px] leading-[21px] text-[#333333]">
+            SKU: <span>{product?.sku || "N/A"}</span>
           </p>
 
           {/* Rating & Reviews */}
-          <div className="flex flex-wrap items-center gap-2 text-[14px] text-[#333333]">
+          <div className="flex flex-wrap items-center gap-2 text-[14px] leading-[21px] text-[#333333]">
             {stats?.count ? (
               <>
                 {stats?.rating && (
@@ -90,11 +90,11 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             )}
           </div>
         </div>
-        <hr className="mt-6" />
+        <hr className="mt-6 hidden min-[801px]:block" />
         {/* Price */}
         <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
           {purchasabilityStatus ? (
-            <div className="flex flex-col items-start">
+            <div className="hidden min-[801px]:flex flex-col items-start">
               <p className="text-[15px] text-[#333333]">
                 Price:{" "}
                 {hasBothPrices ? (
@@ -102,35 +102,35 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                     <ProductPrice
                       price={originalPrice}
                       inline={true}
-                      className="!text-[15px] text-[#333333]"
+                      className="text-[15px]! text-[#333333]"
                     />
                   </span>
                 ) : (
                   <ProductPrice
                     price={currentPrice}
                     inline={true}
-                    className="xl:text-[13.3px] 2xl:text-[16.6px] text-[#333333]"
+                    className="text-[15px]! text-[#333333]"
                   />
                 )}
               </p>
-              <h2 className="text-[20px] text-[#FF482E] !font-normal">
+              <h2 className="text-[20px] text-[#FF482E]">
                 {currentPrice > 0 && (
                   <ProductPrice
                     price={currentPrice}
                     inline={true}
                     textColor="#FF482E"
-                    className="!text-[20px] !font-normal"
+                    className="text-[20px]!"
                   />
                 )}
               </h2>
               {savings > 0 && (
-                <p className="text-[15px] text-[#CC0000] !font-normal">
+                <p className="text-[15px] text-[#CC0000]">
                   You save{" "}
                   <ProductPrice
                     price={savings}
                     inline={true}
                     textColor="#CC0000"
-                    className="!text-[15px] !font-normal"
+                    className="text-[15px]!"
                   />
                 </p>
               )}
@@ -145,38 +145,32 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </Link>
             </div>
           )}
-          <div className="mt-2 xl:mt-3 2xl:mt-4 flex items-center gap-2 text-xs xl:text-[11.2px] 2xl:text-[14px] text-[#121e4d] flex-wrap md:flex-nowrap whitespace-nowrap">
-            <span className="inline-flex items-center justify-center rounded-full bg-[#E2E2FF] text-[#6656D5] text-[14px] font-semibold px-2 py-1 mr-1">
+          <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
+            <span className="inline-flex items-center align-middle gap-[3.5px] rounded-[7px] bg-[#E2E2FF] text-[#4242CF] text-[14px] leading-[21px] font-normal py-[1.75px] px-[7px] mr-2 whitespace-nowrap">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4 mr-1"
+                className="w-[14px] h-[14px] shrink-0"
                 fill="none"
                 viewBox="0 0 16 16"
               >
-                <circle cx="8" cy="8" r="8" fill="#6656D5" />
                 <path
-                  d="M5.5 8.5L7.5 10.5L10.5 6.5"
-                  stroke="#fff"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M6.86727 2.00001C7.44959 1.99991 7.82487 1.99984 8.18373 2.086C8.50126 2.16223 8.80481 2.28796 9.08324 2.45858C9.39791 2.65141 9.66323 2.91682 10.0749 3.32865L12.492 5.74578C12.998 6.25171 13.3989 6.65265 13.6957 7.00223C13.9992 7.35971 14.2225 7.69568 14.3477 8.08111C14.5508 8.70611 14.5508 9.37937 14.3477 10.0044C14.2225 10.3898 13.9992 10.7258 13.6957 11.0832C13.3989 11.4328 12.998 11.8338 12.492 12.3397L11.8397 12.992C11.3338 13.498 10.9328 13.8989 10.5832 14.1957C10.2258 14.4992 9.8898 14.7225 9.50437 14.8477C8.87937 15.0508 8.20611 15.0508 7.58111 14.8477C7.19568 14.7225 6.85971 14.4992 6.50223 14.1957C6.15267 13.8989 5.75168 13.4979 5.24578 12.992L2.82865 10.5749C2.41682 10.1632 2.15142 9.89791 1.95858 9.58324C1.78796 9.30481 1.66223 9.00126 1.586 8.68373C1.49984 8.32487 1.49991 7.94959 1.50001 7.36727L1.50001 6.66263C1.50001 5.94712 1.50001 5.3801 1.53735 4.92306C1.57553 4.45569 1.6552 4.06024 1.83919 3.69914C2.13754 3.1136 2.6136 2.63754 3.19914 2.33919C3.56024 2.1552 3.95569 2.07553 4.42306 2.03735C4.8801 2.00001 5.44712 2.00001 6.16263 2.00001L6.86727 2.00001ZM4.8098 6.90569C4.8098 5.91068 5.61641 5.10407 6.61142 5.10407C7.60644 5.10407 8.41305 5.91068 8.41305 6.90569C8.41305 7.9007 7.60644 8.70732 6.61142 8.70732C5.61641 8.70732 4.8098 7.9007 4.8098 6.90569Z"
+                  fill="#4242CF"
                 />
               </svg>
               Zero interest
             </span>
-            <span className="whitespace-nowrap">
-              or as low as $19/mo with Affirm.&nbsp;
-              <button type="button" className="underline font-semibold">
-                See if you qualify
-              </button>
-            </span>
+            or as low as $19/mo with Affirm.{" "}
+            <span className="underline cursor-pointer">See if you qualify</span>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 border border-gray-200 rounded-md overflow-hidden bg-white">
+        <div className="mt-6 hidden min-[801px]:grid grid-cols-1 sm:grid-cols-2 border border-gray-200 overflow-hidden bg-white">
           {/* Free Shipping */}
-          <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-gray-200">
-            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+          <div className="pl-3 pr-8 py-3.5 flex flex-col justify-center border-b sm:border-b-0 sm:border-r border-gray-200">
+            <span className="flex items-center text-[16px] font-medium leading-[21px] text-[#333333]">
               {/* Tick Icon, tick is #333333, bg none, size bardha di but text align with tick */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -195,13 +189,13 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               <span className="leading-none">Free Shipping</span>
             </span>
             {/* Text below, right-aligned with the above */}
-            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+            <span className="text-[14px] font-normal leading-[21px] text-[#808080] ml-[24px]">
               Upto 10 LBS
             </span>
           </div>
           {/* Best Price */}
-          <div className="px-10 py-3.5 flex flex-col justify-center border-b sm:border-b-0 border-gray-200">
-            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+          <div className="pl-3 pr-8 py-3.5 flex flex-col justify-center border-b sm:border-b-0 border-gray-200">
+            <span className="flex items-center text-[16px] font-medium leading-[21px] text-[#333333]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-7 h-7 mr-2 -ml-[2px]"
@@ -218,13 +212,13 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </svg>
               <span className="leading-none">Best Price</span>
             </span>
-            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+            <span className="text-[14px] font-normal leading-[21px] text-[#808080] ml-[24px]">
               Guarantee
             </span>
           </div>
           {/* Customer Help */}
-          <div className="px-10 py-3.5 flex flex-col justify-center border-t  border-r border-gray-200">
-            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+          <div className="pl-3 pr-8 py-3.5 flex flex-col justify-center border-t  border-r border-gray-200">
+            <span className="flex items-center text-[16px] font-medium leading-[21px] text-[#333333]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-7 h-7 mr-2 -ml-[2px]"
@@ -241,13 +235,13 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </svg>
               <span className="leading-none">Customer Help</span>
             </span>
-            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+            <span className="text-[14px] font-normal font-normal leading-[21px] text-[#808080] ml-[24px]">
               (209) 651-6864
             </span>
           </div>
           {/* Secure Payment */}
-          <div className="px-10 py-3.5 flex flex-col justify-center border-t border-gray-200">
-            <span className="flex items-center font-semibold text-[12px] xl:text-[13px] 2xl:text-[15px] text-[#333333]">
+          <div className="pl-3 pr-8 py-3.5 flex flex-col justify-center border-t border-gray-200">
+            <span className="flex items-center text-[16px] font-medium leading-[21px] text-[#333333]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="w-7 h-7 mr-2 -ml-[2px]"
@@ -264,14 +258,14 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </svg>
               <span className="leading-none">Secure Payment</span>
             </span>
-            <span className="text-[11px] xl:text-[12px] 2xl:text-[14px] text-[#333333] ml-[24px]">
+            <span className="text-[14px] font-normal leading-[21px] text-[#808080] ml-[24px]">
               Method
             </span>
           </div>
         </div>
       </div>
       {/* Note with icon and text side by side */}
-      <div className="mt-6 bg-[#F5F5F5] p-6 flex items-start">
+      <div className="mt-6 bg-[#F5F5F5] px-[20px] py-[10px] hidden min-[801px]:flex items-center">
         {/* Icon 34x42 with color #333333 */}
         <svg
           version="1.1"
@@ -298,7 +292,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           />
         </svg>
         {/* Text */}
-        <p className="ml-5 text-[12px] text-[#333333]">
+        <p className="ml-5 text-[11.2px] text-[#333333]">
           All Business Entities, Corporations, Public &amp; Private School
           Systems, Governmental Organizations, Colleges, Universities &amp;
           Libraries are welcome to submit purchase orders.
@@ -306,7 +300,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
       </div>
 
       {/* TrustPilot / SAM.GOV / D&B logos */}
-      <div className="flex flex-row flex-wrap gap-6 items-center mt-6">
+      <div className="hidden min-[801px]:flex flex-row flex-wrap gap-6 items-center mt-6">
         <Image
           src="/productslug/trustpilot.PNG"
           alt="Trustpilot"

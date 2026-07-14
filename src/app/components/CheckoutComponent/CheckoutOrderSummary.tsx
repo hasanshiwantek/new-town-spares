@@ -35,44 +35,44 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   const [showCouponInput, setShowCouponInput] = useState(false);
 
   return (
-    <div className="bg-white border-[1px] border-[#8b8b8b] rounded-sm shadow-sm h-fit sticky top-9">
-      <div className="flex items-center justify-between mb-6 p-4 border-b-[1px] border-[#8b8b8b]">
-        <h2 className="text-xl text-[#333333] p-2">
+    <div className="bg-white border border-[#ebebeb] rounded-[4px] h-fit sticky top-9">
+      <div className="flex items-center justify-between p-[19.5px] border-b border-[#ebebeb]">
+        <h2 className="text-[15px] text-[#333333]">
           Order Summary
         </h2>
         <Link
           href="/cart"
-          className="text-[13px] hover:underline"
+          className="text-[13px] text-[#333333] hover:underline"
         >
           Edit Cart
         </Link>
       </div>
 
-      <div className="text-[13px] text-[#333333] px-6">
+      <div className="text-[13px] text-[#333333] px-[19.5px] pt-[19.5px]">
         {cart.length} Item{cart.length !== 1 ? "s" : ""}
       </div>
 
       {/* Cart Items */}
-      <div className="space-y-4 max-h-[400px] overflow-y-auto p-6 border-b-[1px] border-[#8b8b8b]">
+      <div className="space-y-4 max-h-[400px] overflow-y-auto p-[19.5px] border-b border-[#ebebeb]">
         {cart.map((item) => (
           <div
             key={item.id}
             className="flex items-start gap-4"
           >
-            <div className="relative w-[60px] h-[45px] flex-shrink-0">
+            <div className="relative w-[60px] shrink-0">
               <Image
                 src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
                 alt={item.name}
                 width={60}
                 height={45}
-                className="object-cover"
+                className="w-[60px] h-auto object-contain"
               />
             </div>
-            <div className="flex-1 flex min-w-0">
-              <p className="text-base font-medium line-clamp-4 text-[#333333] pr-4">
+            <div className="flex-1 flex min-w-0 gap-4">
+              <p className="flex-1 text-[13px] leading-[19.5px] text-[#333333]">
                 {item.quantity} x {item.name}
               </p>
-              <p className="text-base font-semibold text-[#333333] mt-1">
+              <p className="text-[13px] text-[#333333] whitespace-nowrap">
                 ${(Number(item.price) * (item.quantity || 1)).toFixed(2)}
               </p>
             </div>
@@ -81,7 +81,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       </div>
 
       {/* Coupon */}
-      <div className="mb-6 border-b-[1px] px-6 border-[#8b8b8b] py-6">
+      <div className="border-b border-[#ebebeb] px-[19.5px] py-[19.5px]">
         <button
           type="button"
           className="text-[13px] w-full text-left"
@@ -129,29 +129,29 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       </div>
 
       {/* Totals */}
-      <div className="space-y-3 text-[13px] pt-4 px-6">
+      <div className="space-y-3 text-[13px] pt-[19.5px] px-[19.5px]">
         <div className="flex justify-between text-[#333333]">
           <span>Subtotal</span>
-          <span className="font-medium">${subtotal.toFixed(2)}</span>
+          <span>${subtotal.toFixed(2)}</span>
         </div>
 
         <div className="flex justify-between text-[#333333]">
           <span>Shipping</span>
-          <span className="font-medium">
+          <span>
             {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
           </span>
         </div>
         <div className="flex justify-between text-[#333333]">
           <span>Tax</span>
-          <span className="font-medium">${tax.toFixed(2)}</span>
+          <span>${tax.toFixed(2)}</span>
         </div>
       </div>
 
       {/* Total */}
-      <div className="flex flex-col py-4 px-6 border-t-[1px] border-[#8b8b8b] text-[#333333]">
-        <div className="flex justify-between items-center text-lg font-bold">
-          <span className="text-[15px]">Total (USD)</span>
-          <span className=" text-2xl md:text-[30px] text-[var(--primary-color)]">${finalTotal.toFixed(2)}</span>
+      <div className="flex flex-col py-[19.5px] px-[19.5px] mt-[19.5px] border-t border-[#ebebeb] text-[#333333]">
+        <div className="flex justify-between items-center">
+          <span className="text-[15px]">Total</span>
+          <span className="text-[30px] font-bold leading-none text-[#FF482E]">${finalTotal.toFixed(2)}</span>
         </div>
       </div>
     </div>

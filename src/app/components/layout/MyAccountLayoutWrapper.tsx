@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 const MyAccountTabs = () => {
   const pathname = usePathname();
-  const font2 = "Poppins, sans-serif";
+
   const tabs = [
     { name: "Orders", href: "/my-account/orders" },
     { name: "Returns", href: "/my-account/returns" },
@@ -24,29 +24,32 @@ const MyAccountTabs = () => {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="hidden md:flex gap-2 items-center text-[12px] mb-4 text-[#333333]">
-        <span>Home</span> / <span>Your Account</span> /{" "}
-        <span className="">{getActiveTab()}</span>
-      </div>
-      <div className=" mb-4 text-gray-600  flex justify-center">
-        <span className="text-3xl">{getActiveTab()}</span>
-      </div>
+      <nav
+        aria-label="breadcrumb"
+        className="hidden min-[551px]:block text-[13px] leading-[19.5px] text-[#333333] mb-[21px]"
+      >
+        <Link href="/" className="underline">Home</Link>
+        <span className="mx-[7px] text-[#333333]" aria-hidden="true">/{" "}</span>
+        <Link href="/my-account/orders" className="underline">Your Account</Link>
+        <span className="mx-[7px] text-[#333333]" aria-hidden="true">/{" "}</span>
+        <span>{getActiveTab()}</span>
+      </nav>
+
+      {/* Heading */}
+      <h1 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center my-[26.25px]">
+        {getActiveTab()}
+      </h1>
 
       {/* Tabs */}
-      <div className="flex flex-wrap  gap-5 mb-6 justify-start sm:justify-center">
+      <div className="flex flex-wrap gap-x-[21px] gap-y-[8px] mb-[42px] justify-center">
         {tabs.map((tab) => {
           const isActive = pathname.startsWith(tab.href);
           return (
             <Link
               key={tab.name}
               href={tab.href}
-              style={{ fontFamily: font2 }}
-              className={`text-[13px] font-medium transition-colors duration-200 border-b-2
-        ${
-          isActive
-            ? "text-[#666666]  border-[#666666]"
-            : "text-[#FF482E] border-transparent hover:border-[#F15939]"
-        }`}
+              className={`text-[14px] font-semibold underline transition-colors duration-200
+        ${isActive ? "text-[#666666]" : "text-[#FF482E]"}`}
             >
               {tab.name}
             </Link>
