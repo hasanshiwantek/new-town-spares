@@ -1,28 +1,37 @@
 "use client";
-import React, { useMemo, useCallback, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice";
-import { calculatePackage } from "../CheckoutComponent/Shippingstep";
 import { fetchShippingRates } from "@/redux/slices/shippingSlice";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Country, State, City } from "country-state-city";
-import Image from "next/image";
+import { RootState } from "@/redux/store";
+import { Country, State } from "country-state-city";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { calculatePackage } from "../CheckoutComponent/Shippingstep";
 
 const OrderSummary = () => {
   const cart = useAppSelector((state: RootState) => state.cart.items);
-  const { appliedCoupon, discountAmount, loading: couponLoading } = useAppSelector(
-    (state: RootState) => state.coupon
-  );
+  const {
+    appliedCoupon,
+    discountAmount,
+    loading: couponLoading,
+  } = useAppSelector((state: RootState) => state.coupon);
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [couponCode, setCouponCode] = useState("");
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showShipping, setShowShipping] = useState(false);
-  const { shippingRates, ratesLoader } = useAppSelector((state) => state.shippingZone);
+  const { shippingRates, ratesLoader } = useAppSelector(
+    (state) => state.shippingZone,
+  );
   const [loading, setLoading] = useState(false);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState("");
   const [shippingData, setShippingData] = useState({
@@ -51,7 +60,6 @@ const OrderSummary = () => {
   }, [cart]);
 
   const shipping = useMemo(() => {
-
     if (typeof window !== "undefined") {
       const savedCost = localStorage.getItem("shippingCost");
       if (savedCost) return Number(savedCost);
@@ -96,25 +104,27 @@ const OrderSummary = () => {
     router.push("/checkout");
   }, [cart.length, router]);
 
-const poppinsFont = "Poppins, sans-serif";
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const pkg = calculatePackage(cart);
-    dispatch(fetchShippingRates({
-      data: {
-        destination: {
-          ...shippingData,
-          country_code: shippingData?.country?.trim(),
-          postal_code: shippingData?.zip?.trim(),
+    dispatch(
+      fetchShippingRates({
+        data: {
+          destination: {
+            ...shippingData,
+            country_code: shippingData?.country?.trim(),
+            postal_code: shippingData?.zip?.trim(),
+          },
+          package: pkg,
         },
-        package: pkg,
-      },
-    })).unwrap().finally(() => {
-      setLoading(false);
-    })
+      }),
+    )
+      .unwrap()
+      .finally(() => {
+        setLoading(false);
+      });
   };
-
 
   useEffect(() => {
     const detectCountry = async () => {
@@ -143,26 +153,43 @@ const poppinsFont = "Poppins, sans-serif";
   }, []);
 
   return (
-    <div className="md:border rounded-none 2xl:w-full" style={{fontFamily:poppinsFont}}>
-      <div className="px-6 py-5">
-        <div className="flex justify-between items-center py-5 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333]  !font-semibold">Total Items:</span>
+    <div className="shadow-[0_0_1px_0_rgba(0,0,0,0.5)] 2xl:w-full">
+      <div className="p-[21px]">
+        <div className="flex justify-between items-center py-[14px] border-b border-[#ebebeb]">
+          <span className="text-[14px] font-bold text-[#333333]">
+            Total Items:
+          </span>
           <span className="text-[14px] text-[#333333]">{totalItems}</span>
         </div>
 
-        <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333] !font-semibold">Subtotal:</span>
-          <span className="text-[14px] text-[#333333]">${subtotal.toFixed(2)}</span>
+        <div className="flex justify-between items-center py-[14px] border-b border-[#ebebeb]">
+          <span className="text-[14px] font-bold text-[#333333]">
+            Subtotal:
+          </span>
+          <span className="text-[14px] text-[#333333]">
+            ${subtotal.toFixed(2)}
+          </span>
         </div>
 
-        <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333] !font-semibold">Shipping:</span>
-          {shippingCost ? <button className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors" onClick={() => setShowShipping(!showShipping)}>
-            {!showShipping ? `$${shippingCost.toFixed(2)}` : ""}
-          </button> :
-            <button className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors" onClick={() => setShowShipping(!showShipping)}>
-              {showShipping ? "Cancel" : "Add info"}
-            </button>}
+        <div className="flex justify-between items-center py-[14px]">
+          <span className="text-[14px] font-bold text-[#333333]">
+            Shipping:
+          </span>
+          {shippingCost ? (
+            <button
+              className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+              onClick={() => setShowShipping(!showShipping)}
+            >
+              {!showShipping ? `$${shippingCost.toFixed(2)}` : ""}
+            </button>
+          ) : (
+            <button
+              className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+              onClick={() => setShowShipping(!showShipping)}
+            >
+              {showShipping ? "Cancel" : "Add Info"}
+            </button>
+          )}
         </div>
         {showShipping && (
           <form
@@ -170,8 +197,8 @@ const poppinsFont = "Poppins, sans-serif";
             className="flex flex-col gap-3 mt-4"
           >
             {/* Country */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <label className="w-full md:w-1/3 text-[14px]">Country</label>
+            <div className="flex flex-col justify-between gap-4">
+              <label className="w-full text-[14px]">Country</label>
 
               <Select
                 value={shippingData.country}
@@ -179,10 +206,10 @@ const poppinsFont = "Poppins, sans-serif";
                   setShippingData({ ...shippingData, country: value })
                 }
               >
-                <SelectTrigger className="w-full md:w-2/3  outline-none">
+                <SelectTrigger className="w-full outline-none h-[32px]!">
                   <SelectValue placeholder="Choose a Country" />
                 </SelectTrigger>
-                <SelectContent className="w-full md:w-2/3  outline-none">
+                <SelectContent className="w-full outline-none h-[32px]!">
                   {countryList.map((country) => (
                     <SelectItem key={country.code} value={country.code}>
                       {country.name}
@@ -193,40 +220,42 @@ const poppinsFont = "Poppins, sans-serif";
             </div>
 
             {/* State */}
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <label className="w-full md:w-1/3 text-[14px]">
-                State/Province
-              </label>
-              {stateList.length > 0 ? <Select
-                value={shippingData.state}
-                onValueChange={(value) =>
-                  setShippingData({ ...shippingData, state: value })
-                }
-              >
-                <SelectTrigger className="w-full md:w-2/3  outline-none">
-                  <SelectValue placeholder="Choose a State" />
-                </SelectTrigger>
-                <SelectContent className="w-full md:w-2/3  outline-none">
-                  {stateList.map((state) => (
-                    <SelectItem key={state.code} value={state.code}>
-                      {state.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select> : <Input
-                className="w-full md:w-2/3"
-                onChange={(e) =>
-                  setShippingData({ ...shippingData, state: e.target.value })
-                }
-              />}
+            <div className="flex flex-col gap-4">
+              <label className="w-full text-[14px]">State/Province</label>
+              {stateList.length > 0 ? (
+                <Select
+                  value={shippingData.state}
+                  onValueChange={(value) =>
+                    setShippingData({ ...shippingData, state: value })
+                  }
+                >
+                  <SelectTrigger className="w-full outline-none h-[32px]!">
+                    <SelectValue placeholder="State/Province" />
+                  </SelectTrigger>
+                  <SelectContent className="w-full outline-none h-[32px]!">
+                    {stateList.map((state) => (
+                      <SelectItem key={state.code} value={state.code}>
+                        {state.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  className="w-full"
+                  onChange={(e) =>
+                    setShippingData({ ...shippingData, state: e.target.value })
+                  }
+                />
+              )}
             </div>
 
             {/* City */}
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <label className="w-full md:w-1/3 text-[14px]">Suburb/City</label>
+            <div className="flex flex-col gap-4">
+              <label className="w-full text-[14px]">Suburb/City</label>
               <Input
                 value={shippingData.city}
-                className="w-full md:w-2/3"
+                className="w-full h-[32px]!"
                 onChange={(e) =>
                   setShippingData({ ...shippingData, city: e.target.value })
                 }
@@ -234,10 +263,10 @@ const poppinsFont = "Poppins, sans-serif";
             </div>
 
             {/* Zip */}
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <label className="w-full md:w-1/3 text-[14px]">Zip/Postcode</label>
+            <div className="flex flex-col gap-4">
+              <label className="w-full text-[14px]">Zip/Postcode</label>
               <Input
-                className="w-full md:w-2/3"
+                className="w-full h-[32px]!"
                 value={shippingData.zip}
                 onChange={(e) =>
                   setShippingData({ ...shippingData, zip: e.target.value })
@@ -246,87 +275,107 @@ const poppinsFont = "Poppins, sans-serif";
             </div>
 
             {/* Submit */}
-            <div className="flex justify-end">
+            <div className="flex justify-end mb-[25px]">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-[65%] btn-primary"
-              // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                className="w-full text-white bg-[#fd5430] font-medium rounded-md px-4 py-[6px] text-xl transition-all my-1 duration-200 cursor-pointer text-[13px]!"
+                // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
               >
                 {loading ? "Loading..." : "Estimate Shipping"}
               </button>
             </div>
 
-            {shippingRates?.length > 0 && <div className="">
-              {ratesLoader ? (
-                Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="flex items-start gap-3 border rounded p-4 animate-pulse">
-                    <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4" />
-                      <div className="h-5 bg-gray-200 rounded w-16" />
-                    </div>
-                  </div>
-                ))
-              ) : shippingRates?.map((rate, i) => {
-                return <label
-                  key={`${rate.method_id}-${rate.service_type}`}
-                  className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
-                >
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value={rate.service_type}
-                    checked={selectedShippingMethod === rate.service_type}
-                    onChange={(e) => setSelectedShippingMethod(e.target.value)}
-                    className="mt-1"
-                  />
-                  <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
-                    <div className="flex items-center gap-2 font-normal" >
-                      {rate.is_fedex && (
-                        <span>
-                          FedEx
-                        </span>
-                      )}
-                      <span className="">
-                        {rate.is_fedex ? `(${rate.service_name})` : rate.display_name}
-                      </span>
-                    </div>
-                    <div className=" font-bold flex-shrink-0">
-                      {rate.total_charge === 0 ? "Free" : `$${Number(rate.total_charge).toFixed(2)}`}
-                    </div>
-                  </div>
-                </label>
-              })}
-              <div className="flex justify-end mt-1.5 mb-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!selectedShippingMethod) {
-                      toast.error("Please select a shipping method");
-                      return;
-                    }
-                    const selectedRate = shippingRates?.find(
-                      (rate: any) => rate.service_type === selectedShippingMethod
-                    );
-                    const cost = selectedRate ? Number(selectedRate.total_charge).toFixed(2) : "0";
-                    localStorage.setItem("shippingCost", cost);
-                    localStorage.setItem("shippingData", JSON.stringify(shippingData));
-                    window.location.reload(); // Refresh to update totals with new shipping cost
-                  }}
-                  className="w-full md:w-[55%] text-[18px] btn-primary"
-                // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
-                >
-                  Update Shipping Cost
-                </button>
+            {shippingRates?.length > 0 && (
+              <div className="">
+                {ratesLoader
+                  ? Array.from({ length: 2 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 border rounded p-4 animate-pulse"
+                      >
+                        <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4" />
+                          <div className="h-5 bg-gray-200 rounded w-16" />
+                        </div>
+                      </div>
+                    ))
+                  : shippingRates?.map((rate, i) => {
+                      return (
+                        <label
+                          key={`${rate.method_id}-${rate.service_type}`}
+                          className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="shippingMethod"
+                            value={rate.service_type}
+                            checked={
+                              selectedShippingMethod === rate.service_type
+                            }
+                            onChange={(e) =>
+                              setSelectedShippingMethod(e.target.value)
+                            }
+                            className="mt-1"
+                          />
+                          <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
+                            <div className="flex items-center gap-2 font-normal">
+                              {rate.is_fedex && <span>FedEx</span>}
+                              <span className="">
+                                {rate.is_fedex
+                                  ? `(${rate.service_name})`
+                                  : rate.display_name}
+                              </span>
+                            </div>
+                            <div className=" font-bold flex-shrink-0">
+                              {rate.total_charge === 0
+                                ? "Free"
+                                : `$${Number(rate.total_charge).toFixed(2)}`}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                <div className="flex justify-end mt-1.5 mb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!selectedShippingMethod) {
+                        toast.error("Please select a shipping method");
+                        return;
+                      }
+                      const selectedRate = shippingRates?.find(
+                        (rate: any) =>
+                          rate.service_type === selectedShippingMethod,
+                      );
+                      const cost = selectedRate
+                        ? Number(selectedRate.total_charge).toFixed(2)
+                        : "0";
+                      localStorage.setItem("shippingCost", cost);
+                      localStorage.setItem(
+                        "shippingData",
+                        JSON.stringify(shippingData),
+                      );
+                      window.location.reload(); // Refresh to update totals with new shipping cost
+                    }}
+                    className="w-full md:w-[55%] text-[18px] btn-primary"
+                    // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                  >
+                    Update Shipping Cost
+                  </button>
+                </div>
               </div>
-            </div>}
-
+            )}
           </form>
         )}
 
-        <div className="flex justify-between items-center py-4 border-b border-gray-200">
-          <span className="text-[14px] text-[#333333] !font-semibold">Coupon Code:</span>
+        <hr />
+
+        <div className="flex justify-between items-center py-[14px]">
+          <span className="text-[14px] font-bold text-[#333333]">
+            Coupon Code:
+          </span>
           {appliedCoupon ? (
             <div className="flex items-center gap-3">
               <span className="text-[14px] text-[#333333]">
@@ -363,26 +412,27 @@ const poppinsFont = "Poppins, sans-serif";
         </div>
 
         {showCouponInput && (
-          <div className="flex gap-2 py-3">
+          <div className="flex mb-[14px]">
             <Input
               id="discountCode"
               type="text"
-              placeholder="Coupon code"
+              placeholder="Enter your coupon code"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
-              className="flex-1 h-10 border border-gray-300 text-[14px] text-[#333333]"
+              className="flex-1 h-10 border border-gray-300 text-[14px] text-[#333333] rounded-none rounded-l!"
             />
             <button
               type="button"
               onClick={handleApplyCoupon}
               disabled={couponLoading}
-              className="text-[14px] text-white bg-[#FF482E] border border-[#F15939] px-4 rounded h-10 shrink-0 disabled:opacity-60"
+              className="text-[14px] text-white bg-[#F15939] border border-[#F15939] px-[11px] rounded-r h-10 shrink-0 disabled:opacity-60"
             >
               Apply
             </button>
           </div>
         )}
 
+        <hr />
         {discountAmount > 0 && (
           <div className="flex justify-between items-center py-2">
             <span className="text-[14px] text-[#333333]">Discount:</span>
@@ -392,9 +442,11 @@ const poppinsFont = "Poppins, sans-serif";
           </div>
         )}
 
-        <div className="flex justify-between items-center py-4">
-          <span className="text-[14px] text-[#333333] font-semibold">Grand total:</span>
-          <span className="text-[20px] text-[#333333] font-semibold">
+        <div className="flex justify-between items-center py-[14px]">
+          <span className="text-[14px] font-bold text-[#333333]">
+            Grand total:
+          </span>
+          <span className="text-[25px] leading-none text-[#333333] font-bold">
             ${grandTotal.toFixed(2)}
           </span>
         </div>
@@ -402,17 +454,17 @@ const poppinsFont = "Poppins, sans-serif";
         <button
           type="button"
           onClick={handleProceedToCheckout}
-          className="w-full bg-[#FF482E] hover:bg-[#e04f33] text-[14px] text-white py-3 rounded-sm mt-2 transition"
+          className="w-full h-[39px] bg-[#FF482E] hover:bg-[#e04f33] text-[14px] font-light text-white rounded-[4px] mt-2 transition"
         >
           Check out
         </button>
 
-        <p className="text-center text-[14px] text-[#333333] py-10">-- or use --</p>
+        <p className="text-center text-[14px] text-[#333333] py-6">
+          -- or use --
+        </p>
 
-        <button className="mx-auto w-[90px] bg-black hover:bg-gray-900 !text-white py-3 rounded-sm flex items-center justify-center transition">
-          <Image
-           width={64}
-           height={32}
+        <button className="mx-auto w-[90px] bg-black hover:bg-gray-900 !text-white py-2.5 rounded-lg flex items-center justify-center transition">
+          <img
             src="/checkouticon/googlepay.png"
             alt="Google Pay"
             className="w-16 h-8 object-contain"

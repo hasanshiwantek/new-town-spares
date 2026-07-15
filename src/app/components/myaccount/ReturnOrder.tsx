@@ -1,9 +1,8 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const ReturnOrder = () => {
   const dispatch = useAppDispatch();
@@ -16,9 +15,11 @@ const ReturnOrder = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await axiosInstance.get("dashboard/orders/get-return-order");
+        const res = await axiosInstance.get(
+          "dashboard/orders/get-return-order",
+        );
         console.log("API Response:", res?.data?.data);
-        
+
         if (res?.data?.data && res.data.data.length > 0) {
           setOrders(res.data.data);
         } else {
@@ -82,7 +83,8 @@ const ReturnOrder = () => {
       <div className="p-4">
         <div className="w-full bg-white border border-black p-6 rounded-lg text-center">
           <p className="text-[#545454] text-[14px]">
-            You haven't requested any returns yet. When you do, they will appear on this page.
+            You haven't requested any returns yet. When you do, they will appear
+            on this page.
           </p>
         </div>
       </div>
@@ -102,7 +104,8 @@ const ReturnOrder = () => {
             <div className="w-full max-w-[128px] h-32 relative flex-shrink-0">
               <Image
                 src={
-                order?.product?.[1]?.image?.[0]?.path ||  order?.product?.[0]?.images?.[0]?.path ||
+                  order?.product?.[1]?.image?.[0]?.path ||
+                  order?.product?.[0]?.images?.[0]?.path ||
                   "/default-product-image.svg"
                 }
                 alt={order?.product?.[0]?.name || "Product Image"}
@@ -114,21 +117,20 @@ const ReturnOrder = () => {
             {/* Product Details */}
             <div className="flex flex-col items-center md:items-start justify-center w-full">
               {/* <Link href={`/my-account/orders/${order?.orderNumber || ""}`}> */}
-                <p className="mb-1 text-xl text-red-600 hover:text-red-700 transition-colors duration-200">
-                  Order #{order?.orderNumber || "N/A"}
-                </p>
+              <p className="mb-1 text-xl text-red-600 hover:text-red-700 transition-colors duration-200">
+                Order #{order?.orderNumber || "N/A"}
+              </p>
               {/* </Link> */}
-             <p className="text-sm md:text-[14px]">
-  {order?.product?.length || 0} product
-  {order?.product?.length > 1 ? "s" : ""} totaling $
-  {(
-    order?.product?.reduce(
-      (total:any, item:any) => total + Number(item?.price || 0),
-      0
-    ) || 0
-  ).toFixed(2)}
-</p>
-
+              <p className="text-sm md:text-[14px]">
+                {order?.product?.length || 0} product
+                {order?.product?.length > 1 ? "s" : ""} totaling $
+                {(
+                  order?.product?.reduce(
+                    (total: any, item: any) => total + Number(item?.price || 0),
+                    0,
+                  ) || 0
+                ).toFixed(2)}
+              </p>
 
               {/* Return Info */}
               <div className="flex text-center md:text-left flex-wrap gap-6 md:gap-2 mt-2 w-full">

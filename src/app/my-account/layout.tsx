@@ -7,7 +7,7 @@ const MyAccountLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <ProtectedLayout>
-        <div className="container mx-auto p-4">
+        <div className="max-w-[1684px] mx-auto pt-[9px] pb-[21px]">
           {/* Client component for breadcrumb + tabs */}
           <MyAccountTabs />
 

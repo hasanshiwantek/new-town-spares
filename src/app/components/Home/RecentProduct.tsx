@@ -110,13 +110,13 @@ const RecentProduct = ({ products = [] }: { products?: RelatedProductItem[] }) =
     const showUI = dotsCount > 0;
 
     return (
-        <div className="bg-transparent py-4">
-            <h2 className="text-4xl text-[#333333] p-3 text-center w-full mb-4">
+        <div className="bg-transparent">
+            <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center w-full my-[26px]">
                 Recently Viewed
             </h2>
 
             {loading && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                <div className="grid grid-cols-1 min-[551px]:grid-cols-2 min-[801px]:grid-cols-3 min-[1261px]:grid-cols-4 gap-3">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <ProductSkeleton key={i} />
                     ))}
@@ -135,12 +135,13 @@ const RecentProduct = ({ products = [] }: { products?: RelatedProductItem[] }) =
                         <button
                             onClick={scrollLeft}
                             disabled={!canScrollLeft}
-                            style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
-                            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
-                flex items-center justify-center font-bold transition-opacity duration-200
-                ${!canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+                            aria-label="Previous products"
+                            className={`absolute -left-7 xl:-left-[47px] top-1/2 -translate-y-1/2 z-10 w-10 h-[61px]
+                flex items-center justify-center text-[34px] leading-none font-light text-[#333333]
+                transition-opacity duration-200
+                ${!canScrollLeft ? "opacity-10 pointer-events-none" : "opacity-100"}`}
                         >
-                            &lt;
+                            &#10094;
                         </button>
                     )}
 
@@ -148,10 +149,10 @@ const RecentProduct = ({ products = [] }: { products?: RelatedProductItem[] }) =
                         ref={trackRef}
                         className="grid grid-rows-1 grid-flow-col gap-3
               auto-cols-[100%]
-              sm:auto-cols-[calc(50%-6px)]
-              md:auto-cols-[calc(33.333%-8px)]
-              lg:auto-cols-[calc(25%-9px)]
-              2xl:auto-cols-[calc(20%-10px)]
+              min-[551px]:auto-cols-[calc(50%-6px)]
+              min-[801px]:auto-cols-[calc(33.333%-8px)]
+              min-[1261px]:auto-cols-[calc(25%-9px)]
+              min-[1441px]:auto-cols-[calc(20%-9.6px)]
               overflow-x-auto scroll-smooth scrollbar-hide"
                     >
                         {productsData.slice(0, 5).map((product: any) => (
@@ -163,22 +164,24 @@ const RecentProduct = ({ products = [] }: { products?: RelatedProductItem[] }) =
                         <button
                             onClick={scrollRight}
                             disabled={!canScrollRight}
-                            style={{ width: 20, height: 41, fontSize: 18, lineHeight: 1 }}
-                            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-md rounded
-                flex items-center justify-center font-bold transition-opacity duration-200
-                ${!canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100 hover:bg-gray-50"}`}
+                            aria-label="Next products"
+                            className={`absolute -right-7 xl:-right-[47px] top-1/2 -translate-y-1/2 z-10 w-10 h-[61px]
+                flex items-center justify-center text-[34px] leading-none font-light text-[#333333]
+                transition-opacity duration-200
+                ${!canScrollRight ? "opacity-10 pointer-events-none" : "opacity-100"}`}
                         >
-                            &gt;
+                            &#10095;
                         </button>
                     )}
 
                     {showUI && (
-                        <div className="flex justify-center gap-2 mt-3">
+                        <div className="h-[25px] flex items-end justify-center gap-2 mt-[11px]">
                             {Array.from({ length: dotsCount + 1 }).map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => scrollToIndex(i)}
-                                    className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${activeIndex === i ? "bg-[#333333]" : "bg-transparent"
+                                    aria-label={`Go to slide ${i + 1}`}
+                                    className={`h-[10px] w-[10px] rounded-full border border-black transition-all duration-300 ${activeIndex === i ? "opacity-100 bg-black" : "opacity-25"
                                         }`}
                                 />
                             ))}

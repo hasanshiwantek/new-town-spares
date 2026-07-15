@@ -14,7 +14,7 @@ import { UseFormRegister, FieldErrors, Control, Controller } from "react-hook-fo
 interface BillingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
-  control: any;
+  control: Control<any>;
   onContinue: () => void;
   countryList: Array<{ name: string; code: string }>;
   isActive: boolean;
@@ -45,8 +45,8 @@ const BillingStep: React.FC<BillingStepProps> = ({
   if (isCompleted && !isActive) {
     // Show completed state with billing info and edit button
     return (
-      <div className="flex items-start justify-between">
-        <div className="text-base text-gray-600">
+      <div className="flex items-start justify-between gap-4">
+        <div className="text-[13px] leading-[19.5px] text-[#333333]">
           <p>{billingInfo?.firstName} {billingInfo?.lastName}</p>
           <p>{billingInfo?.address}</p>
           <p>{billingInfo?.city}, {billingInfo?.state} {billingInfo?.zip}</p>
@@ -55,9 +55,9 @@ const BillingStep: React.FC<BillingStepProps> = ({
         <button
           type="button"
           onClick={onEdit}
-          className="btn-primary"
+          className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
         >
-          EDIT
+          Edit
         </button>
       </div>
     );
@@ -71,14 +71,15 @@ const BillingStep: React.FC<BillingStepProps> = ({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col">
-          <label htmlFor="billingFirstName" className="text-base mb-2 text-gray-700">
+          <label htmlFor="billingFirstName" className="text-[13px] font-medium mb-2 text-[#333333]">
             First Name
           </label>
           <Input
             id="billingFirstName"
             type="text"
-            className={`w-full h-[40px] ${errors.billingFirstName ? "border-red-500" : ""
-              }`}
+            className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+              errors.billingFirstName ? "border-red-500" : ""
+            }`}
             {...register("billingFirstName", {
               required: "First name is required",
             })}
@@ -91,14 +92,15 @@ const BillingStep: React.FC<BillingStepProps> = ({
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="billingLastName" className="text-base mb-2 text-gray-700">
+          <label htmlFor="billingLastName" className="text-[13px] font-medium mb-2 text-[#333333]">
             Last Name
           </label>
           <Input
             id="billingLastName"
             type="text"
-            className={`w-full h-[40px] ${errors.billingLastName ? "border-red-500" : ""
-              }`}
+            className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+              errors.billingLastName ? "border-red-500" : ""
+            }`}
             {...register("billingLastName", {
               required: "Last name is required",
             })}
@@ -112,38 +114,39 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingCompany" className="text-base mb-2 text-gray-700">
+        <label htmlFor="billingCompany" className="text-[13px] font-medium mb-2 text-[#333333]">
           Company Name <span className="text-gray-400">(Optional)</span>
         </label>
         <Input
           id="billingCompany"
           type="text"
-          className="w-full h-[40px]"
+          className="w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
           {...register("billingCompany")}
         />
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingPhone" className="text-base mb-2 text-gray-700">
+        <label htmlFor="billingPhone" className="text-[13px] font-medium mb-2 text-[#333333]">
           Phone Number <span className="text-gray-400">(Optional)</span>
         </label>
         <Input
           id="billingPhone"
           type="text"
-          className="w-full h-[40px]"
+          className="w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
           {...register("billingPhone")}
         />
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingAddress1" className="text-base mb-2 text-gray-700">
+        <label htmlFor="billingAddress1" className="text-[13px] font-medium mb-2 text-[#333333]">
           Address Line 1
         </label>
         <Input
           id="billingAddress1"
           type="text"
-          className={`w-full h-[40px] ${errors.billingAddress1 ? "border-red-500" : ""
-            }`}
+          className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+            errors.billingAddress1 ? "border-red-500" : ""
+          }`}
           {...register("billingAddress1", {
             required: "Address is required",
           })}
@@ -156,26 +159,27 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingAddress2" className="text-base mb-2 text-gray-700">
+        <label htmlFor="billingAddress2" className="text-[13px] font-medium mb-2 text-[#333333]">
           Address Line 2 <span className="text-gray-400">(Optional)</span>
         </label>
         <Input
           id="billingAddress2"
           type="text"
-          className="w-full h-[40px]"
+          className="w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
           {...register("billingAddress2")}
         />
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingCity" className="text-base mb-2 text-gray-700">
+        <label htmlFor="billingCity" className="text-[13px] font-medium mb-2 text-[#333333]">
           City
         </label>
         <Input
           id="billingCity"
           type="text"
-          className={`w-full h-[40px] ${errors.billingCity ? "border-red-500" : ""
-            }`}
+          className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+            errors.billingCity ? "border-red-500" : ""
+          }`}
           {...register("billingCity", {
             required: "City is required",
           })}
@@ -188,7 +192,7 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingCountry" className="text-base mb-2 text-gray-700">
+        <label htmlFor="billingCountry" className="text-[13px] font-medium mb-2 text-[#333333]">
           Country
         </label>
         <Controller
@@ -198,8 +202,9 @@ const BillingStep: React.FC<BillingStepProps> = ({
           render={({ field }) => (
             <Select onValueChange={field.onChange} value={field.value}>
               <SelectTrigger
-                className={`w-full h-[40px] ${errors.billingCountry ? "border-red-500" : ""
-                  }`}
+                className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                  errors.billingCountry ? "border-red-500" : ""
+                }`}
               >
                 <SelectValue placeholder="Select country" />
               </SelectTrigger>
@@ -222,26 +227,27 @@ const BillingStep: React.FC<BillingStepProps> = ({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col">
-          <label htmlFor="billingState" className="text-base mb-2 text-gray-700">
+          <label htmlFor="billingState" className="text-[13px] font-medium mb-2 text-[#333333]">
             State/Province
           </label>
           <Input
             id="billingState"
             type="text"
-            className="w-full h-[40px]"
+            className="w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
             {...register("billingState")}
           />
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="billingZip" className="text-base mb-2 text-gray-700">
+          <label htmlFor="billingZip" className="text-[13px] font-medium mb-2 text-[#333333]">
             Postal Code
           </label>
           <Input
             id="billingZip"
             type="text"
-            className={`w-full h-[40px] ${errors.billingZip ? "border-red-500" : ""
-              }`}
+            className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+              errors.billingZip ? "border-red-500" : ""
+            }`}
             {...register("billingZip", {
               required: "Postal code is required",
             })}

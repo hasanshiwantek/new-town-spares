@@ -1,12 +1,12 @@
-import MyAddress from '@/app/components/myaccount/MyAddress'
-import React from 'react'
+"use client";
+import MyAddress from "@/app/components/myaccount/MyAddress";
 
 const page = () => {
   return (
     <div>
-      <MyAddress/>
+      <MyAddress />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

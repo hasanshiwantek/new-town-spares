@@ -17,12 +17,12 @@ const BlogHome = () => {
   }, [dispatch]);
 
   return (
-    <div className=" py-12">
+    <div className=" py-6">
       {/* Heading */}
-      <h2 className="text-[2.1rem] text-center mb-10">Blogs</h2>
+      <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center mb-[26px]">Blogs</h2>
 
       {/* Grid */}
-      <div className="w-full mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="w-full mx-auto grid gap-6 min-[551px]:grid-cols-2 min-[801px]:grid-cols-4">
         {loading && blogPosts.length === 0
           ? Array.from({ length: 4 }).map((_, idx) => (
               <div
@@ -53,10 +53,10 @@ const BlogHome = () => {
                 <Link
                   key={blog.id ?? idx}
                   href={`/blogs/${blog.slug}`}
-                  className="bg-white transition duration-300 overflow-hidden border border-gray-200 block"
+                  className="bg-white transition duration-300 overflow-hidden shadow-[0_0_1px_0_rgba(51,51,51,0.5)] block"
                 >
                   {/* Image */}
-                  <div className="relative h-[195px] w-full overflow-hidden group">
+                  <div className="relative h-[167px] w-full overflow-hidden group">
                     <Image
                       src={imageUrl}
                       alt={blog?.title ?? "Blog"}
@@ -69,19 +69,19 @@ const BlogHome = () => {
                     />
                   </div>
                   {/* Content */}
-                  <div className="p-4.5">
+                  <div className="p-[15px]">
                     {dateText && (
-                      <p className="text-[13px] text-gray-500 mb-2">
+                      <p className="text-[14px] leading-[21px] text-[#333333] mb-2">
                         {dateText}
                       </p>
                     )}
 
-                    <h3 className="text-xl text-gray-500 mb-3 hover:text-blue-600 cursor-pointer line-clamp-2">
+                    <h3 className="text-[15px] leading-[18px] text-[#333333] mb-[7px] hover:text-blue-600 cursor-pointer line-clamp-3">
                       {blog?.title ?? "—"}
                     </h3>
 
                     {desc && (
-                      <p className="text-[14px] text-gray-600 text-sm line-clamp-3">
+                      <p className="text-[14px] leading-[21px] text-[#333333] line-clamp-3 mt-2">
                         {desc}
                       </p>
                     )}
@@ -97,7 +97,7 @@ const BlogHome = () => {
 
       {/* View All */}
       <div className="text-center mt-6">
-        <Link href="/blogs" className="text-[14px] font-medium underline">
+        <Link href="/blogs" className="text-[14px] font-normal text-[#333333] underline">
           View All Articles
         </Link>
       </div>

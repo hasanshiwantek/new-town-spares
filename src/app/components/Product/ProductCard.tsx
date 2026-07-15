@@ -55,7 +55,15 @@ const ProductCard = ({ product }: { product: any }) => {
   return (
     <div className="max-w-full mx-auto">
       <div className="bg-white rounded-xl w-full">
-        <div className="flex flex-wrap lg:flex-nowrap 2xl:gap-6 xl:gap-[20px] lg:gap-[25px] md:gap-5 sm:gap-4 gap-4 ">
+        {/* Responsive grid mirrors live: stacked (title→image→buy) ≤800, 2-col 801–1260, 3-col ≥1261 */}
+        <div
+          className="grid gap-4 min-[801px]:gap-6 min-[1261px]:gap-4
+            [grid-template-areas:'info'_'image'_'buy']
+            min-[801px]:[grid-template-columns:1fr_1fr] min-[801px]:[grid-template-rows:auto_1fr]
+            min-[801px]:[grid-template-areas:'image_info'_'image_buy']
+            min-[1261px]:[grid-template-columns:40%_37.4%_20%] min-[1261px]:[grid-template-rows:auto]
+            min-[1261px]:[grid-template-areas:'image_info_buy']"
+        >
           <ProductLeft
             images={images}
             selectedImage={selectedImage}

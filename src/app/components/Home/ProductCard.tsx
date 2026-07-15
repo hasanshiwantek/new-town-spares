@@ -111,9 +111,9 @@ const handleQuantityBlur = () => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] rounded shadow hover:shadow-md transition flex flex-col h-full p-7 border border-[#ebebeb]">
+    <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
       {/* Image */}
-      <div className="relative w-[97.3%] h-[252.63px] mb-2 mx-auto">
+      <div className="relative w-full aspect-square">
         <Image
           src={imageSrc}
           alt={productName}
@@ -123,51 +123,56 @@ const handleQuantityBlur = () => {
       </div>
 
       {/* Info Wrapper */}
-      <div className="pb-3 flex flex-col flex-1">
-        <Link href={`/brand/${brandSlug || ""}`}>
-          <p className="text-[14px] text-[#333333] hover:text-[#D42020]">
-            <span className="font-bold">{brandName}</span>{" "}
-            <span className="font-[13px]">SKU: {product.sku}</span>
-          </p>
-        </Link>
+      <div className="flex flex-col flex-1">
+        <p className="text-[14px] leading-[21px] text-[#333333] mb-2">
+          <Link
+            href={`/brand/${brandSlug || ""}`}
+            className="font-bold hover:text-[#D42020]"
+          >
+            {brandName}
+          </Link>{" "}
+          <span className="text-[13px]">SKU: {product.sku}</span>
+        </p>
 
         <Link href={`${product?.productUrl}`}>
-          <p className="text-[#212529] text-xl font-normal mb-1 line-clamp-4 hover:text-[#D42020]">
+          <p className="text-[#212529] text-[15px] leading-[18px] font-normal mb-[7px] line-clamp-4 hover:text-[#D42020]">
             {productName}
           </p>
         </Link>
 
+        {/* Bottom block — anchored so price/stock/cart align across cards like live */}
+        <div className="mt-auto flex flex-col">
         {/* Price Section */}
-        <div className="flex flex-col items-start mb-2">
+        <div className="flex flex-col items-start pb-[11px]">
           {product?.msrp && Number(product.msrp) > 0 ? (
             <>
-              <span className="text-[#333333] text-[14px]">
-                Price $
+              <span className="text-[#333333] text-[14px] leading-[21px]">
+                Price: $
                 <span>
                   {(Number(product.price) + Number(product.msrp)).toFixed(2)}
                 </span>
               </span>
-              <span className="text-[20px] font-light text-[#ff482e]">
+              <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
                 ${Number(product.price)}
               </span>
             </>
           ) : (
-            <span className="text-[20px] font-bold text-[#ff482e]">
+            <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
               ${Number(product.price)}
             </span>
           )}
         </div>
 
         {/* Divider */}
-        <hr className="border-t border-[#ebebeb] mb-3" />
+        <hr className="border-t border-[#ebebeb]" />
 
         {/* In Stock */}
-        <p className="text-[14px] text-[#333333] mb-3">
+        <p className="text-[14px] text-[#333333] pt-[11px] mb-[10px]">
           {product?.availabilityText ? product?.availabilityText : "In Stock"}
         </p>
 
         {/* Quantity + Add to Cart Row */}
-        <div className="flex items-center mt-auto">
+        <div className="flex items-center pb-[11px]">
           {/* Quantity Input */}
           <input
             type="number"
@@ -176,16 +181,17 @@ const handleQuantityBlur = () => {
             value={quantity}
             onChange={handleQuantityChange}
             onBlur={handleQuantityBlur}
-            className="w-16 h-14 border text-center text-[14px] font-medium text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
 
           {/* Add to Cart Button */}
           <button
             onClick={handleAddToCart}
-            className="flex-1 h-14 bg-[#ff482e] hover:bg-[#D42020] text-white py-1 h-9 text-[14px] transition-colors"
+            className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
           >
             Add to Cart
           </button>
+        </div>
         </div>
       </div>
     </div>

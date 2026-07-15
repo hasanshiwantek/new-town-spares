@@ -1,12 +1,11 @@
-import AccountForm from '@/app/components/myaccount/AccountForm'
-import React from 'react'
+import AccountForm from "@/app/components/myaccount/AccountForm";
 
 const page = () => {
   return (
     <div>
-      <AccountForm/>
+      <AccountForm />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

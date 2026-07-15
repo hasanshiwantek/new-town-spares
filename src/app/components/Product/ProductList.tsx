@@ -2,29 +2,28 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import ProductCategoryCard from "./ProductCategoryCard";
-import ProductGridCard from "./ProductGridCard";
-import SortingBar from "./SortingBar";
-import ProductSkeleton from "../loader/ProductSkeleton";
-import Pagination from "@/components/ui/pagination";
+import CategoryPagination from "./CategoryPagination";
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 import ProductCard from "../Home/ProductCard";
+import ProductSkeleton from "../loader/ProductSkeleton";
+import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortDropdown from "./SortDropdown";
 import { useMemo } from "react";
 import { decode } from "html-entities";
+import SortingBar from "./SortingBar";
 
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false }
+  { ssr: false },
 );
 
 const AnimatePresence = dynamic(
   () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false }
+  { ssr: false },
 );
 
 interface ProductListProps {
@@ -48,7 +47,7 @@ export default function ProductList({
   filterMeta,
   initialCategorydescription,
 }: ProductListProps) {
-  const [view, setView] = useState<"list" | "grid">("list");
+  const [view, setView] = useState<"list" | "grid">("grid");
   const [page, setPage] = useState(1);
   const decodedHtml = decode(
   (initialCategorydescription || "")
@@ -133,8 +132,11 @@ w-full
     >
       {/* Headings */}
       <div className="mb-4">
-        <h1 className="text-4xl text-[#333333] pb-4">
+        <h1 className="flex flex-wrap items-baseline text-[28px] leading-[33.6px] font-normal text-[#333333]">
           {initialCategorydescription?.name || "Product Category"}
+          <span className="ml-[7px] text-[13px] leading-[19.5px]">
+            (Showing {products?.length || 0} of {total || 0})
+          </span>
         </h1>
         <h4 className="text-[14px] block sm:hidden text-[#333333] mb-2">{getFilterTitle()}</h4>
         <div className="mt-4">
@@ -236,14 +238,14 @@ w-full
 
       {/* Sort Bar */}
 
-        <SortingBar
-          total={total || 0}
-          view={view}
-          setView={setView}
-          filters={filters}
-          setFilters={setFilters}
-          filterMeta={filterMeta}
-        />
+      <SortingBar
+        total={total || 0}
+        view={view}
+        setView={setView}
+        filters={filters}
+        setFilters={setFilters}
+        filterMeta={filterMeta}
+      />
 
       {/* Error State */}
       {error && (
@@ -268,10 +270,11 @@ w-full
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className={`mt-4 ${view === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            : "space-y-4"
-            }`}
+          className={`mt-4 ${
+            view === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              : "space-y-4"
+          }`}
         >
           {Array.from({ length: 6 }).map((_, idx) => (
             <ProductSkeleton key={idx} view={view} />
@@ -285,14 +288,15 @@ w-full
           <MotionDiv
             key={view}
             layout
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className={`xl:max-w-[754px] w-full ${view === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-3"
-              : "space-y-4"
-              }`}
+            className={`w-full min-w-0 flex-1 ${
+              view === "grid"
+                ? "grid grid-cols-1 min-[551px]:grid-cols-2 gap-3"
+                : "space-y-4"
+            }`}
           >
             <AnimatePresence mode="wait">
               {products.map((product, idx) =>
@@ -300,10 +304,10 @@ w-full
                   <MotionDiv
                     key={`list-${idx}`}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <ProductCategoryCard product={product} />
                   </MotionDiv>
@@ -311,14 +315,14 @@ w-full
                   <MotionDiv
                     key={`grid-${idx}`}
                     layout
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={false}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <ProductCard product={product} />
                   </MotionDiv>
-                )
+                ),
               )}
             </AnimatePresence>
           </MotionDiv>
@@ -328,18 +332,16 @@ w-full
 
       {/* Pagination */}
       {!isLoading && !error && (
-        <div className="mt-6 flex justify-start">
-          <Pagination
-            currentPage={filters.page}
-            totalPages={pagination?.lastPage || 1}
-            onPageChange={(page) =>
-              setFilters((prev: any) => ({
-                ...prev,
-                page,
-              }))
-            }
-          />
-        </div>
+        <CategoryPagination
+          currentPage={filters.page}
+          totalPages={pagination?.lastPage || 1}
+          onPageChange={(page) =>
+            setFilters((prev: any) => ({
+              ...prev,
+              page,
+            }))
+          }
+        />
       )}
     </section>
   );

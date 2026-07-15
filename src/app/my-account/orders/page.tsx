@@ -1,12 +1,11 @@
-import OrderProduct from '@/app/components/myaccount/OrderProduct'
-import React from 'react'
+import OrderProduct from "@/app/components/myaccount/OrderProduct";
 
 const page = () => {
   return (
     <div>
-      <OrderProduct/>
+      <OrderProduct />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

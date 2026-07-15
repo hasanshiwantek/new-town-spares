@@ -1,11 +1,10 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { IoStarSharp } from "react-icons/io5";
-import { GoArrowLeft, GoArrowRight } from "react-icons/go";
-import { FaQuoteLeft } from "react-icons/fa";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchReviews, fetchStats } from "@/redux/slices/homeSlice";
 export interface Review {
@@ -42,24 +41,23 @@ const Carousel = dynamic(
   () => import("primereact/carousel").then((mod) => mod.Carousel),
   {
     ssr: false,
-  }
+  },
 );
 const Testimonials = () => {
   const dispatch = useAppDispatch();
   const { reviews, reviewsLoading, reviewsError, stats } = useAppSelector(
-    (state) => state.home
+    (state) => state.home,
   );
   const [pageIndex, setPageIndex] = useState(0);
   const [visibleItems, setVisibleItems] = useState(3); // dynamically set numVisible
 
+  // Matches live (BigCommerce Cornerstone) breakpoints: 1 below 551, 2 up to 800, 3 above
   const responsiveOptions = useMemo(
     () => [
-      { breakpoint: 1400, numVisible: 3 },
-      { breakpoint: 1199, numVisible: 2 },
-      { breakpoint: 767, numVisible: 2 },
-      { breakpoint: 575, numVisible: 1 },
+      { breakpoint: 550, numVisible: 1 },
+      { breakpoint: 800, numVisible: 2 },
     ],
-    []
+    [],
   );
 
   useEffect(() => {
@@ -105,78 +103,75 @@ const Testimonials = () => {
     });
   }, [totalPages]);
 
-  const navigateLeft = useCallback(
-    () => setPageIndex((prev) => (prev > 0 ? prev - 1 : totalPages - 1)),
-    [totalPages]
-  );
-  const navigateRight = useCallback(
-    () => setPageIndex((prev) => (prev < totalPages - 1 ? prev + 1 : 0)),
-    [totalPages]
-  );
+  const reviewTemplate = (review: Review) => {
+    const fullContent = review?.reviewContent || "No review content";
+    const isTruncated = fullContent.length > 220;
+    const displayContent = isTruncated
+      ? fullContent.slice(0, 220).trimEnd() + "…"
+      : fullContent;
+    const parsedDate = dayjs(review?.date);
+    const displayDate = parsedDate.isValid()
+      ? parsedDate.format("MMM D, YYYY")
+      : review?.date;
 
-  // Calculate visible indicators (max 5, centered around active)
-  const visibleIndicators = useMemo(() => {
-    const maxVisible = 5;
-    if (totalPages <= maxVisible) {
-      return Array.from({ length: totalPages }).map((_, i) => i);
-    }
-
-    const half = Math.floor(maxVisible / 2);
-    const initialStart = Math.max(0, pageIndex - half);
-    const initialEnd = Math.min(totalPages - 1, initialStart + maxVisible - 1);
-
-    // Adjust if we're near the end
-    const start =
-      initialEnd - initialStart < maxVisible - 1
-        ? Math.max(0, initialEnd - maxVisible + 1)
-        : initialStart;
-    const end = initialEnd;
-
-    return Array.from({ length: end - start + 1 }).map((_, i) => start + i);
-  }, [totalPages, pageIndex]);
-
-  const reviewTemplate = (review: Review) => (
-    <div className="mt-[2rem] m-2 text-left px-3 flex flex-col gap-2 bg-white ">
-      {/* <FaQuoteLeft size={24} color="#00b67a" className="mb-2" /> */}
-      <div className="mb-3 flex items-center justify-between">
-        <Image
-          src={review?.stars || "/default-product-image.svg"}
-          alt="Rating"
-          width={80}
-          height={32}
-          className="h-7 w-auto"
-          unoptimized
-        />
-        <p className="mb-1 font-[500] text-[13px]">{review.dateOfExperience}</p>
-      </div>
+    return (
+      <div className="mt-[2rem] text-left pr-5 mr-2 flex flex-col bg-white ">
+        <div className="flex items-center justify-between">
+          <Image
+            src={review?.stars || "/default-product-image.svg"}
+            alt="Rating"
+            width={105}
+            height={20}
+            className="h-5 w-auto"
+            unoptimized
+          />
+          <p className="text-[13px] leading-[20px] text-black/60">
+            {displayDate}
+          </p>
+        </div>
         <Link href={review?.url} target="_blank">
-        <h2 className="mb-2 text-[14px] line-clamp-1 underline">
-          {review?.reviewHeading}
-        </h2>
-      </Link>
-      <div
-        className="mb-3 text-[14px] overflow-auto review-scroll"
-        style={{
-          maxHeight: "7.5em", // Approx 5 lines at 1.5em each
-          minHeight: "7.5em",
-        }}
-      >
-        {review?.reviewContent ? review?.reviewContent : "No review content"}
+          <h2 className="mt-[15px] mb-[10px] text-[14px] leading-[21px] font-bold text-[#333333] line-clamp-1 underline">
+            {review?.reviewHeading}
+          </h2>
+        </Link>
+        <div className="text-[14px] leading-[21px] text-[#333333] min-h-[105px]">
+          {displayContent}
+          {isTruncated && (
+            <>
+              {" "}
+              <Link
+                href={review?.url || "#"}
+                target="_blank"
+                className="text-[#0000ff] underline"
+              >
+                Read Full Review on Trustpilot
+              </Link>
+            </>
+          )}
+        </div>
+        <p className="mt-[15px] text-[14px] leading-[21px] text-[#333333]">
+          <span className="font-bold">Date Of Experience:</span>{" "}
+          {review.dateOfExperience}
+        </p>
+        <p className="mt-[16px] text-[14px] leading-[21px] text-[#333333]">
+          {review.reviewer}
+        </p>
       </div>
-      <p className="mb-1 text-[14px] border-t p-1">{review.reviewer}</p>
-    </div>
-  );
+    );
+  };
 
   return (
     <div>
       {/* Header */}
-      <header className="text-center flex flex-col 2xl:gap-5 gap-3 mb-10">
-        <h2 className="text-[2.1rem]">Reviews</h2>
+      <header className="text-center flex flex-col mb-[26px]">
+        <h2 className="text-[25px] leading-[30px] font-normal text-[#333333]">
+          Reviews
+        </h2>
       </header>
-      <div className="flex items-center justify-between md:flex-col sm:flex-col lg:flex-row flex-col">
+      <div className="flex flex-col min-[551px]:flex-row items-center justify-between gap-6 min-[551px]:gap-0">
         {/* Left Summary Box */}
-        <div className="flex flex-col items-center justify-between gap-3 whitespace-nowrap">
-          <h3 className="text-center text-[#333333]">
+        <div className="w-[192px] shrink-0 flex flex-col items-center whitespace-nowrap">
+          <h3 className="text-center text-[24px] leading-[29px] font-normal text-[#333333] mb-[10px]">
             {stats?.status || "Excellent"}
           </h3>
           <Image
@@ -185,24 +180,24 @@ const Testimonials = () => {
               "https://cdn.trustpilot.net/brand-assets/4.1.0/stars/stars-4.5.svg"
             }
             alt="Reviews"
-            width={200}
-            height={200}
-            className="max-w-[85%]"
+            width={160}
+            height={30}
+            className="w-[160px]"
           />
-       <span className="text-[13px]">
-  Based on{" "}
-  <Link href="#" className="border-b-2">
-    {stats?.count || "18"} reviews
-  </Link>
-</span>
+          <span className="text-[13px] leading-[45px] text-[#333333]">
+            Based on{" "}
+            <a href="#" className="font-bold underline">
+              {stats?.count || "18"} Reviews
+            </a>
+          </span>
           <div className="flex items-center justify-center">
-            <IoStarSharp size={35} color="#00b67a" />
-            <h4 className="text-[#2A2A2A] mt-1 text-2xl font-bold">TrustPilot</h4>
+            <IoStarSharp size={28} color="#00b67a" />
+            <h4 className="text-[#191919] text-[22px] font-bold">Trustpilot</h4>
           </div>
         </div>
 
         {/* Carousel */}
-        <div className="card w-[86%] relative">
+        <div className="card flex-1 min-w-0 w-full lg:w-auto relative">
           {reviewsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-4 animate-pulse">
               {Array.from({ length: visibleItems }).map((_, index) => (
@@ -255,44 +250,23 @@ const Testimonials = () => {
             />
           )}
 
-          {/* Custom Navigation */}
-         {reviews.length > 0 && !reviewsLoading && !reviewsError && (
-  <div className="flex lg:hidden items-center justify-center mt-4 gap-4">
-    
-    {/* Left Arrow */}
-    <button
-      aria-label="Previous"
-      onClick={navigateLeft}
-      className="p-1 text-gray-500 hover:text-gray-800 transition"
-    >
-      <GoArrowLeft size={25} />
-    </button>
-
-    {/* Dotted Indicators */}
-    <div className="flex items-center gap-3">
-      {visibleIndicators.map((i) => (
-        <button
-          key={i}
-          className={`h-3 w-3 rounded-full border-2 border-[#333333] transition-all duration-300 ${
-            i === pageIndex
-              ? "bg-[#333333] scale-110"
-              : "bg-transparent hover:bg-gray-300"
-          }`}
-        />
-      ))}
-    </div>
-
-    {/* Right Arrow */}
-    <button
-      onClick={navigateRight}
-      aria-label="Next"
-      className="p-1 text-gray-500 hover:text-gray-800 transition"
-    >
-      <GoArrowRight size={25} />
-    </button>
-
-  </div>
-)}
+          {/* Dotted Indicators — always visible like live, one dot per page */}
+          {reviews.length > 0 && !reviewsLoading && !reviewsError && (
+            <div className="flex items-center justify-center mt-4">
+              <div className="flex items-center flex-wrap justify-center gap-[6px]">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    aria-label={`Go to review page ${i + 1}`}
+                    onClick={() => setPageIndex(i)}
+                    className={`h-[10px] w-[10px] rounded-full border border-black transition-all duration-300 ${
+                      i === pageIndex ? "opacity-100 bg-black" : "opacity-25"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

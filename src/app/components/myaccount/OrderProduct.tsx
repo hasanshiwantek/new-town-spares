@@ -1,17 +1,22 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
 import { fetchAccountOrders } from "@/redux/slices/myaccountSlice";
+import { RootState } from "@/redux/store";
+import Image from "next/image";
 import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import ReturnItemsModal from "./ReturnItemsModal"; // Import modal
+import { AlertCircle, CircleAlert } from "lucide-react";
 
 const OrderProduct = () => {
   const dispatch = useAppDispatch();
-  const { order, loading, error } = useAppSelector(
-    (state: RootState) => state.myaccount
+  const { loading, error } = useAppSelector(
+    (state: RootState) => state.myaccount,
   );
+
+  const order = {
+    orders: [],
+  };
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,17 +62,22 @@ const OrderProduct = () => {
   }
 
   if (error)
-    return (
-      <p className="text-red-500">Failed to fetch orders. {error}</p>
-    );
+    return <p className="text-red-500">Failed to fetch orders. {error}</p>;
 
   if (!order?.orders || order.orders.length === 0)
     return (
-      <div className="w-full flex justify-center">
-        <div className="w-full sm:w-[50%] bg-[#dfdfdf] rounded-md flex justify-center p-4">
-          <p className="text-[#545454] text-[14px]">
-            You haven't placed any order with us. When you do, they will appear
-            on this page.
+      <div className="w-full flex justify-center mx-auto">
+        <div className="w-full bg-[#e5e5e5] rounded-md px-6 py-5 flex items-center gap-4">
+          <div className="flex-shrink-0">
+            <CircleAlert
+              size={28}
+              className="text-white bg-[#6b6b6b] rounded-full p-1"
+            />
+          </div>
+
+          <p className="text-[#5a5a5a] text-[15px] font-normal">
+            You haven't placed any orders with us. When you do, their status
+            will appear on this page.
           </p>
         </div>
       </div>
@@ -87,10 +97,15 @@ const OrderProduct = () => {
               <div className="w-full max-w-[128px] h-32 relative flex-shrink-0">
                 <Image
                   src={
-                    item?.products?.[0]?.images?.[0] || item?.products?.[1]?.images?.[0] ||
+                    item?.products?.[0]?.images?.[0] ||
+                    item?.products?.[1]?.images?.[0] ||
                     "/default-product-image.svg"
                   }
-                  alt={item?.products?.[0]?.name || item?.products?.[1]?.name || "Product Image"}
+                  alt={
+                    item?.products?.[0]?.name ||
+                    item?.products?.[1]?.name ||
+                    "Product Image"
+                  }
                   fill
                   className="object-contain border rounded-md"
                 />
