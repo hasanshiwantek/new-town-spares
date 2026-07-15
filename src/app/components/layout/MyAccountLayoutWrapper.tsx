@@ -10,7 +10,7 @@ const MyAccountTabs = () => {
 
   const tabs = [
     { name: "Orders", href: "/my-account/orders" },
-    { name: "Returns", href: "/my-account/returns" },
+    { name: "Messages", href: "/my-account/messages" },
     { name: "Addresses", href: "/my-account/addresses" },
     { name: "Recently Viewed", href: "/my-account/recently-viewed" },
     { name: "Account Settings", href: "/my-account/account-settings" },
