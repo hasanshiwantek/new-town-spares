@@ -12,6 +12,9 @@ import dynamic from "next/dynamic";
 import ProductCard from "../Home/ProductCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortDropdown from "./SortDropdown";
+import { useMemo } from "react";
+import { decode } from "html-entities";
+
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
@@ -47,12 +50,55 @@ export default function ProductList({
 }: ProductListProps) {
   const [view, setView] = useState<"list" | "grid">("list");
   const [page, setPage] = useState(1);
+  const decodedHtml = decode(
+  (initialCategorydescription || "")
+    .replace(/<pre[^>]*>/gi, "")
+    .replace(/<\/pre>/gi, "")
+);
+
+const { contentHtml, faqHtml } = useMemo(() => {
+  if (!decodedHtml) {
+    return {
+      contentHtml: "",
+      faqHtml: "",
+    };
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(decodedHtml, "text/html");
+
+  const faq = doc.querySelector(".blog-faqs");
+
+  const faqHtml = faq ? faq.outerHTML : "";
+
+  if (faq) {
+    faq.remove();
+  }
+
+  return {
+    contentHtml: doc.body.innerHTML,
+    faqHtml,
+  };
+}, [decodedHtml]);
+useEffect(() => {
+  const main = document.querySelector(".custom-description-style");
+  if (!main) return;
+
+  const blogFaqs = main.querySelector(".blog-faqs");
+  const target = document.querySelector(".faqs-section");
+
+  if (blogFaqs && target) {
+    target.innerHTML = "";
+    target.appendChild(blogFaqs.cloneNode(true));
+  }
+}, [decodedHtml]);
   const total = pagination?.total || 0;
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [filters.page]);
-
+   
+ 
   const getFilterTitle = () => {
     const parts: string[] = [];
 
@@ -91,17 +137,90 @@ w-full
           {initialCategorydescription?.name || "Product Category"}
         </h1>
         <h4 className="text-[14px] block sm:hidden text-[#333333] mb-2">{getFilterTitle()}</h4>
-        <p className="text-[14px] text-[#333333] ">
-          {/* Do you need to fix your computer or make it work better? At
-          NewTownSpares, we have all the IT Accessories you need! It doesn’t
-          matter if it’s for your home, work, or even an old computer. We are
-          here to help you. We have parts from popular brands like Intel, Dell,
-          and HP. */}
-          <p className="text-[14px] text-[#333333] px-5 py-2 max-h-[150px] overflow-y-auto border border-gray-300 rounded-md">
-            {initialCategorydescription?.description ||
-              "Discover quality products available in this category, curated to meet your needs. Do you need to fix your computer or make it work better? At NewTownSpares, we have all the IT Accessories you need! It doesn’t matter if it’s for your home, work, or even an old computer. We are here to help you. We have parts from popular brands like Intel, Dell, and HP."}
-          </p>
-        </p>
+        <div className="mt-4">
+ {initialCategorydescription && (
+  <>
+    <style>{`
+      .custom-description {
+        color: #545454;
+        font-family: Roboto, Arial, Helvetica, sans-serif;
+      }
+
+      .custom-description h1,
+      .custom-description h2,
+      .custom-description h3,
+      .custom-description h4,
+      .custom-description h5,
+      .custom-description h6 {
+        color: #333;
+        margin: 16px 0 10px;
+        line-height: 1.4;
+      }
+
+      .custom-description p {
+        font-size: 14px;
+        line-height: 1.7;
+        margin: 8px 0;
+        color: #545454;
+      }
+
+      .custom-description strong {
+        font-weight: 700;
+      }
+
+      .custom-description a {
+        color: #d42020;
+        text-decoration: underline;
+      }
+
+      .custom-description ul,
+      .custom-description ol {
+        margin: 10px 0 10px 20px;
+      }
+
+      .custom-description li {
+        margin-bottom: 6px;
+        line-height: 1.6;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #FF0101;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #387C3B;
+      }
+    `}</style>
+
+    <div
+      className="
+        my-6
+        border
+        border-gray-600
+        bg-white
+        py-5
+        px-4
+        max-h-[240px]
+        overflow-y-auto
+        custom-scrollbar
+      "
+    >
+      <div
+        className="custom-description custom-description-style prose prose-sm max-w-none break-words"
+        dangerouslySetInnerHTML={{ __html: contentHtml }}
+      />
+    </div>
+  </>
+)}
+</div>
       </div>
 
       {/* <div className="mb-4">
