@@ -79,13 +79,10 @@ const SignupPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onSubmit = async (data: SignupFormValues) => {
-<<<<<<< HEAD
     //   if (!captchaToken) {
     //   toast("Please verify the captcha.");
     //   return;
     // }
-=======
->>>>>>> 70fc34962eb373b3c8ddaf1edd6c76b2e7a179de
     try {
       const payload = {
         userRole: 2,
