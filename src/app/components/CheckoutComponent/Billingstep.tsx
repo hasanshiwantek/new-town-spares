@@ -9,12 +9,17 @@ import {
   SelectItem,
   SelectContent,
 } from "@/components/ui/select";
-import { UseFormRegister, FieldErrors, Control, Controller } from "react-hook-form";
+import {
+  UseFormRegister,
+  FieldErrors,
+  Control,
+  Controller,
+} from "react-hook-form";
 
 interface BillingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
-  control: Control<any>;
+  control: any;
   onContinue: () => void;
   countryList: Array<{ name: string; code: string }>;
   isActive: boolean;
@@ -47,9 +52,13 @@ const BillingStep: React.FC<BillingStepProps> = ({
     return (
       <div className="flex items-start justify-between gap-4">
         <div className="text-[13px] leading-[19.5px] text-[#333333]">
-          <p>{billingInfo?.firstName} {billingInfo?.lastName}</p>
+          <p>
+            {billingInfo?.firstName} {billingInfo?.lastName}
+          </p>
           <p>{billingInfo?.address}</p>
-          <p>{billingInfo?.city}, {billingInfo?.state} {billingInfo?.zip}</p>
+          <p>
+            {billingInfo?.city}, {billingInfo?.state} {billingInfo?.zip}
+          </p>
           <p>{billingInfo?.country}</p>
         </div>
         <button
@@ -67,11 +76,16 @@ const BillingStep: React.FC<BillingStepProps> = ({
 
   return (
     <div className="space-y-6">
-      <h3 className="text-sm font-medium mb-4 text-gray-700">Billing Address</h3>
+      <h3 className="text-sm font-medium mb-4 text-gray-700">
+        Billing Address
+      </h3>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col">
-          <label htmlFor="billingFirstName" className="text-[13px] font-medium mb-2 text-[#333333]">
+          <label
+            htmlFor="billingFirstName"
+            className="text-[13px] font-medium mb-2 text-[#333333]"
+          >
             First Name
           </label>
           <Input
@@ -92,7 +106,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="billingLastName" className="text-[13px] font-medium mb-2 text-[#333333]">
+          <label
+            htmlFor="billingLastName"
+            className="text-[13px] font-medium mb-2 text-[#333333]"
+          >
             Last Name
           </label>
           <Input
@@ -114,7 +131,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingCompany" className="text-[13px] font-medium mb-2 text-[#333333]">
+        <label
+          htmlFor="billingCompany"
+          className="text-[13px] font-medium mb-2 text-[#333333]"
+        >
           Company Name <span className="text-gray-400">(Optional)</span>
         </label>
         <Input
@@ -126,7 +146,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingPhone" className="text-[13px] font-medium mb-2 text-[#333333]">
+        <label
+          htmlFor="billingPhone"
+          className="text-[13px] font-medium mb-2 text-[#333333]"
+        >
           Phone Number <span className="text-gray-400">(Optional)</span>
         </label>
         <Input
@@ -138,7 +161,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingAddress1" className="text-[13px] font-medium mb-2 text-[#333333]">
+        <label
+          htmlFor="billingAddress1"
+          className="text-[13px] font-medium mb-2 text-[#333333]"
+        >
           Address Line 1
         </label>
         <Input
@@ -159,7 +185,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingAddress2" className="text-[13px] font-medium mb-2 text-[#333333]">
+        <label
+          htmlFor="billingAddress2"
+          className="text-[13px] font-medium mb-2 text-[#333333]"
+        >
           Address Line 2 <span className="text-gray-400">(Optional)</span>
         </label>
         <Input
@@ -171,7 +200,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingCity" className="text-[13px] font-medium mb-2 text-[#333333]">
+        <label
+          htmlFor="billingCity"
+          className="text-[13px] font-medium mb-2 text-[#333333]"
+        >
           City
         </label>
         <Input
@@ -192,7 +224,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="billingCountry" className="text-[13px] font-medium mb-2 text-[#333333]">
+        <label
+          htmlFor="billingCountry"
+          className="text-[13px] font-medium mb-2 text-[#333333]"
+        >
           Country
         </label>
         <Controller
@@ -227,7 +262,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col">
-          <label htmlFor="billingState" className="text-[13px] font-medium mb-2 text-[#333333]">
+          <label
+            htmlFor="billingState"
+            className="text-[13px] font-medium mb-2 text-[#333333]"
+          >
             State/Province
           </label>
           <Input
@@ -239,7 +277,10 @@ const BillingStep: React.FC<BillingStepProps> = ({
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="billingZip" className="text-[13px] font-medium mb-2 text-[#333333]">
+          <label
+            htmlFor="billingZip"
+            className="text-[13px] font-medium mb-2 text-[#333333]"
+          >
             Postal Code
           </label>
           <Input
@@ -260,11 +301,7 @@ const BillingStep: React.FC<BillingStepProps> = ({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onContinue}
-        className="btn-primary"
-      >
+      <button type="button" onClick={onContinue} className="btn-primary">
         CONTINUE
       </button>
     </div>
