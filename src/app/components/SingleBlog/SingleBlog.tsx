@@ -1,10 +1,6 @@
-import React from "react";
-import BlogHeader from "./BlogHeader";
-import TableofContents from "./TableofContents";
-import FeaturedHBATable from "./FeaturedHBATable";
-import Image from "next/image";
 import Blogimg2 from "@/assets/blog/blogImage2.png";
-import CommentForm from "./CommentForm";
+import Image from "next/image";
+import BlogHeader from "./BlogHeader";
 // import css from "../../../styles/blog/BlogContent.module.css"
 
 const SingleBlog = ({ blogPost }: { blogPost: any }) => {
@@ -12,16 +8,20 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
 
   return (
     <>
-      <div className="flex flex-col gap-5  py-5 px-3 lg:w-[72.5%] 2xl:w-[76.1%]  xl:w-[76.8%] w-full">
+      {/* Live: `.col-md-9` — 75% wide with 10.5px side padding (the row's -10.5px margin
+          pulls the content flush to the container edge) */}
+      <div className="flex flex-col md:w-[75%] w-full px-[10.5px]">
         <BlogHeader blogPost={blogPost} />
         {/* <TableofContents /> */}
 
         {/* Blog Content Sections */}
 
-        <div className="flex flex-col gap-7">
+        <div className="flex flex-col">
           <section id="overview" className="scroll-mt-[140px]">
-            <h2 className="text-xl md:text-[25px] text-[#333333] mb-3">Overview</h2>
-            <p className="text-[15px] text-[#333333]">
+            <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">
+              Overview
+            </h2>
+            <p className="text-[15px] leading-[22.5px] text-[#333333] mt-[8px] mb-[21px]">
               Host Bus Adapters (HBAs) are essential components in modern data
               storage, facilitating high-speed communication between servers and
               storage devices. This comprehensive guide explores HBA types, key
@@ -32,15 +32,19 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
           </section>
 
           <section id="understanding-hba" className="scroll-mt-[140px]">
-            <h2 className="text-xl md:text-[25px] text-[#333333] mb-3">Understanding Host Bus Adapters</h2>
-            <p className="text-[15px] text-[#333333]">
+            <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">
+              Understanding Host Bus Adapters
+            </h2>
+            <p className="text-[15px] leading-[22.5px] text-[#333333] mt-[8px] mb-[21px]">
               HBAs are critical for connecting computers to storage devices...
             </p>
           </section>
 
           <section id="evolution-hba" className="scroll-mt-[140px]">
-            <h2 className="text-xl md:text-[25px] text-[#333333] mb-3">The Evolution of HBA Technology</h2>
-            <p className="text-[15px] text-[#333333]">
+            <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">
+              The Evolution of HBA Technology
+            </h2>
+            <p className="text-[15px] leading-[22.5px] text-[#333333] mt-[8px] mb-[21px]">
               The evolution of HBA technology has significantly enhanced data
               storage capabilities. Modern HBAs support advanced features such
               as PCIe Gen4 and NVMe, providing faster data transfer rates and
@@ -50,11 +54,11 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
             </p>
           </section>
 
-   
-
           <section id="evolution-hba" className="scroll-mt-[140px]">
-            <h2 className="text-xl md:text-[25px] text-[#333333] mb-3">The Evolution of HBA Technology</h2>
-            <p className="text-[15px] text-[#333333]">
+            <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">
+              The Evolution of HBA Technology
+            </h2>
+            <p className="text-[15px] leading-[22.5px] text-[#333333] mt-[8px] mb-[21px]">
               The evolution of HBA technology has significantly enhanced data
               storage capabilities. Modern HBAs support advanced features such
               as PCIe Gen4 and NVMe, providing faster data transfer rates and
@@ -76,8 +80,10 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
           </section>
 
           <section id="evolution-hba" className="scroll-mt-[140px]">
-            <h2 className="text-xl md:text-[25px] text-[#333333] mb-3">The Evolution of HBA Technology</h2>
-            <p className="text-[15px] text-[#333333]">
+            <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">
+              The Evolution of HBA Technology
+            </h2>
+            <p className="text-[15px] leading-[22.5px] text-[#333333] mt-[8px] mb-[21px]">
               The evolution of HBA technology has significantly enhanced data
               storage capabilities. Modern HBAs support advanced features such
               as PCIe Gen4 and NVMe, providing faster data transfer rates and
@@ -95,8 +101,10 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
           </section>
 
           <section id="conclusion" className="scroll-mt-[140px]">
-            <h2 className="text-xl md:text-[25px] text-[#333333] mb-3">Conclusion</h2>
-            <p className="text-[15px] text-[#333333]">
+            <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">
+              Conclusion
+            </h2>
+            <p className="text-[15px] leading-[22.5px] text-[#333333] mt-[8px] mb-[21px]">
               Host Bus Adapters (HBAs) are essential components in modern data
               storage, facilitating high-speed communication between servers and
               storage devices. This comprehensive guide explores HBA types, key
@@ -105,7 +113,6 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
               enhance overall system reliability.
             </p>
           </section>
-
 
           {/* <div
             className={`max-w-none api-content-wrapper`}

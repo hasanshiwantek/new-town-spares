@@ -1,41 +1,37 @@
-import React from "react";
-import Image from "next/image";
-import Blogimg1 from "@/assets/blog/blogImage1.jpg";
 import dayjs from "dayjs";
+import Image from "next/image";
+
 const BlogHeader = ({ blogPost }: { blogPost: any }) => {
   console.log("blogPost", blogPost);
 
   return (
     <section className="w-full bg-white">
-      {/* Blog Title + Meta */}
-      <div className="flex flex-col gap-3">
-        {/* Title */}
-        <h1 className="text-xl md:text-[30px] text-[#F15939]">{blogPost?.title}</h1>
+      {/* Blog Title + Meta — live `header.blog-header` */}
+      <div>
+        {/* Title: live is 30px/36 with the link in #FD5430, margin 32px 0 11px */}
+        <h1 className="text-[30px] leading-[36px] text-[#FD5430] mt-[32px] mb-[11px]">
+          {blogPost?.title}
+        </h1>
 
-        {/* Meta Info */}
-        <div className="flex flex-wrap items-center text-[14px] text-[#333333]">
-          {/* <span>By {blogPost?.author || "N/A"}</span> */}
-          {/* <span className="w-[4px] h-[4px] bg-gray-400 rounded-full"></span> */}
+        {/* Meta Info — live: 14px/21 #333, margin 0 0 14px */}
+        <div className="flex flex-wrap items-center text-[14px] leading-[21px] text-[#333333] mb-[14px]">
           <span>{dayjs(blogPost?.createdAt).format("MMM D, YYYY")}</span>
-          {/* <span className="w-[4px] h-[4px] bg-gray-400 rounded-full"></span> */}
-          {/* <span className="text-[#F15939] font-medium capitalize">
-            {blogPost?.tags}
-          </span> */}
         </div>
       </div>
 
-      {/* Blog Image */}
-      <div className="w-full mt-6 relative aspect-[16/9] h-auto 2xl:h-[611px]">
-        <Image
-          src={blogPost?.thumbnail}
-          alt={blogPost?.title}
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-          quality={85}
-        />
-      </div>
+      {/* Blog Image — live uses `img-fluid` (width 100%, height auto), so the hero keeps
+          the image's natural aspect ratio and is never cropped. width/height 0 + sizes is
+          the Next.js recipe for a responsive image with an unknown intrinsic ratio. */}
+      <Image
+        src={blogPost?.thumbnail}
+        alt={blogPost?.title}
+        width={0}
+        height={0}
+        sizes="100vw"
+        className="w-full h-auto"
+        priority
+        quality={85}
+      />
     </section>
   );
 };

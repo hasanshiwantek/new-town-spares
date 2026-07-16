@@ -1,13 +1,10 @@
 "use client";
-import React, { useEffect } from "react";
-import SingleBlog from "@/app/components/SingleBlog/SingleBlog";
 import BlogSidebar from "@/app/components/SingleBlog/BlogSidebar.tsx/BlogSidebar";
-import Image from "next/image";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import SingleBlog from "@/app/components/SingleBlog/SingleBlog";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { getBlogs } from "@/redux/slices/storeFrontSlice";
-import BlogSkeleton from "../loader/BlogSkeleton";
+import Link from "next/link";
+import { useEffect } from "react";
 
 interface SingleBlogContainerProps {
   singleBlog: {
@@ -28,7 +25,7 @@ interface SingleBlogContainerProps {
 const SingleBlogContainer = ({ singleBlog }: SingleBlogContainerProps) => {
   const dispatch = useAppDispatch();
   const { blogs, error, loading } = useAppSelector(
-    (state: any) => state.storeFront
+    (state: any) => state.storeFront,
   );
   const blogPosts = blogs?.data;
 
@@ -37,33 +34,45 @@ const SingleBlogContainer = ({ singleBlog }: SingleBlogContainerProps) => {
   }, [dispatch]);
 
   // Calculate reading time
-  const wordCount = singleBlog?.body?.replace(/<[^>]*>/g, '').split(/\s+/).length || 0;
+  const wordCount =
+    singleBlog?.body?.replace(/<[^>]*>/g, "").split(/\s+/).length || 0;
   const readingTime = Math.ceil(wordCount / 200);
 
   // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   return (
     <>
       {/* Article wrapper with Schema.org markup */}
-      <article 
-        itemScope 
+      <article
+        itemScope
         itemType="https://schema.org/BlogPosting"
         className="w-full"
       >
-        {/* Breadcrumb Navigation with Schema markup */}
-        <div className="mb-6 text-sm md:text-base">
-          <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px] underline">
+        {/* Breadcrumb — live `ul.breadcrumbs`: 13px/19.5 #333, 21px below, hidden under 551.
+            Only the "/" separator is spaced (10.5px = live's 7px margin + 3.5px whitespace). */}
+        <div className="hidden min-[551px]:block mt-[9px] mb-[21px] text-[13px] leading-[19.5px] text-[#333333]">
+          <Link
+            href="/"
+            className="underline"
+          >
             Home
-          </Link>{" "}
-          / <span className="mx-1 text-[#333333] text-[13px] underline">Blog</span>
-          / <span className="mx-1 text-[#333333] text-[13px]">{singleBlog?.title}</span>
+          </Link>
+          <span className="mx-[10.5px]">/</span>
+          <Link
+            href="/blogs"
+            className="underline"
+          >
+            Blog
+          </Link>
+          <span className="mx-[10.5px]">/</span>
+          <span>{singleBlog?.title}</span>
         </div>
         {/* <nav 
           className="flex items-center mb-6"
@@ -105,7 +114,10 @@ const SingleBlogContainer = ({ singleBlog }: SingleBlogContainerProps) => {
 
         {/* Hidden meta data for SEO */}
         <meta itemProp="headline" content={singleBlog?.title} />
-        <meta itemProp="description" content={singleBlog?.metaDescription || ''} />
+        <meta
+          itemProp="description"
+          content={singleBlog?.metaDescription || ""}
+        />
         <meta itemProp="datePublished" content={singleBlog?.createdAt} />
         {singleBlog?.updatedAt && (
           <meta itemProp="dateModified" content={singleBlog.updatedAt} />
@@ -113,17 +125,22 @@ const SingleBlogContainer = ({ singleBlog }: SingleBlogContainerProps) => {
         <meta itemProp="author" content={singleBlog?.author} />
         <meta itemProp="image" content={singleBlog?.thumbnail} />
         <meta itemProp="inLanguage" content="en-US" />
-        {singleBlog?.tags && <meta itemProp="keywords" content={singleBlog.tags} />}
-        {readingTime > 0 && <meta itemProp="timeRequired" content={`PT${readingTime}M`} />}
-        {wordCount > 0 && <meta itemProp="wordCount" content={wordCount.toString()} />}
+        {singleBlog?.tags && (
+          <meta itemProp="keywords" content={singleBlog.tags} />
+        )}
+        {readingTime > 0 && (
+          <meta itemProp="timeRequired" content={`PT${readingTime}M`} />
+        )}
+        {wordCount > 0 && (
+          <meta itemProp="wordCount" content={wordCount.toString()} />
+        )}
 
-        {/* Main content with sidebar */}
-        <div className="flex flex-row">
+        {/* Main content with sidebar — live `.row.justify-content-between` has -10.5px side
+            margins so the columns' 10.5px padding lands flush with the container edge */}
+        <div className="flex flex-col md:flex-row justify-between mx-[-10.5px]">
           <SingleBlog blogPost={singleBlog} />
           <BlogSidebar />
         </div>
-
-   
       </article>
     </>
   );

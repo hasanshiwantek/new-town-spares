@@ -24,6 +24,14 @@ type ContactFormData = {
 const AOSWrapper = dynamic(
   () => import("../../components/animation/AOSWrapper")
 );
+
+// Live form tokens (measured on newtownspares.com/contact-us/).
+// globals.css has an unlayered `input { font-size: 1.1rem }` rule that beats
+// Tailwind utilities, so the font-size here has to be forced.
+const labelClass = "block text-[14px] leading-[21px] font-light text-[#333333] mb-[7px]";
+const requiredClass = "text-[10px] leading-[15px] font-light uppercase text-[#333333]";
+const inputClass =
+  "w-full h-[42px] px-[14px] py-[10.5px] border border-[#ebebeb] rounded-[4px] bg-white !text-[14px] text-[#333333] focus:outline-none focus:border-[#FF482E]";
 const ContactUs = () => {
   const {
     register,
@@ -48,18 +56,24 @@ const ContactUs = () => {
   };
   return (
     <div className="w-full">
-      {/* Breadcrumb */}
-      <div className="mb-6 text-sm md:text-base">
-        <Link href="/" className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px]">
+      {/* Breadcrumb — live `ul.breadcrumbs`: 13px/19.5 #333, margin 0 0 21px, hidden below 551.
+          Crumbs are inline with no margins of their own; only the "/" separator is spaced.
+          mt-[9px]: live sits 21px below the header, PageTransition already supplies 12px of that. */}
+      <div className="hidden min-[551px]:block mt-[9px] mb-[21px] text-[13px] leading-[19.5px] text-[#333333]">
+        <Link href="/" className="underline">
           Home
-        </Link>{" "}
-        / <span className="mx-1 text-[#333333] text-[13px]"> Contact Us</span>
+        </Link>
+        {/* 10.5px = live's 7px separator margin + the 3.5px whitespace in its markup */}
+        <span className="mx-[10.5px]">/</span>
+        <span>Contact Us</span>
       </div>
 
-      <div className="max-w-[800px] mx-auto">
+      {/* flow-root: without a BFC the h1's top margin escapes this wrapper and collapses
+          with the breadcrumb's margin-bottom, giving 26.25px instead of live's 21+26.25 */}
+      <div className="max-w-[800px] mx-auto flow-root">
 
-        {/* Page Title */}
-        <h1 className="text-3xl md:text-[28px] text-[#333333] mb-10 text-center">
+        {/* Page Title — live h1: 28px/33.6, margin 26.25px 0 */}
+        <h1 className="text-3xl md:text-[28px] leading-[33.6px] text-[#333333] mt-[26.25px] mb-10 text-center">
           Contact Us
         </h1>
 
@@ -129,42 +143,39 @@ const ContactUs = () => {
           <div className="max-w-6xl mx-auto">
 
             {/* Top Text */}
-            <p className="text-[16px] text-gray-600 mb-8">
+            <p className="text-[14px] leading-[21px] text-[#333333] mb-[21px]">
               Please fill out the form below if you need assistance.
             </p>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)}>
 
-              {/* Row 1 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Fields — live floats all six at 50% with a 21px gutter, stacking below 551 */}
+              <div className="grid grid-cols-1 min-[551px]:grid-cols-2 gap-x-[21px] gap-y-[28px]">
                 <div>
-                  <label htmlFor="full_name" className="block text-[14px] mb-2">Full Name</label>
+                  <label htmlFor="full_name" className={labelClass}>Full Name</label>
                   <input
                     type="text"
                     id="full_name"
                     {...register("full_name")}
-                    className="w-full h-14 px-4 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                    className={inputClass}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="phone_number" className="block text-[14px] mb-2">Phone Number</label>
+                  <label htmlFor="phone_number" className={labelClass}>Phone Number</label>
                   <input
                     type="tel"
                     id="phone_number"
                     {...register("phone_number")}
-                    className="w-full h-14 px-4 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                    className={inputClass}
                   />
                 </div>
-              </div>
 
-              {/* Row 2 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label htmlFor="email" className="text-[14px]">Email Address</label>
-                    <span className="text-[12px] text-gray-500">REQUIRED</span>
-                  </div>
+                  <label htmlFor="email" className={`${labelClass} flex justify-between items-baseline`}>
+                    Email Address
+                    <small className={requiredClass}>Required</small>
+                  </label>
                   <input
                     type="email"
                     id="email"
@@ -175,66 +186,63 @@ const ContactUs = () => {
                         message: "Invalid email address",
                       },
                     })}
-                    className="w-full h-14 px-4 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                    className={inputClass}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="order_number" className="block text-[14px] mb-2">Order Number</label>
+                  <label htmlFor="order_number" className={labelClass}>Order Number</label>
                   <input
                     type="text"
                     id="order_number"
                     {...register("order_number")}
-                    className="w-full h-14 px-4 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                    className={inputClass}
                   />
                 </div>
-              </div>
 
-              {/* Row 3 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="company_name" className="block text-[14px] mb-2">Company Name</label>
+                  <label htmlFor="company_name" className={labelClass}>Company Name</label>
                   <input
                     type="text"
                     id="company_name"
                     {...register("company_name")}
-                    className="w-full h-14 px-4 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                    className={inputClass}
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="rma_number" className="block text-[14px] mb-2">RMA Number</label>
+                  <label htmlFor="rma_number" className={labelClass}>RMA Number</label>
                   <input
                     type="text"
                     id="rma_number"
                     {...register("rma_number")}
-                    className="w-full h-14 px-4 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                    className={inputClass}
                   />
                 </div>
               </div>
 
               {/* Comments */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label htmlFor="comments" className="text-[14px]">Comments/Questions</label>
-                  <span className="text-[12px] text-gray-500">REQUIRED</span>
-                </div>
+              <div className="mt-[28px]">
+                <label htmlFor="comments" className={`${labelClass} flex justify-between items-baseline`}>
+                  Comments/Questions
+                  <small className={requiredClass}>Required</small>
+                </label>
                 <textarea
                   id="comments"
                   {...register("comments", {
                     required: "Message is required",
                   })}
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-red-500"
+                  rows={5}
+                  className="w-full px-[14px] py-[10.5px] border border-[#ebebeb] rounded-[4px] bg-white !text-[14px] leading-[21px] text-[#333333] focus:outline-none focus:border-[#FF482E]"
                 ></textarea>
               </div>
 
-              {/* Submit Button */}
-              <div className="flex justify-end">
+              {/* Submit Button — full width below 551, auto-width right-aligned above */}
+              <div className="mt-[28px] min-[551px]:text-right">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-[#F15939] w-full md:w-52 text-white px-8 py-3 rounded-md hover:bg-red-600 transition-colors"
+                  className="w-full min-[551px]:w-auto h-[39px] px-[32px] bg-[#FF482E] text-white !text-[14px] font-light rounded-[4px] hover:bg-[#e03d25] transition-colors disabled:opacity-70"
                 >
                   {loading ? "Loading..." : "Submit Form"}
                 </button>

@@ -66,7 +66,9 @@ export default function PageTransition({
             "/about-us",
           ].some((p) => pathname.includes(p))
             ? "w-full max-w-[1684px] mx-auto px-7 xl:px-28 pt-[12px] pb-[42px]"
-            : pathname.includes("/my-account")
+            : // live's blog container is a flat 21px below 801, not the 5% the product
+            // pages use (measured on newtownspares.com/blog/*)
+            pathname.includes("/my-account") || pathname.includes("/blogs")
             ? "pt-[12px] pb-[42px] px-[21px] min-[801px]:px-[84px]"
             : "pt-[12px] pb-[42px] px-[5%] min-[801px]:px-[84px]"
         }`}
