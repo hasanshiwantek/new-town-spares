@@ -113,7 +113,7 @@ const SignupPage = () => {
     <section className="w-full mt-[9px] mb-20">
       {/* Breadcrumb (live hides it below 551px) */}
       <div className="hidden min-[551px]:block mb-0 text-sm">
-        <Link href="/" className="hover:text-[#F15939] transition-colors text-[#333333] text-[13px] underline">
+        <Link href="/" className="text-[#333333] text-[13px] underline">
           Home
         </Link>
         <span className="mx-2">/</span>

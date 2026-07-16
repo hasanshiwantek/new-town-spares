@@ -1,8 +1,3 @@
-/**
- * Empty-state alert box — replicates live's `.alertBox.alertBox--info`:
- * 800px centered, bg #dfdfdf, text #666, radius 4px, 14px/21px, padding 11px 16px,
- * with the same Material "error" icon (25px, fill #666, knocked-out "!") and a 16px gap.
- */
 const AccountEmptyState = ({ message }: { message: string }) => (
   <div className="max-w-[800px] mx-auto bg-[#dfdfdf] text-[#666666] rounded-[4px] py-[11px] px-[16px] flex items-center gap-[16px]">
     <svg

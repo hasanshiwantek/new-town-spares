@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import { useAppSelector } from "@/hooks/useReduxHooks";
+import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
-import dayjs from "dayjs";
-import { useAppSelector } from "@/hooks/useReduxHooks";
 
 // const blogs = [
 //   {
@@ -35,7 +34,7 @@ import { useAppSelector } from "@/hooks/useReduxHooks";
 
 const RecentPost = () => {
   const { blogs, error, loading } = useAppSelector(
-    (state: any) => state.storeFront
+    (state: any) => state.storeFront,
   );
   const blogPosts = blogs?.data;
   const pagination = blogs?.pagination || null;
@@ -46,18 +45,14 @@ const RecentPost = () => {
         Popular Blogs
       </h3>
       <section className="w-full flex justify-center">
-
         <div className="w-full">
           <div>
             {blogPosts?.map((blog: any) => (
-              /* Live `.recentblog`: white, the site's standard 1px shadow (no border, no
-                 radius), 7px padding, 14px apart, image and text vertically centred */
               <Link
                 key={blog.id}
                 href={`/blogs/${blog.slug}`}
                 className="flex items-center bg-white p-[7px] mt-[14px] mx-[-10.5px] shadow-[0_0_1px_0_rgba(51,51,51,0.5)]"
               >
-                {/* Image — live `.col-md-4`: 33.33% wide, natural aspect ratio */}
                 <div className="w-[33.33%] shrink-0 px-[10.5px]">
                   {blog?.thumbnail && (
                     <Image
@@ -70,10 +65,7 @@ const RecentPost = () => {
                     />
                   )}
                 </div>
-
-                {/* Text — live `.col-md-8`: 66.67% wide */}
                 <div className="w-[66.67%] px-[10.5px] text-left">
-                  {/* Live shows the post TITLE, uppercased via CSS, in black */}
                   <h3 className="text-[13px] leading-[15.6px] uppercase text-black line-clamp-2">
                     {blog?.title}
                   </h3>
@@ -87,7 +79,6 @@ const RecentPost = () => {
         </div>
       </section>
     </>
-
   );
 };
 

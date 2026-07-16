@@ -8,14 +8,8 @@ const SingleBlog = ({ blogPost }: { blogPost: any }) => {
 
   return (
     <>
-      {/* Live: `.col-md-9` — 75% wide with 10.5px side padding (the row's -10.5px margin
-          pulls the content flush to the container edge) */}
       <div className="flex flex-col md:w-[75%] w-full px-[10.5px]">
         <BlogHeader blogPost={blogPost} />
-        {/* <TableofContents /> */}
-
-        {/* Blog Content Sections */}
-
         <div className="flex flex-col">
           <section id="overview" className="scroll-mt-[140px]">
             <h2 className="text-[25px] leading-[30px] text-[#333333] mt-[32px] mb-[11px]">

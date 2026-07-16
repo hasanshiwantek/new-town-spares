@@ -55,20 +55,12 @@ const SingleBlogContainer = ({ singleBlog }: SingleBlogContainerProps) => {
         itemType="https://schema.org/BlogPosting"
         className="w-full"
       >
-        {/* Breadcrumb — live `ul.breadcrumbs`: 13px/19.5 #333, 21px below, hidden under 551.
-            Only the "/" separator is spaced (10.5px = live's 7px margin + 3.5px whitespace). */}
         <div className="hidden min-[551px]:block mt-[9px] mb-[21px] text-[13px] leading-[19.5px] text-[#333333]">
-          <Link
-            href="/"
-            className="underline"
-          >
+          <Link href="/" className="underline">
             Home
           </Link>
           <span className="mx-[10.5px]">/</span>
-          <Link
-            href="/blogs"
-            className="underline"
-          >
+          <Link href="/blogs" className="underline">
             Blog
           </Link>
           <span className="mx-[10.5px]">/</span>
@@ -134,9 +126,6 @@ const SingleBlogContainer = ({ singleBlog }: SingleBlogContainerProps) => {
         {wordCount > 0 && (
           <meta itemProp="wordCount" content={wordCount.toString()} />
         )}
-
-        {/* Main content with sidebar — live `.row.justify-content-between` has -10.5px side
-            margins so the columns' 10.5px padding lands flush with the container edge */}
         <div className="flex flex-col md:flex-row justify-between mx-[-10.5px]">
           <SingleBlog blogPost={singleBlog} />
           <BlogSidebar />
