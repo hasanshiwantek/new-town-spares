@@ -1,9 +1,8 @@
 "use client";
-import React from "react";
+import { useAppSelector } from "@/hooks/useReduxHooks";
+import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
-import dayjs from "dayjs";
-import { useAppSelector } from "@/hooks/useReduxHooks";
 
 // const blogs = [
 //   {
@@ -35,63 +34,44 @@ import { useAppSelector } from "@/hooks/useReduxHooks";
 
 const RecentPost = () => {
   const { blogs, error, loading } = useAppSelector(
-    (state: any) => state.storeFront
+    (state: any) => state.storeFront,
   );
   const blogPosts = blogs?.data;
   const pagination = blogs?.pagination || null;
   return (
     <>
-      <h3 className="text-xl  md:text-[28px] text-[#333333]">
+      {/* Live: 28px/33.6 #333, no margins */}
+      <h3 className="text-[28px] leading-[33.6px] text-[#333333]">
         Popular Blogs
       </h3>
-      <section className="w-full flex  justify-center">
-
+      <section className="w-full flex justify-center">
         <div className="w-full">
-          <div className="flex flex-col gap-4 justify-items-center ">
+          <div>
             {blogPosts?.map((blog: any) => (
               <Link
                 key={blog.id}
                 href={`/blogs/${blog.slug}`}
-                className="
-            w-[100%] p-6 md:p-0 xl:w-[100%] 2xl:w-[100%]
-             rounded-lg transition overflow-hidden
-            flex flex-col sm:flex-row justify-start items-center sm:items-stretch gap-5 sm:gap-7 border !p-2.5
-          "
+                className="flex items-center bg-white p-[7px] mt-[14px] mx-[-10.5px] shadow-[0_0_1px_0_rgba(51,51,51,0.5)]"
               >
-                {/* Image */}
-                <div
-                  className="
-              
-              w-[31.5%]
-              w-[31.6%] h-[53px]
-              relative overflow-hidden  flex-shrink-0
-            "
-                >
+                <div className="w-[33.33%] shrink-0 px-[10.5px]">
                   {blog?.thumbnail && (
                     <Image
                       src={blog?.thumbnail}
                       alt={blog?.title}
-                      width={300}
-                      height={200}
-                      className="w-full h-full object-cover"
+                      width={0}
+                      height={0}
+                      sizes="100px"
+                      className="w-full h-auto"
                     />
                   )}
                 </div>
-
-                {/* Text */}
-                <div
-                  className="
-              flex flex-col justify-center lg:justify-between items-start 
-              w-full sm:w-[55%] md:w-[60%]
-              text-left py-2 sm:py-2
-            "
-                >
-                  <p className="text-[13px] text-[#333333]  ">
-                    {blog.author}
-                  </p>
-                  <h3 className="text-[13px] text-[#333333]group-hover:text-[#F15939] transition-colors duration-200 line-clamp-2">
-                    {dayjs(blog?.createdAt).format("MMMM D, YYYY")}
+                <div className="w-[66.67%] px-[10.5px] text-left">
+                  <h3 className="text-[13px] leading-[15.6px] uppercase text-black line-clamp-2">
+                    {blog?.title}
                   </h3>
+                  <p className="text-[13px] leading-[19.5px] text-[#333333]">
+                    Posted {dayjs(blog?.createdAt).format("MMM DD, YYYY")}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -99,7 +79,6 @@ const RecentPost = () => {
         </div>
       </section>
     </>
-
   );
 };
 

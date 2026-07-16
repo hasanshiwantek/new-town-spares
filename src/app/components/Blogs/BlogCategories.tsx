@@ -2,6 +2,7 @@ import React from "react";
 import BlogSkeleton from "../loader/BlogSkeleton";
 import Link from "next/link";
 import Image from "next/image";
+import dayjs from "dayjs";
 import Pagination from "@/components/ui/pagination";
 
 const BlogCategories = ({
@@ -85,7 +86,9 @@ const BlogCategories = ({
                 {/* Content */}
                 <div className="p-3">
                   <p className="text-[13px] text-[#333333] mb-2">
-                    {blog.author || "N/A"}  {/* ✅ API field: author */}
+                    {blog.createdAt
+                      ? dayjs(blog.createdAt).format("MMM D, YYYY")
+                      : ""}
                   </p>
 
                   <h3 className="text-[14px] text-[#333333] mb-3 hover:text-[#FF482E] cursor-pointer transition-colors duration-300">

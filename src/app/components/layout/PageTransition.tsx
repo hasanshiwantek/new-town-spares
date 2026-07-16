@@ -35,10 +35,10 @@
 // file: components/layout/PageTransition.tsx
 "use client";
 
-import React from "react";
-import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import React from "react";
 
 export default function PageTransition({
   children,
@@ -51,7 +51,7 @@ export default function PageTransition({
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        className={`flex-grow ${
+        className={`grow ${
           pathname === "/" ||
           [
             "/auth",
@@ -66,9 +66,9 @@ export default function PageTransition({
             "/about-us",
           ].some((p) => pathname.includes(p))
             ? "w-full max-w-[1684px] mx-auto px-7 xl:px-28 pt-[12px] pb-[42px]"
-            : pathname.includes("/my-account")
-            ? "pt-[12px] pb-[42px] px-[21px] min-[801px]:px-[84px]"
-            : "pt-[12px] pb-[42px] px-[5%] min-[801px]:px-[84px]"
+            : pathname.includes("/my-account") || pathname.includes("/blogs")
+              ? "pt-[12px] pb-[42px] px-[21px] min-[801px]:px-[84px]"
+              : "pt-[12px] pb-[42px] px-[5%] min-[801px]:px-[84px]"
         }`}
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}

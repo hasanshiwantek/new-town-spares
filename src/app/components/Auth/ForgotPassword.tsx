@@ -68,7 +68,6 @@ const ForgotPasswordPage = () => {
 
   return (
     <section className="w-full mt-[9px] mb-[21px]">
-      {/* Breadcrumb (live hides it below 551px) */}
       <div className="hidden min-[551px]:block mb-0 text-sm">
         <Link
           href="/"
@@ -80,19 +79,16 @@ const ForgotPasswordPage = () => {
         <span className="text-[#333333] text-[13px] ml-1">Forgot Password</span>
       </div>
 
-      {/* Title */}
       <h1 className="text-[25px] leading-[30px] tracking-[0.25px] font-normal text-[#333333] mt-[26.25px] mb-[26.25px]">
         Reset Password
       </h1>
 
-      {/* Description */}
       <p className="text-[#333333] text-[14px] leading-[21px] mb-[21px]">
         Fill in your email below to request a new password. An email will be
         sent to the address below containing a link to verify your email
         address.
       </p>
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Label
           htmlFor="email"
@@ -101,13 +97,12 @@ const ForgotPasswordPage = () => {
           Email Address
         </Label>
 
-        {/* Inline input + button (live stacks them below 801px) */}
         <div className="flex flex-col min-[801px]:flex-row items-stretch w-full min-[801px]:w-1/2">
           <Input
             id="email"
             type="email"
             placeholder=""
-            className="flex-1 max-w-none !text-[14px] h-[42px] bg-white border border-[#ebebeb] rounded-[4px] min-[801px]:rounded-r-none px-[14px] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E] !ring-offset-0"
+            className="flex-1 max-w-none text-[14px]! h-[42px] bg-white border border-[#ebebeb] rounded-[4px] min-[801px]:rounded-r-none px-[14px] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E] ring-offset-0!"
             {...register("email", {
               required: "Email is required",
               pattern: {
@@ -132,7 +127,6 @@ const ForgotPasswordPage = () => {
           )}
         </div>
 
-        {/* Error message */}
         {errors.email && (
           <p className="text-[13px] text-[#FD5430] mt-2 flex items-center gap-1">
             <span>✕</span> {errors.email.message}
