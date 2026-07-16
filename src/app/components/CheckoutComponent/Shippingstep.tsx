@@ -29,7 +29,7 @@ import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
 interface ShippingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
-  control: Control<any>;
+  control: any;
   setValue: UseFormSetValue<any>;
   onContinue: () => void;
   countryList: Array<{ name: string; code: string }>;
