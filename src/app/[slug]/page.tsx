@@ -198,7 +198,7 @@ export default async function ProductPage({
                 </div>
               }
             >
-              x              {product?.relatedProductsEnabled && (
+                       {product?.relatedProductsEnabled && (
                 <ProductExtras
                   products={products?.filter((p: any) => p.id !== product.id)}
                 />
