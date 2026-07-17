@@ -2,9 +2,10 @@
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { contactRequests } from "@/redux/slices/contactSlice";
+import { Divide } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type ContactFormData = {
@@ -39,6 +40,7 @@ const ContactUs = () => {
   } = useForm<ContactFormData>();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state: any) => state.contact);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -52,6 +54,7 @@ const ContactUs = () => {
       .unwrap()
       .then(() => {
         reset();
+         setShowSuccess(true);
       });
   };
   return (
@@ -63,6 +66,10 @@ const ContactUs = () => {
         <span className="mx-[10.5px]">/</span>
         <span>Contact Us</span>
       </div>
+      {
+        !showSuccess ? (
+      
+       <div>
 
       <div className="max-w-[800px] mx-auto flow-root">
         <h1 className="text-3xl md:text-[28px] leading-[33.6px] text-[#333333] mt-[26.25px] mb-10 text-center">
@@ -236,8 +243,28 @@ const ContactUs = () => {
               </div>
             </form>
           </div>
+          </div>
         </div>
       </div>
+      ):(<div>
+        <div className="w-full flex justify-center py-10">
+  <div className="text-center">
+    <h1 className="text-[35px] font-light text-[#3F3F3F] mb-8 roboto-only-font">
+      Contact Us
+    </h1>
+
+    <p className="text-[14px] text-[#545454] roboto-font">
+      We've received your feedback and will respond shortly if required.{" "}
+      <Link
+        href="/"
+        className="underline hover:text-[#FF482E]"
+      >
+        Continue.
+      </Link>
+    </p>
+  </div>
+</div>
+      </div>)}
     </div>
   );
 };

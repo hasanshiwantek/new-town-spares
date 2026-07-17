@@ -141,8 +141,16 @@ const authSlice = createSlice({
       })
 
       // Fulfilled - register
-      .addCase(registerUser.fulfilled, (state) => {
+      // .addCase(registerUser.fulfilled, (state) => {
+      //   state.registerLoading = false;
+      // })
+         .addCase(registerUser.fulfilled, (state, action) => {
+        const { user, customer, token, expireAt } = action.payload.data || action.payload;
         state.registerLoading = false;
+        state.user = customer || user;
+        state.token = token;
+        state.expireAt = expireAt;
+        state.isAuthenticated = true;
       })
 
       // Rejected

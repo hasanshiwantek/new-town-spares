@@ -63,46 +63,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const brandSlug =
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
-  // const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const val = parseInt(e.target.value, 10);
-  //   if (isNaN(val) || val <= 0) {
-  //     setQuantity(1);
-  //   } else if (val > 5) {
-  //     setQuantity(5);
-  //   } else {
-  //     setQuantity(val);
-  //   }
-  // };
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    if (isNaN(val) || val <= 0) {
+      setQuantity(1);
+    } else if (val > 5) {
+      setQuantity(5);
+    } else {
+      setQuantity(val);
+    }
+  };
   
-  //  handle function 
-const handleQuantityChange = (
-  e: React.ChangeEvent<HTMLInputElement>
-) => {
-  setQuantity(Number(e.target.value));
-};
 
-  // const handleQuantityBlur = () => {
-  //   if (quantity < 1 || isNaN(quantity)) {
-  //     setQuantity(1);
-  //   }
-  // };
+  const handleQuantityBlur = () => {
+    if (quantity < 1 || isNaN(quantity)) {
+      setQuantity(1);
+    }
+  };
 
-  // set validation input should be in between minQty and maxQty
-const handleQuantityBlur = () => {
-  if (quantity < minQty) {
-    setQuantity(minQty);
-  } else if (quantity > maxQty) {
-    setQuantity(maxQty);
-  }
-};
 
-  const handleAddToCart = () => {
-    if (quantity < minQty) {
-      toast.error(`Minimum quantity allowed is ${minQty}`);
+
+   const handleAddToCart = () => {
+    if (quantity < 1) {
+      toast.error("Quantity must be at least 1.");
       return;
     }
-    if (quantity > maxQty) {
-      toast.error(`Maximum quantity allowed is ${maxQty}`);
+    if (quantity > 5) {
+      toast.error("Maximum quantity allowed is 5.");
       return;
     }
     dispatch(addToCart({ ...product, quantity }));
@@ -176,8 +163,8 @@ const handleQuantityBlur = () => {
           {/* Quantity Input */}
           <input
             type="number"
-            min={minQty}
-            max={maxQty}
+            min={1}
+            max={5}
             value={quantity}
             onChange={handleQuantityChange}
             onBlur={handleQuantityBlur}

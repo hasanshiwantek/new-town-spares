@@ -13,6 +13,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { baseURL, sitekey, storeId } from "@/lib/axiosInstance";
+import { fetchCartList } from "@/redux/slices/cartSlice";
 
 interface SignupFormValues {
   firstName: string;
@@ -90,10 +92,26 @@ const SignupPage = () => {
       };
       const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
-        reset();
-        toast.success("Account created successfully!");
-        router.push("/auth/login");
-      } else {
+  const token = result.payload.token;
+  const sessionId = localStorage.getItem("sessionId");
+
+  await fetch(`${baseURL}web/cart/transfer`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      storeId: storeId,
+      "X-Session-ID": sessionId || "",
+      "Content-Type": "application/json",
+    },
+  });
+
+  await dispatch(fetchCartList());
+
+  reset();
+  toast.success("Account created successfully!");
+  router.push("/action");
+}
+       else {
         const errorMessage =
           (result.payload as string) || "Registration failed. Please try again.";
         toast.error(errorMessage);

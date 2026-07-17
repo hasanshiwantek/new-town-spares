@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import LayoutWrapper from "./components/layout/LayoutWrapper";
 import DynamicFavicon from "@/components/DynamicFavicon";
 import { Inter, Jost, Poppins } from "next/font/google";
 import localFont from "next/font/local";
-import "../styles/blog/api-content.css";
 import ScriptInjector from "@/components/ScriptInjector";
+import "./globals.css";
+import "../styles/blog/api-content.css";
 const jost = Jost({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   display: "swap",
   preload: true,
 });
-
 
 // Live (newtownspares.com) loads ONLY Poppins Light (300) and lets the browser
 // synthesize bolder weights from it — so its whole baseline reads as 300. We mirror

@@ -301,6 +301,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
 
       {/* TrustPilot / SAM.GOV / D&B logos */}
       <div className="hidden min-[801px]:flex flex-row flex-wrap gap-6 items-center mt-6">
+        <Link href='https://www.trustpilot.com/review/newtownspares.com' target="_blank"  rel="noopener noreferrer" >
         <Image
           src="/productslug/trustpilot.PNG"
           alt="Trustpilot"
@@ -308,8 +309,12 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           height={40}
           className="w-[114px] h-[40px] object-contain"
         />
+        </Link>
+        
 
         <div className="flex flex-col items-center">
+          <Link href='https://sam.gov/' target="_blank" rel="noopener noreferrer"  >
+          
           <Image
             src="/productslug/samgov.PNG"
             alt="SAM.GOV"
@@ -317,8 +322,9 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             height={40}
             className="w-[114px] h-[40px] object-contain"
           />
+          </Link>
         </div>
-
+         <Link href='https://www.dnb.com/en-us/' target="_blank" rel="noopener noreferrer">
         <Image
           src="/productslug/dnb.PNG"
           alt="D&B"
@@ -326,6 +332,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           height={40}
           className="w-[114px] h-[40px] object-contain"
         />
+        </Link>
       </div>
       {isReviewModalOpen && (
         <AddReviewModal

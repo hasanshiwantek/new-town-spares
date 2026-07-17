@@ -20,7 +20,7 @@ export default async function ProductsPage({
   const brands = await fetchBrands();
 
   return (
-    <div className="">
+    <div>
       <ProductsClientWrapper
         categories={categories}
         brands={brands}

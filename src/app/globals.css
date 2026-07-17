@@ -4,9 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-
   --font-poppins: "Poppins", sans-serif;
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -316,17 +315,21 @@ img {
 }
 
 .review-scroll::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg,
-      rgba(229, 73, 73, 0.4) 0%,
-      rgba(229, 73, 73, 0.6) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(229, 73, 73, 0.4) 0%,
+    rgba(229, 73, 73, 0.6) 100%
+  );
   border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 .review-scroll::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg,
-      rgba(229, 73, 73, 0.6) 0%,
-      rgba(229, 73, 73, 0.8) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(229, 73, 73, 0.6) 0%,
+    rgba(229, 73, 73, 0.8) 100%
+  );
 }
 
 /* Tailwind Breakpoints reference:
@@ -355,7 +358,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h1-secondary,
   .h1-secondary-medium {
     font-size: 24px;
@@ -369,7 +371,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h1-secondary,
   .h1-secondary-medium {
     font-size: 28px;
@@ -383,7 +384,6 @@ img {
 }
 
 @media (min-width: 1280px) {
-
   .h1-secondary,
   .h1-secondary-medium {
     font-size: 32px;
@@ -397,7 +397,6 @@ img {
 }
 
 @media (min-width: 1440px) {
-
   .h1-secondary,
   .h1-secondary-medium {
     font-size: 36px;
@@ -439,7 +438,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h2-secondary,
   .h2-medium,
   .h2-bold,
@@ -449,7 +447,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h2-secondary,
   .h2-medium,
   .h2-bold {
@@ -457,8 +454,70 @@ img {
   }
 }
 
-@media (min-width: 1280px) {
+/* Faqs Design */
+.faqs-section {
+  width: 100%;
+}
 
+.faqs-section .accordion input {
+  display: none;
+}
+
+.faqs-section h2 {
+  border: none;
+  text-transform: none;
+  font-size: 24px;
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #333;
+  font-weight: 300;
+}
+
+.faqs-section .accordion h3 label {
+  display: block;
+  padding: 12px;
+  background: #f1f1f1;
+  color: #000;
+  cursor: pointer;
+  margin-bottom: 2px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.faqs-section .accordion h3 label:hover {
+  background: #FF482E;
+  color: #fff;
+}
+
+.faqs-section .accordion input:checked + h3 label {
+  background: #FF482E;
+  color: #fff;
+}
+
+.faqs-section .accordion .content {
+  max-height: 0;
+  overflow: hidden;
+  background: #fff;
+  transition: max-height 0.3s ease;
+  padding: 0 12px;
+}
+
+.faqs-section .accordion input:checked + h3 + .content {
+  max-height: 200px;
+  padding: 10px 12px;
+}
+
+.faqs-section .accordion h3 {
+  font-weight: 700;
+  line-height: inherit;
+  margin: 0;
+  font-size: 15px;
+}
+
+@media (min-width: 1280px) {
   .h2-secondary,
   .h2-medium,
   .h2-bold,
@@ -468,7 +527,6 @@ img {
 }
 
 @media (min-width: 1440px) {
-
   .h2-secondary,
   .h2-medium,
   .h2-bold,
@@ -508,7 +566,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h3-secondary,
   .h3-regular,
   .h3-24px-medium .h3-24px-regular {
@@ -517,7 +574,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h3-secondary,
   .h3-regular,
   .h3-24px-medium,
@@ -527,7 +583,6 @@ img {
 }
 
 @media (min-width: 1280px) {
-
   .h3-secondary,
   .h3-regular,
   .h3-24px-medium,
@@ -537,7 +592,6 @@ img {
 }
 
 @media (min-width: 1440px) {
-
   .h3-secondary,
   .h3-regular,
   .h3-24px-medium,
@@ -586,7 +640,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h4-bold,
   .h4-medium,
   .h4-regular,
@@ -596,7 +649,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h4-bold,
   .h4-medium,
   .h4-regular,
@@ -606,7 +658,6 @@ img {
 }
 
 @media (min-width: 1280px) {
-
   .h4-bold,
   .h4-medium,
   .h4-regular,
@@ -616,7 +667,6 @@ img {
 }
 
 @media (min-width: 1440px) {
-
   .h4-bold,
   .h4-medium,
   .h4-regular,
@@ -668,7 +718,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h5-bold,
   .h5-medium,
   .h5-regular,
@@ -680,7 +729,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h5-bold,
   .h5-medium,
   .h5-regular,
@@ -692,7 +740,6 @@ img {
 }
 
 @media (min-width: 1280px) {
-
   .h5-bold,
   .h5-medium,
   .h5-regular,
@@ -705,7 +752,6 @@ img {
 }
 
 @media (min-width: 1440px) {
-
   .h5-bold,
   .h5-medium,
   .h5-regular,
@@ -760,7 +806,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h6-bold,
   .h6-medium,
   .h6-medium-color,
@@ -772,7 +817,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h6-bold,
   .h6-medium,
   .h6-medium-color,
@@ -784,7 +828,6 @@ img {
 }
 
 @media (min-width: 1280px) {
-
   .h6-bold,
   .h6-medium,
   .h6-medium-color,
@@ -796,7 +839,6 @@ img {
 }
 
 @media (min-width: 1440px) {
-
   .h6-bold,
   .h6-medium,
   .h6-medium-color,
@@ -823,7 +865,6 @@ img {
 }
 
 @media (min-width: 640px) {
-
   .h7-regular,
   .h7-16-px-regular {
     font-size: 12px;
@@ -831,7 +872,6 @@ img {
 }
 
 @media (min-width: 1024px) {
-
   .h7-regular,
   .h7-16-px-regular {
     font-size: 12px;
@@ -839,7 +879,6 @@ img {
 }
 
 @media (min-width: 1280px) {
-
   .h7-regular,
   .h7-16-px-regular {
     font-size: 13.5px;
@@ -854,7 +893,6 @@ img {
 }
 
 @layer utilities {
-
   /* ✅ Fade animations */
   .fade-in-start {
     opacity: 0;
@@ -922,14 +960,8 @@ img {
   }
 }
 
-
-
-
-
-
 /* 
 overview description */
-
 
 .description-content {
   color: #4a4a4a;
@@ -970,7 +1002,6 @@ overview description */
 
 /* sm breakpoint (640px) */
 @media (min-width: 640px) {
-
   .description-content h1,
   .description-content h2,
   .description-content h3,
@@ -987,7 +1018,6 @@ overview description */
 
 /* Lg breakpoint (1024px) */
 @media (min-width: 1024px) {
-
   .description-content h1,
   .description-content h2,
   .description-content h3,
