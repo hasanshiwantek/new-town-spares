@@ -18,7 +18,7 @@ const Banner = () => {
   const auth = useAppSelector((state: RootState) => state?.auth);
   const isLoggedIn = Boolean(auth?.isAuthenticated);
   const dispatch = useAppDispatch();
-  const { loginLoading } = useAppSelector((state: RootState) => state?.auth);
+  const { loginloading } = useAppSelector((state: RootState) => state?.auth);
   const {
     register,
     handleSubmit,
@@ -87,8 +87,8 @@ const Banner = () => {
             />
 
             <div className="flex flex-col min-[551px]:flex-row-reverse min-[551px]:items-center min-[551px]:justify-between min-[801px]:flex-col gap-[21px] min-[801px]:gap-0">
-              <button disabled={loginLoading} type="submit" className="bg-[#FF482E] text-white text-[14px] font-light h-[39px] rounded min-[551px]:w-[230px] min-[801px]:w-full min-[801px]:mb-[21px] hover:bg-orange-700 transition" >
-                {loginLoading ? "Loading..." : "Sign in"}
+              <button disabled={loginloading} type="submit" className="bg-[#FF482E] text-white text-[14px] font-light h-[39px] rounded min-[551px]:w-[230px] min-[801px]:w-full min-[801px]:mb-[21px] hover:bg-orange-700 transition" >
+                {loginloading ? "Loading..." : "Sign in"}
               </button>
 
               <div className="flex flex-row gap-5 min-[801px]:flex-col min-[801px]:items-center min-[801px]:gap-0 min-[801px]:justify-center">

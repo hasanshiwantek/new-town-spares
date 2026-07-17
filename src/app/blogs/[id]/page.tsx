@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import navlogo from "@/assets/navlogo.svg";
 
 const SITE_NAME = "New Town Spares";
-const BASE_URL = "https://nts-ecommerce.vercel.app";
+const BASE_URL = "https://new-town-spares.vercel.app";
 const TWITTER_HANDLE = "@newtownspares"; 
 const LOGO_URL = `${BASE_URL}/${navlogo}`; 
 

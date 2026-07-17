@@ -14,7 +14,7 @@ interface BreadcrumbProps {
 }
 
 const Breadcrumb = ({ items }: BreadcrumbProps) => {
-  const BASE_URL = "https://nts-ecommerce.vercel.app";
+  const BASE_URL = "https://new-town-spares.vercel.app";
 
   // Generate JSON-LD structured data for SEO
   const breadcrumbJsonLd = {
