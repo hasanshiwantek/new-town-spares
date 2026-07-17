@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: "404 - Page Not Found | New Town Spares",
     description:
       "The page you're looking for doesn't exist. Return to New Town Spares homepage.",
-    url: "https://nts-ecommerce.vercel.app/404",
+    url: "https://new-town-spares.vercel.app/404",
     siteName: "New Town Spares",
     type: "website",
   },

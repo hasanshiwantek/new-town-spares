@@ -1,23 +1,11 @@
 import type { Metadata } from "next";
 import LayoutWrapper from "./components/layout/LayoutWrapper";
 import DynamicFavicon from "@/components/DynamicFavicon";
-import { Inter, Jost, Poppins } from "next/font/google";
-import localFont from "next/font/local";
+import { Poppins } from "next/font/google";
 import ScriptInjector from "@/components/ScriptInjector";
 import "./globals.css";
 import "../styles/blog/api-content.css";
-const jost = Jost({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  display: "swap",
-  preload: true,
-});
 
-// Live (newtownspares.com) loads ONLY Poppins Light (300) and lets the browser
-// synthesize bolder weights from it — so its whole baseline reads as 300. We mirror
-// that exactly: load only 300, and CSS font-matching makes 400/500 fall to 300 while
-// 600/700 get synthesized bold. This keeps our text the same visual weight as live
-// site-wide, without per-page tweaks. (See CLAUDE.md "Font weight".)
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300"],
@@ -25,72 +13,8 @@ const poppins = Poppins({
   preload: true,
 });
 
-// ✅ Recoleta (400–700) - Loading multiple weights
-// const recoleta = localFont({
-//   src: [
-//     {
-//       // 🚨 Ensure file name matches exactly (with space)
-//       path: "./fonts/Recoleta-regular.woff2",
-//       weight: "400", // Regular
-//       style: "normal",
-//     },
-//     {
-//       // 🚨 Ensure file name matches exactly (with space)
-//       path: "./fonts/Recoleta-medium.woff2",
-//       weight: "500", // Medium
-//       style: "normal",
-//     },
-//     {
-//       // 🚨 Ensure file name matches exactly (with space)
-//       path: "./fonts/Recoleta-semibold.woff2",
-//       weight: "600", // SemiBold
-//       style: "normal",
-//     },
-//     {
-//       // 🚨 Ensure file name matches exactly (with space)
-//       path: "./fonts/Recoleta-bold.woff2",
-//       weight: "700", // Bold
-//       style: "normal",
-//     },
-//   ],
-//   variable: "--font-recoleta",
-// });
-
-// ✅ Recoleta (400–700) - Loading multiple weights
-const gilroy = localFont({
-  src: [
-    {
-      // 🚨 Ensure file name matches exactly (with space)
-      path: "./fonts/Gilroy-Regular.ttf",
-      weight: "400", // Regular
-      style: "normal",
-    },
-    {
-      // 🚨 Ensure file name matches exactly (with space)
-      path: "./fonts/Gilroy-Medium.ttf",
-      weight: "500", // Medium
-      style: "normal",
-    },
-    {
-      // 🚨 Ensure file name matches exactly (with space)
-      path: "./fonts/Gilroy-SemiBold.ttf",
-      weight: "600", // SemiBold
-      style: "normal",
-    },
-    {
-      // 🚨 Ensure file name matches exactly (with space)
-      path: "./fonts/Gilroy-Bold.ttf",
-      weight: "700", // Bold
-      style: "normal",
-    },
-  ],
-  variable: "--font-recoleta",
-  display: "swap",
-  preload: true,
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL("https://nts-ecommerce.vercel.app"),
+  metadataBase: new URL("https://new-town-spares.vercel.app"),
   title: {
     default: "New Town Spares",
     template: "%s | New Town Spares",
@@ -108,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://nts-ecommerce.vercel.app",
+    url: "https://new-town-spares.vercel.app",
     siteName: "New Town Spares",
     title: "New Town Spares – Quality Electronics & Accessories",
     description:
@@ -145,8 +69,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <LayoutWrapper>
-          <DynamicFavicon />
           <ScriptInjector />
+          <DynamicFavicon />
           {children}
         </LayoutWrapper>
       </body>

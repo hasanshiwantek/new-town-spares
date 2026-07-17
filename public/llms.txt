@@ -1,0 +1,38 @@
+# New Town Spares: IT Hardware, Servers, Networking & Enterprise Solutions
+
+> Buy servers, networking equipment, storage devices, computer parts, and enterprise IT hardware. Browse products, brands, categories, and technical resources.
+
+Generated for AI assistants and large language models.
+
+## Pages
+
+- [Home](https://new-town-spares.vercel.app/)
+- [About Us](https://new-town-spares.vercel.app/about-us)
+- [Products](https://new-town-spares.vercel.app/products)
+- [Categories](https://new-town-spares.vercel.app/category)
+- [Brands](https://new-town-spares.vercel.app/brands)
+- [Advanced Search](https://new-town-spares.vercel.app/advanced-search)
+- [Contact Us](https://new-town-spares.vercel.app/contact-us)
+- [Blogs](https://new-town-spares.vercel.app/blogs)
+- [Terms & Conditions](https://new-town-spares.vercel.app/terms-conditions)
+- [Privacy Policy](https://new-town-spares.vercel.app/privacy-Policy)
+- [Shipping Policy](https://new-town-spares.vercel.app/shipping-policy)
+- [Return Policy](https://new-town-spares.vercel.app/return-Policy)
+
+## Product Categories
+
+- Servers
+- Networking Equipment
+- Storage Solutions
+- Computer Parts
+- Accessories
+- Enterprise Hardware
+
+## Resources
+
+- [Sitemap](https://new-town-spares.vercel.app/sitemap.xml)
+- [Robots](https://new-town-spares.vercel.app/robots.txt)
+
+## Purpose
+
+New Town Spares provides enterprise IT hardware, networking products, storage solutions, replacement parts, and accessories for businesses and IT professionals.
