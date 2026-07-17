@@ -44,11 +44,11 @@ const MessageList = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {messages.map((msg: any) => (
         <div key={msg.id} className="flex items-center gap-5">
           {/* Message Box */}
-          <div className="relative w-[500px] border border-[#E6E6E6] bg-[#E6E6E6] px-6 py-6">
+          <div className="relative w-[570px] border border-[#E6E6E6] bg-[#E6E6E6] px-5 py-5">
             {/* Arrow */}
             <div className="absolute -right-[8px] top-1/2 h-4 w-4 -translate-y-1/2 rotate-45 border-r border-t border-[#E6E6E6] bg-[#E6E6E6]" />
 
@@ -56,19 +56,19 @@ const MessageList = () => {
               {formatDate(msg.createdAt)}
             </p>
 
-            <h3 className="mt-3 text-[15px] font-light text-[#333333]">
+            <h3 className="mt-2 text-[15px] font-light text-[#333333]">
               {msg.subject}
             </h3>
 
-            <p className="mt-4 text-[14px] text-[#333333]">
+            <p className="mt-2 text-[14px] text-[#333333]">
               {msg.message}
             </p>
           </div>
 
           {/* User Icon */}
-          <div className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border border-[#E6E6E6] bg-[#E6E6E6]">
+          <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full border border-[#E6E6E6] bg-[#E6E6E6]">
             <UserRound
-              size={12}
+              size={15}
               strokeWidth={2.5}
               className="text-[#ff4a32]"
             />

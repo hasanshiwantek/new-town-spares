@@ -16,7 +16,7 @@ const Page = () => {
     dispatch(fetchUserOrders());
   }, []);
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full ">
       {orders.length > 0 ? (
         <>
           <div className="mx-auto w-full max-w-[600px]  px-4 lg:px-0">
@@ -24,7 +24,7 @@ const Page = () => {
               <MessageList />
             </div>
 
-            <div className="mt-12">
+            <div className="mt-7">
               <Messages />
             </div>
           </div>
