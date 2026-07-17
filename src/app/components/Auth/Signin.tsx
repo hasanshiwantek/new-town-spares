@@ -30,7 +30,7 @@ const SigninPage = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePassword = () => setShowPassword((prev) => !prev);
-  const { loginLoading } = useAppSelector((state: RootState) => state?.auth);
+  const { loginloading } = useAppSelector((state: RootState) => state?.auth);
 
   const onSubmit = async (data: SigninFormValues) => {
     try {
@@ -163,7 +163,7 @@ const SigninPage = () => {
                 >
                   Forgot your password?
                 </Link>
-                {loginLoading ? (
+                {loginloading ? (
                   <div className="w-8 h-8 border-4 border-t-transparent border-[#FF482E] rounded-full animate-spin" />
                 ) : (
                   <Button
