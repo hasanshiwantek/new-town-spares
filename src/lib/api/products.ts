@@ -1,11 +1,147 @@
+// // lib/api/products.ts
+// import { baseURL, storeId } from "../axiosInstance";
+// import serverAxios from "../serverAxios";
+// import { redirect } from "next/navigation";
+// export const fetchProducts = async () => {
+//   try {
+//     const res = await fetch(`${baseURL}web/products/products`, {
+//       next: { revalidate: 60 }, // ✅ revalidate every 60 seconds
+//       headers: {
+//         storeId: storeId,
+//       },
+//     });
+
+//     if (!res.ok) throw new Error("Failed to fetch products");
+//     const data = await res.json();
+//     return data?.data || [];
+//   } catch (error) {
+//     console.error("Failed to fetch products:", error);
+//     throw new Error("Failed to load products");
+//   }
+// };
+// export const fetchProductBySlugAndUrl = async (slug?: string) => {
+
+//   if (!slug) return
+//   try {
+//     const res = await fetch(`${baseURL}web/products/get-product-by-url${slug}`, {
+//       cache: "no-store",
+//       headers: { storeId: storeId },
+//     });
+
+//     if (!res.ok) {
+//       console.error(`❌ API failed for slug: ${slug}, status: ${res.status}`);
+//       return null;
+//     }
+
+//     const data = await res.json();
+//     if (!data?.data) {
+//       console.warn(`⚠️ No product found for slug: ${slug}`);
+//       return null;
+//     }
+
+//     return data.data;
+//   } catch (err) {
+//     console.error("🚨 Error fetching product:", err);
+//     return null; // always return null, not throw
+//   }
+// };
+// // Get single product by slug (always fresh)
+// export const fetchProductBySlug = async (slug: string) => {
+//   try {
+//     const res = await fetch(`${baseURL}web/products/get-product/${slug}`, {
+//       cache: "no-store",
+//       headers: { storeId: storeId },
+//     });
+
+//     if (!res.ok) {
+//       console.error(`❌ API failed for slug: ${slug}, status: ${res.status}`);
+//       return null;
+//     }
+
+//     const data = await res.json();
+//     if (!data?.data) {
+//       console.warn(`⚠️ No product found for slug: ${slug}`);
+//       return null;
+//     }
+
+//     return data.data;
+//   } catch (err) {
+//     return null; // always return null, not throw
+//   }
+// };
+
+// // lib/api/products.ts
+// export async function fetchFilteredProducts(filters: {
+//   page?: number;
+//   pageSize?: number;
+//   categoryIds?: number[];
+//   brandId?: number[];
+//   minPrice?: number;
+//   maxPrice?: number;
+//   sortBy?: string;
+// }) {
+//   const params = new URLSearchParams();
+
+//   if (filters.page) params.append("page", filters.page.toString());
+//   if (filters.pageSize) params.append("pageSize", filters.pageSize.toString());
+//   if (filters.categoryIds && filters.categoryIds.length > 0)
+//     params.append("categoryIds", filters.categoryIds.join(","));
+//   if (filters.brandId) params.append("brandId", filters.brandId.toString());
+//   if (filters.minPrice) params.append("minPrice", filters.minPrice.toString());
+//   if (filters.maxPrice) params.append("maxPrice", filters.maxPrice.toString());
+//   if (filters.sortBy) params.append("sortBy", filters.sortBy);
+
+//   const url = `${baseURL}web/categories/category-filter?${params.toString()}`;
+
+//   const res = await fetch(url, {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       storeId: storeId,
+//     },
+//     cache: "no-store", // or "no-cache" for fresh data
+//   });
+
+//   if (!res.ok) {
+//     throw new Error("Failed to fetch filtered products");
+//   }
+
+//   const data = await res.json();
+//   console.log("Filtered Data:", data);
+
+//   return data; // {status, message, data: []}
+// }
+
+
+// export const getBlogByIdServer = async (id: string) => {
+//   try {
+//     const res = await fetch(`${baseURL}web/blogs/blog-posts/${id}`, {
+//       next: { revalidate: 3600 }, // Example: revalidate every hour
+//       headers: {
+//         storeId: storeId,
+//       },
+//     });
+
+//     if (!res.ok) {
+//       throw new Error("Failed to fetch blog with id");
+//     }
+
+//     const data = await res.json();
+//     return data?.data || [];
+//   } catch (error) {
+//     console.error(`Failed to fetch blog post with ID ${id}:`, error);
+//     throw new Error("Failed to load blog post");
+//   }
+// };
 // lib/api/products.ts
 import { baseURL, storeId } from "../axiosInstance";
 import serverAxios from "../serverAxios";
 import { redirect } from "next/navigation";
+// const baseURL = process.env.NEXT_PUBLIC_API_URL;
 export const fetchProducts = async () => {
   try {
     const res = await fetch(`${baseURL}web/products/products`, {
-      next: { revalidate: 60 }, // ✅ revalidate every 60 seconds
+      next: { revalidate: 10 }, // ✅ revalidate every 10 seconds
       headers: {
         storeId: storeId,
       },
@@ -15,12 +151,12 @@ export const fetchProducts = async () => {
     const data = await res.json();
     return data?.data || [];
   } catch (error) {
-    console.error("Failed to fetch products:", error);
     throw new Error("Failed to load products");
   }
 };
-export const fetchProductBySlugAndUrl = async (slug?: string) => {
 
+// Get single product by slug (always fresh)
+export const fetchProductBySlugAndUrl = async (slug?: string) => {
   if (!slug) return
   try {
     const res = await fetch(`${baseURL}web/products/get-product-by-url${slug}`, {
@@ -28,8 +164,7 @@ export const fetchProductBySlugAndUrl = async (slug?: string) => {
       headers: { storeId: storeId },
     });
 
-    if (!res.ok) {
-      console.error(`❌ API failed for slug: ${slug}, status: ${res.status}`);
+    if (!res?.ok) {
       return null;
     }
 
@@ -41,11 +176,10 @@ export const fetchProductBySlugAndUrl = async (slug?: string) => {
 
     return data.data;
   } catch (err) {
-    console.error("🚨 Error fetching product:", err);
+
     return null; // always return null, not throw
   }
 };
-// Get single product by slug (always fresh)
 export const fetchProductBySlug = async (slug: string) => {
   try {
     const res = await fetch(`${baseURL}web/products/get-product/${slug}`, {
@@ -54,7 +188,7 @@ export const fetchProductBySlug = async (slug: string) => {
     });
 
     if (!res.ok) {
-      console.error(`❌ API failed for slug: ${slug}, status: ${res.status}`);
+
       return null;
     }
 
@@ -66,6 +200,7 @@ export const fetchProductBySlug = async (slug: string) => {
 
     return data.data;
   } catch (err) {
+
     return null; // always return null, not throw
   }
 };
@@ -107,7 +242,6 @@ export async function fetchFilteredProducts(filters: {
   }
 
   const data = await res.json();
-  console.log("Filtered Data:", data);
 
   return data; // {status, message, data: []}
 }
@@ -129,7 +263,36 @@ export const getBlogByIdServer = async (id: string) => {
     const data = await res.json();
     return data?.data || [];
   } catch (error) {
-    console.error(`Failed to fetch blog post with ID ${id}:`, error);
     throw new Error("Failed to load blog post");
+  }
+};
+export const fetchWebPages = async (slug?: string) => {
+  if (!slug) return
+  try {
+    const normalizeSlug = (s: string) => s?.replace(/\/+$/, '');
+
+    const res = await fetch(`${baseURL}web/webpages/web-pages?page=${1}&perPage=${100}`, {
+      cache: "no-store",
+      headers: { storeId: storeId },
+    });
+
+    if (!res?.ok) {
+      return null;
+    }
+
+    const data = await res.json();
+
+    // const filteredPages = data?.data?.find((page: any) => page?.slugWithUrl === slug);
+    const filteredPages = data?.data?.find(
+      (page: any) => normalizeSlug(page?.slugWithUrl) === normalizeSlug(slug)
+    );
+
+    if (!data?.data) {
+      return null;
+    }
+
+    return filteredPages;
+  } catch (err) {
+    return null; // always return null, not throw
   }
 };

@@ -1,46 +1,74 @@
-import ProductCard from "@/app/components/Product/ProductCard";
-import ProductExtras from "@/app/components/Product/ProductExtras";
-import ProductOverview from "@/app/components/Product/ProductOverview";
-import { fetchProductBySlugAndUrl, fetchProducts } from "@/lib/api/products";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import Script from "next/script";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
+import { fetchProductBySlugAndUrl, fetchProducts, fetchWebPages, } from "@/lib/api/products";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import Script from "next/script";
+import ProductCard from "@/app/components/Product/ProductCard";
 import ProductRecent from "../components/Product/ProductRecent";
-// import { useAppSelector } from "@/hooks/useReduxHooks";
 
+
+const DynamicWebPage = dynamic(
+  () => import("../components/Product/DynamicWebPage")
+);
+const ProductExtras = dynamic(
+  () => import("../components/Product/ProductExtras")
+);
+const ProductOverview = dynamic(
+  () => import("../components/Product/ProductOverview")
+);
 // ✅ Dynamic metadata for SEO
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params; // <-- await here
+  const { slug } = await params;
   const headersList = await headers();
 
-  // ✅ Most reliable - Next.js sets this automatically
-  const fullUrl = headersList.get("x-full-url");
   const pathname: any = headersList.get("x-pathname");
-
   const product = await fetchProductBySlugAndUrl(pathname);
+  const webPages = await fetchWebPages(pathname);
 
-  if (!product) {
-    return {
-      title: "Product Not Found | New Town Spares",
-      description: "This product could not be found.",
-    };
+  if (!product && !webPages) {
+    notFound();
   }
 
-  const url = `https://nts-ecommerce.vercel.app/${slug}`;
+  const url = `https://new-town-spares.vercel.app/${slug}`;
 
+  if (webPages) {
+    return {
+      title: {
+        absolute: webPages.pageTitle || webPages.pageName,  // ← changed
+      },
+      description:
+        webPages.metaDescription?.substring(0, 160) ||
+        webPages.pageName,
+      keywords: webPages.metaKeywords || webPages.searchKeywords || webPages.pageName,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title: webPages.pageTitle || webPages.pageName,
+        description: webPages.metaDescription || webPages.pageName,
+        url,
+        siteName: "New Town Spares",
+        type: "website",
+      },
+      robots: {
+        index: true,
+        follow: true,
+      },
+    };
+  }
   return {
-    title: `${product.pageTitle || product.name} | New Town Spares`,
+    title: {
+      absolute: product.pageTitle || product.name,  // ← changed
+    },
     description:
-      product.metaDescription?.substring(0, 160) ||
-      product.description?.substring(0, 160) ||
-      "Buy quality products at New Town Spares.",
+      product.metaDescription?.substring(0, 160),
     keywords:
       product.searchKeywords ||
       `${product.name}, ${product.brand?.name}, New Town Spares`,
@@ -49,9 +77,9 @@ export async function generateMetadata({
     },
     openGraph: {
       title: product.pageTitle || product.name,
-      description: product.metaDescription || product.description,
+      description: product.metaDescription,
       url,
-      siteName: "New Town Spares",
+      siteName: "",
       images: [
         {
           url: product.image?.[0]?.path || "/default-product-image.svg",
@@ -60,12 +88,12 @@ export async function generateMetadata({
           alt: product.pageTitle || product.name,
         },
       ],
-      type: "website", // ✅ cast since Next.js types don’t allow "product"
+      type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title: product.pageTitle || product.name,
-      description: product.metaDescription || product.description,
+      description: product.metaDescription,
       images: [product.image?.[0]?.path || "/default-product-image.svg"],
     },
     robots: {
@@ -89,102 +117,97 @@ export default async function ProductPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params; // <-- await here
   const headersList = await headers();
-  // const recentProducts = useAppSelector((state: any) => state.recent.items);
-  // ✅ Most reliable - Next.js sets this automatically
-  const fullUrl = headersList.get("x-full-url");
+  //  Most reliable - Next.js sets this automatically
   const pathname: any = headersList.get("x-pathname");
 
-  // const product = await fetchProductBySlugAndUrl(pathname);
+  //  Parallel data fetching
+  const product = await fetchProductBySlugAndUrl(pathname);
+  const webPages = await fetchWebPages(pathname);
+  const products = await fetchProducts()
 
-  // 🔥 Parallel data fetching
-  const [product, products] = await Promise.all([
-    // fetchProductBySlug(slug),
-    fetchProductBySlugAndUrl(pathname),
-    fetchProducts(),
-  ]);
-  if (!product) {
+  if (!product && !webPages) {
     notFound();
   }
   const backendSchema = product?.schema;
   return (
     <>
       {/* ✅ Structured Data (SEO safe) */}
-      {backendSchema && (
-        <Script
-          id="product-jsonld"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(backendSchema),
-          }}
-          strategy="afterInteractive"
-        />
-      )}
+      {webPages ? <DynamicWebPage webPages={webPages} /> : <div>
+        {backendSchema && (
+          <Script
+            id="product-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(backendSchema),
+            }}
+            strategy="afterInteractive"
+          />
+        )}
 
-      <main role="main">
-        <article>
-          {/* Breadcrumb */}
-          <nav
-            aria-label="breadcrumb"
-            className="mb-[42px] leading-[24px]"
-          >
-            <Link href={"/"} className="underline">
-              <span className="text-[#333333] text-[13px]">Home</span>
-            </Link>
-            {product?.categoryHierarchy?.map((cat: any) => (
-              <span key={cat.id} className="whitespace-nowrap">
-                <span
-                  className="mt-2 mx-3 text-gray-400 text-[13px]"
-                  aria-hidden="true"
-                >
-                  /
+        <main role="main">
+          <article>
+            {/* Breadcrumb */}
+            <nav
+              aria-label="breadcrumb"
+              className="mb-[42px] leading-[24px]"
+            >
+              <Link href={"/"} className="underline">
+                <span className="text-[#333333] text-[13px]">Home</span>
+              </Link>
+              {product?.categoryHierarchy?.map((cat: any) => (
+                <span key={cat.id} className="whitespace-nowrap">
+                  <span
+                    className="mt-2 mx-3 text-gray-400 text-[13px]"
+                    aria-hidden="true"
+                  >
+                    /
+                  </span>
+                  <Link
+                    href={`/category/${cat?.slug}`}
+                    className="text-[13px] text-[#333333] underline"
+                    itemProp="name"
+                  >
+                    {cat.name}
+                  </Link>
                 </span>
-                <Link
-                  href={`/category/${cat?.slug}`}
-                  className="text-[13px] text-[#333333] underline"
-                  itemProp="name"
-                >
-                  {cat.name}
-                </Link>
-              </span>
-            ))}
-            {product?.name && (
-              <span>
-                <span
-                  className="mt-2 mx-3 text-gray-400 text-[13px]"
-                  aria-hidden="true"
-                >
-                  /
+              ))}
+              {product?.name && (
+                <span>
+                  <span
+                    className="mt-2 mx-3 text-gray-400 text-[13px]"
+                    aria-hidden="true"
+                  >
+                    /
+                  </span>
+                  <span className="text-[13px] text-[#333333]">
+                    {product?.name}
+                  </span>
                 </span>
-                <span className="text-[13px] text-[#333333]">
-                  {product.name}
-                </span>
-              </span>
-            )}
-            <hr className="mx-[-5%] w-[calc(100%+10%)] min-[801px]:mx-[-84px] min-[801px]:w-[calc(100%+168px)] mt-4" />
-          </nav>
-          <ProductCard product={product} />
-          <ProductOverview product={product} />
+              )}
+              <hr className="mx-[-5%] w-[calc(100%+10%)] min-[801px]:mx-[-84px] min-[801px]:w-[calc(100%+168px)] mt-4" />
+            </nav>
+            <ProductCard product={product} />
+            <ProductOverview product={product} />
 
-          {/* Client-side component */}
-          <Suspense
-            fallback={
-              <div className="py-10 text-center text-sm text-gray-500">
-                Loading...
-              </div>
-            }
-          >
-            {/* <ProductExtras products={product} /> */}
-            {product?.relatedProductsEnabled && (
-              <ProductExtras
-                products={products?.filter((p: any) => p.id !== product.id)}
-              />
-            )}
-            <ProductRecent productId={product?.id} />
-          </Suspense>
-        </article>
-      </main>
+            {/* Client-side component */}
+            <Suspense
+              fallback={
+                <div className="py-10 text-center text-sm text-gray-500">
+                  Loading...
+                </div>
+              }
+            >
+              x              {product?.relatedProductsEnabled && (
+                <ProductExtras
+                  products={products?.filter((p: any) => p.id !== product.id)}
+                />
+              )}
+              <ProductRecent productId={product?.id} />
+            </Suspense>
+          </article>
+        </main>
+      </div>}
     </>
   );
 }

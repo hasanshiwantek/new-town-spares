@@ -6,7 +6,6 @@ export const getBlogs = createAsyncThunk(
   async ({ page, perPage }: any, thunkAPI) => {
     try {
       const res = await axiosInstance.get(`web/blogs/blog-posts?page=${page}&perPage=${perPage}`);
-      console.log("Blogs data: ", res.data);
 
       return res.data;
     } catch (err: any) {
@@ -38,8 +37,6 @@ export const getBlogById = createAsyncThunk(
   async ({ id }: { id: any }, thunkAPI) => {
     try {
       const res = await axiosInstance.get(`web/blogs/blog-posts/${id}`);
-      console.log("Blogs data by id: ", res.data);
-
       return res.data;
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

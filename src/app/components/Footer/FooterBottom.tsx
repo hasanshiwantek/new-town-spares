@@ -2,37 +2,57 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchCategories } from "@/lib/api/category";
-import Image from "next/image";
-import FooterSkeleton from "../loader/FooterSkeleton";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getWebPages } from "@/redux/slices/storeFrontSlice";
-import {getBrands} from "@/redux/slices/homeSlice";
+import { getBrands } from "@/redux/slices/homeSlice";
+import { customerProfile, logout } from "@/redux/slices/authSlice";
+import { toast } from "react-toastify";
+import { RootState } from "@/redux/store";
 interface Category {
   id: number;
   name: string;
   slug: string;
   subcategories?: Category[];
 }
+const poppinsFont = "Poppins, sans-serif";
 
 const FooterBottom = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
   const dispatch = useAppDispatch();
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const paramsToken = searchParams.get("token");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [email, setEmail] = useState("");
+  const auth = useAppSelector((state: RootState) => state?.auth);
+
+  const [token, setToken] = useState<string | null>(null);
+
   const { newsletterLoading, newsletterSuccess, newsletterError } =
     useAppSelector((state: any) => state.contact);
   const { webPages, error, loading } = useAppSelector(
     (state: any) => state.storeFront,
   );
+  const pagesList = webPages?.data || [];
+  const visiblePages = pagesList?.filter((page: any) => !page.restrictToCustomersOnly || token)
+    .filter((item: any) => item?.showInNavigation);
   const { getBrand } = useAppSelector(
-  (state: any) => state.home
-);
+    (state: any) => state.home
+  );
   const handleSelect = (url: string) => {
     router.push(url);
   };
-  const poppinsFont = "Poppins, sans-serif";
+  const handleLogout = () => {
+    const confirm = window.confirm("Confirm Logout?");
+    if (!confirm) {
+      return;
+    } else {
+      dispatch(logout());
+      toast.success("Logged out successfully!");
+      router.replace("/auth/login");
+    }
+  };
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -46,11 +66,31 @@ const FooterBottom = () => {
     loadCategories();
   }, []); // ✅ run once on mount
   useEffect(() => {
+    const user = localStorage.getItem("persist:auth");
+    const parsedAuth = user ? JSON.parse(user) : null;
+    const t = parsedAuth?.token ? JSON.parse(parsedAuth.token) : null;
+    setToken(t);
+  }, []);
+  useEffect(() => {
     dispatch(getWebPages({ page: 1, perPage: 100 }));
     dispatch(getBrands())
   }, [dispatch]);
 
-  
+  useEffect(() => {
+    if (!paramsToken) return;
+    const login = async () => {
+      const auth = {
+        token: JSON.stringify(paramsToken),
+      };
+      localStorage.setItem("persist:auth", JSON.stringify(auth));
+      const result = await dispatch(customerProfile());
+      if (customerProfile.fulfilled.match(result)) {
+        // dispatch(fetchCartList());
+        window.location.href = "/my-account/orders";
+      }
+    };
+    login();
+  }, [paramsToken, dispatch, router]);
   return (
     <React.Fragment>
       <div className="w-full">
@@ -145,42 +185,24 @@ const FooterBottom = () => {
                 <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
                   Pages
                 </h4>
-
-                {/* <ul className="space-y-2 text-[#FAFAFA]">
-                  <li>
-                    <Link href="/payment-options">Payment Options</Link>
-                  </li>
-                  <li>
-                    <Link href="/privacyPolicy">Privacy Policy</Link>
-                  </li>
-                  <li>
-                    <Link href="/shipping-policy">Shipping Policy</Link>
-                  </li>
-                  <li>
-                    <Link href="/returnPolicy">Return Policy</Link>
-                  </li>
-                  <li>
-                    <Link href="/terms-conditions">Terms & Conditions</Link>
-                  </li>
-                  <li>
-                    <Link href="/about-us">About Us</Link>
-                  </li>
-                  <li>
-                    <Link href="/contact-us">Contact Us</Link>
-                  </li>
-                  <li>
-                    <Link href="/blogs">Blog</Link>
-                  </li>
-                  <li>
-                    <Link href="/sitemap">Sitemap</Link>
-                  </li>
-                </ul> */}
                 <ul className="space-y-2 text-[#FAFAFA]">
-                  {webPages?.data?.map((page: any) => (
+                  {visiblePages?.map((page: any) => (
                     <li key={page.id}>
-                      <Link href={page.slugWithUrl || page.slug || "#"}>
-                        {page.pageName}
-                      </Link>
+                      {page?.pageType == "2" ? (
+                        <Link
+                          href={page.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {page.pageName}
+                        </Link>
+                      ) : (
+                        <Link
+                          href={page.slugWithUrl}
+                        >
+                          {page.pageName}
+                        </Link>
+                      )}
                     </li>
                   ))}
                   <li>
@@ -211,45 +233,15 @@ const FooterBottom = () => {
                 <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
                   Brands
                 </h4>
-
-                {/* <ul className="space-y-2 text-[#FAFAFA]">
-                  <li>
-                    <Link href="#">HP</Link>
-                  </li>
-                  <li>
-                    <Link href="#">Dell</Link>
-                  </li>
-                  <li>
-                    <Link href="#">Cisco</Link>
-                  </li>
-                  <li>
-                    <Link href="#">IBM</Link>
-                  </li>
-                  <li>
-                    <Link href="#">Seagate</Link>
-                  </li>
-                  <li>
-                    <Link href="#">Intel</Link>
-                  </li>
-                  <li>
-                    <Link href="#">Samsung</Link>
-                  </li>
-                  <li>
-                    <Link href="#">Lenovo</Link>
-                  </li>
-                  <li>
-                    <Link href="#">View All</Link>
-                  </li>
-                </ul> */}
                 <ul className="space-y-2 text-[#FAFAFA]">
-  {getBrand?.data?.slice(0, 8)?.map((item: any) => (
-    <li key={item?.brand?.id}>
-      <Link href={`/brand/${item?.brand?.slug || ""}`}>
-        {item?.brand?.name}
-      </Link>
-    </li>
-  ))}
-</ul>
+                  {getBrand?.data?.slice(0, 8)?.map((item: any) => (
+                    <li key={item?.brand?.id}>
+                      <Link href={`/brand/${item?.brand?.slug || ""}`}>
+                        {item?.brand?.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </nav>
 
               {/* ACCOUNT */}
@@ -259,12 +251,21 @@ const FooterBottom = () => {
                 </h4>
 
                 <ul className="space-y-2 text-[#FAFAFA]">
-                  <li>
-                    <Link href="/auth/login">Sign In</Link>
-                  </li>
-                  <li>
-                    <Link href="/auth/signup">Sign Up</Link>
-                  </li>
+                  {!auth?.isAuthenticated ? <>
+                    <li>
+                      <Link href="/auth/login">Sign In</Link>
+                    </li>
+                    <li>
+                      <Link href="/auth/signup">Sign Up</Link>
+                    </li>
+                  </> : <>
+                    <li>
+                      <Link href="/my-account/orders">Account</Link>
+                    </li>
+                    <li>
+                      <span onClick={handleLogout}>Logout</span>
+                    </li>
+                  </>}
                   <li>
                     <Link href="/cart">My Cart</Link>
                   </li>
@@ -324,18 +325,6 @@ const FooterBottom = () => {
             <p className="!text-white text-center sm:text-left w-full">
               &copy; {new Date().getFullYear()} New Town Spares Inc.
             </p>
-
-            {/* Right Content */}
-            {/* <p className="flex items-center gap-2 text-[14px] !text-white mx-auto sm:ml-auto">
-          <span className="whitespace-nowrap">Join Us</span>
-          <Image
-            src="/footer-logo.png"
-            alt="Join Us Logo"
-            width={120}
-            height={48}
-            className="object-contain"
-          />
-        </p> */}
           </div>
         </footer>
       </div>
