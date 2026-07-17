@@ -6,7 +6,6 @@ const ProductOverview = ({ product }: { product: any }) => {
   const customFields = product?.customFields?.filter(
     (item: { name: string; value: string }) => item.name && item.value
   )
-  console.log(product);
 
   return (
     <section className="my-8" aria-labelledby="product-overview-heading">
