@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { updatecustomer } from "@/redux/slices/myaccountSlice";
+import {addCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -45,8 +45,7 @@ const AddressForm = () => {
   const onSubmit = async (data: AddressFormValues) => {
     try {
       const mergedData = {
-        addresses: [
-          {
+    
             firstName: data.firstName,
             lastName: data.lastName,
             companyName: data.companyName || "",
@@ -57,15 +56,15 @@ const AddressForm = () => {
             state: data.state,
             zip: data.postcode,
             country: data.country,
-          },
-        ],
+        
+      
       };
 
       const result = await dispatch(
-        updatecustomer({ id: auth?.user?.id, data: mergedData }),
+        addCustomerAddress({ id: auth?.user?.id, data: mergedData }),
       );
 
-      if (updatecustomer.fulfilled.match(result)) {
+      if (addCustomerAddress.fulfilled.match(result)) {
         reset();
         router.push("/my-account/addresses");
       } else {
