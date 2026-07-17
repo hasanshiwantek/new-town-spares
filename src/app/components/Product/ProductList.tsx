@@ -14,7 +14,6 @@ import { useMemo } from "react";
 import { decode } from "html-entities";
 import SortingBar from "./SortingBar";
 
-
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
@@ -50,54 +49,53 @@ export default function ProductList({
   const [view, setView] = useState<"list" | "grid">("grid");
   const [page, setPage] = useState(1);
   const decodedHtml = decode(
-  (initialCategorydescription || "")
-    .replace(/<pre[^>]*>/gi, "")
-    .replace(/<\/pre>/gi, "")
-);
+    (initialCategorydescription || "")
+      .replace(/<pre[^>]*>/gi, "")
+      .replace(/<\/pre>/gi, ""),
+  );
 
-const { contentHtml, faqHtml } = useMemo(() => {
-  if (!decodedHtml) {
+  const { contentHtml, faqHtml } = useMemo(() => {
+    if (!decodedHtml) {
+      return {
+        contentHtml: "",
+        faqHtml: "",
+      };
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(decodedHtml, "text/html");
+
+    const faq = doc.querySelector(".blog-faqs");
+
+    const faqHtml = faq ? faq.outerHTML : "";
+
+    if (faq) {
+      faq.remove();
+    }
+
     return {
-      contentHtml: "",
-      faqHtml: "",
+      contentHtml: doc.body.innerHTML,
+      faqHtml,
     };
-  }
+  }, [decodedHtml]);
+  useEffect(() => {
+    const main = document.querySelector(".custom-description-style");
+    if (!main) return;
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(decodedHtml, "text/html");
+    const blogFaqs = main.querySelector(".blog-faqs");
+    const target = document.querySelector(".faqs-section");
 
-  const faq = doc.querySelector(".blog-faqs");
-
-  const faqHtml = faq ? faq.outerHTML : "";
-
-  if (faq) {
-    faq.remove();
-  }
-
-  return {
-    contentHtml: doc.body.innerHTML,
-    faqHtml,
-  };
-}, [decodedHtml]);
-useEffect(() => {
-  const main = document.querySelector(".custom-description-style");
-  if (!main) return;
-
-  const blogFaqs = main.querySelector(".blog-faqs");
-  const target = document.querySelector(".faqs-section");
-
-  if (blogFaqs && target) {
-    target.innerHTML = "";
-    target.appendChild(blogFaqs.cloneNode(true));
-  }
-}, [decodedHtml]);
+    if (blogFaqs && target) {
+      target.innerHTML = "";
+      target.appendChild(blogFaqs.cloneNode(true));
+    }
+  }, [decodedHtml]);
   const total = pagination?.total || 0;
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [filters.page]);
-   
- 
+
   const getFilterTitle = () => {
     const parts: string[] = [];
 
@@ -138,11 +136,13 @@ w-full
             (Showing {products?.length || 0} of {total || 0})
           </span>
         </h1>
-        <h4 className="text-[14px] block sm:hidden text-[#333333] mb-2">{getFilterTitle()}</h4>
+        <h4 className="text-[14px] block sm:hidden text-[#333333] mb-2">
+          {getFilterTitle()}
+        </h4>
         <div className="mt-4">
- {initialCategorydescription && (
-  <>
-    <style>{`
+          {initialCategorydescription && (
+            <>
+              <style>{`
       .custom-description {
         color: #545454;
         font-family: Roboto, Arial, Helvetica, sans-serif;
@@ -202,8 +202,8 @@ w-full
       }
     `}</style>
 
-    <div
-      className="
+              <div
+                className="
         my-6
         border
         border-gray-600
@@ -214,15 +214,15 @@ w-full
         overflow-y-auto
         custom-scrollbar
       "
-    >
-      <div
-        className="custom-description custom-description-style prose prose-sm max-w-none break-words"
-        dangerouslySetInnerHTML={{ __html: contentHtml }}
-      />
-    </div>
-  </>
-)}
-</div>
+              >
+                <div
+                  className="custom-description custom-description-style prose prose-sm max-w-none break-words"
+                  dangerouslySetInnerHTML={{ __html: contentHtml }}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* <div className="mb-4">
@@ -341,6 +341,18 @@ w-full
               page,
             }))
           }
+        />
+      )}
+
+      {faqHtml && (
+        <div
+          className="faqs-section mt-8 "
+          dangerouslySetInnerHTML={{
+            __html: faqHtml.replace(
+              /type="checkbox"/g,
+              'type="radio" name="faq-accordion"',
+            ),
+          }}
         />
       )}
     </section>

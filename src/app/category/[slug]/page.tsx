@@ -18,11 +18,8 @@ function findCategoryBySlug(categories: any[], slug: string): any | undefined {
   return undefined;
 }
 
-
 // ✅ Dynamic SEO metadata per category
-export async function generateMetadata({
-  params,
-}: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const categories = await fetchCategories();
   const category = findCategoryBySlug(categories, slug);
@@ -63,9 +60,9 @@ export async function generateMetadata({
       googleBot: {
         index: true,
         follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
       },
     },
   };
@@ -78,16 +75,16 @@ export default async function CategoryPage({ params }: Props) {
   // Find category by slug
   const category = findCategoryBySlug(categories, slug);
 
-
   if (!category) {
     return <div className="text-center py-10">❌ Category not found</div>;
   }
-const formattedCategorydescription = await fetchCategoryById(category.id);
+  const formattedCategorydescription = await fetchCategoryById(category.id);
+
   return (
     <ProductsPage
       initialCategoryId={category.id}
       initialCategoryName={category.name}
-      initialCategorydescription={formattedCategorydescription?.category}
+      initialCategorydescription={category?.description}
     />
   );
 }

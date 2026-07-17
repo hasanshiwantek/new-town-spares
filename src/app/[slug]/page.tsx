@@ -36,11 +36,10 @@ export async function generateMetadata({
   const url = `https://nts-ecommerce.vercel.app/${slug}`;
 
   return {
-    title: `${product.pageTitle || product.name} | New Town Spares`,
-    description:
-      product.metaDescription?.substring(0, 160) ||
-      product.description?.substring(0, 160) ||
-      "Buy quality products at New Town Spares.",
+    title: {
+      absolute: product.pageTitle || product.name, // ← changed
+    },
+    description: product.metaDescription?.substring(0, 160),
     keywords:
       product.searchKeywords ||
       `${product.name}, ${product.brand?.name}, New Town Spares`,
@@ -49,9 +48,9 @@ export async function generateMetadata({
     },
     openGraph: {
       title: product.pageTitle || product.name,
-      description: product.metaDescription || product.description,
+      description: product.metaDescription,
       url,
-      siteName: "New Town Spares",
+      siteName: "",
       images: [
         {
           url: product.image?.[0]?.path || "/default-product-image.svg",
@@ -60,12 +59,12 @@ export async function generateMetadata({
           alt: product.pageTitle || product.name,
         },
       ],
-      type: "website", // ✅ cast since Next.js types don’t allow "product"
+      type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title: product.pageTitle || product.name,
-      description: product.metaDescription || product.description,
+      description: product.metaDescription,
       images: [product.image?.[0]?.path || "/default-product-image.svg"],
     },
     robots: {
@@ -125,10 +124,7 @@ export default async function ProductPage({
       <main role="main">
         <article>
           {/* Breadcrumb */}
-          <nav
-            aria-label="breadcrumb"
-            className="mb-[42px] leading-[24px]"
-          >
+          <nav aria-label="breadcrumb" className="mb-[42px] leading-[24px]">
             <Link href={"/"} className="underline">
               <span className="text-[#333333] text-[13px]">Home</span>
             </Link>

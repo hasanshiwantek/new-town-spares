@@ -1,7 +1,4 @@
-"use client";
-
 import Link from "next/link";
-import React from "react";
 
 const ProductOverview = ({ product }: { product: any }) => {
   return (
@@ -66,47 +63,64 @@ const ProductOverview = ({ product }: { product: any }) => {
 
         {/* Product Details Section */}
         <section className="border" aria-labelledby="product-details-heading">
-          <div className="px-[21px] pt-[21px]">
-            <h2 className="text-[20px] leading-[24px] font-light text-[#333333] mb-[14px]">Description</h2>
-          </div>
-          <div className="px-[21px]">
-            <h2 className="text-[16px] leading-[24px] text-[#333333] mb-2">{product?.metaDescription || "N/A"}</h2>
-          </div>
-          {product?.customFields.length > 0 && <>
-            <div className="px-[21px] pt-[21px]">
-              <h2 className="text-[20px] leading-[24px] font-light text-[#333333]">Details</h2>
-            </div>
-            <hr className="border-t border-2 border-[#333333] opacity-80 w-[98%] mx-auto mb-3" />
-            {/* Key-Value Details */}
-            <dl className="p-2 space-y-4">
-              {[
-                ...product?.customFields?.map((item: {
-                  name: string; value: string
+  <div className="px-[21px] py-[21px]">
+    <h2 className="text-[20px] leading-[24px] font-light text-[#333333] mb-[14px]">
+      Description
+    </h2>
 
-                }) => [item.name, item.value])
-              ].map(([key, value], index) => (
-                <div
-                  key={`${key}-${index}`}
-                  className={`!grid  !grid-cols-[180px_1fr] lg:!grid-cols-[350px_1fr] !items-center !p-2 ${index % 2 === 1 ? "" : "bg-[#F2F2F2]"
-                    }`}
-                >
-                  <dt className="text-[14px] leading-[21px] text-[#333333]">{key}</dt>
-                  <dd className="text-[14px] leading-[21px] text-[#333333]">
-                    {key === "Brand" && product?.brand?.name ? (
-                      <Link
-                        href={`/brand/${product.brand.slug}`}
-                      >
-                        {value}
-                      </Link>
-                    ) : (
-                      value
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </>}
-        </section>
+    <div
+  className="text-[16px] leading-[24px] text-[#333333]"
+  dangerouslySetInnerHTML={{
+    __html: product?.description ||  "No description available for this product.",
+  }}
+/>
+  </div>
+
+  {product?.customFields?.length > 0 && (
+    <>
+      <div className="px-[21px] pt-[21px]">
+        <h2 className="text-[20px] leading-[24px] font-light text-[#333333]">
+          Details
+        </h2>
+      </div>
+
+      <hr className="mx-[21px] my-3 border-t-2 border-[#333333]" />
+
+      <div className="px-[21px] pb-[21px]">
+        <dl className="space-y-2">
+          {product.customFields.map(
+            (
+              item: {
+                name: string;
+                value: string;
+              },
+              index: number
+            ) => (
+              <div
+                key={index}
+                className={`grid grid-cols-[180px_1fr] lg:grid-cols-[350px_1fr] items-center p-2 ${
+                  index % 2 === 0 ? "bg-[#F2F2F2]" : ""
+                }`}
+              >
+                <dt>{item.name}</dt>
+
+                <dd>
+                  {item.name === "Brand" && product?.brand?.name ? (
+                    <Link href={`/brand/${product.brand.slug}`}>
+                      {item.value}
+                    </Link>
+                  ) : (
+                    item.value
+                  )}
+                </dd>
+              </div>
+            )
+          )}
+        </dl>
+      </div>
+    </>
+  )}
+</section>
       </div>
     </section>
   );
