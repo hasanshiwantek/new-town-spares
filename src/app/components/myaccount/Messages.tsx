@@ -11,6 +11,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { useEffect } from "react";
 import { RootState } from "@/redux/store";
+import { Check } from "lucide-react";
 
 interface SendMessageValues {
   order_id: number;
@@ -37,12 +38,21 @@ const Messages = () => {
   const { sendLoading } = useAppSelector(
     (state: RootState) => state.customerMessage,
   );
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   reset,
+  //   formState: { errors },
+  // } = useForm<SendMessageValues>();
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<SendMessageValues>();
+  register,
+  handleSubmit,
+  reset,
+  formState: { errors, touchedFields },
+} = useForm<SendMessageValues>({
+  mode: "onTouched",
+  reValidateMode: "onChange",
+});
 
   function reCallAPis() {
     dispatch(fetchCustomerMessages({ page: 1, pageSize: 100 }));
@@ -67,7 +77,7 @@ const Messages = () => {
   }, []);
 
   return (
-   <section className=" w-[500px]  text-[#545454] roboto-font">
+   <section className=" w-[546px]  text-[#545454] roboto-font">
       {/* Title */}
     <h2 className="text-[25px] font-light text-[#333] mb-4">
   Send a Message
@@ -91,11 +101,9 @@ const Messages = () => {
   <div className="relative">
     <select
       {...register("order_id", { required: true })}
-      className={`h-[36px] w-full appearance-none rounded border bg-white px-4 pr-10 text-[16px] text-[#444] outline-none ${
-        errors.order_id
-          ? "border-red-500"
-          : "border-[#ddd]"
-      }`}
+      className={`h-[36px] w-full appearance-none rounded border bg-white px-4 pr-10 text-[10px] outline-none transition-colors ${
+  errors.order_id ? "border-red-500" : "border-[#ddd]"
+}`}
     >
       {orders.map((order) => (
         <option key={order.id} value={order.id}>
@@ -121,7 +129,8 @@ const Messages = () => {
 </div>
 
           {/* Subject */}
-         <div className="mb-8">
+        
+<div className="mb-8">
   <div className="mb-2 flex justify-between">
     <label className="text-[14px] text-[#333]">
       Subject
@@ -132,14 +141,30 @@ const Messages = () => {
     </span>
   </div>
 
-  <input
-    {...register("subject", { required: true })}
-    className={`h-[36px] w-full rounded border px-4 text-[16px] outline-none ${
-      errors.subject
-        ? "border-red-500"
-        : "border-[#ddd]"
-    }`}
-  />
+  <div className="relative">
+    <input
+      {...register("subject", { required: 'You must enter a subject' })}
+      className={`h-[36px] w-full rounded border px-4 pr-10 !text-[11px] outline-none ${
+        errors.subject
+          ? "border-red-500"
+          : touchedFields.subject
+          ? "border-green-500"
+          : "border-[#ddd]"
+      }`}
+    />
+    {errors.subject && (
+  <p className="mt-2 text-[10px] text-[#ff4a32]">
+    ✕ {errors.subject.message}
+  </p>
+)}
+
+    {touchedFields.subject && !errors.subject && (
+      <Check
+        size={18}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600"
+      />
+    )}
+  </div>
 </div>
 
           {/* Message */}
@@ -156,13 +181,20 @@ const Messages = () => {
 
   <textarea
     rows={8}
-    {...register("message", { required: true })}
-    className={`w-full rounded border p-2 text-[10px] outline-none resize-none ${
-      errors.message
-        ? "border-red-500"
-        : "border-[#ddd]"
-    }`}
+    {...register("message", { required: 'You must enter a message' })}
+   className={`w-full rounded border p-2 text-[10px] resize-none outline-none transition-colors ${
+  errors.message
+    ? "border-red-500"
+    : touchedFields.message
+    ? "border-green-700"
+    : "border-[#ddd]"
+}`}
   />
+     {errors.subject && (
+  <p className="mt-2 text-[10px] text-[#ff4a32]">
+    ✕ {errors.subject.message}
+  </p>
+)}
 </div>
 
           {/* Buttons */}
@@ -170,7 +202,7 @@ const Messages = () => {
   <Button
     type="submit"
     disabled={sendLoading}
-    className="h-[32px] min-w-[170px] rounded-none bg-[#ff4a32] text-white hover:bg-[#ef3b24]"
+    className="h-[32px] min-w-[144px] rounded-none bg-[#ff4a32] text-white hover:bg-[#ef3b24]"
   >
     {sendLoading ? "Loading..." : "Send Message"}
   </Button>

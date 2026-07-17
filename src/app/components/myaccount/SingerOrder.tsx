@@ -150,115 +150,195 @@ const SingleOrder = () => {
     return product?.quantity || 1;
   };
 
-  return (
-    <div className="py-6 max-w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Order Contents */}
-      <div className="lg:col-span-2 border rounded-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Order Contents</h2>
-        <p className="text-gray-500 mb-4">
-          Items shipped to {shippingAddress?.addressLine1},{" "}
-          {shippingAddress?.city}, {shippingAddress?.zip},{" "}
-          {shippingAddress?.country}
-        </p>
-
-        <div className="border-t border-b divide-y">
-          {order.products.map((item) => {
-            const quantity = getProductQuantity(item.id);
-            const itemPrice = parseFloat(item.price);
-            const primaryImage = item.image.find((img) => img.isPrimary === 1);
-
-            return (
-              <div
-                key={item.id}
-                className="flex items-center justify-between py-4"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-40 h-40 relative border rounded">
-                    <Image
-                      src={primaryImage?.path || "/default-product-image.svg"}
-                      alt={primaryImage?.altText || item.name}
-                      fill
-                      className="object-contain bg-white p-2"
-                    />
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      {quantity} × {item.sku} - {item.name}
-                    </p>
-                  </div>
-                </div>
-                <p className="font-medium">
-                  ${(itemPrice * quantity).toFixed(2)}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Totals */}
-        <div className="flex flex-col items-end mt-6 gap-1">
-          <p>Subtotal: ${subtotal.toFixed(2)}</p>
-          {shippingCost > 0 && <p>Shipping: ${shippingCost.toFixed(2)}</p>}
-          <p className="text-lg font-semibold">
-            Grand total: ${total.toFixed(2)}
-          </p>
-        </div>
-      </div>
-
-      {/* Order Details, Ship To, Bill To */}
-      <div className="flex flex-col gap-6">
+ return (
+  <div className="mx-auto w-full max-w-[880px] py-6 space-y-6">
+    {/* Top Information */}
+    <div className="border border-gray-200 bg-white p-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
         {/* Order Details */}
-        <div className="border rounded-md p-4">
-          <h2 className="font-semibold mb-2">Order Details</h2>
-          <p>Order number: {order.orderNumber}</p>
-          <p>Order status: {order.status}</p>
-          <p>Order date: {orderDate}</p>
-          <p>Order total: ${total.toFixed(2)}</p>
-          <button className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition w-full">
-            PRINT INVOICE
-          </button>
+        <div>
+          <h3 className="text-[13px] font-normal mb-4">Order Details</h3>
+
+          <div className="space-y-3 text-[15px]">
+            <div>
+              <p className="text-[#333333]">Order Status</p>
+              <p className="font-medium">{order.status}</p>
+            </div>
+
+            <div>
+              <p className="text-[#333333]">Order Date</p>
+              <p>{orderDate}</p>
+            </div>
+
+            <div>
+              <p className="text-[#333333]">Order Total</p>
+              <p>${total.toFixed(2)}</p>
+            </div>
+          </div>
         </div>
 
         {/* Ship To */}
-        <div className="border rounded-md p-4">
-          <h2 className="font-semibold mb-2">Ship To</h2>
-          <p>
-            {shippingAddress?.firstName} {shippingAddress?.lastName}
-          </p>
-          {shippingAddress?.companyName && <p>{shippingAddress.companyName}</p>}
-          <p>{shippingAddress?.addressLine1}</p>
-          {shippingAddress?.addressLine2 && (
-            <p>{shippingAddress.addressLine2}</p>
-          )}
-          <p>
-            {shippingAddress?.city}, {shippingAddress?.state}{" "}
-            {shippingAddress?.zip}
-          </p>
-          <p>{shippingAddress?.country}</p>
-          <p className="mt-2 text-sm text-gray-600">{shippingAddress?.phone}</p>
-          <p className="text-sm text-gray-600">{shippingAddress?.email}</p>
+        <div>
+          <h3 className="text-[13px] font-normal mb-4">Ship To</h3>
+
+          <div className="text-[15px] leading-7">
+            <p>
+              {shippingAddress?.firstName} {shippingAddress?.lastName}
+            </p>
+
+            {shippingAddress?.companyName && (
+              <p>{shippingAddress.companyName}</p>
+            )}
+
+            <p>{shippingAddress?.addressLine1}</p>
+
+            {shippingAddress?.addressLine2 && (
+              <p>{shippingAddress.addressLine2}</p>
+            )}
+
+            <p>
+              {shippingAddress?.city}, {shippingAddress?.state}{" "}
+              {shippingAddress?.zip}
+            </p>
+
+            <p>{shippingAddress?.country}</p>
+          </div>
         </div>
 
         {/* Bill To */}
-        <div className="border rounded-md p-4">
-          <h2 className="font-semibold mb-2">Bill To</h2>
-          <p>
-            {billingAddress?.firstName} {billingAddress?.lastName}
-          </p>
-          {billingAddress?.companyName && <p>{billingAddress.companyName}</p>}
-          <p>{billingAddress?.addressLine1}</p>
-          {billingAddress?.addressLine2 && <p>{billingAddress.addressLine2}</p>}
-          <p>
-            {billingAddress?.city}, {billingAddress?.state}{" "}
-            {billingAddress?.zip}
-          </p>
-          <p>{billingAddress?.country}</p>
-          <p className="mt-2 text-sm text-gray-600">{billingAddress?.phone}</p>
-          <p className="text-sm text-gray-600">{billingAddress?.email}</p>
+        <div>
+          <h3 className="text-[13px] font-normal mb-4">Bill To</h3>
+
+          <div className="text-[15px] leading-7">
+            <p>
+              {billingAddress.firstName} {billingAddress.lastName}
+            </p>
+
+            {billingAddress.companyName && (
+              <p>{billingAddress.companyName}</p>
+            )}
+
+            <p>{billingAddress.addressLine1}</p>
+
+            {billingAddress.addressLine2 && (
+              <p>{billingAddress.addressLine2}</p>
+            )}
+
+            <p>
+              {billingAddress.city}, {billingAddress.state}{" "}
+              {billingAddress.zip}
+            </p>
+
+            <p>{billingAddress.country}</p>
+          </div>
         </div>
+
+        {/* Action */}
+        <div className="md:ml-auto">
+  <h3 className="text-[13px] font-normal mb-4">Actions</h3>
+
+  <button className="bg-[#ff4b34] hover:bg-[#e6422d] text-white px-8 py-3 rounded-md font-medium transition">
+    Reorder
+  </button>
+</div>
       </div>
     </div>
-  );
+
+    {/* Bottom */}
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Products */}
+      <div className="lg:col-span-2 border border-gray-200 bg-white">
+        <div className="px-6 py-5 border-b">
+          <p className="text-[15px] text-[#333333]">
+            Items shipped to{" "}
+            {shippingAddress?.addressLine1},{" "}
+            {shippingAddress?.city},{" "}
+            {shippingAddress?.state},{" "}
+            {shippingAddress?.zip},{" "}
+            {shippingAddress?.country}
+          </p>
+        </div>
+
+        {order.products.map((item) => {
+          const quantity = getProductQuantity(item.id);
+
+          const primaryImage = item.image.find(
+            (img) => img.isPrimary === 1
+          );
+
+          return (
+            <div
+              key={item.id}
+              className="flex items-center gap-6 px-6 py-8 border-b last:border-b-0"
+            >
+              <input
+                type="checkbox"
+                className="w-5 h-5 rounded border-gray-300"
+              />
+
+              <div className="relative w-28 h-28 flex-shrink-0">
+                <Image
+                  fill
+                  className="object-contain"
+                  src={
+                    primaryImage?.path ||
+                    "/default-product-image.svg"
+                  }
+                  alt={primaryImage?.altText || item.name}
+                />
+              </div>
+
+              <div className="flex-1">
+                <p className="text-[15px] text-[#333333]">
+                  {quantity} × {item.sku}
+                </p>
+
+                <p className="text-[15px] text-[#333333]">
+                  {item.name}
+                </p>
+
+                <p className="mt-2 text-[16px] font-semibold text-[#ff4b34]">
+                  $
+                  {(
+                    parseFloat(item.price) * quantity
+                  ).toFixed(2)}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Summary */}
+      <div className="border border-gray-200 bg-white p-6 h-fit">
+        <h3 className="text-[13px] text-[#333333] font-normal uppercase mb-6">
+          Order Summary
+        </h3>
+
+        <div className="space-y-4 text-[14px]">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>${subtotal.toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Shipping</span>
+            <span>${shippingCost.toFixed(2)}</span>
+          </div>
+
+          <div className="flex justify-between font-semibold border-t pt-4">
+            <span>Total</span>
+            <span>${total.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <button className="mt-8 w-full border border-gray-300 rounded-md py-3 text-[14px] hover:bg-gray-50 transition">
+          Print Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+);
 };
 
 export default SingleOrder;
