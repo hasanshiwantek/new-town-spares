@@ -7,12 +7,14 @@ interface AccountState {
   address: any | null;
   loading: boolean;
   error: string | null;
+  customerAddresses: any | null;
 }
 
 const initialState: AccountState = {
   order: null,
   address: null,
   loading: false,
+   customerAddresses: null,
   error: null,
 };
 
@@ -52,7 +54,33 @@ export const fetchAccountAddress = createAsyncThunk(
     }
   }
 );
+export const fetchCustomerAddress = createAsyncThunk(
+  "account/customer-address",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("dashboard/customer-address/list");
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
 // Async thunk to update customer details (PUT request)
+
+export const addCustomerAddress = createAsyncThunk(
+  "account/addCustomerAddress",
+  async ({ id, data }: { id: string | number; data: any }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `dashboard/customer-address/store`,
+        data
+      );
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
 
 export const updatecustomer = createAsyncThunk(
   "account/updatecustomer",
@@ -112,11 +140,42 @@ const myAccountSlice = createSlice({
       .addCase(fetchAccountAddress.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
       state.address = action.payload;
+      
+       
       })
       .addCase(fetchAccountAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        
       })
+        .addCase(fetchCustomerAddress.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCustomerAddress.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.customerAddresses = action.payload?.data?.customer_addresses;
+      })
+      .addCase(fetchCustomerAddress.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+        // addCustomerAddress
+      .addCase(addCustomerAddress.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addCustomerAddress.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+      })
+      .addCase(addCustomerAddress.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+
+
+
       .addCase(updatecustomer.pending, (state) => {
         state.loading = true;
         state.error = null;
