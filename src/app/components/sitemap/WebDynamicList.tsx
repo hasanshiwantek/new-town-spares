@@ -15,9 +15,9 @@ const WebDynamicList = ({ webPages }: { webPages: any[] }) => {
         setToken(parsedToken);
     }, [auth]);
 
-    const visiblePages = webPages?.filter((page: any) =>
-        !page.restrictToCustomersOnly || token
-    );
+    const visiblePages = webPages
+        ?.filter((page: any) => !page.restrictToCustomersOnly || token)
+        .filter((item: any) => item?.showInNavigation);
 
     return (
         <section className="mb-8">
