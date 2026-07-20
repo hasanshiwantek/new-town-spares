@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   deletecustomeraddress,
   fetchAccountAddress,
+  fetchCustomerAddress,
   updatecustomer,
 } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
@@ -33,10 +34,10 @@ interface AddressFormValues {
 const MyAddress = () => {
   const dispatch = useAppDispatch();
 
-  const { address, loading, error } = useAppSelector(
+  const { address, loading, error,customerAddresses } = useAppSelector(
     (state: RootState) => state.myaccount,
   );
-
+  
   const auth = useAppSelector((state: RootState) => state.auth);
 
   const [showModal, setShowModal] = useState(false);
@@ -53,10 +54,13 @@ const MyAddress = () => {
     .map((c) => ({ name: c.name.common, code: c.cca2 }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  useEffect(() => {
-    dispatch(fetchAccountAddress());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchAccountAddress());
+  // }, [dispatch]);
 
+    useEffect(() => {
+    dispatch(fetchCustomerAddress());
+  }, [dispatch]);
   const handleDelete = async (id: number | string) => {
     const confirmDelete = confirm(
       `Are you sure you want to delete address with ID: ${id}?`,
@@ -149,17 +153,17 @@ const MyAddress = () => {
       {!loading && !error && (
         <ul className="flex flex-wrap -mx-[11px] list-none p-0 m-0">
           {/* Address List */}
-          {address?.addresses?.map((item: any) => (
+          {customerAddresses?.map((item: any) => (
             <li
               key={item.addressId}
               className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]"
             >
               <div className="relative min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
                 <h5 className="text-[15px] leading-[18px] font-normal text-[#333333] mb-[11px]">
-                  {item.customerName || "N/A"}
+                   {item.first_name || "N/A"}   {item.last_name}
                 </h5>
-                <p>{item.addressLine1}</p>
-                {item.addressLine2 && <p>{item.addressLine2}</p>}
+                <p>   {item.address_line_1}</p>
+                {item.address_line_2 && <p> {item.address_line_2}</p>}
                 <p>
                   {item.city} {item.zip}
                 </p>
