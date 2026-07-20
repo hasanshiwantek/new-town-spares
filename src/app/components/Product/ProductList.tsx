@@ -96,30 +96,6 @@ export default function ProductList({
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [filters.page]);
 
-  const getFilterTitle = () => {
-    const parts: string[] = [];
-
-    if (filterMeta.brandName) {
-      parts.push(`Brand: ${filterMeta.brandName}`);
-    }
-
-    if (filterMeta.categoryName) {
-      parts.push(`Category: ${filterMeta.categoryName}`);
-    }
-
-    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-      parts.push(`Price: $${filters.minPrice} - $${filters.maxPrice}`);
-    } else if (filters.minPrice !== undefined) {
-      parts.push(`Price: Above $${filters.minPrice}`);
-    } else if (filters.maxPrice !== undefined) {
-      parts.push(`Price: Below $${filters.maxPrice}`);
-    }
-
-    return parts.length === 0
-      ? `All Products (Showing ${total || 0})`
-      : `${parts.join(", ")} (Showing ${total || 0})`;
-  };
-
   return (
     <section
       className="
@@ -131,14 +107,14 @@ w-full
       {/* Headings */}
       <div className="mb-4">
         <h1 className="flex flex-wrap items-baseline text-[28px] leading-[33.6px] font-normal text-[#333333]">
-          {initialCategorydescription?.name || "Product Category"}
+          {initialCategorydescription?.name ||
+            filterMeta?.categoryName ||
+            filterMeta?.brandName ||
+            "Product Category"}
           <span className="ml-[7px] text-[13px] leading-[19.5px]">
             (Showing {products?.length || 0} of {total || 0})
           </span>
         </h1>
-        <h4 className="text-[14px] block sm:hidden text-[#333333] mb-2">
-          {getFilterTitle()}
-        </h4>
         <div className="mt-4">
           {initialCategorydescription && (
             <>
@@ -190,15 +166,15 @@ w-full
       }
 
       .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: transparent;
       }
 
       .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #FF0101;
+        background: #333333;
       }
 
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #387C3B;
+        background: #333333;
       }
     `}</style>
 
@@ -294,7 +270,7 @@ w-full
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className={`w-full min-w-0 flex-1 ${
               view === "grid"
-                ? "grid grid-cols-1 min-[551px]:grid-cols-2 gap-3"
+                ? "grid grid-cols-1 min-[551px]:grid-cols-2 min-[1441px]:grid-cols-3 min-[2000px]:grid-cols-4 gap-3"
                 : "space-y-4"
             }`}
           >
@@ -324,24 +300,25 @@ w-full
                   </MotionDiv>
                 ),
               )}
+              {/* Pagination */}
+              {!isLoading && !error && (
+                <div className="col-span-full">
+                  <CategoryPagination
+                    currentPage={filters.page}
+                    totalPages={pagination?.lastPage || 1}
+                    onPageChange={(page) =>
+                      setFilters((prev: any) => ({
+                        ...prev,
+                        page,
+                      }))
+                    }
+                  />
+                </div>
+              )}
             </AnimatePresence>
           </MotionDiv>
           <ProductListCartSidebar />
         </div>
-      )}
-
-      {/* Pagination */}
-      {!isLoading && !error && (
-        <CategoryPagination
-          currentPage={filters.page}
-          totalPages={pagination?.lastPage || 1}
-          onPageChange={(page) =>
-            setFilters((prev: any) => ({
-              ...prev,
-              page,
-            }))
-          }
-        />
       )}
 
       {faqHtml && (

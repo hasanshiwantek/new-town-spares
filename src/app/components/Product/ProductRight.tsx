@@ -116,10 +116,10 @@ const ProductRight: React.FC<ProductRightProps> = ({
           <p className="text-center text-[#888888] text-[15px] leading-[22.5px] font-normal uppercase tracking-wide">
             Expert Team Support
           </p>
-          <div className="flex gap-2 justify-between items-center flex-nowrap mt-4">
+          <div className="w-full flex gap-2 justify-between items-center flex-nowrap mt-4">
             <a
               href="mailto:support@newtownspares.com"
-              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors"
+              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors w-full text-center"
             >
               Email
             </a>
@@ -127,7 +127,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
               href="https://wa.me/12096516864"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors"
+              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors w-full text-center"
             >
               WhatsApp
             </a>
@@ -135,7 +135,7 @@ const ProductRight: React.FC<ProductRightProps> = ({
               href="https://join.skype.com/invite/example"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors"
+              className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors w-full text-center"
             >
               Skype
             </a>

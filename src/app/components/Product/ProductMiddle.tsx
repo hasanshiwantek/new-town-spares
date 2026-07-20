@@ -17,8 +17,8 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
     (state) => state.home,
   );
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const originalPrice = Number(product?.retailPrice) || 0;
-  const currentPrice = Number(product?.price) || 0;
+  const originalPrice = Number(product?.price) || 0;
+  const currentPrice = Number(product?.retailPrice) || 0;
   const hasBothPrices = originalPrice > 0 && currentPrice > 0;
   const savings =
     hasBothPrices && originalPrice > currentPrice
@@ -50,8 +50,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           </h1>
 
           <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
-            Brand:{" "}
-            <span>{product?.brand?.name || "N/A"}</span>
+            Brand: <span>{product?.brand?.name || "N/A"}</span>
           </p>
           <p className="text-[14px] leading-[21px] text-[#333333]">
             SKU: <span>{product?.sku || "N/A"}</span>
@@ -63,8 +62,8 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               <>
                 {stats?.rating && (
                   <Image
-                   width={80}
-                   height={20}
+                    width={80}
+                    height={20}
                     src={stats.image}
                     alt={`${stats.rating} Stars`}
                     className="w-20 h-auto cursor-pointer"
@@ -90,11 +89,11 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             )}
           </div>
         </div>
-        <hr className="mt-6 hidden min-[801px]:block" />
+        <hr className="mt-6 hidden min-[1261px]:block" />
         {/* Price */}
         <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
           {purchasabilityStatus ? (
-            <div className="hidden min-[801px]:flex flex-col items-start">
+            <div className="hidden min-[1261px]:flex flex-col items-start">
               <p className="text-[15px] text-[#333333]">
                 Price:{" "}
                 {hasBothPrices ? (
@@ -139,32 +138,36 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
             <div className="flex flex-col items-start">
               <Link
                 href="tel:0296516864"
-                className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[18px] tracking-wide transition-colors"
+                className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
               >
                 CALL FOR PRICE
               </Link>
             </div>
           )}
-          <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
-            <span className="inline-flex items-center align-middle gap-[3.5px] rounded-[7px] bg-[#E2E2FF] text-[#4242CF] text-[14px] leading-[21px] font-normal py-[1.75px] px-[7px] mr-2 whitespace-nowrap">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-[14px] h-[14px] shrink-0"
-                fill="none"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M6.86727 2.00001C7.44959 1.99991 7.82487 1.99984 8.18373 2.086C8.50126 2.16223 8.80481 2.28796 9.08324 2.45858C9.39791 2.65141 9.66323 2.91682 10.0749 3.32865L12.492 5.74578C12.998 6.25171 13.3989 6.65265 13.6957 7.00223C13.9992 7.35971 14.2225 7.69568 14.3477 8.08111C14.5508 8.70611 14.5508 9.37937 14.3477 10.0044C14.2225 10.3898 13.9992 10.7258 13.6957 11.0832C13.3989 11.4328 12.998 11.8338 12.492 12.3397L11.8397 12.992C11.3338 13.498 10.9328 13.8989 10.5832 14.1957C10.2258 14.4992 9.8898 14.7225 9.50437 14.8477C8.87937 15.0508 8.20611 15.0508 7.58111 14.8477C7.19568 14.7225 6.85971 14.4992 6.50223 14.1957C6.15267 13.8989 5.75168 13.4979 5.24578 12.992L2.82865 10.5749C2.41682 10.1632 2.15142 9.89791 1.95858 9.58324C1.78796 9.30481 1.66223 9.00126 1.586 8.68373C1.49984 8.32487 1.49991 7.94959 1.50001 7.36727L1.50001 6.66263C1.50001 5.94712 1.50001 5.3801 1.53735 4.92306C1.57553 4.45569 1.6552 4.06024 1.83919 3.69914C2.13754 3.1136 2.6136 2.63754 3.19914 2.33919C3.56024 2.1552 3.95569 2.07553 4.42306 2.03735C4.8801 2.00001 5.44712 2.00001 6.16263 2.00001L6.86727 2.00001ZM4.8098 6.90569C4.8098 5.91068 5.61641 5.10407 6.61142 5.10407C7.60644 5.10407 8.41305 5.91068 8.41305 6.90569C8.41305 7.9007 7.60644 8.70732 6.61142 8.70732C5.61641 8.70732 4.8098 7.9007 4.8098 6.90569Z"
-                  fill="#4242CF"
-                />
-              </svg>
-              Zero interest
-            </span>
-            or as low as $19/mo with Affirm.{" "}
-            <span className="underline cursor-pointer">See if you qualify</span>
-          </div>
+          {purchasabilityStatus && (
+            <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
+              <span className="inline-flex items-center align-middle gap-[3.5px] rounded-[7px] bg-[#E2E2FF] text-[#4242CF] text-[14px] leading-[21px] font-normal py-[1.75px] px-[7px] mr-2 whitespace-nowrap">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-[14px] h-[14px] shrink-0"
+                  fill="none"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fillRule="evenodd"
+                    clipRule="evenodd"
+                    d="M6.86727 2.00001C7.44959 1.99991 7.82487 1.99984 8.18373 2.086C8.50126 2.16223 8.80481 2.28796 9.08324 2.45858C9.39791 2.65141 9.66323 2.91682 10.0749 3.32865L12.492 5.74578C12.998 6.25171 13.3989 6.65265 13.6957 7.00223C13.9992 7.35971 14.2225 7.69568 14.3477 8.08111C14.5508 8.70611 14.5508 9.37937 14.3477 10.0044C14.2225 10.3898 13.9992 10.7258 13.6957 11.0832C13.3989 11.4328 12.998 11.8338 12.492 12.3397L11.8397 12.992C11.3338 13.498 10.9328 13.8989 10.5832 14.1957C10.2258 14.4992 9.8898 14.7225 9.50437 14.8477C8.87937 15.0508 8.20611 15.0508 7.58111 14.8477C7.19568 14.7225 6.85971 14.4992 6.50223 14.1957C6.15267 13.8989 5.75168 13.4979 5.24578 12.992L2.82865 10.5749C2.41682 10.1632 2.15142 9.89791 1.95858 9.58324C1.78796 9.30481 1.66223 9.00126 1.586 8.68373C1.49984 8.32487 1.49991 7.94959 1.50001 7.36727L1.50001 6.66263C1.50001 5.94712 1.50001 5.3801 1.53735 4.92306C1.57553 4.45569 1.6552 4.06024 1.83919 3.69914C2.13754 3.1136 2.6136 2.63754 3.19914 2.33919C3.56024 2.1552 3.95569 2.07553 4.42306 2.03735C4.8801 2.00001 5.44712 2.00001 6.16263 2.00001L6.86727 2.00001ZM4.8098 6.90569C4.8098 5.91068 5.61641 5.10407 6.61142 5.10407C7.60644 5.10407 8.41305 5.91068 8.41305 6.90569C8.41305 7.9007 7.60644 8.70732 6.61142 8.70732C5.61641 8.70732 4.8098 7.9007 4.8098 6.90569Z"
+                    fill="#4242CF"
+                  />
+                </svg>
+                Zero interest
+              </span>
+              or as low as $19/mo with Affirm.{" "}
+              <span className="underline cursor-pointer">
+                See if you qualify
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 hidden min-[801px]:grid grid-cols-1 sm:grid-cols-2 border border-gray-200 overflow-hidden bg-white">
@@ -301,37 +304,47 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
 
       {/* TrustPilot / SAM.GOV / D&B logos */}
       <div className="hidden min-[801px]:flex flex-row flex-wrap gap-6 items-center mt-6">
-        <Link href='https://www.trustpilot.com/review/newtownspares.com' target="_blank"  rel="noopener noreferrer" >
-        <Image
-          src="/productslug/trustpilot.PNG"
-          alt="Trustpilot"
-          width={114}
-          height={40}
-          className="w-[114px] h-[40px] object-contain"
-        />
-        </Link>
-        
-
-        <div className="flex flex-col items-center">
-          <Link href='https://sam.gov/' target="_blank" rel="noopener noreferrer"  >
-          
+        <Link
+          href="https://www.trustpilot.com/review/newtownspares.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <Image
-            src="/productslug/samgov.PNG"
-            alt="SAM.GOV"
+            src="/productslug/trustpilot.PNG"
+            alt="Trustpilot"
             width={114}
             height={40}
             className="w-[114px] h-[40px] object-contain"
           />
+        </Link>
+
+        <div className="flex flex-col items-center">
+          <Link
+            href="https://sam.gov/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              src="/productslug/samgov.PNG"
+              alt="SAM.GOV"
+              width={114}
+              height={40}
+              className="w-[114px] h-[40px] object-contain"
+            />
           </Link>
         </div>
-         <Link href='https://www.dnb.com/en-us/' target="_blank" rel="noopener noreferrer">
-        <Image
-          src="/productslug/dnb.PNG"
-          alt="D&B"
-          width={114}
-          height={40}
-          className="w-[114px] h-[40px] object-contain"
-        />
+        <Link
+          href="https://www.dnb.com/en-us/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            src="/productslug/dnb.PNG"
+            alt="D&B"
+            width={114}
+            height={40}
+            className="w-[114px] h-[40px] object-contain"
+          />
         </Link>
       </div>
       {isReviewModalOpen && (

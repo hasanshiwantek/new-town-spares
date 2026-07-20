@@ -1,20 +1,18 @@
-
 "use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
 import { fetchAccountOrders } from "@/redux/slices/myaccountSlice";
+import { RootState } from "@/redux/store";
+import Image from "next/image";
 import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import AccountEmptyState from "./AccountEmptyState";
 import ReturnItemsModal from "./ReturnItemsModal"; // Import modal
-// import { cartTransfer } from "@/redux/slices/cartsSlice";
 
 const OrderProduct = () => {
   const dispatch = useAppDispatch();
   const { order, loading, error } = useAppSelector(
-    (state: RootState) => state.myaccount
+    (state: RootState) => state.myaccount,
   );
-  const auth = useAppSelector((state: RootState) => state?.auth);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,14 +36,14 @@ const OrderProduct = () => {
   // Skeleton Loader
   if (loading) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 max-w-[800px] mx-auto">
         {[...Array(3)].map((_, idx) => (
           <div
             key={idx}
             className="border rounded-lg p-4 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 xl:gap-6 w-full animate-pulse"
           >
             <div className="flex flex-col xl:flex-row items-start xl:items-center gap-4 xl:w-[65%] w-full">
-              <div className="w-full max-w-[128px] h-32 bg-gray-300 rounded-md flex-shrink-0"></div>
+              <div className="w-full max-w-[128px] h-32 bg-gray-300 rounded-md shrink-0"></div>
               <div className="flex flex-col justify-center w-full gap-2">
                 <div className="h-4 bg-gray-300 rounded w-1/3"></div>
                 <div className="h-4 bg-gray-300 rounded w-2/3"></div>
@@ -60,98 +58,134 @@ const OrderProduct = () => {
   }
 
   if (error)
-    return (
-      <p className="text-red-500">Failed to fetch orders. {error}</p>
-    );
+    return <p className="text-red-500">Failed to fetch orders. {error}</p>;
 
   if (!order?.orders || order.orders.length === 0)
     return (
-      <div className="w-full bg-white border border-black p-4">
-        <p className="text-[#545454] text-[14px]">
-          You haven't placed any order with us. When you do, they will appear
-          on this page.
-        </p>
-      </div>
+      <AccountEmptyState message="You haven't placed any orders with us. When you do, their status will appear on this page." />
     );
 
   return (
     <>
-      <div className="flex flex-col gap-4">
-        {order.orders.map((item: any) => (
-          <div
-            key={item.id}
-            className="border text-center md:text-left rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 w-full"
-          >
-            {/* Left Side: Product Info */}
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:w-[65%] w-full">
-              {/* Product Image */}
-              <div className="w-full max-w-[128px] h-32 relative flex-shrink-0">
-                <Image
-                  src={
-                    item?.products?.[0]?.image?.[0]?.path || item?.products?.[1]?.image?.[0]?.path ||
-                    "/default-product-image.svg"
-                  }
-                  alt={item?.products?.[0]?.name || item?.products?.[1]?.name || "Product Image"}
-                  fill
-                  className="object-contain border rounded-md"fetchPriority="high"
-                />
-              </div>
+      {/*
+        Order list — mirrors live (.account-product.account-orders).
+        Grid switches at 801 (Cornerstone breakpoint):
+          <801: single-column stack, each detail = full-width row with
+                label-left / value-right; order = Order#, Placed, Total, Status,
+                then product rows.
+          >=801: 5-col row [Placed | Total | Status(span 2) | Order#(right)]
+                 with label above value; product rows span full width below.
+      */}
+      <ul className="max-w-[800px] mx-auto list-none p-0 m-0">
+        {order.orders.map((item: any) => {
+          const products = item?.products ?? {};
+          // Detail cell: full-width row (<801) → label/value on one line via
+          // justify-between; grid cell with stacked label/value (>=801).
+          const cellClass =
+            "border-b border-[#ebebeb] p-[11px] flex justify-between items-baseline min-[801px]:block min-[801px]:pr-[21px]";
+          const labelClass =
+            "block text-[13px] leading-[15.6px] capitalize text-[#333333] min-[801px]:mb-[5px]";
+          const valueClass = "block text-[14px] leading-[21px] text-[#333333]";
 
-              {/* Product Details */}
-              <div className="flex flex-col justify-center w-full">
-                <Link href={`/my-account/orders/${item.order_number || ""}`}>
-                  <p className="mb-1 text-xl text-red-600 hover:text-red-700 transition-colors duration-200">
-                    Order #{item?.id || "N/A"}
-                  </p>
-                </Link>
-                <p className="text-sm md:text-[14px]">
-                  {item?.products?.length || 1} product totaling $
-                  {item?.total_amount
-                    ? Number(item.total_amount).toFixed(2)
-                    : "0.00"}
-                </p>
-
-                {/* Order Info */}
-                <div className="flex flex-col items-center justify-center md:justify-start md:items-start sm:flex-row sm:gap-12 gap-2 mt-2 text-sm">
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[12px]">Order Placed</span>
-                    <span className="text-xl">
+          return (
+            <li key={item.id} className="mb-[21px]">
+              <div className="border border-[#ebebeb] bg-white text-[#333333]">
+                {/* Detail row — its own grid so long product names below can't
+                    blow out the intrinsic (max-content) tracks. */}
+                <div className="grid grid-cols-2 min-[801px]:[grid-template-columns:minmax(100px,200px)_minmax(100px,200px)_minmax(100px,200px)_minmax(0,100%)_max-content]">
+                  {/* Order Placed — col 1 (>=801) / row 2 (<801) */}
+                  <div
+                    className={`${cellClass} col-span-2 row-start-2 min-[801px]:col-span-1 min-[801px]:col-start-1 min-[801px]:row-start-1`}
+                  >
+                    <span className={labelClass}>Order Placed</span>
+                    <span className={valueClass}>
                       {item?.created_at
-                        ? new Date(item.created_at).toLocaleDateString()
+                        ? new Date(item.created_at).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })
                         : "-"}
                     </span>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <span className="text-[12px]">Last Update</span>
-                    <span className="text-xl">
-                      {item?.updated_at
-                        ? new Date(item.updated_at).toLocaleDateString()
-                        : "-"}
+                  {/* Total — col 2 (>=801) / row 3 (<801) */}
+                  <div
+                    className={`${cellClass} col-span-2 row-start-3 min-[801px]:col-span-1 min-[801px]:col-start-2 min-[801px]:row-start-1`}
+                  >
+                    <span className={labelClass}>Total</span>
+                    <span className={valueClass}>
+                      ${Number(item?.total_amount || 0).toFixed(2)}
+                    </span>
+                  </div>
+
+                  {/* Status — cols 3-4 (>=801) / row 4 (<801) */}
+                  <div
+                    className={`${cellClass} col-span-2 row-start-4 min-[801px]:col-start-3 min-[801px]:col-end-5 min-[801px]:row-start-1`}
+                  >
+                    <span className={labelClass}>Status</span>
+                    <span className={valueClass}>
+                      {item?.status || "Pending"}
+                    </span>
+                  </div>
+
+                  {/* Order # + actions — col 5, right-aligned (>=801) / row 1 (<801) */}
+                  <div className="border-b border-[#ebebeb] p-[11px] flex justify-between items-baseline col-span-2 row-start-1 min-[801px]:flex-col min-[801px]:items-end min-[801px]:col-start-5 min-[801px]:col-end-6 min-[801px]:row-start-1">
+                    <span className={valueClass}>
+                      Order #{item?.order_number || "N/A"}
+                    </span>
+                    <span className="flex text-[14px] leading-[21px] items-center">
+                      <Link
+                        href={`/my-account/orders/${item?.order_number || ""}`}
+                        className="underline hover:text-[#FF482E]"
+                      >
+                        Order Details
+                      </Link>
+                      <button
+                        onClick={() => window.print()}
+                        className="border-l border-[#ebebeb] pl-[5px] ml-[3px]"
+                      >
+                        Invoice
+                      </button>
                     </span>
                   </div>
                 </div>
+
+                {/* Product rows — full-width flex rows below the details. Name
+                    clamps to one line + ellipsis like live; flex-1 + min-w-0 let
+                    it shrink instead of overflowing the card. */}
+                {products?.map((product: any, index: number) => {
+                  const productName = product?.name || "Product";
+                  const productImg =
+                    product?.image?.[0]?.path || "/default-product-image.svg";
+                  const qty = product?.quantity;
+                  return (
+                    <div
+                      key={index}
+                      className={`flex items-center min-w-0 overflow-hidden ${index !== products?.length - 1 ? "border-b border-[#ebebeb]" : ""}`}
+                    >
+                      <div className="w-[75px] h-[63px] shrink-0 p-[5px]">
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={productImg}
+                            alt={productName}
+                            fill
+                            sizes="65px"
+                            className="object-contain"
+                          />
+                        </div>
+                      </div>
+                      <span className="flex-1 min-w-0 truncate text-[14px] leading-[21px] text-[#333333] py-[21px] px-[11px]">
+                        {qty} × {productName}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-
-            {/* Right Side: Status Button */}
-            <div className="md:w-[30%] w-full flex flex-col md:items-end items-center mt-2 md:mt-0">
-              <button className="bg-[#BFBFBF] text-white font-bold border border-[#BFBFBF] px-4 py-2 rounded hover:bg-white hover:text-[#F15939] transition w-auto text-center text-sm md:text-base">
-                {item?.status || "Pending"}
-              </button>
-
-              {item?.status === "Completed" && (
-                <button
-                  onClick={(e) => handleReturnClick(e, item)}
-                  className="mt-2 text-lg text-[#393939] underline cursor-pointer hover:text-red-600 transition"
-                >
-                  Return Items?
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+            </li>
+          );
+        })}
+      </ul>
 
       {/* Modal */}
       {selectedOrder && (
@@ -167,4 +201,3 @@ const OrderProduct = () => {
 };
 
 export default OrderProduct;
-
