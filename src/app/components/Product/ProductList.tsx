@@ -320,18 +320,20 @@ w-full
           <ProductListCartSidebar />
         </div>
       )}
-
-      {faqHtml && (
-        <div
-          className="faqs-section mt-8 "
-          dangerouslySetInnerHTML={{
-            __html: faqHtml.replace(
-              /type="checkbox"/g,
-              'type="radio" name="faq-accordion"',
-            ),
-          }}
-        />
-      )}
+      <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full items-start">
+        {faqHtml && (
+          <div
+            className="faqs-section mt-8 "
+            dangerouslySetInnerHTML={{
+              __html: faqHtml.replace(
+                /type="checkbox"/g,
+                'type="radio" name="faq-accordion"',
+              ),
+            }}
+          />
+        )}
+        <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto"></div>
+      </div>
     </section>
   );
 }
