@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   fetchCustomerMessages,
@@ -77,145 +76,135 @@ const Messages = () => {
   }, []);
 
   return (
-   <section className=" w-[546px]  text-[#545454] roboto-font">
+    <section className="w-full text-[#333333]">
       {/* Title */}
-    <h2 className="text-[25px] font-light text-[#333] mb-4">
-  Send a Message
-</h2>
+      <h2 className="text-[25px] leading-[30px] font-light text-[#333333] mb-[11px]">
+        Send a Message
+      </h2>
 
       {/* Form Container */}
-      <div className="bg-[#]  w-full">
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full ">
+      <div className="w-full">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full">
           {/* Order Dropdown */}
-         <div className="mb-8">
-  <div className="mb-2 flex justify-between">
-    <label className="text-[14px] text-[#333]">
-      Order:
-    </label>
+          <div className="mb-[28px]">
+            <div className="mb-[7px] flex justify-between items-baseline">
+              <label className="text-[14px] text-[#333333]">Order:</label>
+              <span className="text-[10px] uppercase tracking-wider text-[#333333]">
+                Required
+              </span>
+            </div>
 
-    <span className="text-[10px] uppercase tracking-wider text-[#777]">
-      REQUIRED
-    </span>
-  </div>
+            <div className="relative">
+              <select
+                {...register("order_id", { required: true })}
+                className={`h-[42px] w-full appearance-none rounded-[4px] border bg-white py-[10.5px] pl-[14px] pr-[42px] !text-[14px] text-[#333333] outline-none transition-colors ${
+                  errors.order_id ? "border-red-500" : "border-[#ebebeb]"
+                }`}
+              >
+                {orders.map((order) => (
+                  <option key={order.id} value={order.id}>
+                    {order.label}
+                  </option>
+                ))}
+              </select>
 
-  <div className="relative">
-    <select
-      {...register("order_id", { required: true })}
-      className={`h-[36px] w-full appearance-none rounded border bg-white px-4 pr-10 text-[10px] outline-none transition-colors ${
-  errors.order_id ? "border-red-500" : "border-[#ddd]"
-}`}
-    >
-      {orders.map((order) => (
-        <option key={order.id} value={order.id}>
-          {order.label}
-        </option>
-      ))}
-    </select>
-
-    <svg
-      className="pointer-events-none absolute right-4 top-1/2 h-3 w-3 -translate-y-1/2 text-[#666]"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M19 9l-7 7-7-7"
-      />
-    </svg>
-  </div>
-</div>
+              <svg
+                className="pointer-events-none absolute right-4 top-1/2 h-3 w-3 -translate-y-1/2 text-[#666]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+          </div>
 
           {/* Subject */}
-        
-<div className="mb-8">
-  <div className="mb-2 flex justify-between">
-    <label className="text-[14px] text-[#333]">
-      Subject
-    </label>
+          <div className="mb-[28px]">
+            <div className="mb-[7px] flex justify-between items-baseline">
+              <label className="text-[14px] text-[#333333]">Subject</label>
+              <span className="text-[10px] uppercase tracking-wider text-[#333333]">
+                Required
+              </span>
+            </div>
 
-    <span className="text-[10px] uppercase tracking-wider text-[#777]">
-      REQUIRED
-    </span>
-  </div>
-
-  <div className="relative">
-    <input
-      {...register("subject", { required: 'You must enter a subject' })}
-      className={`h-[36px] w-full rounded border px-4 pr-10 !text-[11px] outline-none ${
-        errors.subject
-          ? "border-red-500"
-          : touchedFields.subject
-          ? "border-green-500"
-          : "border-[#ddd]"
-      }`}
-    />
-    {errors.subject && (
-  <p className="mt-2 text-[10px] text-[#ff4a32]">
-    ✕ {errors.subject.message}
-  </p>
-)}
-
-    {touchedFields.subject && !errors.subject && (
-      <Check
-        size={18}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600"
-      />
-    )}
-  </div>
-</div>
+            <div className="relative">
+              <input
+                {...register("subject", { required: "You must enter a subject" })}
+                className={`h-[42px] w-full rounded-[4px] border px-[14px] pr-10 !text-[14px] text-[#333333] outline-none ${
+                  errors.subject
+                    ? "border-red-500"
+                    : touchedFields.subject
+                    ? "border-green-500"
+                    : "border-[#ebebeb]"
+                }`}
+              />
+              {touchedFields.subject && !errors.subject && (
+                <Check
+                  size={18}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600"
+                />
+              )}
+            </div>
+            {errors.subject && (
+              <p className="mt-2 text-[10px] text-[#ff4a32]">
+                ✕ {errors.subject.message}
+              </p>
+            )}
+          </div>
 
           {/* Message */}
-          <div className="mb-8">
-  <div className="mb-2 flex justify-between">
-    <label className="text-[14px] text-[#333]">
-      Message
-    </label>
+          <div className="mb-[28px]">
+            <div className="mb-[7px] flex justify-between items-baseline">
+              <label className="text-[14px] text-[#333333]">Message</label>
+              <span className="text-[10px] uppercase tracking-wider text-[#333333]">
+                Required
+              </span>
+            </div>
 
-    <span className="text-[10px] uppercase tracking-wider text-[#777]">
-      REQUIRED
-    </span>
-  </div>
+            <textarea
+              rows={6}
+              {...register("message", { required: "You must enter a message" })}
+              className={`w-full rounded-[4px] border px-[14px] py-[10.5px] !text-[14px] text-[#333333] resize-none outline-none transition-colors ${
+                errors.message
+                  ? "border-red-500"
+                  : touchedFields.message
+                  ? "border-green-700"
+                  : "border-[#ebebeb]"
+              }`}
+            />
+            {errors.message && (
+              <p className="mt-2 text-[10px] text-[#ff4a32]">
+                ✕ {errors.message.message}
+              </p>
+            )}
+          </div>
 
-  <textarea
-    rows={8}
-    {...register("message", { required: 'You must enter a message' })}
-   className={`w-full rounded border p-2 text-[10px] resize-none outline-none transition-colors ${
-  errors.message
-    ? "border-red-500"
-    : touchedFields.message
-    ? "border-green-700"
-    : "border-[#ddd]"
-}`}
-  />
-     {errors.subject && (
-  <p className="mt-2 text-[10px] text-[#ff4a32]">
-    ✕ {errors.subject.message}
-  </p>
-)}
-</div>
+          {/* Buttons — live .form-actions: full-width stacked <551px,
+              auto-width right-aligned >=551px, 11px gap either way. */}
+          <div className="flex flex-col min-[551px]:flex-row min-[551px]:justify-end gap-[11px]">
+            <Button
+              type="submit"
+              disabled={sendLoading}
+              className="h-[39px] w-full min-[551px]:w-auto rounded-[4px] bg-[#ff482e] px-[32px] text-[14px] font-light text-white hover:bg-[#ef3b24]"
+            >
+              {sendLoading ? "Loading..." : "Send Message"}
+            </Button>
 
-          {/* Buttons */}
-          <div className="flex justify-end gap-4">
-  <Button
-    type="submit"
-    disabled={sendLoading}
-    className="h-[32px] min-w-[144px] rounded-none bg-[#ff4a32] text-white hover:bg-[#ef3b24]"
-  >
-    {sendLoading ? "Loading..." : "Send Message"}
-  </Button>
-
-  <Button
-    type="button"
-    onClick={handleClear}
-    variant="outline"
-    className="h-[32px] min-w-[100px]  rounded-none border  bg-white text-[#555] hover:bg-[#fafafa]"
-  >
-    Clear
-  </Button>
-</div>
+            <Button
+              type="button"
+              onClick={handleClear}
+              variant="outline"
+              className="h-[39px] w-full min-[551px]:w-auto rounded-[4px] border border-[#ebebeb] bg-white px-[32px] text-[14px] font-light text-[#333333] hover:bg-[#fafafa]"
+            >
+              Clear
+            </Button>
+          </div>
         </form>
       </div>
     </section>

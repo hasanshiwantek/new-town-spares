@@ -30,7 +30,7 @@ export default function CategoryPagination({
           <button
             type="button"
             onClick={() => onPageChange(currentPage - 1)}
-            className="flex items-center px-[7px] hover:text-[#FF482E]"
+            className="underline flex items-center px-[7px] hover:text-[#FF482E]"
           >
             <ChevronLeft size={20} strokeWidth={1.5} />
             Previous
@@ -40,14 +40,14 @@ export default function CategoryPagination({
       {pages.map((p) =>
         p === currentPage ? (
           <li key={p}>
-            <span className="px-[7px]">{p}</span>
+            <span className="cursor-pointer hover:text-[#FF482E] border rounded-sm px-[7px]">{p}</span>
           </li>
         ) : (
           <li key={p}>
             <button
               type="button"
               onClick={() => onPageChange(p)}
-              className="px-[7px] hover:underline hover:text-[#FF482E]"
+              className="px-[7px] hover:text-[#FF482E]"
             >
               {p}
             </button>
@@ -59,7 +59,7 @@ export default function CategoryPagination({
           <button
             type="button"
             onClick={() => onPageChange(currentPage + 1)}
-            className="flex items-center px-[7px] hover:text-[#FF482E]"
+            className="underline flex items-center px-[7px] hover:text-[#FF482E]"
           >
             Next
             <ChevronRight size={20} strokeWidth={1.5} />

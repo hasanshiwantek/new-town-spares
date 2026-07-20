@@ -1,12 +1,11 @@
-
 "use client";
 
-import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 // import { fetchOrderDetails } from "@/lib/api/order";
-import { fetchOrderDetails } from "@/redux/slices/cartSlice";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
+import { fetchOrderDetails } from "@/redux/slices/cartSlice";
 interface OrderData {
   id: number;
   orderNumber: string;
@@ -64,8 +63,7 @@ const SingleOrder = () => {
   const params = useParams();
   const orderNumber = params?.slug as string;
   console.log(orderNumber);
-  
-  
+
   const dispatch = useAppDispatch();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +80,7 @@ const SingleOrder = () => {
       try {
         setLoading(true);
         const res = await dispatch(
-          fetchOrderDetails({ orderId: orderNumber })
+          fetchOrderDetails({ orderId: orderNumber }),
         ).unwrap();
 
         if (res?.order?.length > 0) {
@@ -122,12 +120,12 @@ const SingleOrder = () => {
     );
   }
 
-  // Calculate subtotal from products
-  const subtotal =
-    order.shippingDestinations[0]?.products.reduce(
-      (sum, item) => sum + parseFloat(item.price) * item.quantity,
-      0
-    ) || 0;
+  // // Calculate subtotal from products
+  // const subtotal =
+  //   order.shippingDestinations[0]?.products.reduce(
+  //     (sum, item) => sum + parseFloat(item.price) * item.quantity,
+  //     0
+  //   ) || 0;
 
   const shippingCost = parseFloat(order.shippingCost) || 0;
   const total = parseFloat(order.totalAmount);
@@ -145,200 +143,195 @@ const SingleOrder = () => {
   // Get product quantities from shipping destinations
   const getProductQuantity = (productId: number) => {
     const product = order.shippingDestinations[0]?.products.find(
-      (p) => p.productId === productId
+      (p) => p.productId === productId,
     );
     return product?.quantity || 1;
   };
 
- return (
-  <div className="mx-auto w-full max-w-[880px] py-6 space-y-6">
-    {/* Top Information */}
-    <div className="border border-gray-200 bg-white p-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+  // Sidebar block, mirroring live's .order-details-sidebar .account-sidebar-block:
+  // full-width with a 1px bottom divider + 21px padding on mobile (<801) AND
+  // tablet (801-1260, where it's a 50% wrap column) → at >=1261 the divider and
+  // padding drop and blocks become equal flex columns.
+  const blockTypography = "text-[15px] leading-[22.5px] text-[#333333]";
+  const blockClass = `${blockTypography} w-full p-[21px] border-b border-[#ebebeb] min-[801px]:w-1/2 min-[1261px]:w-auto min-[1261px]:flex-1 min-[1261px]:border-b-0 min-[1261px]:p-0`;
+  // Actions block is special: live gives it NO bottom divider + padding-bottom:0
+  // always, width:100% at >=801 (its own full-width row so the Reorder button
+  // spans it), and max-width:120px + padding:0 at >=1261.
+  const actionsBlockClass = `${blockTypography} w-full p-[21px] pb-0 min-[801px]:w-full min-[801px]:flex-[1_0_auto] min-[1261px]:max-w-[120px] min-[1261px]:p-0`;
+  const blockHeading =
+    "text-[13px] leading-[15.6px] capitalize text-[#333333] mb-[5px] pb-[5px]";
+  const summaryRow =
+    "overflow-hidden text-[14px] leading-[21px] text-[#333333] mb-[5px] pt-[5px]";
+
+  return (
+    <div className="max-w-[800px] mx-auto text-[#333333]">
+      {/* Sidebar band — Order Details / Ship To / Bill To / (spacer) / Actions.
+          A bordered white card in a horizontal flex row on desktop, stacked
+          full-width below 801 (matches live .order-details-sidebar). */}
+      <div className="bg-white border border-[#ebebeb] mb-[21px] w-full min-[801px]:flex min-[801px]:flex-wrap min-[801px]:pb-[21px] min-[1261px]:flex-nowrap min-[1261px]:p-[21px]">
         {/* Order Details */}
-        <div>
-          <h3 className="text-[13px] font-normal mb-4">Order Details</h3>
-
-          <div className="space-y-3 text-[15px]">
-            <div>
-              <p className="text-[#333333]">Order Status</p>
-              <p className="font-medium">{order.status}</p>
+        <section className={blockClass}>
+          <h6 className={blockHeading}>Order Details</h6>
+          <dl className="pr-[11px] overflow-hidden">
+            <div className="clear-both">
+              <dt className="float-left mr-[5px]">Order status:</dt>
+              <dd className="m-0">{order.status}</dd>
             </div>
-
-            <div>
-              <p className="text-[#333333]">Order Date</p>
-              <p>{orderDate}</p>
+            <div className="clear-both">
+              <dt className="float-left mr-[5px]">Order date:</dt>
+              <dd className="m-0">{orderDate}</dd>
             </div>
-
-            <div>
-              <p className="text-[#333333]">Order Total</p>
-              <p>${total.toFixed(2)}</p>
+            <div className="clear-both">
+              <dt className="float-left mr-[5px]">Order total:</dt>
+              <dd className="m-0">${total.toFixed(2)}</dd>
             </div>
-          </div>
-        </div>
+          </dl>
+        </section>
 
         {/* Ship To */}
-        <div>
-          <h3 className="text-[13px] font-normal mb-4">Ship To</h3>
-
-          <div className="text-[15px] leading-7">
-            <p>
+        <section className={blockClass}>
+          <h6 className={blockHeading}>Ship To</h6>
+          <ul className="list-none p-0 m-0">
+            <li>
               {shippingAddress?.firstName} {shippingAddress?.lastName}
-            </p>
-
+            </li>
             {shippingAddress?.companyName && (
-              <p>{shippingAddress.companyName}</p>
+              <li>{shippingAddress.companyName}</li>
             )}
-
-            <p>{shippingAddress?.addressLine1}</p>
-
+            <li>{shippingAddress?.addressLine1}</li>
             {shippingAddress?.addressLine2 && (
-              <p>{shippingAddress.addressLine2}</p>
+              <li>{shippingAddress.addressLine2}</li>
             )}
-
-            <p>
+            <li>
               {shippingAddress?.city}, {shippingAddress?.state}{" "}
               {shippingAddress?.zip}
-            </p>
-
-            <p>{shippingAddress?.country}</p>
-          </div>
-        </div>
+            </li>
+            <li>{shippingAddress?.country}</li>
+          </ul>
+        </section>
 
         {/* Bill To */}
-        <div>
-          <h3 className="text-[13px] font-normal mb-4">Bill To</h3>
-
-          <div className="text-[15px] leading-7">
-            <p>
+        <section className={blockClass}>
+          <h6 className={blockHeading}>Bill To</h6>
+          <ul className="list-none p-0 m-0">
+            <li>
               {billingAddress.firstName} {billingAddress.lastName}
-            </p>
-
+            </li>
             {billingAddress.companyName && (
-              <p>{billingAddress.companyName}</p>
+              <li>{billingAddress.companyName}</li>
             )}
-
-            <p>{billingAddress.addressLine1}</p>
-
+            <li>{billingAddress.addressLine1}</li>
             {billingAddress.addressLine2 && (
-              <p>{billingAddress.addressLine2}</p>
+              <li>{billingAddress.addressLine2}</li>
             )}
+            <li>
+              {billingAddress.city}, {billingAddress.state} {billingAddress.zip}
+            </li>
+            <li>{billingAddress.country}</li>
+          </ul>
+        </section>
 
-            <p>
-              {billingAddress.city}, {billingAddress.state}{" "}
-              {billingAddress.zip}
-            </p>
+        {/* Spacer — live has an empty block that pushes Actions to the right
+            (>=1261) / fills the wrap grid (801-1260). Hidden below 801. */}
+        <section
+          className={`${blockClass} hidden min-[801px]:block`}
+          aria-hidden="true"
+        />
 
-            <p>{billingAddress.country}</p>
-          </div>
-        </div>
-
-        {/* Action */}
-        <div className="md:ml-auto">
-  <h3 className="text-[13px] font-normal mb-4">Actions</h3>
-
-  <button className="bg-[#ff4b34] hover:bg-[#e6422d] text-white px-8 py-3 rounded-md font-medium transition">
-    Reorder
-  </button>
-</div>
+        {/* Actions */}
+        <section className={actionsBlockClass}>
+          <h6 className={blockHeading}>Actions</h6>
+          <button className="mt-[11px] w-full bg-[#FF482E] text-white border border-[#FF482E] rounded-[4px] h-[39px] px-[32px] text-[14px] font-light">
+            Reorder
+          </button>
+        </section>
       </div>
-    </div>
 
-    {/* Bottom */}
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Products */}
-      <div className="lg:col-span-2 border border-gray-200 bg-white">
-        <div className="px-6 py-5 border-b">
-          <p className="text-[15px] text-[#333333]">
-            Items shipped to{" "}
-            {shippingAddress?.addressLine1},{" "}
-            {shippingAddress?.city},{" "}
-            {shippingAddress?.state},{" "}
-            {shippingAddress?.zip},{" "}
-            {shippingAddress?.country}
-          </p>
-        </div>
-
-        {order.products.map((item) => {
-          const quantity = getProductQuantity(item.id);
-
-          const primaryImage = item.image.find(
-            (img) => img.isPrimary === 1
-          );
-
-          return (
-            <div
-              key={item.id}
-              className="flex items-center gap-6 px-6 py-8 border-b last:border-b-0"
-            >
-              <input
-                type="checkbox"
-                className="w-5 h-5 rounded border-gray-300"
-              />
-
-              <div className="relative w-28 h-28 flex-shrink-0">
-                <Image
-                  fill
-                  className="object-contain"
-                  src={
-                    primaryImage?.path ||
-                    "/default-product-image.svg"
-                  }
-                  alt={primaryImage?.altText || item.name}
-                />
-              </div>
-
-              <div className="flex-1">
-                <p className="text-[15px] text-[#333333]">
-                  {quantity} × {item.sku}
-                </p>
-
-                <p className="text-[15px] text-[#333333]">
-                  {item.name}
-                </p>
-
-                <p className="mt-2 text-[16px] font-semibold text-[#ff4b34]">
-                  $
-                  {(
-                    parseFloat(item.price) * quantity
-                  ).toFixed(2)}
-                </p>
-              </div>
+      {/* Items list (left, ~80%) + Order Summary (right, 250px); stacks <801 */}
+      <div className="min-[801px]:flex min-[801px]:items-start">
+        {/* Items */}
+        <div className="mb-[21px] min-[801px]:mb-0 min-[801px]:flex-1 min-[801px]:min-w-0 min-[801px]:pr-[21px]">
+          <div className="border border-[#ebebeb] bg-white grid grid-cols-[40px_100px_minmax(0,1fr)]">
+            {/* Items-shipped-to header spans all 3 columns */}
+            <div className="col-span-3 p-[21px] border-b border-[#ebebeb]">
+              <h5 className="text-[15px] leading-[18px] text-[#333333]">
+                Items shipped to {shippingAddress?.addressLine1},{" "}
+                {shippingAddress?.city}, {shippingAddress?.state},{" "}
+                {shippingAddress?.zip}, {shippingAddress?.country}
+              </h5>
             </div>
-          );
-        })}
-      </div>
 
-      {/* Summary */}
-      <div className="border border-gray-200 bg-white p-6 h-fit">
-        <h3 className="text-[13px] text-[#333333] font-normal uppercase mb-6">
-          Order Summary
-        </h3>
-
-        <div className="space-y-4 text-[14px]">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Shipping</span>
-            <span>${shippingCost.toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between font-semibold border-t pt-4">
-            <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            {order.products.map((item, index) => {
+              const quantity = getProductQuantity(item.id);
+              const primaryImage = item.image.find(
+                (img) => img.isPrimary === 1,
+              );
+              const notLast = index !== order.products.length - 1;
+              const rowBorder = notLast ? "border-b border-[#ebebeb]" : "";
+              return (
+                <React.Fragment key={item.id}>
+                  <div
+                    className={`flex items-center justify-center py-[21px] ${rowBorder}`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="w-[16px] h-[16px] accent-[#FF482E]"
+                    />
+                  </div>
+                  <div className={`flex items-center py-[21px] ${rowBorder}`}>
+                    <div className="relative w-[90px] h-[50px]">
+                      <Image
+                        fill
+                        className="object-contain"
+                        src={primaryImage?.path || "/default-product-image.svg"}
+                        alt={primaryImage?.altText || item.name}
+                      />
+                    </div>
+                  </div>
+                  <div
+                    className={`flex flex-col justify-center py-[21px] pr-[21px] ${rowBorder}`}
+                  >
+                    <h5 className="text-[15px] leading-[18px] text-[#333333]">
+                      {quantity} × {item.sku} - {item.name}
+                    </h5>
+                    <div className="text-[15px] leading-[22.5px] text-[#FF482E]">
+                      ${(parseFloat(item.price) * quantity).toFixed(2)}
+                    </div>
+                  </div>
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 
-        <button className="mt-8 w-full border border-gray-300 rounded-md py-3 text-[14px] hover:bg-gray-50 transition">
-          Print Invoice
-        </button>
+        {/* Order Summary */}
+        <div className="border border-[#ebebeb] bg-white p-[21px] min-[801px]:w-[250px] min-[801px]:shrink-0">
+          <h6 className="text-[13px] leading-[15.6px] uppercase text-[#333333] mb-[11px]">
+            Order Summary
+          </h6>
+
+          <div className={summaryRow}>
+            <span>Subtotal:</span>
+            <span className="float-right">${order?.totalAmount}</span>
+          </div>
+          <div className={summaryRow}>
+            <span>Shipping:</span>
+            <span className="float-right">${shippingCost.toFixed(2)}</span>
+          </div>
+          <div
+            className={`${summaryRow} font-semibold border-t border-[#ebebeb]`}
+          >
+            <span>Grand total:</span>
+            <span className="float-right">${total.toFixed(2)}</span>
+          </div>
+
+          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]">
+            Print Invoice
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default SingleOrder;

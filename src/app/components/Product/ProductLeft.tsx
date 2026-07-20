@@ -29,10 +29,7 @@ const ProductLeft = ({ images, selectedImage, setSelectedImage }: any) => {
 
         {/* Thumbnails */}
         <figcaption
-          className="
-            flex  justify-center text-[14px] text-[#808080] items-start h-[5.1rem] xl:w-[100%] 2xl:w-[100%] xl:h-[10.7rem] 
-          "
-        >
+          className="flex justify-center text-[14px] text-[#808080] items-start h-[5.1rem] xl:w-[100%] 2xl:w-[100%] xl:h-[10.7rem] text-center">
           Image may differ from the actual product
         </figcaption>
       </div>

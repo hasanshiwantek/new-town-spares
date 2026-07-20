@@ -29,7 +29,7 @@ export default function ProductsClientWrapper({
 
   const [filters, setFilters] = useState<ProductFilterPayload>({
     page: 1,
-    pageSize: 20,
+    pageSize: 10,
     categoryIds: initialCategoryId ? [initialCategoryId] : [],
     brandId: initialBrandId || null,
     minPrice: undefined,

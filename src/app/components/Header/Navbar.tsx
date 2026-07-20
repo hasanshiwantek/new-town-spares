@@ -317,6 +317,9 @@ const Navbar: React.FC = () => {
                       <Link href="/my-account/orders">Orders</Link>
                     </li>
                     <li>
+                      <Link href="/my-account/messages">Messages</Link>
+                    </li>
+                    <li>
                       <Link href="/my-account/addresses">Addresses</Link>
                     </li>
                     <li>
@@ -662,6 +665,11 @@ const Navbar: React.FC = () => {
                     <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
                       <Link href={"/my-account/orders"}>
                         Orders
+                      </Link>
+                    </li>
+                    <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">
+                      <Link href={"/my-account/messages"}>
+                        Messages
                       </Link>
                     </li>
                     <li className="hover:text-[#FD5430] cursor-pointer py-2 border-b">

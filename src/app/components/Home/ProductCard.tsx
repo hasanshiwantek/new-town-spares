@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { addToCart } from "@/redux/slices/cartSlice";
-import { toast } from "sonner";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { toast } from "sonner";
 
 interface Brand {
   id: number;
@@ -28,6 +28,7 @@ interface Product {
   availabilityText?: string;
   minPurchaseQuantity: number;
   maxPurchaseQuantity: number;
+  purchasabilityStatus: string;
 }
 
 interface ProductCardProps {
@@ -40,6 +41,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const minQty = product.minPurchaseQuantity || 1;
   const maxQty = product.maxPurchaseQuantity;
+  const purchasabilityStatus = product?.purchasabilityStatus == "available";
+
   const [quantity, setQuantity] = useState<number>(minQty);
 
   // safe brand name
@@ -73,7 +76,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setQuantity(val);
     }
   };
-  
 
   const handleQuantityBlur = () => {
     if (quantity < 1 || isNaN(quantity)) {
@@ -81,9 +83,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-
-
-   const handleAddToCart = () => {
+  const handleAddToCart = () => {
     if (quantity < 1) {
       toast.error("Quantity must be at least 1.");
       return;
@@ -129,56 +129,71 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Bottom block — anchored so price/stock/cart align across cards like live */}
         <div className="mt-auto flex flex-col">
-        {/* Price Section */}
-        <div className="flex flex-col items-start pb-[11px]">
-          {product?.msrp && Number(product.msrp) > 0 ? (
-            <>
-              <span className="text-[#333333] text-[14px] leading-[21px]">
-                Price: $
-                <span>
-                  {(Number(product.price) + Number(product.msrp)).toFixed(2)}
+          {/* Price Section */}
+          {purchasabilityStatus ? (
+            <div className="flex flex-col items-start pb-[11px]">
+              {product?.msrp && Number(product.msrp) > 0 ? (
+                <>
+                  <span className="text-[#333333] text-[14px] leading-[21px]">
+                    Price: $
+                    <span>
+                      {(Number(product.price) + Number(product.msrp)).toFixed(
+                        2,
+                      )}
+                    </span>
+                  </span>
+                  <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
+                    ${Number(product.price)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
+                  ${Number(product.price)}
                 </span>
-              </span>
-              <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
-                ${Number(product.price)}
-              </span>
-            </>
+              )}
+            </div>
           ) : (
-            <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
-              ${Number(product.price)}
-            </span>
+            <div className="flex flex-col items-start mb-2">
+              <Link
+                href="tel:0296516864"
+                className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
+              >
+                CALL FOR PRICE
+              </Link>
+            </div>
           )}
-        </div>
 
-        {/* Divider */}
-        <hr className="border-t border-[#ebebeb]" />
+          {/* Divider */}
+          <hr className="border-t border-[#ebebeb]" />
 
-        {/* In Stock */}
-        <p className="text-[14px] text-[#333333] pt-[11px] mb-[10px]">
-          {product?.availabilityText ? product?.availabilityText : "In Stock"}
-        </p>
+          {/* In Stock */}
+          <p className="text-[14px] text-[#333333] pt-[11px] mb-[10px]">
+            {product?.availabilityText ? product?.availabilityText : "In Stock"}
+          </p>
 
-        {/* Quantity + Add to Cart Row */}
-        <div className="flex items-center pb-[11px]">
-          {/* Quantity Input */}
-          <input
-            type="number"
-            min={1}
-            max={5}
-            value={quantity}
-            onChange={handleQuantityChange}
-            onBlur={handleQuantityBlur}
-            className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          />
+          {/* Quantity + Add to Cart Row */}
+          {purchasabilityStatus && (
+            <div className="flex items-center pb-[11px]">
+              {/* Quantity Input */}
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={quantity}
+                onChange={handleQuantityChange}
+                onBlur={handleQuantityBlur}
+                className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
-          >
-            Add to Cart
-          </button>
-        </div>
+              {/* Add to Cart Button */}
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
+              >
+                Add to Cart
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

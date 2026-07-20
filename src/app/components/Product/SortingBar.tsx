@@ -55,7 +55,6 @@ export default function SortingBar({
   setView,
   filters,
   setFilters,
-  filterMeta,
 }: Props) {
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = e.target.value;
@@ -83,64 +82,41 @@ export default function SortingBar({
     }));
   };
 
-  // ✅ Build a dynamic title based on filters
-  const getFilterTitle = () => {
-    const parts: string[] = [];
-
-    if (filterMeta.brandName) {
-      parts.push(`Brand: ${filterMeta.brandName}`);
-    }
-
-    if (filterMeta.categoryName) {
-      parts.push(`Category: ${filterMeta.categoryName}`);
-    }
-
-    if (filters.minPrice !== undefined && filters.maxPrice !== undefined) {
-      parts.push(`Price: $${filters.minPrice} - $${filters.maxPrice}`);
-    } else if (filters.minPrice !== undefined) {
-      parts.push(`Price: Above $${filters.minPrice}`);
-    } else if (filters.maxPrice !== undefined) {
-      parts.push(`Price: Below $${filters.maxPrice}`);
-    }
-
-    return parts.length === 0
-      ? `All Products (Showing ${total || 0})`
-      : `${parts.join(", ")} (Showing ${total || 0})`;
-  };
+  // Live only renders a page-size link once the catalog exceeds that size
+  // (e.g. 20 products → "12"; 30 → "12 24"; 100 → "12 24 36 48 96").
+  const pageSizeOptions = [12, 24, 36, 48, 96].filter((n) => total > n);
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 py-4 w-full">
-      {/* ✅ Dynamic heading */}
-      <h4 className="text-[13px] hidden sm:block text-[#333333]">
-        {getFilterTitle()}
-      </h4>
-
+    <div className="flex flex-col md:flex-row md:justify-end items-start md:items-center gap-3 py-4 w-full">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <span className="text-[13px] font-light text-[#333333]">Sort By:</span>
 
         {/* Sort Dropdown */}
         <SortDropdown filters={filters} setFilters={setFilters} />
 
-        {/* Page size — live: bold "Show" + underlined links, current one plain */}
-        <div className="hidden sm:flex items-center">
-          <span className="text-[13px] font-bold text-[#333333] mr-[11px]">
-            Show
-          </span>
-          {[12, 24, 36, 48, 96].map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() =>
-                setFilters((prev: any) => ({ ...prev, pageSize: n, page: 1 }))
-              }
-              className={`text-[13px] text-[#333333] mr-[11px] hover:text-[#FF482E] ${
-                filters.pageSize === n ? "" : "underline"
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
+        {/* Page size — live: bold "Show" + underlined links, current one plain.
+            Only sizes the catalog exceeds are shown. */}
+        {pageSizeOptions.length > 0 && (
+          <div className="hidden sm:flex items-center">
+            <span className="text-[13px] font-bold text-[#333333] mr-[11px]">
+              Show
+            </span>
+            {pageSizeOptions.map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() =>
+                  setFilters((prev: any) => ({ ...prev, pageSize: n, page: 1 }))
+                }
+                className={`text-[13px] text-[#333333] mr-[11px] hover:text-[#FF482E] ${
+                  filters.pageSize === n ? "" : "underline"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* View Toggle */}
         <div className="hidden lg:flex items-center gap-2">

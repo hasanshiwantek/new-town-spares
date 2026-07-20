@@ -3,6 +3,7 @@ import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import AccountEmptyState from "./AccountEmptyState";
 
 const ReturnOrder = () => {
   const dispatch = useAppDispatch();
@@ -80,14 +81,7 @@ const ReturnOrder = () => {
   // No Data State
   if (orders.length === 0) {
     return (
-      <div className="p-4">
-        <div className="w-full bg-white border border-black p-6 rounded-lg text-center">
-          <p className="text-[#545454] text-[14px]">
-            You haven't requested any returns yet. When you do, they will appear
-            on this page.
-          </p>
-        </div>
-      </div>
+      <AccountEmptyState message="You haven't requested any returns yet. When you do, they will appear on this page." />
     );
   }
 

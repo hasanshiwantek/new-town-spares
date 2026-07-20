@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { globalSearch } from "@/redux/slices/homeSlice";
-import { usePathname } from "next/navigation";
+import { Search } from "lucide-react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 // Simple debounce helper
 const useDebounce = (value: string, delay: number) => {
@@ -25,6 +25,8 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
   const { searchData, loading } = useAppSelector((state: any) => state.home);
 
   const [results, setResults] = useState<any[]>([]);
+
+  console.log({ results });
 
   // Cache state object for storing search results
   const [searchCache, setSearchCache] = useState<{ [key: string]: any[] }>({});
@@ -70,6 +72,7 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
         price: item.price || item.costPrice || "0.00",
         url: `/category/${item.categories?.[0]?.slug || item.slug}`,
         productUrl: `${item?.productUrl}`,
+        imageUrl: item?.image[0]?.path,
       }));
 
       setResults(mapped);
@@ -148,8 +151,8 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
             value={query}
             // onChange={(e) => setQuery(e.target.value)}
             onChange={(e) => {
-              handleOnChange(e.target.value)
-              setQuery(e.target.value)
+              handleOnChange(e.target.value);
+              setQuery(e.target.value);
             }}
             // onKeyDown={(e) => {
             //   if (e.key === "Enter") handleSearch();
@@ -159,23 +162,20 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
                 e.preventDefault();
                 const q = query.trim();
                 if (q) {
-                  localStorage.setItem("advancedSearchFilters", JSON.stringify({ q }));
+                  localStorage.setItem(
+                    "advancedSearchFilters",
+                    JSON.stringify({ q }),
+                  );
                   window.dispatchEvent(new Event("searchFiltersUpdated"));
                   if (pathname === "/advanced-search") {
-                    window.location.reload()
+                    window.location.reload();
                   } else {
                     router.push(`/advanced-search`);
                   }
                 }
               }
             }}
-            className="
-      w-full pl-[14px] pr-[56px] border-[#d9d9d9] border rounded-sm
-      py-[10.5px]
-      bg-white text-gray-800 !text-[14px]
-      focus:outline-none focus:ring-2 focus:ring-orange-400
-      h-[42px]
-    "
+            className="w-full pl-[14px] pr-[56px] border-[#d9d9d9] border rounded-sm py-[10.5px] bg-white text-gray-800 text-[14px]! focus:outline-none focus:ring-2 focus:ring-orange-400 h-[42px]"
           />
           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
             <button
@@ -192,10 +192,13 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
                 e.preventDefault();
                 const q = query.trim();
                 if (q) {
-                  localStorage.setItem("advancedSearchFilters", JSON.stringify({ q }));
+                  localStorage.setItem(
+                    "advancedSearchFilters",
+                    JSON.stringify({ q }),
+                  );
                   window.dispatchEvent(new Event("searchFiltersUpdated"));
                   if (pathname === "/advanced-search") {
-                    window.location.reload()
+                    window.location.reload();
                   } else {
                     router.push(`/advanced-search`);
                   }
@@ -230,8 +233,10 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
       {/* Dropdown Results */}
       {showDropdown && query.trim().length > 1 && (
         // <div className="absolute top-full left-0 w-full mt-2 bg-white text-[#4A4A4A] shadow-lg rounded-md overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-        <div className="absolute top-full left-0 w-full mt-2 bg-white text-[#4A4A4A] shadow-lg rounded-md overflow-hidden max-h-[400px] overflow-y-auto" style={{ zIndex: 9999 }}>
-
+        <div
+          className="absolute top-full left-0 w-full mt-1 bg-white text-[#4A4A4A] shadow-lg overflow-hidden max-h-[400px] overflow-y-auto"
+          style={{ zIndex: 9999 }}
+        >
           {loading && <div className="p-3 text-gray/80">Searching...</div>}
 
           {!loading && results.length === 0 && (
@@ -243,26 +248,30 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               <div
                 key={item.id}
                 onClick={() => handleSelect(item.productUrl)}
-                className="
-            flex items-start gap-3 p-3 border-b border-gray/50
-            hover:bg-[var(--primary-color)] hover:text-white
-            transition-colors cursor-pointer
-          "
+                className="flex items-start gap-3 p-5 border-b border-gray/50
+    hover:bg-[var(--primary-color)] hover:[&_*]:text-white transition-colors cursor-pointer"
                 style={{ zIndex: 300 }}
-
               >
                 {/* Product Info */}
-                <div className="flex flex-col flex-grow overflow-hidden">
-                  <p className="text-sm font-semibold truncate">
-                    {item?.brand || "Brand"} |{" "}
-                    <span>SKU: {item?.sku || "N/A"}</span>
-                  </p>
-                  <p className="text-[15px] font-medium leading-tight line-clamp-2">
-                    {item?.name}
-                  </p>
-                  <p className="text-sm font-semibold mt-1">
-                    {item?.price ? `$${item?.price}` : "$0.00"}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={item?.imageUrl}
+                    alt="product image"
+                    width={18}
+                    height={18}
+                  />
+                  <div className="text-[13px] font-normal flex flex-col grow overflow-hidden ml-4">
+                    <p className="truncate">
+                      {item?.brand || "Brand"} |{" "}
+                      <span>SKU: {item?.sku || "N/A"}</span>
+                    </p>
+                    <p className="text-[15px] font-medium leading-tight line-clamp-2">
+                      {item?.name}
+                    </p>
+                    <p className="font-light text-[#ff482e] mt-1">
+                      {item?.price ? `$${item?.price}` : "$0.00"}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}

@@ -1,7 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/hooks/useReduxHooks";
+import { addToCart } from "@/redux/slices/cartSlice";
+import { toast } from "sonner";
 import ProductPrice from "../productprice/ProductPrice";
 interface Product {
   id: number;
@@ -19,10 +25,51 @@ interface Product {
   availabilityText?: string;
   description?: string;
   customFields?: Record<string, string>;
+  purchasabilityStatus?: string;
+  minPurchaseQuantity?: number;
+  maxPurchaseQuantity?: number;
 }
 
 export default function ProductCategoryCard({ product }: { product: Product }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const purchasabilityStatus = product?.purchasabilityStatus == "available";
+  const [quantity, setQuantity] = useState<number>(
+    product.minPurchaseQuantity || 1,
+  );
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    if (isNaN(val) || val <= 0) {
+      setQuantity(1);
+    } else if (val > 5) {
+      setQuantity(5);
+    } else {
+      setQuantity(val);
+    }
+  };
+
+  const handleQuantityBlur = () => {
+    if (quantity < 1 || isNaN(quantity)) {
+      setQuantity(1);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (quantity < 1) {
+      toast.error("Quantity must be at least 1.");
+      return;
+    }
+    if (quantity > 5) {
+      toast.error("Maximum quantity allowed is 5.");
+      return;
+    }
+    dispatch(addToCart({ ...product, quantity }));
+    toast.success(`${product?.name ?? "Product"} added to cart!`);
+    router.push("/cart");
+  };
 
   const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";
   const brandName = product.brand?.name ?? "";
@@ -91,12 +138,25 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
           <p className="text-[#333333] text-[14px] w-full text-left">
             {product?.availabilityText ?? "In Stock"}
           </p>
-          <Link
-            href={`${product?.productUrl}`}
-            className="w-full mt-2 flex items-center justify-center bg-[#FD5430] hover:bg-[#e04a2a] text-white text-[14px] font-light h-[42px] transition-colors"
-          >
-            Choose Options
-          </Link>
+          {purchasabilityStatus && (
+            <div className="w-full mt-2 flex items-center">
+              <input
+                type="number"
+                min={1}
+                max={5}
+                value={quantity}
+                onChange={handleQuantityChange}
+                onBlur={handleQuantityBlur}
+                className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
+              >
+                Add to Cart
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

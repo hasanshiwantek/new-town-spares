@@ -123,7 +123,7 @@ const FooterBottom = () => {
                       });
                   }
                 }}
-                className="w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 "
+                className="w-full max-w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 "
               >
                 <input
                   type="email"

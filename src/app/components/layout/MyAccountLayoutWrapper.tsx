@@ -1,12 +1,26 @@
 // app/my-account/MyAccountTabs.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { fetchCustomerMessages } from "@/redux/slices/OrderMessage";
+import { RootState } from "@/redux/store";
 
 const MyAccountTabs = () => {
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+
+  // Live shows the message count on the Messages tab (e.g. "Messages (2)").
+  const { messages, pagination } = useAppSelector(
+    (state: RootState) => state.customerMessage,
+  );
+  const messagesCount = pagination?.total ?? messages?.length ?? 0;
+
+  useEffect(() => {
+    dispatch(fetchCustomerMessages({ page: 1, pageSize: 100 }));
+  }, [dispatch]);
 
   const tabs = [
     { name: "Orders", href: "/my-account/orders" },
@@ -20,6 +34,13 @@ const MyAccountTabs = () => {
     const currentTab = tabs.find((tab) => pathname.startsWith(tab.href));
     return currentTab?.name || "Your Account";
   };
+
+  // On an order detail route (/my-account/orders/<id>) live shows the order
+  // number as the page heading instead of the "Orders" tab name.
+  const orderDetailMatch = pathname.match(/^\/my-account\/orders\/([^/]+)/);
+  const pageHeading = orderDetailMatch
+    ? `Order #${decodeURIComponent(orderDetailMatch[1])}`
+    : getActiveTab();
 
   return (
     <div>
@@ -37,7 +58,7 @@ const MyAccountTabs = () => {
 
       {/* Heading */}
       <h1 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center my-[26.25px]">
-        {getActiveTab()}
+        {pageHeading}
       </h1>
 
       {/* Tabs */}
@@ -51,7 +72,9 @@ const MyAccountTabs = () => {
               className={`text-[14px] font-semibold underline transition-colors duration-200
         ${isActive ? "text-[#666666]" : "text-[#FF482E]"}`}
             >
-              {tab.name}
+              {tab.name === "Messages"
+                ? `Messages (${messagesCount})`
+                : tab.name}
             </Link>
           );
         })}

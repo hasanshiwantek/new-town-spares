@@ -20,11 +20,9 @@ const Page = () => {
       {orders.length > 0 ? (
         <>
           <div className="mx-auto w-full max-w-[600px]  px-4 lg:px-0">
-            <div className="space-y-4">
-              <MessageList />
-            </div>
+            <MessageList />
 
-            <div className="mt-7">
+            <div className="mt-[32px]">
               <Messages />
             </div>
           </div>
