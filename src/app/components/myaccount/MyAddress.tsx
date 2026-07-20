@@ -54,6 +54,7 @@ const MyAddress = () => {
     .map((c) => ({ name: c.name.common, code: c.cca2 }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
+   
   // useEffect(() => {
   //   dispatch(fetchAccountAddress());
   // }, [dispatch]);
@@ -62,13 +63,14 @@ const MyAddress = () => {
     dispatch(fetchCustomerAddress());
   }, [dispatch]);
   const handleDelete = async (id: number | string) => {
+    console.log(id,'ya id hy')
     const confirmDelete = confirm(
       `Are you sure you want to delete address with ID: ${id}?`,
     );
     if (confirmDelete) {
       try {
         await dispatch(deletecustomeraddress({ id })).unwrap();
-        dispatch(fetchAccountAddress());
+        dispatch(fetchCustomerAddress());
       } catch (err) {
         console.error("Delete failed:", err);
       }
@@ -179,7 +181,7 @@ const MyAddress = () => {
                   </button>
                   <span className="mx-[5px]">|</span>
                   <button
-                    onClick={() => handleDelete(item.addressId)}
+                    onClick={() => handleDelete(item.id)}
                     className="underline hover:text-[#FF482E]"
                   >
                     Delete
