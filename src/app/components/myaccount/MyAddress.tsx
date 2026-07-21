@@ -4,6 +4,7 @@ import {
   fetchAccountAddress,
   fetchCustomerAddress,
   updatecustomer,
+  updateCustomerAddress,
 } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
@@ -34,36 +35,35 @@ interface AddressFormValues {
 const MyAddress = () => {
   const dispatch = useAppDispatch();
 
-  const { address, loading, error,customerAddresses } = useAppSelector(
+  const { address, loading, error, customerAddresses } = useAppSelector(
     (state: RootState) => state.myaccount,
   );
-  
-  const auth = useAppSelector((state: RootState) => state.auth);
 
+  const auth = useAppSelector((state: RootState) => state.auth);
+  const [editData, setEditData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<AddressFormValues>();
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   reset,
+  //   formState: { errors },
+  // } = useForm<AddressFormValues>();
 
   const countryList = countries
     .map((c) => ({ name: c.name.common, code: c.cca2 }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
-   
   // useEffect(() => {
   //   dispatch(fetchAccountAddress());
   // }, [dispatch]);
 
-    useEffect(() => {
+  useEffect(() => {
     dispatch(fetchCustomerAddress());
   }, [dispatch]);
   const handleDelete = async (id: number | string) => {
-    console.log(id,'ya id hy')
+    console.log(id, "ya id hy");
     const confirmDelete = confirm(
       `Are you sure you want to delete address with ID: ${id}?`,
     );
@@ -78,51 +78,47 @@ const MyAddress = () => {
   };
 
   const openEditModal = (item: any) => {
-    setEditingId(item.addressId ?? null);
-    reset({
-      firstName: item.firstName || "",
-      lastName: item.lastName || "",
-      companyName: item.companyName || "",
-      phoneNumber: item.phoneNumber || "",
-      address1: item.addressLine1 || "",
-      address2: item.addressLine2 || "",
-      suburb: item.city || "",
-      country: item.country || "",
-      state: item.state || "",
-      postcode: item.zip || "",
+    setEditData({
+      addressId: item.id,
+      addressLine1: item.address_line_1,
+      addressLine2: item.address_line_2,
+      city: item.city,
+      state: item.state,
+      zip: item.zip,
+      country: item.country,
+      firstName: item.first_name,
+      lastName: item.last_name,
+      companyName: item.company_name,
+      phone: item.phone_number,
     });
+
     setShowModal(true);
   };
 
-  const handleUpdate = async (data: AddressFormValues) => {
+  const handleUpdate = async () => {
     const payload = {
-      addresses: [
-        {
-          id: editingId,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          companyName: data.companyName || "",
-          phoneNumber: data.phoneNumber || "",
-          addressLine1: data.address1 || "",
-          addressLine2: data.address2 || "",
-          city: data.suburb,
-          state: data.state,
-          zip: data.postcode,
-          country: data.country,
-        },
-      ],
+      address_line_1: editData.addressLine1,
+      address_line_2: editData.addressLine2,
+      city: editData.city,
+      state: editData.state,
+      zip: editData.zip,
+      country: editData.country,
+      first_name: editData.firstName,
+      last_name: editData.lastName,
+      company_name: editData.companyName,
+      phone_number: editData.phone,
     };
 
     try {
       await dispatch(
-        updatecustomer({
-          id: auth?.user?.id,
+        updateCustomerAddress({
+          id: editData.addressId,
           data: payload,
         }),
       ).unwrap();
 
       setShowModal(false);
-      dispatch(fetchAccountAddress());
+      dispatch(fetchCustomerAddress());
     } catch (err) {
       console.error("Update failed:", err);
     }
@@ -162,9 +158,9 @@ const MyAddress = () => {
             >
               <div className="relative min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
                 <h5 className="text-[15px] leading-[18px] font-normal text-[#333333] mb-[11px]">
-                   {item.first_name || "N/A"}   {item.last_name}
+                  {item.first_name || "N/A"} {item.last_name}
                 </h5>
-                <p>   {item.address_line_1}</p>
+                <p> {item.address_line_1}</p>
                 {item.address_line_2 && <p> {item.address_line_2}</p>}
                 <p>
                   {item.city} {item.zip}
@@ -208,7 +204,10 @@ const MyAddress = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <form
-            onSubmit={handleSubmit(handleUpdate)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdate();
+            }}
             className="bg-white rounded-[6px] shadow-lg w-full max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden relative"
           >
             {/* Close Btn */}
@@ -237,10 +236,15 @@ const MyAddress = () => {
                   </FieldLabel>
                   <input
                     id="edit-firstName"
-                    className={addrInputCls(!!errors.firstName)}
-                    {...register("firstName", { required: true })}
+                    className={addrInputCls()}
+                    value={editData?.firstName || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        firstName: e.target.value,
+                      })
+                    }
                   />
-                  <ErrorMsg show={!!errors.firstName} label="First Name" />
                 </div>
 
                 <div>
@@ -249,10 +253,15 @@ const MyAddress = () => {
                   </FieldLabel>
                   <input
                     id="edit-lastName"
-                    className={addrInputCls(!!errors.lastName)}
-                    {...register("lastName", { required: true })}
+                    className={addrInputCls()}
+                    value={editData?.lastName || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        lastName: e.target.value,
+                      })
+                    }
                   />
-                  <ErrorMsg show={!!errors.lastName} label="Last Name" />
                 </div>
 
                 <div>
@@ -262,7 +271,13 @@ const MyAddress = () => {
                   <input
                     id="edit-companyName"
                     className={addrInputCls()}
-                    {...register("companyName")}
+                    value={editData?.companyName || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        companyName: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
@@ -273,7 +288,13 @@ const MyAddress = () => {
                   <input
                     id="edit-phoneNumber"
                     className={addrInputCls()}
-                    {...register("phoneNumber")}
+                    value={editData?.phone || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        phone: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
@@ -281,23 +302,35 @@ const MyAddress = () => {
                   <FieldLabel htmlFor="edit-address1" required>
                     Address Line 1
                   </FieldLabel>
-                  <input
-                    id="edit-address1"
-                    className={addrInputCls(!!errors.address1)}
-                    {...register("address1", { required: true })}
-                  />
-                  <ErrorMsg show={!!errors.address1} label="Address Line 1" />
+                 <input
+  id="edit-address1"
+  className={addrInputCls()}
+  value={editData?.addressLine1 || ""}
+  onChange={(e) =>
+    setEditData({
+      ...editData,
+      addressLine1: e.target.value,
+    })
+  }
+/>
+                  
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-address2">
                     Address Line 2
                   </FieldLabel>
-                  <input
-                    id="edit-address2"
-                    className={addrInputCls()}
-                    {...register("address2")}
-                  />
+                 <input
+  id="edit-address2"
+  className={addrInputCls()}
+  value={editData?.addressLine2 || ""}
+  onChange={(e) =>
+    setEditData({
+      ...editData,
+      addressLine2: e.target.value,
+    })
+  }
+/>
                 </div>
 
                 <div>
@@ -305,32 +338,45 @@ const MyAddress = () => {
                     Suburb/City
                   </FieldLabel>
                   <input
-                    id="edit-suburb"
-                    className={addrInputCls(!!errors.suburb)}
-                    {...register("suburb", { required: true })}
-                  />
-                  <ErrorMsg show={!!errors.suburb} label="Suburb/City" />
+  id="edit-suburb"
+  className={addrInputCls()}
+  value={editData?.city || ""}
+  onChange={(e) =>
+    setEditData({
+      ...editData,
+      city: e.target.value,
+    })
+  }
+/>
+                  
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-country" required>
                     Country
                   </FieldLabel>
-                  <select
-                    id="edit-country"
-                    className={addrSelectCls(!!errors.country)}
-                    {...register("country", { required: true })}
-                  >
-                    <option value="" disabled>
-                      Choose a Country
-                    </option>
-                    {countryList.map((c) => (
-                      <option key={c.code} value={c.name}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ErrorMsg show={!!errors.country} label="Country" />
+                 <select
+  id="edit-country"
+  className={addrSelectCls()}
+  value={editData?.country || ""}
+  onChange={(e) =>
+    setEditData({
+      ...editData,
+      country: e.target.value,
+    })
+  }
+>
+  <option value="" disabled>
+    Choose a Country
+  </option>
+
+  {countryList.map((c) => (
+    <option key={c.code} value={c.code}>
+      {c.name}
+    </option>
+  ))}
+</select>
+                  
                 </div>
 
                 <div>
@@ -338,23 +384,25 @@ const MyAddress = () => {
                     State/Province
                   </FieldLabel>
                   <input
-                    id="edit-state"
-                    className={addrInputCls(!!errors.state)}
-                    {...register("state", { required: true })}
-                  />
-                  <ErrorMsg show={!!errors.state} label="State/Province" />
+  id="edit-state"
+  className={addrInputCls()}
+  value={editData?.state || ""}
+  onChange={(e) =>
+    setEditData({
+      ...editData,
+      state: e.target.value,
+    })
+  }
+/>
+                
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-postcode" required>
                     Zip/Postcode
                   </FieldLabel>
-                  <input
-                    id="edit-postcode"
-                    className={addrInputCls(!!errors.postcode)}
-                    {...register("postcode", { required: true })}
-                  />
-                  <ErrorMsg show={!!errors.postcode} label="Zip/Postcode" />
+                  
+                  
                 </div>
               </div>
             </div>
