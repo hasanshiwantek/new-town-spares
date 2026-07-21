@@ -120,8 +120,8 @@ w-full
             <>
               <style>{`
       .custom-description {
-        color: #545454;
-        font-family: Roboto, Arial, Helvetica, sans-serif;
+        color: #333333;
+        font-family: poppins, sans-serif;
       }
 
       .custom-description h1,
@@ -130,16 +130,21 @@ w-full
       .custom-description h4,
       .custom-description h5,
       .custom-description h6 {
-        color: #333;
+        color: #333333;
         margin: 16px 0 10px;
         line-height: 1.4;
       }
-
+       .custom-description h3{
+       font-size:22px
+       }
+        .custom-description h2{
+       font-size:25px
+       }
       .custom-description p {
         font-size: 14px;
         line-height: 1.7;
         margin: 8px 0;
-        color: #545454;
+        color: #333333;
       }
 
       .custom-description strong {
@@ -147,7 +152,7 @@ w-full
       }
 
       .custom-description a {
-        color: #d42020;
+        color: #333333;
         text-decoration: underline;
       }
 
@@ -159,6 +164,7 @@ w-full
       .custom-description li {
         margin-bottom: 6px;
         line-height: 1.6;
+        font-size:14px
       }
 
       .custom-scrollbar::-webkit-scrollbar {

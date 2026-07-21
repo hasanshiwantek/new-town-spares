@@ -15,6 +15,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { baseURL, sitekey, storeId } from "@/lib/axiosInstance";
 import { fetchCartList } from "@/redux/slices/cartSlice";
+import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
 
 interface SignupFormValues {
   firstName: string;
@@ -104,6 +105,25 @@ const SignupPage = () => {
       "Content-Type": "application/json",
     },
   });
+   const {
+            email,
+            userRole,
+            password,
+            password_confirmation,
+            suburb,
+            ...body
+          } = payload;
+
+          const addressPayload = {
+            ...body,
+            city: suburb,
+          };
+          dispatch(
+            addCustomerAddress({
+              id: result?.payload?.user?.id,
+              data: addressPayload,
+            }),
+          );
 
   await dispatch(fetchCartList());
 
