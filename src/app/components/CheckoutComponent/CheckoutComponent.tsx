@@ -49,6 +49,7 @@ import PaymentStep from "./Paymentstep";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import { resetMultiAddress } from "@/redux/slices/multiAddressSlice";
 import { resetShippingRates } from "@/redux/slices/shippingSlice";
+export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
 
 // Stripe publishable key
 const stripePromise = loadStripe(
@@ -96,7 +97,7 @@ interface CheckoutFormValues {
 // Inner component that uses Stripe hooks
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
   const { isMultiAddress, completedDestinations, destinations, destShippingRates } = useAppSelector(
     (state) => state.multiAddress

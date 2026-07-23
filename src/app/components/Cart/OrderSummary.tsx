@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { calculatePackage } from "../CheckoutComponent/Shippingstep";
 
 const OrderSummary = () => {
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   const {
     appliedCoupon,
     discountAmount,

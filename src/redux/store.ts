@@ -18,6 +18,7 @@ import contactReducer from "./slices/contactSlice";
 import multiAddressReducer from "./slices/multiAddressSlice";
 import advanceSearchReducer from "./slices/advanceSearchSlice";
 import orderMessageReducer from "./slices/OrderMessage"
+import cartsSliceReducer from "./slices/cartsSlice";
 
 // ✅ only cart persist hoga
 const cartPersistConfig = {
@@ -67,6 +68,7 @@ const rootReducer = combineReducers({
   contact: contactReducer,
   advanceSearch: advanceSearchReducer,
   scripts: scriptReducer,
+   carts: cartsSliceReducer,
     customerMessage: orderMessageReducer,
 });
 

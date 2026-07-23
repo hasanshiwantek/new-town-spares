@@ -1,7 +1,8 @@
 "use client";
 
-import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { addToCart } from "@/redux/slices/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
+import { RootState } from "@/redux/store";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -38,6 +39,12 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  const cart = useAppSelector((state: RootState) => state.carts?.items);
+  const { cartLoading, loading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
+  const cartLoad = cartLoading || loading;
 
   const minQty = product.minPurchaseQuantity || 1;
   const maxQty = product.maxPurchaseQuantity;
@@ -83,19 +90,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
-  const handleAddToCart = () => {
-    if (quantity < 1) {
-      toast.error("Quantity must be at least 1.");
-      return;
-    }
-    if (quantity > 5) {
-      toast.error("Maximum quantity allowed is 5.");
-      return;
-    }
-    dispatch(addToCart({ ...product, quantity }));
-    toast.success(`${productName} added to cart!`);
-    router.push("/cart");
-  };
 
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
@@ -186,12 +180,53 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               />
 
               {/* Add to Cart Button */}
-              <button
+              {/* <button
                 onClick={handleAddToCart}
                 className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
               >
                 Add to Cart
-              </button>
+              </button> */}
+               <button
+            onClick={() => {
+              if (purchasabilityStatus) {
+                const cartItem = cart.find(
+                  (item: any) => item.id === product.id,
+                );
+                const minQty = product.minPurchaseQuantity || 1;
+                const maxQty = product.maxPurchaseQuantity;
+                const currentQty = cartItem?.quantity || 0;
+                const remaining = maxQty ? maxQty - currentQty : Infinity;
+                if (remaining <= 0) {
+                  toast.error(
+                    `You have already reached the maximum limit (${maxQty}) for this product.`,
+                  );
+                  return;
+                }
+                // dispatch(addToCart(product));
+                // Add only up to the allowed maximum
+                const quantityToAdd = Math.min(minQty, remaining);
+
+                dispatch(
+                  addCart({
+                    data: {
+                      productId: product?.id,
+                      quantity: quantityToAdd,
+                    },
+                  }),
+                )
+                  .unwrap()
+                  .then(() => {
+                    toast.success(`${product.name} added to cart!`);
+                    dispatch(fetchCartList());
+                    router.push("/cart");
+                  });
+              }
+            }}
+            disabled={!purchasabilityStatus || cartLoad}
+            className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
+          >
+            {"ADD TO CART"}
+          </button>
             </div>
           )}
         </div>
