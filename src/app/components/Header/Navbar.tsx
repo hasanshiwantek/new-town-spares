@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   const totalCartItems = cart.reduce(
     (sum: number, item: any) => sum + (item?.quantity || 0),
     0,

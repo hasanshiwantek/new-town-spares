@@ -31,6 +31,20 @@ export const getWebsiteSeo = createAsyncThunk(
     }
   }
 );
+export const visitorSession = createAsyncThunk(
+  "visitor-session",
+  async (data: any, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post("web/visitor-session", data);
+
+      return res.data;
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Login failed"
+      );
+    }
+  }
+);
 
 export const getBlogById = createAsyncThunk(
   "storeFront/getBlogById",

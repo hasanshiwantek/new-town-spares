@@ -12,7 +12,8 @@ import { RootState } from "@/redux/store";
 import { useState } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
 import { toast } from "react-toastify";
-
+import { fetchCartList } from "@/redux/slices/cartSlice";
+import { baseURL, storeId } from "@/lib/axiosInstance";
 interface SigninFormValues {
   email: string;
   password: string;
@@ -36,8 +37,25 @@ const SigninPage = () => {
     try {
       const result = await dispatch(loginUser(data));
       if (loginUser.fulfilled.match(result)) {
-        reset();
-        router.push("/my-account/orders");
+         const token = result?.payload?.token
+        const fetchCartListInner = async () => {
+          const sessionId = localStorage.getItem("sessionId")
+          const res = await fetch(`${baseURL}web/cart/transfer`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "storeId": storeId,
+              "X-Session-ID": sessionId || "",
+              "Content-Type": "application/json",
+            },
+          });
+          
+          reset();
+          dispatch(fetchCartList());
+          router.push("/my-account/orders");
+        };
+         fetchCartListInner()
+        
       } else {
         const errorMessage =
           typeof result?.payload === "string"

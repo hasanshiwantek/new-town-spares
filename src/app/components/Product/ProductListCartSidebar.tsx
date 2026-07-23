@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 
 export default function ProductListCartSidebar() {
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   const router = useRouter();
   const {
     skuInput,

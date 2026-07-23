@@ -12,7 +12,7 @@ import ProductPrice from "../productprice/ProductPrice";
 const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   const { reviews, reviewsLoading, reviewsError, stats } = useAppSelector(
     (state) => state.home,
   );

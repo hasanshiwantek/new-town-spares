@@ -6,7 +6,7 @@ import CartList from "./CartList";
 import OrderSummary from "./OrderSummary";
 const Cart = () => {
   const auth = useAppSelector((state: RootState) => state?.auth);
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   const isLoggedIn = Boolean(auth?.isAuthenticated);
   return (
     <main className="w-full flex justify-center py-4">

@@ -5,9 +5,10 @@ import { fetchCategories } from "@/lib/api/category";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getWebPages } from "@/redux/slices/storeFrontSlice";
+import { getWebPages, visitorSession } from "@/redux/slices/storeFrontSlice";
 import { getBrands } from "@/redux/slices/homeSlice";
 import { customerProfile, logout } from "@/redux/slices/authSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { toast } from "react-toastify";
 import { RootState } from "@/redux/store";
 interface Category {
@@ -74,8 +75,17 @@ const FooterBottom = () => {
   useEffect(() => {
     dispatch(getWebPages({ page: 1, perPage: 100 }));
     dispatch(getBrands())
-  }, [dispatch]);
-
+       dispatch(fetchCartList());
+  },[]);
+  useEffect(() => {
+    const existingSession = localStorage.getItem("sessionId");
+    if (existingSession) {
+      dispatch(visitorSession({ sessionId: existingSession }));
+    } else {
+      const randomString = Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("sessionId", randomString);
+    }
+  }, []);
   useEffect(() => {
     if (!paramsToken) return;
     const login = async () => {
@@ -85,7 +95,7 @@ const FooterBottom = () => {
       localStorage.setItem("persist:auth", JSON.stringify(auth));
       const result = await dispatch(customerProfile());
       if (customerProfile.fulfilled.match(result)) {
-        // dispatch(fetchCartList());
+        dispatch(fetchCartList());
         window.location.href = "/my-account/orders";
       }
     };

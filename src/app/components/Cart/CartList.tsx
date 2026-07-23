@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { clearCart, removeFromCart, updateQty } from "@/redux/slices/cartSlice";
+import { clearCart, fetchCartList, removeFromCart, updateQty } from "@/redux/slices/cartSlice";
+import { deleteCart } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -17,7 +18,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 const CartList = () => {
   const dispatch = useAppDispatch();
-  const cart = useAppSelector((state: RootState) => state.cart.items);
+  const cart = useAppSelector((state: RootState) => state.carts.items);
   console.log("Cart Items:", cart);
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
@@ -32,13 +33,28 @@ const CartList = () => {
       }));
     }
   };
-
-  const confirmDelete = () => {
+  function removeLocalShipping() {
+    localStorage.removeItem("shippingCost")
+    localStorage.removeItem("shippingData")
+  }
+  // const confirmDelete = () => {
+  //   if (itemToDelete) {
+  //     dispatch(removeFromCart(itemToDelete.id));
+  //     setItemToDelete(null);
+  //   }
+  //   setIsDialogOpen(false);
+  // };
+    const confirmDelete = () => {
+      console.log(itemToDelete,"hello")
     if (itemToDelete) {
-      dispatch(removeFromCart(itemToDelete.id));
-      setItemToDelete(null);
+      // dispatch(removeFromCart(itemToDelete.id));
+      dispatch(deleteCart({ id: itemToDelete?.cartItemId })).unwrap().then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping()
+        setItemToDelete(null);
+        setIsDialogOpen(false);
+      })
     }
-    setIsDialogOpen(false);
   };
   useEffect(() => {
     const updatedQuantities: { [key: string]: number } = {};
@@ -282,7 +298,7 @@ const CartList = () => {
             <Button
               variant="destructive"
               onClick={confirmDelete}
-              className="!p-4 !text-[#fd5430] !text-lg"
+              className="!p-4 !text-[#ffffff] !text-lg"
             >
               Confirm
             </Button>
