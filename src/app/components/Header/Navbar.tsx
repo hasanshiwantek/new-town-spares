@@ -24,6 +24,7 @@ import MobileSearchBar from "./MobileSearchBar";
 // ✅ Optimized imports (Next Image optimized assets)
 import { fetchCategories } from "@/lib/api/category";
 import usaFlag from "../../../../public/usa-logo.png";
+import { addBySku, fetchCartList } from "@/redux/slices/cartsSlice";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -40,18 +41,36 @@ const Navbar: React.FC = () => {
   const { currencies, status, selectedCurrency } = useAppSelector(
     (state: RootState) => state.currency,
   );
+  const { loading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
   const [categories, setCategories] = useState<any[]>([]);
 
   const [open, setOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement | null>(null);
+    const accountRef = useRef<HTMLDivElement | null>(null);
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
   }>({});
   const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
     useAddProductBySku();
-
+    
+  const handleSkuCart = async ()=>{
+    if(skuInput == "" || qty<1){
+      return 
+    }
+       const result =  await dispatch(addBySku({sku:skuInput,quantity:qty}))
+       if (addBySku.fulfilled.match(result)) {
+    toast.success(result.payload.message);
+    setSkuInput("");
+        setQty(1);
+      dispatch(fetchCartList())
+  } else {
+    //  toast.error(result.payload.message);
+  }
+  }
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchCurrencies());
@@ -128,7 +147,24 @@ const Navbar: React.FC = () => {
       router.replace("/auth/login");
     }
   };
+useEffect(() => {
+  if (!auth?.isAuthenticated || !isAccountOpen) return;
 
+  const handleAccountOutside = (event: MouseEvent) => {
+    if (
+      accountRef.current &&
+      !accountRef.current.contains(event.target as Node)
+    ) {
+      setIsAccountOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleAccountOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleAccountOutside);
+  };
+}, [auth?.isAuthenticated, isAccountOpen]);
   // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -141,6 +177,7 @@ const Navbar: React.FC = () => {
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
         setIsCartOpen(false);
       }
+      
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -232,11 +269,12 @@ const Navbar: React.FC = () => {
 
               <button
                 type="button"
-                onClick={handleAddBySku}
-                disabled={adding}
+                onClick={handleSkuCart}
+                disabled={loading}
                 className="w-[30%] xl:w-[34%] h-[42px] bg-[#FF482E] text-[14px] text-white disabled:opacity-70 rounded-r-sm"
+                
               >
-                {adding ? "..." : "Add to Cart"}
+                {loading ? "loading" : "Add to Cart"}
               </button>
             </div>
           </div>
@@ -271,7 +309,7 @@ const Navbar: React.FC = () => {
             </div> */}
 
             {/* Account */}
-            <div className="relative">
+            <div className="relative" ref={accountRef}>
               <div
                 onClick={() =>
                   auth?.isAuthenticated
@@ -538,23 +576,24 @@ const Navbar: React.FC = () => {
             <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
               <input
                 type="number"
-                min={1}
+               
                 value={qty}
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }
                 className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
                 style={{ appearance: "textfield" }}
+                  onFocus={(e) => e.target.select()}
               />
             </div>
 
             <button
               type="button"
-              onClick={handleAddBySku}
-              disabled={adding}
+              onClick={handleSkuCart}
+                disabled={loading}
               className="h-[42px] px-[11px] bg-[#FF482E] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
             >
-              {adding ? "..." : "Add to Cart"}
+              {loading ? "loading" : "Add to Cart"}
             </button>
           </div>
         </div>
@@ -609,6 +648,7 @@ const Navbar: React.FC = () => {
                     value={skuInput}
                     onChange={(e) => setSkuInput(e.target.value)}
                     placeholder="Add SKU to Cart"
+                     onFocus={(e) => e.target.select()}
                     className="w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black !text-[14px]"
                   />
 

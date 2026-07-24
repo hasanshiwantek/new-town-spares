@@ -54,6 +54,7 @@ const FooterBottom = () => {
       router.replace("/auth/login");
     }
   };
+  
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -66,6 +67,7 @@ const FooterBottom = () => {
 
     loadCategories();
   }, []); // ✅ run once on mount
+
   useEffect(() => {
     const user = localStorage.getItem("persist:auth");
     const parsedAuth = user ? JSON.parse(user) : null;
@@ -77,6 +79,7 @@ const FooterBottom = () => {
     dispatch(getBrands())
        dispatch(fetchCartList());
   },[]);
+
   useEffect(() => {
     const existingSession = localStorage.getItem("sessionId");
     if (existingSession) {

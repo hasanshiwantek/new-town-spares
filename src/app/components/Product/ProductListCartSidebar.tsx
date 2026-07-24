@@ -2,14 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/hooks/useReduxHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { toast } from "react-toastify";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import { addBySku, fetchCartList } from "@/redux/slices/cartsSlice";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
+  const { loading } = useAppSelector(
+      (state: RootState) => state.carts
+    )
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const {
     skuInput,
     setSkuInput,
@@ -18,9 +23,24 @@ export default function ProductListCartSidebar() {
     adding,
     handleAddBySku,
   } = useAddProductBySku();
+  
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+   const handleSkuCart = async ()=>{
+      if(skuInput == "" || qty<1){
+        return 
+      }
+         const result =  await dispatch(addBySku({sku:skuInput,quantity:qty}))
+         if (addBySku.fulfilled.match(result)) {
+      toast.success(result.payload.message);
+        setSkuInput("");
+        setQty(1);
+        dispatch(fetchCartList())
+    } else {
+      //  toast.error(result.payload.message);
+    }
+    }
 
   return (
     <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto">
@@ -49,6 +69,7 @@ export default function ProductListCartSidebar() {
               type="number"
               min={1}
               value={qty}
+               onFocus={(e) => e.target.select()}
               onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
               className="w-full h-full text-gray-800 text-lg bg-transparent text-center outline-none ml-5"
               style={{ appearance: "textfield" }}
@@ -56,11 +77,11 @@ export default function ProductListCartSidebar() {
           </div>
           <button
             type="button"
-            onClick={handleAddBySku}
-            disabled={adding}
+            onClick={handleSkuCart}
+            disabled={loading}
             className="h-[42px] bg-[#FD5430] hover:bg-[#e04a2a] text-white text-[14px] shrink-0 px-4 disabled:opacity-70"
           >
-            {adding ? "..." : "Add"}
+            {loading? "loading" : "Add"}
           </button>
         </div>
       </div>
