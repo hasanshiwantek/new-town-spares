@@ -9,7 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { clearCart, fetchCartList, removeFromCart, updateQty } from "@/redux/slices/cartSlice";
+import {
+  clearAllCart,
+  fetchCartList,
+  removeFromCart,
+  updateQty,
+} from "@/redux/slices/cartsSlice";
 import { deleteCart } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
@@ -34,8 +39,8 @@ const CartList = () => {
     }
   };
   function removeLocalShipping() {
-    localStorage.removeItem("shippingCost")
-    localStorage.removeItem("shippingData")
+    localStorage.removeItem("shippingCost");
+    localStorage.removeItem("shippingData");
   }
   // const confirmDelete = () => {
   //   if (itemToDelete) {
@@ -44,16 +49,17 @@ const CartList = () => {
   //   }
   //   setIsDialogOpen(false);
   // };
-    const confirmDelete = () => {
-      console.log(itemToDelete,"hello")
+  const confirmDelete = () => {
     if (itemToDelete) {
       // dispatch(removeFromCart(itemToDelete.id));
-      dispatch(deleteCart({ id: itemToDelete?.cartItemId })).unwrap().then(() => {
-        dispatch(fetchCartList());
-        removeLocalShipping()
-        setItemToDelete(null);
-        setIsDialogOpen(false);
-      })
+      dispatch(deleteCart({ id: itemToDelete?.cartItemId }))
+        .unwrap()
+        .then(() => {
+          dispatch(fetchCartList());
+          removeLocalShipping();
+          setItemToDelete(null);
+          setIsDialogOpen(false);
+        });
     }
   };
   useEffect(() => {
@@ -150,9 +156,7 @@ const CartList = () => {
             <div key={item?.id}>
               <div
                 className={
-                  idx === cart.length - 1
-                    ? ""
-                    : "border-b border-[#ebebeb]"
+                  idx === cart.length - 1 ? "" : "border-b border-[#ebebeb]"
                 }
               >
                 {/* Mobile (<=800): image floated left, brand/title, then stacked info rows */}
@@ -269,7 +273,7 @@ const CartList = () => {
       {!isEmpty && (
         <div className="flex justify-end items-center">
           <button
-            onClick={() => dispatch(clearCart())}
+            onClick={() => dispatch(clearAllCart())}
             className="w-full md:w-[117px] py-[6px] px-[21px] text-[13px] font-light text-[#333333] border border-[#ebebeb] rounded-[4px] hover:bg-gray-100 transition"
           >
             Empty Cart

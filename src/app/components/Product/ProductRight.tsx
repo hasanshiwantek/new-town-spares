@@ -3,6 +3,12 @@ import React, { useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
+import { RootState } from "@/redux/store";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { useRouter } from "next/navigation";
 
 interface ProductRightProps {
   product?: {
@@ -12,6 +18,7 @@ interface ProductRightProps {
     price?: number;
     availabilityText?: string;
     maxPurchaseQuantity?: number;
+    
     [key: string]: any;
   };
   quantity?: number;
@@ -20,17 +27,23 @@ interface ProductRightProps {
   onAddToCart?: () => void;
 }
 
-const ProductRight: React.FC<ProductRightProps> = ({
+const ProductRight = ({
   product,
-  quantity = 1,
+  quantity,
+  setQuantity,
   increment,
   decrement,
   onAddToCart,
-}) => {
+}:any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const price = Number(product?.price) || 0;
+  
+  const cart = useAppSelector((state: RootState) => state.carts?.items);
   const purchasabilityStatus = product?.purchasabilityStatus == "available"
-
+  const dispatch = useAppDispatch()
+  const router = useRouter();
+    const minQty = product?.minPurchaseQuantity || 1;
+  const maxQty = product?.maxPurchaseQuantity;
   return (
     <>
       <aside className="product-right w-full mt-3 [grid-area:buy]">
@@ -57,32 +70,21 @@ const ProductRight: React.FC<ProductRightProps> = ({
               min={1}
               max={product?.maxPurchaseQuantity || 10}
               value={quantity}
-              onChange={e => {
-                let val = e.target.value;
-
-                // Prevent invalid input (negative numbers, decimals, letters, empty)
-                if (!/^\d+$/.test(val) || val === "") {
-                  val = "1";
-                }
-
-                // Handle too small
-                let numVal = Math.max(1, parseInt(val as string, 10) || 1);
-
-                // Handle max quantity
-                const max = product?.maxPurchaseQuantity || 1;
-                if (numVal > max) numVal = max;
-
-                // Only update if parent provided handler
-                if (typeof increment === "function" && typeof decrement === "function") {
-                  // No setQuantity from props; workaround using increment/decrement multiple times (optional)
-                  // Ideally, parent should provide an onQuantityChange handler, but fallback:
-                  if (numVal > quantity) {
-                    for (let i = quantity; i < numVal; i++) increment && increment();
-                  } else if (numVal < quantity) {
-                    for (let i = quantity; i > numVal; i--) decrement && decrement();
+                onChange={(e) => {
+                  const val = e.target.value;
+                  // Empty allow karo typing ke liye
+                  if (val === "") {
+                    setQuantity("");
+                    return;
                   }
-                }
-              }}
+                  const num = Number(val);
+                  // Sirf valid number allow karo
+                  if (!isNaN(num) && num > 0) {
+                    // Max se zyada mat jane do
+                    if (maxQty && num > maxQty) return;
+                    setQuantity(num);
+                  }
+                }}
               className="font-bold! w-[50px] h-[40px] text-center text-[14px] border border-[#ebebeb] rounded bg-white text-[#000000] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               aria-label="Quantity"
               inputMode="numeric"
@@ -90,14 +92,52 @@ const ProductRight: React.FC<ProductRightProps> = ({
             />
           </div>
 
-
+{/* 
           <button
             type="button"
             onClick={onAddToCart}
             className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white text-[14px] transition-colors font-light!"
           >
             Add to Cart
-          </button>
+          </button> */}
+            {purchasabilityStatus && <button
+            aria-label={`Add ${quantity} ${product?.name} to cart`}
+            onClick={() => {
+              const existingItem = cart.find(
+                (item: any) => item.id === product.id
+              );
+              const currentQty = existingItem ? existingItem.quantity : 0;
+              const remainingQty = product?.maxPurchaseQuantity
+                ? product.maxPurchaseQuantity - currentQty
+                : quantity;
+
+              if (remainingQty <= 0) {
+                toast.error(
+                  `Cannot add more than ${product?.maxPurchaseQuantity} units of ${product.name} to cart.`
+                );
+                return;
+              }
+
+              const quantityToAdd = Math.min(quantity, remainingQty);
+              dispatch(addCart({
+                data: {
+                  productId: product?.id,
+                  quantity: quantityToAdd
+                }
+              })).unwrap().then(() => {
+                dispatch(fetchCartList());
+                toast.success(
+                  `${product.name} added to cart (${quantityToAdd})!`
+                );
+                router.push("/cart")
+              })
+
+            }}
+            className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#4d2017] text-white text-[14px] transition-colors font-light!"
+          >
+            ADD TO CART
+          </button>}
+
         </div> : <div className="border border-gray-300 rounded-lg w-full p-7 ">
           <Link
             href="tel:0296516864"

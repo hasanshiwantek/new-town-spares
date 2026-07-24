@@ -68,7 +68,7 @@ const AccountInfoBar = () => {
         </svg>
         <div>
           <p className={labelClass}>Drop us a message</p>
-          <Link href="/contact-us" className={linkClass}>
+          <Link href="/my-account/messages" className={linkClass}>
             Go to your messages
           </Link>
         </div>

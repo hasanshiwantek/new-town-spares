@@ -6,7 +6,7 @@ import ProductMiddle from "./ProductMiddle";
 import ProductRight from "./ProductRight";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { toast } from "react-toastify";
-import { addToCart } from "@/redux/slices/cartSlice";
+import { addToCart } from "@/redux/slices/cartsSlice";
 import { addRecentView } from "@/redux/slices/recentSlice";
 import Link from "next/link";
 
@@ -84,6 +84,8 @@ const ProductCard = ({ product }: { product: any }) => {
               sku: product?.sku,
             }}
             quantity={quantity}
+            setQuantity = {setQuantity}
+            
             increment={increment}
             decrement={decrement}
             onAddToCart={() => {

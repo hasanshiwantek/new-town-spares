@@ -74,14 +74,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    
     const val = parseInt(e.target.value, 10);
-    if (isNaN(val) || val <= 0) {
-      setQuantity(1);
-    } else if (val > 5) {
-      setQuantity(5);
-    } else {
+   
       setQuantity(val);
-    }
+    
   };
 
   const handleQuantityBlur = () => {
@@ -171,11 +168,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {/* Quantity Input */}
               <input
                 type="number"
-                min={1}
-                max={5}
                 value={quantity}
                 onChange={handleQuantityChange}
                 onBlur={handleQuantityBlur}
+                 onFocus={(e) => {
+  console.log("focused");
+  console.log( e.target.select())
+}}
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
@@ -210,7 +209,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   addCart({
                     data: {
                       productId: product?.id,
-                      quantity: quantityToAdd,
+                      quantity: quantity,
                     },
                   }),
                 )
