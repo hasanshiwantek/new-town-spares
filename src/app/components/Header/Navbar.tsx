@@ -25,12 +25,14 @@ import MobileSearchBar from "./MobileSearchBar";
 import { fetchCategories } from "@/lib/api/category";
 import usaFlag from "../../../../public/usa-logo.png";
 import { addBySku, fetchCartList } from "@/redux/slices/cartsSlice";
+import { fetchLogos } from "@/redux/slices/homeSlice";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
   const cart = useAppSelector((state: RootState) => state.carts.items);
+    const { logoUrl, logoType } = useAppSelector((state: any) => state?.home);
   const totalCartItems = cart.reduce(
     (sum: number, item: any) => sum + (item?.quantity || 0),
     0,
@@ -84,6 +86,10 @@ const Navbar: React.FC = () => {
     });
     setQuantities(updated);
   }, [cart]);
+    useEffect(() => {
+    dispatch(fetchLogos());
+  }, []);
+
 
   // const handleQtyChange = (id: string, value: string) => {
   //   if (value === "" || /^\d*$/.test(value)) {
@@ -226,15 +232,17 @@ useEffect(() => {
             {/* Logo */}
             <Link href={"/"} onClick={() => setBurgerMenuOpen(false)}>
               <div className="relative w-[250px] h-[70px]">
-                <Image
-                  src={navlogo}
-                  alt="Logo"
-                  fill
-                  fetchPriority="high"
-                  className="object-contain"
-                  priority
-                  sizes="(max-width: 768px) 120px, (max-width: 1200px) 200px, 253px"
-                />
+                {logoType == "upload" && (
+                  <Image
+                    src={logoUrl || navlogo}
+                    alt="Logo"
+                    fill
+                    fetchPriority="high"
+                    className="object-contain"
+                    priority
+                    sizes="(max-width: 768px) 200px, (max-width: 1200px) 200px, 253px"
+                  />
+                )}
               </div>
             </Link>
           </div>

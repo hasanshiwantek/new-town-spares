@@ -44,6 +44,8 @@ const OrderSummary = () => {
     name: c.name,
     code: c.isoCode,
   }));
+
+
   const stateList = useMemo(() => {
     if (!shippingData.country) return [];
     return State.getStatesOfCountry(shippingData.country).map((s) => ({
@@ -86,7 +88,7 @@ const OrderSummary = () => {
 
     dispatch(applyCoupon({ couponCode: code, total }))
       .unwrap()
-      .then(() => {
+      .then(() => { 
         toast.success("Coupon applied");
         setShowCouponInput(false);
       })
@@ -200,16 +202,17 @@ const OrderSummary = () => {
             <div className="flex flex-col justify-between gap-4">
               <label className="w-full text-[14px]">Country</label>
 
-              <Select
-                value={shippingData.country}
-                onValueChange={(value) =>
-                  setShippingData({ ...shippingData, country: value })
-                }
-              >
-                <SelectTrigger className="w-full outline-none h-[32px]!">
+            <Select
+  value={shippingData.country}
+  onValueChange={(value) => {
+    console.log("Selected:", value);
+    setShippingData({ ...shippingData, country: value });
+  }}
+>
+                <SelectTrigger className="w-full outline-none ">
                   <SelectValue placeholder="Choose a Country" />
                 </SelectTrigger>
-                <SelectContent className="w-full outline-none h-[32px]!">
+                <SelectContent className="w-full outline-none ">
                   {countryList.map((country) => (
                     <SelectItem key={country.code} value={country.code}>
                       {country.name}
@@ -229,10 +232,10 @@ const OrderSummary = () => {
                     setShippingData({ ...shippingData, state: value })
                   }
                 >
-                  <SelectTrigger className="w-full outline-none h-[32px]!">
+                  <SelectTrigger className="w-full outline-none ">
                     <SelectValue placeholder="State/Province" />
                   </SelectTrigger>
-                  <SelectContent className="w-full outline-none h-[32px]!">
+                  <SelectContent className="w-full outline-none ">
                     {stateList.map((state) => (
                       <SelectItem key={state.code} value={state.code}>
                         {state.name}

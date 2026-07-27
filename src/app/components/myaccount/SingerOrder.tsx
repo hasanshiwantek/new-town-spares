@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 // import { fetchOrderDetails } from "@/lib/api/order";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { fetchOrderDetails } from "@/redux/slices/cartSlice";
+import { useReactToPrint } from "react-to-print";
+import { Invoice } from "./helpers/OrderDetails";
 interface OrderData {
   id: number;
   orderNumber: string;
@@ -68,6 +70,23 @@ const SingleOrder = () => {
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+   const invoiceRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: invoiceRef, // v3 API: pass the ref here
+    documentTitle: `Server Blink LLC -`,
+    pageStyle: `
+            @page {
+                size: A4;
+                margin: 16mm;
+            }
+            @media print {
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+        `,
+  });
 
   useEffect(() => {
     const loadOrderDetails = async () => {
@@ -148,15 +167,10 @@ const SingleOrder = () => {
     return product?.quantity || 1;
   };
 
-  // Sidebar block, mirroring live's .order-details-sidebar .account-sidebar-block:
-  // full-width with a 1px bottom divider + 21px padding on mobile (<801) AND
-  // tablet (801-1260, where it's a 50% wrap column) → at >=1261 the divider and
-  // padding drop and blocks become equal flex columns.
+
   const blockTypography = "text-[15px] leading-[22.5px] text-[#333333]";
   const blockClass = `${blockTypography} w-full p-[21px] border-b border-[#ebebeb] min-[801px]:w-1/2 min-[1261px]:w-auto min-[1261px]:flex-1 min-[1261px]:border-b-0 min-[1261px]:p-0`;
-  // Actions block is special: live gives it NO bottom divider + padding-bottom:0
-  // always, width:100% at >=801 (its own full-width row so the Reorder button
-  // spans it), and max-width:120px + padding:0 at >=1261.
+  
   const actionsBlockClass = `${blockTypography} w-full p-[21px] pb-0 min-[801px]:w-full min-[801px]:flex-[1_0_auto] min-[1261px]:max-w-[120px] min-[1261px]:p-0`;
   const blockHeading =
     "text-[13px] leading-[15.6px] capitalize text-[#333333] mb-[5px] pb-[5px]";
@@ -168,6 +182,9 @@ const SingleOrder = () => {
       {/* Sidebar band — Order Details / Ship To / Bill To / (spacer) / Actions.
           A bordered white card in a horizontal flex row on desktop, stacked
           full-width below 801 (matches live .order-details-sidebar). */}
+            <div className="hidden print:block">
+        <Invoice ref={invoiceRef} order={order} />
+      </div>
       <div className="bg-white border border-[#ebebeb] mb-[21px] w-full min-[801px]:flex min-[801px]:flex-wrap min-[801px]:pb-[21px] min-[1261px]:flex-nowrap min-[1261px]:p-[21px]">
         {/* Order Details */}
         <section className={blockClass}>
@@ -325,7 +342,7 @@ const SingleOrder = () => {
             <span className="float-right">${total.toFixed(2)}</span>
           </div>
 
-          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]">
+          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]"   onClick={() => handlePrint()}>
             Print Invoice
           </button>
         </div>
