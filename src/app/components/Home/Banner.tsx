@@ -45,15 +45,17 @@ const Banner = () => {
   };
   return (
     <div className="w-full flex justify-center items-centenr">
-      <div className="flex flex-col min-[801px]:flex-row w-full justify-between min-[801px]:h-[417px] gap-6 min-[801px]:gap-0">
+      <div className={`flex flex-col min-[801px]:flex-row w-full justify-between gap-6 min-[801px]:gap-0 ${isLoggedIn ? "" : "min-[801px]:h-[417px] min-[1640px]:h-[400px]"}`}>
 
         {/* Left Image Section */}
         <div
-          className={`relative w-full aspect-[2/1] min-[801px]:aspect-auto min-[801px]:h-[417px] ${isLoggedIn ? "min-[801px]:w-full" : "min-[801px]:w-[63.7%] min-[1025px]:w-[74.6%]"
+          className={`relative w-full aspect-[2/1] ${isLoggedIn
+            ? "min-[801px]:aspect-[1133/400] min-[801px]:w-full"
+            : "min-[801px]:aspect-auto min-[801px]:h-[417px] min-[1640px]:h-[400px] min-[801px]:w-[63.7%] min-[1025px]:w-[74.6%]"
             }`}
         >
           <Image
-            src="/server-img.svg"
+            src="/server-banner.jpg"
             alt="Server Image"
             fill
             className="object-cover"
@@ -63,7 +65,7 @@ const Banner = () => {
 
         {/* Right Sign In Section */}
         {!isLoggedIn && (
-          <form onSubmit={handleSubmit(onSubmit)} className="w-full min-[801px]:w-[34.1%] min-[1025px]:w-[23.7%] h-auto py-[30px] min-[801px]:py-0 min-[801px]:h-[417px] bg-[#EBEBEB] flex flex-col justify-center px-[21px]">
+          <form onSubmit={handleSubmit(onSubmit)} className="w-full min-[801px]:w-[34.1%] min-[1025px]:w-[23.7%] h-auto py-[30px] min-[801px]:py-0 min-[801px]:h-[417px] min-[1640px]:h-[400px] bg-[#EBEBEB] flex flex-col justify-center px-[21px]">
             <h2 className="text-[20px] leading-[24px] text-[#333333] mb-[11px] text-center">
               Sign in
             </h2>
