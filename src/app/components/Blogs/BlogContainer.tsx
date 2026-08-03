@@ -26,7 +26,6 @@ const BlogContainer = () => {
       <BlogCategories blogPosts={blogPosts} error={error} loading={loading} pagination={pagination}
         filters={filters}
         setFilters={setFilters} />
-      {/* <BlogTrending /> */}
     </div>
   );
 };

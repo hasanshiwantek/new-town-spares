@@ -51,7 +51,7 @@ const BlogCategories = ({
         ) : blogPosts && blogPosts.length > 0 ? (
           // ✅ Grid UI
           <div className="w-full mx-auto grid gap-3 sm:grid-cols-2 lg:grid-cols-4" style={{fontFamily:poppinsFont}}>
-            {blogPosts.map((blog) => (
+            {blogPosts?.filter((item: any) => item?.thumbnail)?.map((blog) => (
               <Link
                 href={`blogs/${blog.slug}`}
                 key={blog.id}
