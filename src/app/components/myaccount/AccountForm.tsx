@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { customerProfile } from "@/redux/slices/authSlice";
 import { postAccountDetails } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { Eye, EyeOff, X } from "lucide-react";
@@ -42,11 +43,15 @@ const AccountForm = () => {
   });
 
   const password = watch("password");
-
+  const password_confirmation = watch("password_confirmation");
+  const currentPassword = watch("currentPassword");
+  const isChangingPassword = !!(password || password_confirmation || currentPassword);
   const onSubmit = async (data: AccountFormValues) => {
     try {
       const result = await dispatch(postAccountDetails(data));
       if (postAccountDetails.fulfilled.match(result)) {
+        await dispatch(customerProfile())
+        window.location.reload()
         reset();
       } else {
         const errorMessage =
@@ -159,7 +164,7 @@ const AccountForm = () => {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              {...register("password")}
+              {...register("password", { required: isChangingPassword ? "Password is required" : false })}
               className={`${inputClass} pr-12`}
             />
             <button
@@ -180,10 +185,8 @@ const AccountForm = () => {
               id="password_confirmation"
               type={showConfirmPassword ? "text" : "password"}
               {...register("password_confirmation", {
-                validate: (value) =>
-                  !password ||
-                  value === password ||
-                  "Your passwords do not match.",
+                required: isChangingPassword ? "Confirm password is required" : false,
+                validate: (value) => value === password || "Passwords do not match"
               })}
               className={`${inputClass} pr-12`}
             />
@@ -210,7 +213,9 @@ const AccountForm = () => {
             <Input
               id="currentPassword"
               type={showCurrentPassword ? "text" : "password"}
-              {...register("currentPassword")}
+              {...register("currentPassword", {
+                required: isChangingPassword ? "Current password is required" : false,
+              })}
               className={`${inputClass} pr-12`}
             />
             <button

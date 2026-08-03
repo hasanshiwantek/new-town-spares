@@ -67,7 +67,7 @@ const RecentViewedRow = ({ product }: { product: any }) => {
       .then(() => {
         toast.success(`${productName} added to cart!`);
         dispatch(fetchCartList());
-        router.push("/cart");
+        // router.push("/cart");
       });
   };
 
