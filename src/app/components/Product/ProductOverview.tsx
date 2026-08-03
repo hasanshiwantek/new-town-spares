@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { decode } from "html-entities";
 
 const ProductOverview = ({ product }: { product: any }) => {
 
@@ -6,7 +7,9 @@ const ProductOverview = ({ product }: { product: any }) => {
   const customFields = product?.customFields?.filter(
     (item: { name: string; value: string }) => item.name && item.value
   )
-
+  const decodedHtml = decode(
+    product?.description?.replace(/<pre[^>]*>/gi, "")?.replace(/<\/pre>/gi, "")
+  );
   return (
     <section className="my-8" aria-labelledby="product-overview-heading">
       <div className="w-full max-w-[1719px] flex flex-col ">
@@ -21,9 +24,24 @@ const ProductOverview = ({ product }: { product: any }) => {
             </h2>
 
             <div
-              className="text-[16px] leading-[24px] text-[#333333]"
+              // className="text-[16px] leading-[24px] text-[#333333]"
+              className="
+    p-4
+    bg-[#F2F2F2]
+    text-[14px]
+    text-[#545454]
+    prose
+    max-w-none
+    break-words
+    [&_*]:max-w-full
+    [&_img]:max-w-full
+    [&_img]:h-auto
+    [&_table]:w-full
+    [&_pre]:whitespace-pre-wrap
+    [&_pre]:break-words
+  "
               dangerouslySetInnerHTML={{
-                __html: product?.description || "No description available for this product.",
+                __html: decodedHtml || "No description available for this product.",
               }}
             />
           </div>
