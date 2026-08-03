@@ -186,9 +186,9 @@ const Testimonials = () => {
           />
           <span className="text-[13px] leading-[45px] text-[#333333]">
             Based on{" "}
-            <a href="#" className="font-bold underline">
-              {stats?.count || "18"} Reviews
-            </a>
+            <Link href={"https://www.trustpilot.com/review/newtownspares.com"} className="font-bold underline">
+              {stats?.count || "0"} Reviews
+            </Link>
           </span>
           <div className="flex items-center justify-center">
             <IoStarSharp size={28} color="#00b67a" />

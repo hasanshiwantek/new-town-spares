@@ -1,155 +1,178 @@
 "use client";
 
-import Link from "next/link";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+} from "react";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { RootState } from "@/redux/store";
+import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice"; // ADD THIS
+import { toast } from "sonner";
+import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import LoadTrustpilotScript  from "./TrustpilotWidget";
-
-const OrderInformation = () => {
+import LoadTrustpilotScript from "./TrustpilotWidget";
+import OrderInformationSummary from "./OrderInformationSummary";
+import { orderDetailById } from "@/redux/slices/OrderMessage";
+// Inner component that uses Stripe hooks
+const CheckoutForm = () => {
+  const dispatch = useAppDispatch();
+  const params = useParams();
+  const orderId = params.orderId;
   const router = useRouter();
-
-  // Temporary Data
-  const order = {
-    id: 810,
-    customer: {
-      firstName: "Delilah",
-      lastName: "Hester",
-    },
-    items: [
-      {
-        id: 1,
-        name: "HPH823X3F0-New | HP | 73GB SAS 3GB/S 2.5-INCH HARD DRIVE",
-        quantity: 1,
-        price: 435,
-        image:
-          "https://via.placeholder.com/60x60?text=HP",
-      },
-    ],
-    shipping: 22.28,
-    tax: 0,
-  };
-
-  const subtotal = order.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+  const customerOrderDetail = useAppSelector((state: RootState) => state?.customerMessage?.orderDetail);
+  const orderCustomer = customerOrderDetail?.customer ? customerOrderDetail : null;
+  const cart: any = customerOrderDetail?.products
+    ? customerOrderDetail.products.map((product: any) => ({
+      ...product,
+      quantity: product.quantity || 1,
+    }))
+    : [];
+  // ADD COUPON STATE FROM REDUX
+  const { appliedCoupon, discountAmount } = useAppSelector(
+    (state: RootState) => state.coupon
   );
 
-  const total = subtotal + order.shipping + order.tax;
+  const [promoCode, setPromoCode] = useState("");
+
+  // Memoized calculations
+  const subtotal = useMemo(() => {
+    return cart.reduce(
+      (acc: any, item: any) => acc + Number(item.price) * (item.quantity || 1),
+      0
+    );
+  }, [cart]);
+
+  const shipping = useMemo(() => {
+
+    // ✅ Cart page se localStorage mein saved cost
+    if (typeof window !== "undefined") {
+      const savedCost = customerOrderDetail?.shippingCost;
+      if (savedCost) return Number(savedCost);
+    }
+
+    if (cart.length === 0) return 0;
+    return cart.reduce((sum: any, item: any) => sum + Number(item.fixedShippingCost || 0), 0);
+  }, [cart]);
+
+  const tax = 0;
+
+  // Total before discount
+  const totalBeforeDiscount = useMemo(() => subtotal + shipping + tax, [subtotal, shipping]);
+
+  // Final total after discount
+  const finalTotal = useMemo(() =>
+    Math.max(totalBeforeDiscount - discountAmount, 0),
+    [totalBeforeDiscount, discountAmount]
+  );
+
+  // ADD COUPON HANDLERS
+  const handleApplyCoupon = async () => {
+    if (!promoCode.trim()) {
+      toast.error("Please enter a promo code");
+      return;
+    }
+
+    try {
+      await dispatch(
+        applyCoupon({ couponCode: promoCode, total: totalBeforeDiscount })
+      ).unwrap();
+      toast.success("Promo code applied successfully!");
+      setPromoCode("");
+    } catch (err: any) {
+      toast.error(err || "Failed to apply coupon");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    dispatch(removeCoupon());
+    setPromoCode("");
+    toast.info("Coupon removed");
+  };
+
+  useEffect(() => {
+    if (!orderId) return;
+    dispatch(orderDetailById({ orderId }));
+  }, [orderId]);
 
   return (
-    <div className="w-full max-w-[1170px] mx-auto px-4 py-10">
+    <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
 
-      {/* Trustpilot */}
-       <div className="flex justify-center mb-8">
+      <form>
+        <div className="flex justify-center mb-8">
           <LoadTrustpilotScript />
         </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start ">
 
-      <div className="grid lg:grid-cols-3 gap-10">
+          {/* LEFT SIDE */}
+          <div className="lg:col-span-2 mt-[18px] roboto-font" >
+            <div className="mt-[1px]">
+              <h2 className="text-4xl font-normal text-[#545454] mb-8">
+                Thank You {orderCustomer?.customer?.firstName} {orderCustomer?.customer?.lastName}!
+              </h2>
 
-        {/* Left */}
-        <div className="lg:col-span-2">
+              <h6 className="text-lg font-medium mb-6 text-[#545454]">
+                Your order number is{" "}
+                <span className="font-bold text-[#545454]">
+                  #{orderCustomer?.id}
+                </span>
+              </h6>
 
-          <h1 className="text-[42px] text-[#545454] mb-8 font-normal">
-            Thank You {order.customer.firstName}{" "}
-            {order.customer.lastName}!
-          </h1>
-
-          <h2 className="text-xl text-[#545454] mb-6">
-            Your order number is{" "}
-            <span className="font-bold">
-              #{order.id}
-            </span>
-          </h2>
-
-          <p className="text-[#545454] leading-8">
-            An email will be sent containing information about your purchase.
-            If you have any questions about your purchase, email us at{" "}
-            <span className="text-[#FF482E] font-semibold">
-              info@serverblink.uk
-            </span>
-            .
-          </p>
-
-          <hr className="my-10 border-[#cfcfcf]" />
-
-          <button
-            onClick={() => router.push("/")}
-            className="bg-[#FF482E] text-white px-8 py-3 uppercase font-semibold hover:bg-red-700"
-          >
-            Continue Shopping
-          </button>
-        </div>
-
-        {/* Right */}
-        <div>
-
-          <div className="border border-gray-300">
-
-            <div className="px-6 py-5 border-b font-semibold text-[#545454]">
-              Order Summary
-            </div>
-
-            <div className="px-6 py-5">
-
-              <p className="mb-5 font-medium">
-                {order.items.length} Item
+              <p className="text-[#545454] leading-7 mb-8">
+                An email will be sent containing information about your purchase.
+                If you have any questions about your purchase, email us at{" "}
+                <span className="font-semibold text-[#fd5430]">
+                  orders@newtownspares.com
+                </span>{" "}
+                or call us at{" "}
+                <span className="font-semibold text-[#fd5430]">
+                  {/* +44 123 456 7890 */}
+                  (209) 651-6864
+                </span>.
               </p>
 
-              {order.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 mb-6"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-14 h-14 border object-cover"
-                  />
+              <hr className="my-8 border-0 h-[0.5px] bg-[#545454]" />
 
-                  <div className="flex-1">
-                    <p className="text-sm text-[#545454]">
-                      {item.quantity} x {item.name}
-                    </p>
-                  </div>
-
-                  <div className="font-semibold">
-                    ${item.price.toFixed(2)}
-                  </div>
-                </div>
-              ))}
-
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="btn-primary !px-6 !py-3 h-[44px] !text-lg"
+              >
+                Continue Shopping
+              </button>
             </div>
+          </div>
 
-            <div className="border-t px-6 py-5 space-y-3">
-
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>${order.shipping.toFixed(2)}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Tax</span>
-                <span>${order.tax.toFixed(2)}</span>
-              </div>
-
-            </div>
-
-            <div className="border-t px-6 py-6 flex justify-between font-bold text-lg">
-              <span>Total (USD)</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-
+          {/* RIGHT SIDE */}
+          <div className="lg:col-span-1 lg:sticky lg:top-6">
+            <OrderInformationSummary
+              cart={cart}
+              subtotal={subtotal}
+              shipping={shipping}
+              tax={tax}
+              total={totalBeforeDiscount}
+              finalTotal={finalTotal}
+              discountAmount={discountAmount}
+              appliedCoupon={appliedCoupon}
+              promoCode={promoCode}
+              setPromoCode={setPromoCode}
+              onApplyCoupon={handleApplyCoupon}
+              onRemoveCoupon={handleRemoveCoupon}
+            />
           </div>
 
         </div>
+      </form>
 
-      </div>
 
     </div>
+  );
+};
+
+// Main component with Stripe Elements provider
+const OrderInformation = () => {
+  return (
+    <CheckoutForm />
   );
 };
 
