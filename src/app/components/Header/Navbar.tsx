@@ -3,7 +3,7 @@ import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { logout } from "@/redux/slices/authSlice";
-import {  updateCart, updateQty } from "@/redux/slices/cartsSlice";
+import { updateCart, updateQty } from "@/redux/slices/cartsSlice";
 import { fetchCurrencies } from "@/redux/slices/currencySlice";
 import { RootState } from "@/redux/store";
 import { ChevronRight, Menu, X } from "lucide-react";
@@ -31,7 +31,7 @@ const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
-  
+
   const cart = useAppSelector((state: RootState) => state.carts.items);
   const { logoUrl, logoType } = useAppSelector((state: any) => state?.home);
   const totalCartItems = cart.reduce(
@@ -107,31 +107,30 @@ const Navbar: React.FC = () => {
   //   }
   // };
 
-
-   const handleManualQtyUpdate = (
+  const handleManualQtyUpdate = (
     e: React.KeyboardEvent<HTMLInputElement>,
     id: string,
     maxPurchaseQuantity?: number,
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
-  
+
       const inputValue = quantities[id];
       const parsed = Number(inputValue);
-  
+
       const newQty = maxPurchaseQuantity
         ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
         : parsed > 0
-        ? parsed
-        : 1;
-  setUpdatingQty(id);
+          ? parsed
+          : 1;
+      setUpdatingQty(id);
       dispatch(
         updateCart({
           id,
           data: {
             quantity: newQty,
           },
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -142,14 +141,15 @@ const Navbar: React.FC = () => {
             ...prev,
             [id]: newQty,
           }));
-        }).catch(() => {
-  setUpdatingQty(null);
-});
-  
+        })
+        .catch(() => {
+          setUpdatingQty(null);
+        });
+
       e.currentTarget.blur();
     }
   };
-  
+
   // Shared qty <input> so mobile + desktop stay identical in behaviour.
   const qtyInput = (item: any) => (
     <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
@@ -448,14 +448,13 @@ const Navbar: React.FC = () => {
                     <div className="px-5 py-4 border-b border-gray-200">
                       <h2 className="text-[#333333] text-3xl">Your Cart</h2>
                     </div>
-                   {cart.length === 0 && (
-                    <div className="px-5 py-4 border-b border-gray-200">
+                    {cart.length === 0 && (
+                      <div className="px-5 py-4 border-b border-gray-200">
                         <p className="text-[#959595] text-[14px] text-center">
                           Your Cart Is Empty.
                         </p>
-                     
-                    </div>
-                     )}
+                      </div>
+                    )}
 
                     {cart.length > 0 && (
                       <div className=" relative max-h-[420px] overflow-y-auto">
@@ -468,9 +467,9 @@ const Navbar: React.FC = () => {
                           const itemPrice = Number(item?.price || 0);
                           return (
                             <div
-  key={item.id}
-  className=" px-5 py-4 border-b border-gray-200 flex gap-4"
->
+                              key={item.id}
+                              className=" px-5 py-4  border-gray-200 flex gap-4"
+                            >
                               <div className="shrink-0">
                                 <Image
                                   src={imageUrl}
@@ -491,34 +490,7 @@ const Navbar: React.FC = () => {
 
                                 <div className="mt-2 flex items-center gap-2">
                                   <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
-                                    {/* <input
-                                      type="number"
-                                      value={
-                                        quantities[item.id] === undefined
-                                          ? item.quantity
-                                          : quantities[item.id]
-                                      }
-                                      // onChange={(e) =>
-                                      //   handleQtyChange(item.id, e.target.value)
-                                      // }
-                                      onChange={(e) =>
-                                        handleQtyChange(
-                                          item.id,
-                                          e.target.value,
-                                          item.maxPurchaseQuantity,
-                                        )
-                                      }
-                                      onKeyDown={(e) =>
-                                        handleManualQtyUpdate(
-                                          e,
-                                          item.id,
-                                          item.maxPurchaseQuantity,
-                                        )
-                                      }
-                                      className="w-[35px] h-8 text-center outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                      aria-label="Quantity"
-                                    /> */}
-                                      {qtyInput(item)}
+                                    {qtyInput(item)}
                                   </div>
                                   <span className="text-[#333333]">×</span>
                                   <span className="text-[#FD5430] text-[14px]">
@@ -535,30 +507,28 @@ const Navbar: React.FC = () => {
                                   </button>
                                 </div>
                               </div>
-                          
                             </div>
                           );
                         })}
                         {loading && updatingQty && (
-  <div className="absolute inset-0 z-30 flex items-center justify-center">
-    {/* Blur layer */}
-    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
+                          <div className="absolute inset-0 z-30 flex items-center justify-center">
+                            {/* Blur layer */}
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
 
-    {/* Loader */}
-    <div className="relative z-40 flex gap-2">
-      <span className="w-2 h-2 bg-black rounded-full animate-bounce" />
-      <span
-        className="w-2 h-2 bg-black rounded-full animate-bounce"
-        style={{ animationDelay: "0.15s" }}
-      />
-      <span
-        className="w-2 h-2 bg-black rounded-full animate-bounce"
-        style={{ animationDelay: "0.3s" }}
-      />
-    </div>
-  </div>
-)}
-                        
+                            {/* Loader */}
+                            <div className="relative z-40 flex gap-2">
+                              <span className="w-2 h-2 bg-black rounded-full animate-bounce" />
+                              <span
+                                className="w-2 h-2 bg-black rounded-full animate-bounce"
+                                style={{ animationDelay: "0.15s" }}
+                              />
+                              <span
+                                className="w-2 h-2 bg-black rounded-full animate-bounce"
+                                style={{ animationDelay: "0.3s" }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
