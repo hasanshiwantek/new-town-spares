@@ -6,10 +6,18 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { toast } from "react-toastify";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
-import { addBySku, fetchCartList } from "@/redux/slices/cartsSlice";
+import { addBySku, deleteCart, fetchCartList, updateCart } from "@/redux/slices/cartsSlice";
+import Image from "next/image";
+import { useState } from "react";
+import { X } from "lucide-react";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
+    const [updatingQty, setUpdatingQty] = useState<string | null>(null);
+    const [quantities, setQuantities] = useState<{
+        [key: string]: number | string;
+      }>({});
+
   const { loading } = useAppSelector(
       (state: RootState) => state.carts
     )
@@ -23,7 +31,84 @@ export default function ProductListCartSidebar() {
     adding,
     handleAddBySku,
   } = useAddProductBySku();
-  
+    function removeLocalShipping() {
+    localStorage.removeItem("shippingCost");
+    localStorage.removeItem("shippingData");
+  }
+    const handleChange = (id: string, value: string) => {
+    if (value === "" || /^\d*$/.test(value)) {
+      setQuantities((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
+  };
+    const confirmDelete = (item: any) => {
+      dispatch(deleteCart({ id: item.cartItemId }))
+        .unwrap()
+        .then(() => {
+          dispatch(fetchCartList());
+          removeLocalShipping();
+        });
+    };
+     const handleManualQtyUpdate = (
+      e: React.KeyboardEvent<HTMLInputElement>,
+      id: string,
+      maxPurchaseQuantity?: number,
+    ) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+    
+        const inputValue = quantities[id];
+        const parsed = Number(inputValue);
+    
+        const newQty = maxPurchaseQuantity
+          ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+          : parsed > 0
+          ? parsed
+          : 1;
+    setUpdatingQty(id);
+        dispatch(
+          updateCart({
+            id,
+            data: {
+              quantity: newQty,
+            },
+          })
+        )
+          .unwrap()
+          .then(() => {
+            dispatch(fetchCartList());
+            removeLocalShipping();
+            setUpdatingQty(null);
+            setQuantities((prev) => ({
+              ...prev,
+              [id]: newQty,
+            }));
+          }).catch(() => {
+    setUpdatingQty(null);
+  });
+    
+        e.currentTarget.blur();
+      }
+    };
+    const qtyInput = (item: any) => (
+    <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
+      <input
+        type="number"
+        value={
+          quantities[item.cartItemId] === undefined
+            ? item.quantity
+            : quantities[item.cartItemId]
+        }
+        onChange={(e) => handleChange(item.cartItemId, e.target.value)}
+        onKeyDown={(e) =>
+          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
+        }
+        className="w-full h-full text-center py-2 outline-none !text-[10px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+    </div>
+  );
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -48,10 +133,93 @@ export default function ProductListCartSidebar() {
         Your Cart
       </h2>
 
-      <div className="bg-white border-b border-gray-200">
-        <p className="text-[#959595] text-[14px] text-center py-4.5">
-          {cart.length === 0 ? "Your Cart Is Empty." : `${totalItems} item(s) in cart`}
-        </p>
+      <div className="bg-white  border-gray-200">
+       {cart.length === 0 && (
+  <div className="bg-white border-b border-gray-200">
+    <p className="text-[#959595] text-[14px] text-center py-4.5">
+      Your Cart Is Empty.
+    </p>
+  </div>
+)}
+ {cart.length > 0 && (
+                      <div className=" relative max-h-[420px] overflow-y-auto">
+                        {cart.map((item) => {
+                          const imageUrl =
+                            item?.image?.[0]?.path ||
+                            item?.image?.path ||
+                            item?.image ||
+                            "/default-product-image.svg";
+                          const itemPrice = Number(item?.price || 0);
+                          return (
+                            <div
+  key={item.id}
+  className=" px-5 py-4  border-gray-200 flex gap-4"
+>
+                              <div className="shrink-0">
+                                <Image
+                                  src={imageUrl}
+                                  alt={item?.name ?? ""}
+                                  width={56}
+                                  height={56}
+                                  className="object-contain w-18 h-18"
+                                />
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
+                                  {item?.name ?? "—"}
+                                </p>
+                                <p className="text-[#333333] text-[14px] mt-1">
+                                  {item?.sku ?? ""}
+                                </p>
+
+                                <div className="mt-2 flex items-center gap-2">
+                                  <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
+                                  
+                                      {qtyInput(item)}
+                                  </div>
+                                  <span className="text-[#333333]">×</span>
+                                  <span className="text-[#FD5430] text-[14px]">
+                                    ${itemPrice.toFixed(2)}
+                                  </span>
+                                  <div className="flex-1" />
+                                  <button
+                                    type="button"
+                                    onClick={() => confirmDelete(item)}
+                                    className="shrink-0 w-6 h-6 rounded-full bg-[#FD5430] text-white flex items-center justify-center"
+                                    aria-label="Remove item"
+                                  >
+                                    <X size={14} strokeWidth={3} />
+                                  </button>
+                                </div>
+                              </div>
+                          
+                            </div>
+                          );
+                        })}
+                        {loading && updatingQty && (
+  <div className="absolute inset-0 z-30 flex items-center justify-center">
+    {/* Blur layer */}
+    <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
+
+    {/* Loader */}
+    <div className="relative z-40 flex gap-2">
+      <span className="w-2 h-2 bg-black rounded-full animate-bounce" />
+      <span
+        className="w-2 h-2 bg-black rounded-full animate-bounce"
+        style={{ animationDelay: "0.15s" }}
+      />
+      <span
+        className="w-2 h-2 bg-black rounded-full animate-bounce"
+        style={{ animationDelay: "0.3s" }}
+      />
+    </div>
+  </div>
+)}
+                        
+                      </div>
+                    )}
+
       </div>
 
       <div className="space-y-4 bg-white border-b border-gray-200">

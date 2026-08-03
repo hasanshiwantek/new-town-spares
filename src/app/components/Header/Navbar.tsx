@@ -3,7 +3,7 @@ import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { logout } from "@/redux/slices/authSlice";
-import { removeFromCart, updateQty } from "@/redux/slices/cartSlice";
+import { updateCart, updateQty } from "@/redux/slices/cartsSlice";
 import { fetchCurrencies } from "@/redux/slices/currencySlice";
 import { RootState } from "@/redux/store";
 import { ChevronRight, Menu, X } from "lucide-react";
@@ -24,15 +24,16 @@ import MobileSearchBar from "./MobileSearchBar";
 // ✅ Optimized imports (Next Image optimized assets)
 import { fetchCategories } from "@/lib/api/category";
 import usaFlag from "../../../../public/usa-logo.png";
-import { addBySku, fetchCartList } from "@/redux/slices/cartsSlice";
+import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerMenuOpen, setBurgerMenuOpen] = useState(false);
+
   const cart = useAppSelector((state: RootState) => state.carts.items);
-    const { logoUrl, logoType } = useAppSelector((state: any) => state?.home);
+  const { logoUrl, logoType } = useAppSelector((state: any) => state?.home);
   const totalCartItems = cart.reduce(
     (sum: number, item: any) => sum + (item?.quantity || 0),
     0,
@@ -43,36 +44,43 @@ const Navbar: React.FC = () => {
   const { currencies, status, selectedCurrency } = useAppSelector(
     (state: RootState) => state.currency,
   );
-  const { loading } = useAppSelector(
-    (state: RootState) => state.carts,
-  );
+  const { loading } = useAppSelector((state: RootState) => state.carts);
   const [categories, setCategories] = useState<any[]>([]);
 
   const [open, setOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement | null>(null);
-    const accountRef = useRef<HTMLDivElement | null>(null);
+  const accountRef = useRef<HTMLDivElement | null>(null);
+
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
   }>({});
+  const [updatingQty, setUpdatingQty] = useState<string | null>(null);
   const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
     useAddProductBySku();
-    
-  const handleSkuCart = async ()=>{
-    if(skuInput == "" || qty<1){
-      return 
+  const handleChange = (id: string, value: string) => {
+    if (value === "" || /^\d*$/.test(value)) {
+      setQuantities((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
     }
-       const result =  await dispatch(addBySku({sku:skuInput,quantity:qty}))
-       if (addBySku.fulfilled.match(result)) {
-    toast.success(result.payload.message);
-    setSkuInput("");
-        setQty(1);
-      dispatch(fetchCartList())
-  } else {
-    //  toast.error(result.payload.message);
-  }
-  }
+  };
+  const handleSkuCart = async () => {
+    if (skuInput == "" || qty < 1) {
+      return;
+    }
+    const result = await dispatch(addBySku({ sku: skuInput, quantity: qty }));
+    if (addBySku.fulfilled.match(result)) {
+      toast.success(result.payload.message);
+      setSkuInput("");
+      setQty(1);
+      dispatch(fetchCartList());
+    } else {
+      //  toast.error(result.payload.message);
+    }
+  };
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchCurrencies());
@@ -82,14 +90,13 @@ const Navbar: React.FC = () => {
   useEffect(() => {
     const updated: { [key: string]: number } = {};
     cart.forEach((item: any) => {
-      updated[item.id] = item.quantity;
+      updated[item.cartItemId] = item.quantity;
     });
     setQuantities(updated);
   }, [cart]);
-    useEffect(() => {
+  useEffect(() => {
     dispatch(fetchLogos());
   }, []);
-
 
   // const handleQtyChange = (id: string, value: string) => {
   //   if (value === "" || /^\d*$/.test(value)) {
@@ -99,21 +106,6 @@ const Navbar: React.FC = () => {
   //     }));
   //   }
   // };
-  const handleQtyChange = (id: number, value: string, max?: number) => {
-    if (!/^\d*$/.test(value)) return; // allow only digits or empty
-
-    let num = parseInt(value || "1", 10);
-
-    const maxQty = max || 2;
-
-    // clamp between 1 and max
-    num = Math.max(1, Math.min(maxQty, num));
-
-    setQuantities((prev) => ({
-      ...prev,
-      [id]: num,
-    }));
-  };
 
   const handleManualQtyUpdate = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -122,6 +114,7 @@ const Navbar: React.FC = () => {
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
+
       const inputValue = quantities[id];
       const parsed = Number(inputValue);
 
@@ -130,17 +123,51 @@ const Navbar: React.FC = () => {
         : parsed > 0
           ? parsed
           : 1;
-
-      dispatch(updateQty({ id, quantity: newQty }));
-
-      setQuantities((prev) => ({
-        ...prev,
-        [id]: newQty,
-      }));
+      setUpdatingQty(id);
+      dispatch(
+        updateCart({
+          id,
+          data: {
+            quantity: newQty,
+          },
+        }),
+      )
+        .unwrap()
+        .then(() => {
+          dispatch(fetchCartList());
+          removeLocalShipping();
+          setUpdatingQty(null);
+          setQuantities((prev) => ({
+            ...prev,
+            [id]: newQty,
+          }));
+        })
+        .catch(() => {
+          setUpdatingQty(null);
+        });
 
       e.currentTarget.blur();
     }
   };
+
+  // Shared qty <input> so mobile + desktop stay identical in behaviour.
+  const qtyInput = (item: any) => (
+    <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
+      <input
+        type="number"
+        value={
+          quantities[item.cartItemId] === undefined
+            ? item.quantity
+            : quantities[item.cartItemId]
+        }
+        onChange={(e) => handleChange(item.cartItemId, e.target.value)}
+        onKeyDown={(e) =>
+          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
+        }
+        className="w-full h-full text-center py-2 outline-none !text-[10px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+      />
+    </div>
+  );
 
   const router = useRouter();
   const handleLogout = () => {
@@ -153,24 +180,37 @@ const Navbar: React.FC = () => {
       router.replace("/auth/login");
     }
   };
-useEffect(() => {
-  if (!auth?.isAuthenticated || !isAccountOpen) return;
+  function removeLocalShipping() {
+    localStorage.removeItem("shippingCost");
+    localStorage.removeItem("shippingData");
+  }
 
-  const handleAccountOutside = (event: MouseEvent) => {
-    if (
-      accountRef.current &&
-      !accountRef.current.contains(event.target as Node)
-    ) {
-      setIsAccountOpen(false);
-    }
+  const confirmDelete = (item: any) => {
+    dispatch(deleteCart({ id: item.cartItemId }))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
+      });
   };
+  useEffect(() => {
+    if (!auth?.isAuthenticated || !isAccountOpen) return;
 
-  document.addEventListener("mousedown", handleAccountOutside);
+    const handleAccountOutside = (event: MouseEvent) => {
+      if (
+        accountRef.current &&
+        !accountRef.current.contains(event.target as Node)
+      ) {
+        setIsAccountOpen(false);
+      }
+    };
 
-  return () => {
-    document.removeEventListener("mousedown", handleAccountOutside);
-  };
-}, [auth?.isAuthenticated, isAccountOpen]);
+    document.addEventListener("mousedown", handleAccountOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleAccountOutside);
+    };
+  }, [auth?.isAuthenticated, isAccountOpen]);
   // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -183,7 +223,6 @@ useEffect(() => {
       if (cartRef.current && !cartRef.current.contains(event.target as Node)) {
         setIsCartOpen(false);
       }
-      
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -280,7 +319,6 @@ useEffect(() => {
                 onClick={handleSkuCart}
                 disabled={loading}
                 className="w-[30%] xl:w-[34%] h-[42px] bg-[#FF482E] text-[14px] text-white disabled:opacity-70 rounded-r-sm"
-                
               >
                 {loading ? "loading" : "Add to Cart"}
               </button>
@@ -410,17 +448,16 @@ useEffect(() => {
                     <div className="px-5 py-4 border-b border-gray-200">
                       <h2 className="text-[#333333] text-3xl">Your Cart</h2>
                     </div>
-
-                    <div className="px-5 py-4 border-b border-gray-200">
-                      <p className="text-[#959595] text-[14px] text-center">
-                        {cart.length === 0
-                          ? "Your Cart Is Empty."
-                          : `${cart.reduce((sum, i) => sum + (i.quantity || 0), 0)} item(s) in cart`}
-                      </p>
-                    </div>
+                    {cart.length === 0 && (
+                      <div className="px-5 py-4 border-b border-gray-200">
+                        <p className="text-[#959595] text-[14px] text-center">
+                          Your Cart Is Empty.
+                        </p>
+                      </div>
+                    )}
 
                     {cart.length > 0 && (
-                      <div className="max-h-[420px] overflow-y-auto">
+                      <div className=" relative max-h-[420px] overflow-y-auto">
                         {cart.map((item) => {
                           const imageUrl =
                             item?.image?.[0]?.path ||
@@ -431,7 +468,7 @@ useEffect(() => {
                           return (
                             <div
                               key={item.id}
-                              className="px-5 py-4 border-b border-gray-200 flex gap-4"
+                              className=" px-5 py-4  border-gray-200 flex gap-4"
                             >
                               <div className="shrink-0">
                                 <Image
@@ -453,33 +490,7 @@ useEffect(() => {
 
                                 <div className="mt-2 flex items-center gap-2">
                                   <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
-                                    <input
-                                      type="number"
-                                      value={
-                                        quantities[item.id] === undefined
-                                          ? item.quantity
-                                          : quantities[item.id]
-                                      }
-                                      // onChange={(e) =>
-                                      //   handleQtyChange(item.id, e.target.value)
-                                      // }
-                                      onChange={(e) =>
-                                        handleQtyChange(
-                                          item.id,
-                                          e.target.value,
-                                          item.maxPurchaseQuantity,
-                                        )
-                                      }
-                                      onKeyDown={(e) =>
-                                        handleManualQtyUpdate(
-                                          e,
-                                          item.id,
-                                          item.maxPurchaseQuantity,
-                                        )
-                                      }
-                                      className="w-[35px] h-8 text-center outline-none text-[14px] text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                      aria-label="Quantity"
-                                    />
+                                    {qtyInput(item)}
                                   </div>
                                   <span className="text-[#333333]">×</span>
                                   <span className="text-[#FD5430] text-[14px]">
@@ -488,9 +499,7 @@ useEffect(() => {
                                   <div className="flex-1" />
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      dispatch(removeFromCart(item.id))
-                                    }
+                                    onClick={() => confirmDelete(item)}
                                     className="shrink-0 w-6 h-6 rounded-full bg-[#FD5430] text-white flex items-center justify-center"
                                     aria-label="Remove item"
                                   >
@@ -501,6 +510,25 @@ useEffect(() => {
                             </div>
                           );
                         })}
+                        {loading && updatingQty && (
+                          <div className="absolute inset-0 z-30 flex items-center justify-center">
+                            {/* Blur layer */}
+                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
+
+                            {/* Loader */}
+                            <div className="relative z-40 flex gap-2">
+                              <span className="w-2 h-2 bg-black rounded-full animate-bounce" />
+                              <span
+                                className="w-2 h-2 bg-black rounded-full animate-bounce"
+                                style={{ animationDelay: "0.15s" }}
+                              />
+                              <span
+                                className="w-2 h-2 bg-black rounded-full animate-bounce"
+                                style={{ animationDelay: "0.3s" }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -584,21 +612,20 @@ useEffect(() => {
             <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
               <input
                 type="number"
-               
                 value={qty}
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }
                 className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
                 style={{ appearance: "textfield" }}
-                  onFocus={(e) => e.target.select()}
+                onFocus={(e) => e.target.select()}
               />
             </div>
 
             <button
               type="button"
               onClick={handleSkuCart}
-                disabled={loading}
+              disabled={loading}
               className="h-[42px] px-[11px] bg-[#FF482E] text-white text-[14px] disabled:opacity-70 rounded-r-sm whitespace-nowrap"
             >
               {loading ? "loading" : "Add to Cart"}
@@ -656,7 +683,7 @@ useEffect(() => {
                     value={skuInput}
                     onChange={(e) => setSkuInput(e.target.value)}
                     placeholder="Add SKU to Cart"
-                     onFocus={(e) => e.target.select()}
+                    onFocus={(e) => e.target.select()}
                     className="w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black !text-[14px]"
                   />
 
