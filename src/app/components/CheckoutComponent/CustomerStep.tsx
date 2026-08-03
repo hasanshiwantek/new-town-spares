@@ -1,11 +1,13 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
 import Link from "next/link";
-import { useAppSelector } from "@/hooks/useReduxHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
+import { logout } from "@/redux/slices/authSlice";
+import LoginForm from "./LoginForm";
 interface CustomerStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
@@ -33,7 +35,14 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
   emailValue,
 }) => {
   const auth = useAppSelector((state: RootState) => state?.auth);
+    const [showLogin, setShowLogin] = useState(false);
+  const dispatch = useAppDispatch();
   const isLoggedIn = Boolean(auth?.isAuthenticated);
+   const handleSignOut = () => {
+    dispatch(logout());
+    window.location.reload()
+  };
+
   return (
     <>
       {isCompleted && !isActive ? (
@@ -42,18 +51,34 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
           <span className="text-[13px] leading-[19.5px] text-[#333333]">
             {emailValue}
           </span>
-          <button
+          {
+            auth?.isAuthenticated?(
+               <button
+            type="button"
+            onClick={handleSignOut}
+            className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
+          >
+            SIGN OUT
+          </button>
+            ):(
+<button
             type="button"
             onClick={onEdit}
             className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
           >
             Edit
           </button>
+            )
+          }
+          
         </div>
       ) : isActive ? (
         // Show active form
         <div className="space-y-4">
+            {!showLogin ? (
+              <>
           <div className="flex flex-col">
+           
             <label
               htmlFor="email"
               className="text-[13px] font-medium mb-2 text-[#333333]"
@@ -105,14 +130,29 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
           {!isLoggedIn && (
             <div className="text-[13px] text-[#333333]">
               Already have an account?{" "}
-              <Link
+              {/* <Link
                 href="/auth/login"
                 className="hover:text-[var(--primary-color)]"
               >
                 Sign in now
-              </Link>
+              </Link> */}
+              <button
+                    type="button"
+                    onClick={() => setShowLogin(true)}
+                    className="text-[var(--primary-color)] "
+                    
+                  >
+                    Sign in now
+                  </button>
             </div>
           )}
+          </>
+        ):(
+          <div className="w-full">
+                <LoginForm onCancel={() => setShowLogin(false)} />
+              </div>
+        )
+      }
 
           {/* Apple Pay Button */}
 
