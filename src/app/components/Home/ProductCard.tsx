@@ -217,7 +217,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   .then(() => {
                     toast.success(`${product.name} added to cart!`);
                     dispatch(fetchCartList());
-                    router.push("/cart");
+                    // router.push("/cart");
                   });
               }
             }}

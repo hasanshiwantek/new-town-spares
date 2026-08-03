@@ -68,7 +68,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     }
     dispatch(addToCart({ ...product, quantity }));
     toast.success(`${product?.name ?? "Product"} added to cart!`);
-    router.push("/cart");
+    // router.push("/cart");
   };
 
   const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";

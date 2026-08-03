@@ -129,7 +129,7 @@ const ProductRight = ({
                 toast.success(
                   `${product.name} added to cart (${quantityToAdd})!`
                 );
-                router.push("/cart")
+                // router.push("/cart")
               })
 
             }}
