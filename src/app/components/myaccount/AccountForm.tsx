@@ -39,6 +39,10 @@ const AccountForm = () => {
   } = useForm<AccountFormValues>({
     defaultValues: {
       email: auth?.user?.email || "",
+      firstName: auth?.user?.firstName || "",
+      lastName: auth?.user?.lastName || "",
+      companyName: auth?.user?.companyName || "",
+      phone: auth?.user?.phone || "",
     },
   });
 
