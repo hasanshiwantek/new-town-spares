@@ -38,7 +38,7 @@ const BlogHome = () => {
                 </div>
               </div>
             ))
-          : blogPosts.map((blog: any, idx: number) => {
+          : blogPosts?.filter((item: any) => item?.thumbnail)?.map((blog: any, idx: number) => {
               const dateText = blog?.createdAt
                 ? dayjs(blog.createdAt).format("MMM D, YYYY")
                 : "";

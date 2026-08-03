@@ -243,7 +243,7 @@ const Testimonials = () => {
               }))}
               className="custom-carousel"
               circular={false}
-              autoplayInterval={0}
+              autoplayInterval={4000}
               itemTemplate={reviewTemplate}
               showIndicators={false}
               showNavigators={false}
@@ -251,7 +251,7 @@ const Testimonials = () => {
           )}
 
           {/* Dotted Indicators — always visible like live, one dot per page */}
-          {reviews.length > 0 && !reviewsLoading && !reviewsError && (
+          {/* {reviews.length > 0 && !reviewsLoading && !reviewsError && (
             <div className="flex items-center justify-center mt-4">
               <div className="flex items-center flex-wrap justify-center gap-[6px]">
                 {Array.from({ length: totalPages }).map((_, i) => (
@@ -266,7 +266,7 @@ const Testimonials = () => {
                 ))}
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

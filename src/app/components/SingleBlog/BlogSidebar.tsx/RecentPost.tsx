@@ -4,40 +4,11 @@ import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
 
-// const blogs = [
-//   {
-//     id: 1,
-//     title: "Network Attached Storage Buying Guide 2026: A Comprehensive Look",
-//     author: "Business |  Power Supplies",
-//     date: "September 12, 2022",
-//     image: "/gridimgone.png",
-//     slug: "network-attached-storage-guide",
-//   },
-//   {
-//     id: 2,
-//     title:
-//       "Host Bus Adapter: Types, Comparisons, and Complete Guide to Modern Storage",
-//     author: "Business |  Power Supplies",
-//     date: "September 12, 2022",
-//     image: "/gridimgtwo.png",
-//     slug: "host-bus-adapter-guide",
-//   },
-//   {
-//     id: 3,
-//     title: "Cloud Storage vs Local Storage: The Modern Dilemma",
-//     author: "Business |  Power Supplies",
-//     date: "September 12, 2022",
-//     image: "/gridimgthree.png",
-//     slug: "cloud-storage-modern-dilemma",
-//   },
-// ];
-
 const RecentPost = () => {
-  const { blogs, error, loading } = useAppSelector(
+  const { blogs } = useAppSelector(
     (state: any) => state.storeFront,
   );
   const blogPosts = blogs?.data;
-  const pagination = blogs?.pagination || null;
   return (
     <>
       {/* Live: 28px/33.6 #333, no margins */}
@@ -47,7 +18,7 @@ const RecentPost = () => {
       <section className="w-full flex justify-center">
         <div className="w-full">
           <div>
-            {blogPosts?.map((blog: any) => (
+            {blogPosts?.filter((item: any) => item?.thumbnail)?.map((blog: any) => (
               <Link
                 key={blog.id}
                 href={`/blogs/${blog.slug}`}

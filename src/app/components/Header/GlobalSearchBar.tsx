@@ -26,8 +26,6 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
 
   const [results, setResults] = useState<any[]>([]);
 
-  console.log({ results });
-
   // Cache state object for storing search results
   const [searchCache, setSearchCache] = useState<{ [key: string]: any[] }>({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);

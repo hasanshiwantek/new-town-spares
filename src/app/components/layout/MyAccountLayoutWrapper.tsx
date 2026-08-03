@@ -57,7 +57,7 @@ const MyAccountTabs = () => {
       </nav>
 
       {/* Heading */}
-      <h1 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center my-[26.25px]">
+      <h1 className="text-[28px] leading-[33.6px] font-normal text-[#333333] text-center my-[26.25px]">
         {pageHeading}
       </h1>
 

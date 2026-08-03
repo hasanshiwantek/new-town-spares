@@ -124,7 +124,7 @@ const OrderProduct = () => {
                     className={`${cellClass} col-span-2 row-start-4 min-[801px]:col-start-3 min-[801px]:col-end-5 min-[801px]:row-start-1`}
                   >
                     <span className={labelClass}>Status</span>
-                    <span className={valueClass}>
+                    <span className="inline-block bg-[#999999] text-white text-[13px] leading-[15px] px-[7px] py-[3px]">
                       {item?.status || "Pending"}
                     </span>
                   </div>

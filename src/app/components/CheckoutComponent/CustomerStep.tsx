@@ -139,7 +139,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
               <button
                     type="button"
                     onClick={() => setShowLogin(true)}
-                    className="text-[var(--primary-color)] "
+                    className="text-[var(--primary-color)]  "
                     
                   >
                     Sign in now

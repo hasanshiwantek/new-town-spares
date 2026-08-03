@@ -43,21 +43,21 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
     try {
       const result = await dispatch(loginUser(state));
       if (loginUser.fulfilled.match(result)) {
-        const token = result?.payload?.token
+        const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = localStorage.getItem("sessionId")
+          const sessionId = localStorage.getItem("sessionId");
           const res = await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${token}`,
-              "storeId": storeId,
+              Authorization: `Bearer ${token}`,
+              storeId: storeId,
               "X-Session-ID": sessionId || "",
               "Content-Type": "application/json",
             },
           });
           window.location.reload();
         };
-        fetchCartListInner()
+        fetchCartListInner();
         setState({
           email: "",
           password: "",
@@ -69,17 +69,14 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
             : "Login failed. Please try again.";
 
         toast.error(errorMessage);
-       
       }
-    } catch (err) {
-     
-    }
+    } catch (err) {}
   };
 
   return (
     <div className="max-full">
       {!showSignup ? (
-        <div className="space-y-6">
+        <div className="space-y-6 w-[600px]">
           {/* Email Address */}
           <div>
             <label
@@ -146,16 +143,16 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
               href="/auth/forgot-password"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#D42020] underline"
+              className="text-[#333333] "
             >
-              Forgot password?
+              Send me a sign-in link instead
             </Link>
 
             <p className="text-[#545454]">
               Don’t have an account?
               <button
                 type="button"
-                className="text-[#D42020]  mx-[3px]"
+                className="text-[#333333]  mx-[3px] hover:text-[#F15B3A]"
                 onClick={() => setShowSignup(true)}
               >
                 Create an account
@@ -175,14 +172,14 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
                 <button
                   type="button"
                   onClick={onSubmit}
-                  className="btn-primary w-full sm:w-auto !mb-[15px] sm:!mb-0"
+                  className="btn-primary !h-12 !rounded-none !w-[90px] w-full sm:w-auto !mb-[15px] sm:!mb-0"
                 >
                   {loginloading ? "Loading..." : "SiGN IN"}
                 </button>
                 <button
                   type="button"
-                  className="btn-primary w-full sm:w-auto"
                   onClick={() => onCancel?.()}
+                  className="btn-primary !bg-white !h-12 !text-black !w-[90px] !border !border-gray-300  !rounded-none w-full sm:w-auto"
                 >
                   CANCEL
                 </button>

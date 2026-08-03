@@ -12,7 +12,7 @@ const AccountInfoBar = () => {
   const firstName = auth?.user?.firstName;
 
   const cardClass =
-    "flex items-center gap-[16.5px] p-[21px] bg-white shadow-[0_0_1px_0_rgba(0,0,0,0.5)]";
+    "flex items-end gap-[16.5px] p-[21px] bg-white shadow-[0_0_1px_0_rgba(0,0,0,0.5)]";
   const labelClass = "text-[#333333] text-[14px] leading-[16.8px]";
   const linkClass =
     "text-[#333333] text-[14px] leading-[21px] font-semibold underline hover:text-[#FD5430] transition-colors duration-200";

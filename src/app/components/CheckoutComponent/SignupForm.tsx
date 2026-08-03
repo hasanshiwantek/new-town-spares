@@ -101,6 +101,7 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
     }
   };
   return (
+    <div className="w-[600px]">
     <div className="w-full space-y-5">
       {/* First + Last Name Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -182,7 +183,7 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
         <button
           type="button"
           onClick={onSubmit}
-          className="btn-primary w-full sm:w-auto !mt-[9px] !mb-[15px] sm:!mb-0 sm:!mt-0"
+          className="btn-primary w-full !h-16 !rounded-none sm:w-auto !mt-[9px] !mb-[15px] sm:!mb-0 sm:!mt-0"
         >
           CREATE ACCOUNT
         </button>
@@ -190,12 +191,13 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
         <button
           type="button"
           onClick={() => onCancel?.()}
-          className="btn-primary w-full sm:w-auto"
+          className="btn-primary  !h-16 !rounded-none !bg-white !h-12 !text-black !text-[15px] !w-[100px] !border !border-gray-300 sm:w-auto"
         >
           CANCEL
         </button>
       </div>
     </div>
+      </div>
   );
 };
 
