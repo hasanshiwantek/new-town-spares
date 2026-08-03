@@ -13,6 +13,7 @@ import {
   clearAllCart,
   fetchCartList,
   removeFromCart,
+  updateCart,
   updateQty,
 } from "@/redux/slices/cartsSlice";
 import { deleteCart } from "@/redux/slices/cartsSlice";
@@ -65,37 +66,50 @@ const CartList = () => {
   useEffect(() => {
     const updatedQuantities: { [key: string]: number } = {};
     cart.forEach((item) => {
-      updatedQuantities[item.id] = item.quantity;
+     updatedQuantities[item.cartItemId] = item.quantity;
     });
     setQuantities(updatedQuantities);
   }, [cart]);
 
   const handleManualQtyUpdate = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    id: string,
-    maxPurchaseQuantity?: number,
-  ) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const inputValue = quantities[id];
-      const parsed = Number(inputValue);
+  e: React.KeyboardEvent<HTMLInputElement>,
+  id: string,
+  maxPurchaseQuantity?: number,
+) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
 
-      const newQty = maxPurchaseQuantity
-        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-        : parsed > 0
-          ? parsed
-          : 1;
+    const inputValue = quantities[id];
+    const parsed = Number(inputValue);
 
-      dispatch(updateQty({ id, quantity: newQty }));
+    const newQty = maxPurchaseQuantity
+      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+      : parsed > 0
+      ? parsed
+      : 1;
 
-      setQuantities((prev) => ({
-        ...prev,
-        [id]: newQty,
-      }));
+    dispatch(
+      updateCart({
+        id,
+        data: {
+          quantity: newQty,
+        },
+      })
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
 
-      e.currentTarget.blur();
-    }
-  };
+        setQuantities((prev) => ({
+          ...prev,
+          [id]: newQty,
+        }));
+      });
+
+    e.currentTarget.blur();
+  }
+};
 
   const isEmpty = !cart?.length;
 
@@ -105,13 +119,13 @@ const CartList = () => {
       <input
         type="number"
         value={
-          quantities[item.id] === undefined
+          quantities[item.cartItemId] === undefined
             ? item.quantity
-            : quantities[item.id]
+            : quantities[item.cartItemId]
         }
-        onChange={(e) => handleChange(item.id, e.target.value)}
+        onChange={(e) => handleChange(item.cartItemId, e.target.value)}
         onKeyDown={(e) =>
-          handleManualQtyUpdate(e, item.id, item.maxPurchaseQuantity)
+          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
         }
         className="w-[50px] h-[40px] text-center py-2 outline-none !text-[15px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
