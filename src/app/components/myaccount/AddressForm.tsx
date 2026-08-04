@@ -1,17 +1,18 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import {addCustomerAddress } from "@/redux/slices/myaccountSlice";
+import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import countries from "world-countries";
 import {
   FieldLabel,
   ErrorMsg,
   addrInputCls,
   addrSelectCls,
 } from "./addressFormHelpers";
+import { Country, State } from "country-state-city";
+import { useMemo } from "react";
 
 interface AddressFormValues {
   firstName: string;
@@ -29,6 +30,8 @@ interface AddressFormValues {
 const AddressForm = () => {
   const {
     register,
+    watch,
+    setValue,
     handleSubmit,
     formState: { errors },
     reset,
@@ -37,27 +40,36 @@ const AddressForm = () => {
   const auth = useAppSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const selectedCountry = watch("country");
 
-  const countryList = countries
-    .map((c) => ({ name: c.name.common, code: c.cca2 }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const countryList = Country.getAllCountries().map((c) => ({
+    name: c.name,
+    code: c.isoCode,
+  }));
+  const stateList = useMemo(() => {
+    if (!selectedCountry) return [];
 
+    return State.getStatesOfCountry(selectedCountry).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [selectedCountry]);
   const onSubmit = async (data: AddressFormValues) => {
     try {
       const mergedData = {
-    
-            firstName: data.firstName,
-            lastName: data.lastName,
-            companyName: data.companyName || "",
-            phoneNumber: data.phoneNumber || "",
-            addressLine1: data.address1 || "",
-            addressLine2: data.address2 || "",
-            city: data.suburb,
-            state: data.state,
-            zip: data.postcode,
-            country: data.country,
-        
-      
+
+        customer_id: auth?.user?.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        companyName: data.companyName || "",
+        phoneNumber: data.phoneNumber || "",
+        addressLine1: data.address1 || "",
+        addressLine2: data.address2 || "",
+        city: data.suburb,
+        state: data.state,
+        zip: data.postcode,
+        country: data.country,
+
       };
 
       const result = await dispatch(
@@ -177,13 +189,19 @@ const AddressForm = () => {
               id="country"
               className={addrSelectCls(!!errors.country)}
               defaultValue=""
-              {...register("country", { required: true })}
+              // {...register("country", { required: true, })}
+              {...register("country", {
+                required: true,
+                onChange: () => {
+                  setValue("state", "");
+                },
+              })}
             >
               <option value="" disabled>
                 Choose a Country
               </option>
               {countryList.map((c) => (
-                <option key={c.code} value={c.name}>
+                <option key={c.code} value={c.code}>
                   {c.name}
                 </option>
               ))}
@@ -198,11 +216,21 @@ const AddressForm = () => {
             <FieldLabel htmlFor="state" required>
               State/Province
             </FieldLabel>
-            <input
+            <select
               id="state"
-              className={addrInputCls(!!errors.state)}
+              className={addrSelectCls(!!errors.state)}
+              defaultValue=""
               {...register("state", { required: true })}
-            />
+            >
+              <option value="" disabled>
+                Choose a State/Province
+              </option>
+              {stateList.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
             <ErrorMsg show={!!errors.state} label="State/Province" />
           </div>
           <div>

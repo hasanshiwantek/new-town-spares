@@ -146,7 +146,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </Link>
             </div>
           )}
-          {purchasabilityStatus && (
+          {/* {purchasabilityStatus && (
             <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
               <span className="inline-flex items-center align-middle gap-[3.5px] rounded-[7px] bg-[#E2E2FF] text-[#4242CF] text-[14px] leading-[21px] font-normal py-[1.75px] px-[7px] mr-2 whitespace-nowrap">
                 <svg
@@ -169,7 +169,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 See if you qualify
               </span>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="mt-6 hidden min-[801px]:grid grid-cols-1 sm:grid-cols-2 border border-gray-200 overflow-hidden bg-white">
