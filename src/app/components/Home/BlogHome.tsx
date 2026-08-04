@@ -9,7 +9,9 @@ import { getBlogs } from "@/redux/slices/storeFrontSlice";
 
 const BlogHome = () => {
   const dispatch = useAppDispatch();
-  const { blogs, loading, error } = useAppSelector((state: any) => state.storeFront);
+  const { blogs, loading, error } = useAppSelector(
+    (state: any) => state.storeFront,
+  );
   const blogPosts = blogs?.data || [];
 
   useEffect(() => {
@@ -19,7 +21,9 @@ const BlogHome = () => {
   return (
     <div className=" py-6">
       {/* Heading */}
-      <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center mb-[26px]">Blogs</h2>
+      <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center mb-[26px]">
+        Blogs
+      </h2>
 
       {/* Grid */}
       <div className="w-full mx-auto grid gap-6 min-[551px]:grid-cols-2 min-[801px]:grid-cols-4">
@@ -38,7 +42,7 @@ const BlogHome = () => {
                 </div>
               </div>
             ))
-          : blogPosts?.filter((item: any) => item?.thumbnail)?.map((blog: any, idx: number) => {
+          : blogPosts?.map((blog: any, idx: number) => {
               const dateText = blog?.createdAt
                 ? dayjs(blog.createdAt).format("MMM D, YYYY")
                 : "";
@@ -47,7 +51,7 @@ const BlogHome = () => {
                 blog?.shortDescription ||
                 blog?.body?.replace(/<[^>]*>/g, "")?.slice(0, 140) ||
                 "";
-              const imageUrl = blog?.thumbnail || "/default-blog-image.svg";
+              const imageUrl = blog?.thumbnail?.trim();
 
               return (
                 <Link
@@ -56,17 +60,19 @@ const BlogHome = () => {
                   className="bg-white transition duration-300 overflow-hidden shadow-[0_0_1px_0_rgba(51,51,51,0.5)] block"
                 >
                   {/* Image */}
-                  <div className="relative h-[167px] w-full overflow-hidden group">
-                    <Image
-                      src={imageUrl}
-                      alt={blog?.title ?? "Blog"}
-                      fill
-                      className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw,
-                             (max-width: 1200px) 50vw,
-                             384px"
-                      priority={idx === 0}
-                    />
+                  <div className="relative h-[167px] w-full overflow-hidden group bg-[#f5f5f5]">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={blog?.title ?? "Blog"}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width:768px) 100vw,
+             (max-width:1200px) 50vw,
+             384px"
+                        priority={idx === 0}
+                      />
+                    ) : null}
                   </div>
                   {/* Content */}
                   <div className="p-[15px]">
@@ -97,7 +103,10 @@ const BlogHome = () => {
 
       {/* View All */}
       <div className="text-center mt-6">
-        <Link href="/blogs" className="text-[14px] font-normal text-[#333333] underline">
+        <Link
+          href="/blogs"
+          className="text-[14px] font-normal text-[#333333] underline"
+        >
           View All Articles
         </Link>
       </div>

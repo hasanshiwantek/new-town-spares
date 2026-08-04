@@ -282,12 +282,12 @@ const OrderSummary = () => {
                   setShippingData({ ...shippingData, country: value });
                 }}
               >
-                <SelectTrigger className="w-full outline-none ">
+                <SelectTrigger className="w-full outline-none max-w-none  !h-[var(--select-height,32px)] ">
                   <SelectValue placeholder="Choose a Country" />
                 </SelectTrigger>
-                <SelectContent className="w-full outline-none ">
+                <SelectContent>
                   {countryList.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
+                    <SelectItem key={country.code} value={country.code} >
                       {country.name}
                     </SelectItem>
                   ))}
@@ -305,10 +305,10 @@ const OrderSummary = () => {
                     setShippingData({ ...shippingData, state: value })
                   }
                 >
-                  <SelectTrigger className="w-full outline-none ">
+                  <SelectTrigger className="w-full  max-w-none outline-none !h-[var(--select-height,32px)]  ">
                     <SelectValue placeholder="State/Province" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full outline-none ">
+                  </SelectTrigger >
+                  <SelectContent >
                     {stateList.map((state) => (
                       <SelectItem key={state.code} value={state.code}>
                         {state.name}
@@ -318,7 +318,7 @@ const OrderSummary = () => {
                 </Select>
               ) : (
                 <Input
-                  className="w-full"
+                   className="w-full !h-[30px]  max-w-none"
                   onChange={(e) =>
                     setShippingData({ ...shippingData, state: e.target.value })
                   }
@@ -331,7 +331,7 @@ const OrderSummary = () => {
               <label className="w-full text-[14px]">Suburb/City</label>
               <Input
                 value={shippingData.city}
-                className="w-full h-[32px]!"
+                className="w-full !h-[30px]  max-w-none"
                 onChange={(e) =>
                   setShippingData({ ...shippingData, city: e.target.value })
                 }
@@ -342,7 +342,7 @@ const OrderSummary = () => {
             <div className="flex flex-col gap-4">
               <label className="w-full text-[14px]">Zip/Postcode</label>
               <Input
-                className="w-full h-[32px]!"
+                className="w-full !h-[30px] max-w-none"
                 value={shippingData.zip}
                 onChange={(e) =>
                   setShippingData({ ...shippingData, zip: e.target.value })
@@ -355,7 +355,7 @@ const OrderSummary = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full text-white bg-[#fd5430] font-medium rounded-md px-4 py-[6px] text-xl transition-all my-1 duration-200 cursor-pointer text-[13px]!"
+                className="w-full text-white bg-[#fd5430] !h-[42px] font-medium rounded-md px-4 py-[6px] text-xl transition-all my-1 duration-200 cursor-pointer !text-[13px]"
               // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
               >
                 {loading ? "Loading..." : "Estimate Shipping"}
@@ -502,7 +502,7 @@ const OrderSummary = () => {
         </div>
         {/* Show applied coupon details */}
         {appliedCoupon && (
-          <div className="flex gap-3 items-center rounded">
+          <div className="flex  items-center rounded">
             {/* <span className="text-sm">
                 ${Number(appliedCoupon.discountAmount).toFixed(2)} off (
                 {appliedCoupon.couponCode.toUpperCase()})
@@ -519,7 +519,7 @@ const OrderSummary = () => {
         {showCoupon && !appliedCoupon && (
           <form
             onSubmit={handleCouponSubmit}
-            className="flex flex-col md:flex-row gap-2 my-2"
+            className="flex flex-col md:flex-row  my-2"
           >
             {/* <div className="flex mb-[14px]"> */}
             <Input

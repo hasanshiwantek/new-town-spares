@@ -19,6 +19,9 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         {/* Content */}
                         <div className="lg:col-span-12">
+                            <div className='hidden md:flex'>
+
+                           
                             <h2 className=""><Link href="/" className="text-[11px] "
                                 itemProp="name"
                             >
@@ -29,9 +32,12 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
                             >
                                     {webPages?.pageName}
                                 </span></h2>
+                                 </div>
 
                             {/* Page Title */}
-                            <h1 className="text-4xl mb-4 text-[#4A4A4A] mt-5">
+
+                           <div className="w-full max-w-[900px]  mx-auto pt-10">
+                            <h1 className="!text-[28px] mb-4 text-[#333333] mt-5">
                                 {webPages?.pageName}
                             </h1>
 
@@ -53,6 +59,7 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
                             {webPages?.pageType == "3" && (
                                 <WebContactForm showTheseFields={showTheseFields} />
                             )}
+                        </div>
                         </div>
                     </div>
                 </div>
