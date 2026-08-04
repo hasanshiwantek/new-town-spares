@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 // import EditCartShipModal from "./EditCartShipModal";
 import { usePathname } from "next/navigation";
 import EditCartShipModal from "./EditCartShipModal";
+import ProductPrice from "../productprice/ProductPrice";
 interface OrderSummaryProps {
     cart: any[];
     subtotal: number;
@@ -173,7 +174,10 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                                             {item.quantity} x {item.name}
                                         </p>
                                         <p className="text-[13px] text-[#333333] whitespace-nowrap">
-                                            ${lineTotal.toFixed(2)}
+                                            <ProductPrice
+                                                price={lineTotal}
+                                                inline={true}
+                                            />
                                         </p>
                                     </div>
                                 </div>
@@ -243,7 +247,10 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                             {/* Show applied coupon */}
                             {appliedCoupon && (
                                 <div className="flex gap-3 items-center px-4 py-2 rounded">
-                                    <span>${Number(appliedCoupon.discountAmount).toFixed(2)} off the order total ({appliedCoupon.couponCode.toUpperCase()})</span>
+                                    <span>   <ProductPrice
+                                        price={Number(appliedCoupon.discountAmount)}
+                                        inline={true}
+                                    /> off the order total ({appliedCoupon.couponCode.toUpperCase()})</span>
                                     <button
                                         onClick={onRemoveCoupon}
                                         className="font-bold hover:text-red-700"
@@ -260,7 +267,12 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                 <div className="space-y-3 text-[13px] pt-[19.5px] px-[19.5px]">
                     <div className="flex justify-between text-[#333333]">
                         <span>Subtotal</span>
-                        <span>${subtotal.toFixed(2)}</span>
+                        <span>
+                            <ProductPrice
+                                price={subtotal}
+                                inline={true}
+                            />
+                        </span>
                     </div>
                     {appliedCoupon && discountAmount > 0 && (
                         <div className="mt-2">
@@ -271,12 +283,25 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </span>
-                                <span className="font-medium">-${discountAmount.toFixed(2)}</span>
+                                <span className="font-medium"> -<ProductPrice
+                                    price={discountAmount}
+                                    inline={true}
+                                /></span>
                             </div>
                             {discountOpen && (
                                 <div className="flex justify-between text-gray-600 text-[13px] mt-1">
-                                    <span>${Number(appliedCoupon.discountAmount).toFixed(2)} off ({appliedCoupon.couponCode.toUpperCase()})</span>
-                                    <span className="font-medium">-${discountAmount.toFixed(2)}</span>
+                                    <span>
+                                        <ProductPrice
+                                            price={Number(appliedCoupon.discountAmount)}
+                                            inline={true}
+                                        />
+                                        off ({appliedCoupon.couponCode.toUpperCase()})</span>
+                                    <span className="font-medium">
+                                        -<ProductPrice
+                                            price={discountAmount}
+                                            inline={true}
+                                        />
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -284,12 +309,18 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                     <div className="flex justify-between text-[#333333]">
                         <span>Shipping</span>
                         <span>
-                            {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+                            {shipping === 0 ? "Free" : <ProductPrice
+                                price={shipping}
+                                inline={true}
+                            />}
                         </span>
                     </div>
                     <div className="flex justify-between text-[#333333]">
                         <span>Tax</span>
-                        <span>${tax.toFixed(2)}</span>
+                        <span><ProductPrice
+                            price={tax}
+                            inline={true}
+                        /></span>
                     </div>
                 </div>
 
@@ -297,7 +328,10 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                 <div className="flex flex-col py-[19.5px] px-[19.5px] mt-[19.5px] border-t border-[#ebebeb] text-[#333333]">
                     <div className="flex justify-between items-center">
                         <span className="text-[15px]">Total</span>
-                        <span className="text-[30px] font-bold leading-none text-[#FF482E]">${finalTotal.toFixed(2)}</span>
+                        <span className="text-[30px] font-bold leading-none text-[#FF482E]"><ProductPrice
+                            price={finalTotal}
+                            inline={true}
+                        /></span>
                     </div>
                 </div>
             </div>

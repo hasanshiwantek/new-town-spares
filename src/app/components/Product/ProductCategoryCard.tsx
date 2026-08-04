@@ -35,7 +35,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const purchasabilityStatus = product?.purchasabilityStatus == "available";
+  const purchasabilityStatus = product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
   const [quantity, setQuantity] = useState<number>(
     product.minPurchaseQuantity || 1,
   );
@@ -75,9 +75,11 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
   const brandName = product.brand?.name ?? "";
   const hasOriginalPrice =
     product?.msrp != null && Number(product.msrp) > 0;
-  const originalPrice = hasOriginalPrice
-    ? Number(product.price) + Number(product.msrp)
-    : Number(product.price);
+  // const originalPrice = hasOriginalPrice
+  //   ? Number(product.price) + Number(product.msrp)
+  //   : Number(product.price);
+  // const salePrice = Number(product.price);
+  const originalPrice = Number(product.msrp)
   const salePrice = Number(product.price);
 
   return (

@@ -26,6 +26,7 @@ import { fetchCategories } from "@/lib/api/category";
 import usaFlag from "../../../../public/usa-logo.png";
 import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
+import ProductPrice from "../productprice/ProductPrice";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -371,9 +372,8 @@ const Navbar: React.FC = () => {
                 <div className="hidden min-[1500px]:flex items-center gap-1">
                   <span className="text-black text-xl">Account</span>
                   <svg
-                    className={`w-5 h-5 text-black transition-transform duration-200 ${
-                      isAccountOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-5 h-5 text-black transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -390,11 +390,10 @@ const Navbar: React.FC = () => {
 
               {auth?.isAuthenticated && (
                 <div
-                  className={`absolute right-0 mt-5 w-max bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
-                    isAccountOpen
-                      ? "opacity-100 visible"
-                      : "opacity-0 invisible"
-                  }`}
+                  className={`absolute right-0 mt-5 w-max bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${isAccountOpen
+                    ? "opacity-100 visible"
+                    : "opacity-0 invisible"
+                    }`}
                 >
                   <ul className="flex flex-col gap-3 px-6 py-4 text-[14px] text-gray-700 font-normal *:underline *:decoration-current *:hover:text-[#FF482E] cursor-pointer">
                     <li>
@@ -494,7 +493,11 @@ const Navbar: React.FC = () => {
                                   </div>
                                   <span className="text-[#333333]">×</span>
                                   <span className="text-[#FD5430] text-[14px]">
-                                    ${itemPrice.toFixed(2)}
+                                    <ProductPrice
+                                      price={itemPrice}
+                                      // price={originalPrice}
+                                      inline={true}
+                                    />
                                   </span>
                                   <div className="flex-1" />
                                   <button
@@ -551,11 +554,24 @@ const Navbar: React.FC = () => {
                             </div>
                             <div className="flex justify-between border-t border-gray-200 pt-3">
                               <span>Subtotal:</span>
-                              <span>${subtotal.toFixed(2)}</span>
+                              <span>
+
+                                <ProductPrice
+                                  price={subtotal}
+                                  // price={originalPrice}
+                                  inline={true}
+                                />
+                              </span>
                             </div>
                             <div className="flex justify-between border-t border-gray-200 pt-3">
                               <span>Grand total:</span>
-                              <span>${subtotal.toFixed(2)}</span>
+                              <span>
+                                <ProductPrice
+                                  price={subtotal}
+                                  // price={originalPrice}
+                                  inline={true}
+                                />
+                              </span>
                             </div>
                           </>
                         );

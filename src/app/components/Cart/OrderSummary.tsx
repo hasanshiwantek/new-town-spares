@@ -23,6 +23,7 @@ import {
 } from "@/redux/slices/shippingSlice";
 import { calculatePackage } from "../CheckoutComponent/Shippingstep";
 import { addShippingCost } from "@/redux/slices/shippingSlice";
+import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
@@ -224,7 +225,11 @@ const OrderSummary = () => {
             Subtotal:
           </span>
           <span className="text-[14px] text-[#333333]">
-            ${subtotal.toFixed(2)}
+
+            <ProductPrice
+              price={subtotal}
+              inline={true}
+            />
           </span>
         </div>
 
@@ -252,7 +257,10 @@ const OrderSummary = () => {
               }
               onClick={() => setShowShipping(!showShipping)}
             >
-              {!showShipping ? `$${shippingCost.toFixed(2)}` : ""}
+              {!showShipping ? <ProductPrice
+                price={shippingCost}
+                inline={true}
+              /> : ""}
             </button>
           ) : (
             <button
@@ -557,7 +565,10 @@ const OrderSummary = () => {
             Grand total:
           </span>
           <span className="text-[25px] leading-none text-[#333333] font-bold">
-            ${finalTotal.toFixed(2)}
+            <ProductPrice
+              price={finalTotal}
+              inline={true}
+            />
           </span>
         </div>
 

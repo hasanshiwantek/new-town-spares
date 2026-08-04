@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ProductPrice from "../productprice/ProductPrice";
 
 interface OrderSummaryProps {
     cart: any[];
@@ -88,7 +89,10 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
                             </p>
                         </div>
                         <div className="text-base font-normal text-[13px] text-[#545454] roboto-font" >
-                            ${(Number(item.price) * (item.quantity || 1)).toFixed(2)}
+                            <ProductPrice
+                                price={Number(item.price) * (item.quantity || 1)}
+                                inline={true}
+                            />
                         </div>
                     </div>
                 ))}
@@ -98,7 +102,13 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
             <div className="space-y-3  pt-4 px-6">
                 <div className="flex justify-between text-[13px] text-[#545454] roboto-font" >
                     <span>Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">
+                        <ProductPrice
+                            price={subtotal}
+                            inline={true}
+                        />
+
+                    </span>
                 </div>
 
                 {/* Discounts */}
@@ -130,7 +140,10 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
 
                             {/* Discount value */}
                             <span className="font-medium">
-                                -${discountAmount.toFixed(2)}
+                                -<ProductPrice
+                                    price={discountAmount}
+                                    inline={true}
+                                />
                             </span>
                         </div>
 
@@ -138,11 +151,16 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
                         {discountOpen && (
                             <div className="flex justify-between text-gray-600 text-[13px] mt-1">
                                 <span>
-                                    ${Number(appliedCoupon.discountAmount).toFixed(2)} off the
-                                    order total ({appliedCoupon.couponCode.toUpperCase()})
+                                    <ProductPrice
+                                        price={Number(appliedCoupon?.discountAmount)}
+                                        inline={true}
+                                    />off the order total ({appliedCoupon.couponCode.toUpperCase()})
                                 </span>
                                 <span className="font-medium">
-                                    -${discountAmount.toFixed(2)}
+                                    -<ProductPrice
+                                        price={Number(discountAmount)}
+                                        inline={true}
+                                    />
                                 </span>
                             </div>
                         )}
@@ -151,24 +169,45 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
 
                 <div className="flex justify-between text-[13px] text-[#545454] roboto-font">
                     <span>Shipping</span>
-                    <span className="font-medium">${shipping.toFixed(2)}</span>
+                    <span className="font-medium">
+                        <ProductPrice
+                            price={Number(shipping)}
+                            inline={true}
+                        />
+                    </span>
                 </div>
                 <div className="flex justify-between pb-[10px] text-[13px] text-[#545454] roboto-font">
                     <span>Tax</span>
-                    <span className="font-medium">${tax.toFixed(2)}</span>
+                    <span className="font-medium">
+                        <ProductPrice
+                            price={Number(tax)}
+                            inline={true}
+                        />
+                    </span>
                 </div>
             </div>
 
             {/* Total */}
             <div className="flex flex-col mt-4 pt-4 pb-2 px-6 border-t-[1px] border-[#8b8b8b] text-gray-700">
                 <div className="flex justify-between items-center text-[15px] text-[#545454] roboto-font" >
-                    <span>Total <br /> (USD)</span>
-                    <span className="font-bold text-[16px]">${finalTotal.toFixed(2)}</span>
+                    {/* <span>Total <br /> (USD)</span> */}
+                    <span>Total <br /> </span>
+                    <span className="font-bold text-[16px]">
+                        <ProductPrice
+                            price={Number(finalTotal)}
+                            inline={true}
+                        />
+                    </span>
                 </div>
 
                 {/* Savings message */}
                 {appliedCoupon && discountAmount > 0 && (
-                    <div className="text-[#333] font-medium text-[13px]  mt-1 self-end">You saved <span className="!text-[#2aab3f] ">${discountAmount.toFixed(2)}</span> in total!</div>
+                    <div className="text-[#333] font-medium text-[13px]  mt-1 self-end">You saved <span className="!text-[#2aab3f] ">
+                        <ProductPrice
+                            price={discountAmount}
+                            inline={true}
+                        />
+                    </span> in total!</div>
                 )}
             </div>
         </div>

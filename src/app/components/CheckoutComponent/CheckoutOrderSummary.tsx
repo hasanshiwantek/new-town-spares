@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import ProductPrice from "../productprice/ProductPrice";
 
 interface OrderSummaryProps {
   cart: any[];
@@ -73,7 +74,10 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
                 {item.quantity} x {item.name}
               </p>
               <p className="text-[13px] text-[#333333] whitespace-nowrap">
-                ${(Number(item.price) * (item.quantity || 1)).toFixed(2)}
+                <ProductPrice
+                  price={Number(item.price) * (item.quantity || 1)}
+                  inline={true}
+                />
               </p>
             </div>
           </div>
@@ -132,18 +136,29 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-3 text-[13px] pt-[19.5px] px-[19.5px]">
         <div className="flex justify-between text-[#333333]">
           <span>Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span> <ProductPrice
+            price={subtotal}
+            inline={true}
+          /></span>
         </div>
 
         <div className="flex justify-between text-[#333333]">
           <span>Shipping</span>
           <span>
-            {shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}
+            {shipping === 0 ? "Free" : <ProductPrice
+              price={shipping}
+              inline={true}
+            />}
           </span>
         </div>
         <div className="flex justify-between text-[#333333]">
           <span>Tax</span>
-          <span>${tax.toFixed(2)}</span>
+          <span>
+            <ProductPrice
+              price={tax}
+              inline={true}
+            />
+          </span>
         </div>
       </div>
 
@@ -151,7 +166,10 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="flex flex-col py-[19.5px] px-[19.5px] mt-[19.5px] border-t border-[#ebebeb] text-[#333333]">
         <div className="flex justify-between items-center">
           <span className="text-[15px]">Total</span>
-          <span className="text-[30px] font-bold leading-none text-[#FF482E]">${finalTotal.toFixed(2)}</span>
+          <span className="text-[30px] font-bold leading-none text-[#FF482E]">    <ProductPrice
+            price={finalTotal}
+            inline={true}
+          /></span>
         </div>
       </div>
     </div>

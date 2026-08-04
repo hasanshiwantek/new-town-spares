@@ -78,7 +78,6 @@ export default async function CategoryPage({ params }: Props) {
   if (!category) {
     return <div className="text-center py-10">❌ Category not found</div>;
   }
-  const formattedCategorydescription = await fetchCategoryById(category.id);
 
   return (
     <ProductsPage
