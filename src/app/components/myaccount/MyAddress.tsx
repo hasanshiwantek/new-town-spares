@@ -1,69 +1,47 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   deletecustomeraddress,
-  fetchAccountAddress,
   fetchCustomerAddress,
-  updatecustomer,
   updateCustomerAddress,
 } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import countries from "world-countries";
+import { useEffect, useMemo, useState } from "react";
 import {
-  ErrorMsg,
   FieldLabel,
   addrInputCls,
   addrSelectCls,
 } from "./addressFormHelpers";
+import { Country, State } from "country-state-city";
+import { toast } from "react-toastify";
 
-interface AddressFormValues {
-  firstName: string;
-  lastName: string;
-  companyName?: string;
-  phoneNumber?: string;
-  address1: string;
-  address2?: string;
-  suburb: string;
-  country: string;
-  state: string;
-  postcode: string;
-}
 
 const MyAddress = () => {
   const dispatch = useAppDispatch();
-
-  const { address, loading, error, customerAddresses } = useAppSelector(
+  const { loading, error, customerAddresses } = useAppSelector(
     (state: RootState) => state.myaccount,
   );
-
-  const auth = useAppSelector((state: RootState) => state.auth);
   const [editData, setEditData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState<number | string | null>(null);
 
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   reset,
-  //   formState: { errors },
-  // } = useForm<AddressFormValues>();
+  const countryList = Country.getAllCountries().map((c) => ({
+    name: c.name,
+    code: c.isoCode,
+  }));
+  const stateList = useMemo(() => {
+    if (!editData?.country) return [];
 
-  const countryList = countries
-    .map((c) => ({ name: c.name.common, code: c.cca2 }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  // useEffect(() => {
-  //   dispatch(fetchAccountAddress());
-  // }, [dispatch]);
+    return State?.getStatesOfCountry(editData?.country).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [editData?.country]);
 
   useEffect(() => {
     dispatch(fetchCustomerAddress());
   }, [dispatch]);
   const handleDelete = async (id: number | string) => {
-    console.log(id, "ya id hy");
     const confirmDelete = confirm(
       `Are you sure you want to delete address with ID: ${id}?`,
     );
@@ -96,32 +74,40 @@ const MyAddress = () => {
   };
 
   const handleUpdate = async () => {
-    const payload = {
-      address_line_1: editData.addressLine1,
-      address_line_2: editData.addressLine2,
-      city: editData.city,
-      state: editData.state,
-      zip: editData.zip,
-      country: editData.country,
-      first_name: editData.firstName,
-      last_name: editData.lastName,
-      company_name: editData.companyName,
-      phone_number: editData.phone,
-    };
+    if (editData.firstName && editData.lastName && editData.addressLine1 && editData.city && editData.state && editData.country && editData.zip) {
+      // Proceed with update
+      const payload = {
+        address_line_1: editData.addressLine1,
+        address_line_2: editData.addressLine2,
+        city: editData.city,
+        state: editData.state,
+        zip: editData.zip,
+        country: editData.country,
+        first_name: editData.firstName,
+        last_name: editData.lastName,
+        company_name: editData.companyName,
+        phone_number: editData.phone,
+      };
 
-    try {
-      await dispatch(
-        updateCustomerAddress({
-          id: editData.addressId,
-          data: payload,
-        }),
-      ).unwrap();
+      try {
+        await dispatch(
+          updateCustomerAddress({
+            id: editData.addressId,
+            data: payload,
+          }),
+        ).unwrap();
 
-      setShowModal(false);
-      dispatch(fetchCustomerAddress());
-    } catch (err) {
-      console.error("Update failed:", err);
+        setShowModal(false);
+        dispatch(fetchCustomerAddress());
+      } catch (err) {
+        console.error("Update failed:", err);
+      }
+    } else {
+      toast.error("Please fill in all required fields before updating the address.");
+      return;
     }
+
+
   };
 
   return (
@@ -302,35 +288,35 @@ const MyAddress = () => {
                   <FieldLabel htmlFor="edit-address1" required>
                     Address Line 1
                   </FieldLabel>
-                 <input
-  id="edit-address1"
-  className={addrInputCls()}
-  value={editData?.addressLine1 || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      addressLine1: e.target.value,
-    })
-  }
-/>
-                  
+                  <input
+                    id="edit-address1"
+                    className={addrInputCls()}
+                    value={editData?.addressLine1 || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        addressLine1: e.target.value,
+                      })
+                    }
+                  />
+
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-address2">
                     Address Line 2
                   </FieldLabel>
-                 <input
-  id="edit-address2"
-  className={addrInputCls()}
-  value={editData?.addressLine2 || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      addressLine2: e.target.value,
-    })
-  }
-/>
+                  <input
+                    id="edit-address2"
+                    className={addrInputCls()}
+                    value={editData?.addressLine2 || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        addressLine2: e.target.value,
+                      })
+                    }
+                  />
                 </div>
 
                 <div>
@@ -338,71 +324,94 @@ const MyAddress = () => {
                     Suburb/City
                   </FieldLabel>
                   <input
-  id="edit-suburb"
-  className={addrInputCls()}
-  value={editData?.city || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      city: e.target.value,
-    })
-  }
-/>
-                  
+                    id="edit-suburb"
+                    className={addrInputCls()}
+                    value={editData?.city || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        city: e.target.value,
+                      })
+                    }
+                  />
+
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-country" required>
                     Country
                   </FieldLabel>
-                 <select
-  id="edit-country"
-  className={addrSelectCls()}
-  value={editData?.country || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      country: e.target.value,
-    })
-  }
->
-  <option value="" disabled>
-    Choose a Country
-  </option>
+                  <select
+                    id="edit-country"
+                    className={addrSelectCls()}
+                    value={editData?.country || ""}
+                    onChange={(e) => {
+                      setEditData({
+                        ...editData,
+                        country: e.target.value,
+                      })
+                      setEditData({
+                        ...editData,
+                        state: '',
+                      })
+                    }}
+                  >
+                    <option value="" disabled>
+                      Choose a Country
+                    </option>
 
-  {countryList.map((c) => (
-    <option key={c.code} value={c.code}>
-      {c.name}
-    </option>
-  ))}
-</select>
-                  
+                    {countryList.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-state" required>
                     State/Province
                   </FieldLabel>
-                  <input
-  id="edit-state"
-  className={addrInputCls()}
-  value={editData?.state || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      state: e.target.value,
-    })
-  }
-/>
-                
+                  <select
+                    id="edit-state"
+                    className={addrInputCls()}
+                    value={editData?.state || ""}
+                    defaultValue=""
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        state: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="" disabled>
+                      Choose a State/Province
+                    </option>
+                    {stateList.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
                 </div>
 
                 <div>
-                  <FieldLabel htmlFor="edit-postcode" required>
+                  <FieldLabel htmlFor="edit-zip" required>
                     Zip/Postcode
                   </FieldLabel>
-                  
-                  
+                  <input
+                    id="edit-zip"
+                    className={addrInputCls()}
+                    value={editData?.zip || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        zip: e.target.value,
+                      })
+                    }
+                  />
                 </div>
               </div>
             </div>

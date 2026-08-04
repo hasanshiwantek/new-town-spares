@@ -54,7 +54,7 @@ const FooterBottom = () => {
       router.replace("/auth/login");
     }
   };
-  
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -77,8 +77,8 @@ const FooterBottom = () => {
   useEffect(() => {
     dispatch(getWebPages({ page: 1, perPage: 100 }));
     dispatch(getBrands())
-       dispatch(fetchCartList());
-  },[]);
+    dispatch(fetchCartList());
+  }, []);
 
   useEffect(() => {
     const existingSession = localStorage.getItem("sessionId");
@@ -276,7 +276,7 @@ const FooterBottom = () => {
                       <Link href="/my-account/orders">Account</Link>
                     </li>
                     <li>
-                      <span onClick={handleLogout}>Logout</span>
+                      <span className="cursor-pointer" onClick={handleLogout}>Logout</span>
                     </li>
                   </>}
                   <li>
