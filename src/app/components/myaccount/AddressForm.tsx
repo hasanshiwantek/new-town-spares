@@ -11,7 +11,7 @@ import {
   addrInputCls,
   addrSelectCls,
 } from "./addressFormHelpers";
-import { Country, State } from "country-state-city";
+import { Country, State, City } from "country-state-city";
 import { useMemo } from "react";
 
 interface AddressFormValues {
@@ -58,7 +58,6 @@ const AddressForm = () => {
     try {
       const mergedData = {
 
-        customer_id: auth?.user?.id,
         firstName: data.firstName,
         lastName: data.lastName,
         companyName: data.companyName || "",
@@ -69,7 +68,6 @@ const AddressForm = () => {
         state: data.state,
         zip: data.postcode,
         country: data.country,
-
       };
 
       const result = await dispatch(
