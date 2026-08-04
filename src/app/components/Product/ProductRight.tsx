@@ -39,7 +39,7 @@ const ProductRight = ({
   const price = Number(product?.price) || 0;
   
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-  const purchasabilityStatus = product?.purchasabilityStatus == "available"
+  const purchasabilityStatus = product?.purchasabilityStatus == "available" && Number(product?.price) > 0
   const dispatch = useAppDispatch()
   const router = useRouter();
     const minQty = product?.minPurchaseQuantity || 1;

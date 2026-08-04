@@ -22,6 +22,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import ProductPrice from "../productprice/ProductPrice";
 const CartList = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -66,50 +67,50 @@ const CartList = () => {
   useEffect(() => {
     const updatedQuantities: { [key: string]: number } = {};
     cart.forEach((item) => {
-     updatedQuantities[item.cartItemId] = item.quantity;
+      updatedQuantities[item.cartItemId] = item.quantity;
     });
     setQuantities(updatedQuantities);
   }, [cart]);
 
   const handleManualQtyUpdate = (
-  e: React.KeyboardEvent<HTMLInputElement>,
-  id: string,
-  maxPurchaseQuantity?: number,
-) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
+    e: React.KeyboardEvent<HTMLInputElement>,
+    id: string,
+    maxPurchaseQuantity?: number,
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
 
-    const inputValue = quantities[id];
-    const parsed = Number(inputValue);
+      const inputValue = quantities[id];
+      const parsed = Number(inputValue);
 
-    const newQty = maxPurchaseQuantity
-      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-      : parsed > 0
-      ? parsed
-      : 1;
+      const newQty = maxPurchaseQuantity
+        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+        : parsed > 0
+          ? parsed
+          : 1;
 
-    dispatch(
-      updateCart({
-        id,
-        data: {
-          quantity: newQty,
-        },
-      })
-    )
-      .unwrap()
-      .then(() => {
-        dispatch(fetchCartList());
-        removeLocalShipping();
+      dispatch(
+        updateCart({
+          id,
+          data: {
+            quantity: newQty,
+          },
+        })
+      )
+        .unwrap()
+        .then(() => {
+          dispatch(fetchCartList());
+          removeLocalShipping();
 
-        setQuantities((prev) => ({
-          ...prev,
-          [id]: newQty,
-        }));
-      });
+          setQuantities((prev) => ({
+            ...prev,
+            [id]: newQty,
+          }));
+        });
 
-    e.currentTarget.blur();
-  }
-};
+      e.currentTarget.blur();
+    }
+  };
 
   const isEmpty = !cart?.length;
 
@@ -207,7 +208,10 @@ const CartList = () => {
                           Price
                         </span>
                         <span className="text-[14px] text-[#333333]">
-                          ${Number(item.price).toFixed(2)}
+                          <ProductPrice
+                            price={item.price}
+                            inline={true}
+                          />
                         </span>
                       </div>
                       <div className="flex items-center gap-3 py-1">
@@ -221,7 +225,10 @@ const CartList = () => {
                           Total
                         </span>
                         <strong className="text-[14px] font-bold text-[#333333]">
-                          ${Number(item.price * item.quantity).toFixed(2)}
+                          <ProductPrice
+                            price={Number(item?.price * item?.quantity)}
+                            inline={true}
+                          />
                         </strong>
                         {removeButton(item)}
                       </div>
@@ -255,13 +262,19 @@ const CartList = () => {
                     {item.sku || "N/A"}
                   </p>
                   <p className="text-[14px] text-[#333333] text-right pr-[11px]">
-                    ${Number(item.price).toFixed(2)}
+                          <ProductPrice
+                            price={Number(item.price)}
+                            inline={true}
+                          />
                   </p>
                   <div className="flex justify-center">{qtyInput(item)}</div>
 
                   <div className="flex items-center justify-end gap-[14px]">
                     <strong className="text-[14px] font-bold text-[#333333]">
-                      ${Number(item.price * item.quantity).toFixed(2)}
+                         <ProductPrice
+                        price={Number(item.price * item.quantity)}
+                        inline={true}
+                      />
                     </strong>
                     {removeButton(item)}
                   </div>

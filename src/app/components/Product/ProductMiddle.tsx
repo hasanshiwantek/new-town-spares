@@ -20,12 +20,13 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   const originalPrice = Number(product?.price) || 0;
   const currentPrice = Number(product?.retailPrice) || 0;
   const hasBothPrices = originalPrice > 0 && currentPrice > 0;
-  const savings =
-    hasBothPrices && originalPrice > currentPrice
-      ? originalPrice - currentPrice
-      : 0;
+  // const savings =
+  //   hasBothPrices && originalPrice > currentPrice
+  //     ? originalPrice - currentPrice
+  //     : 0;
+  const savings = product?.msrp && product?.price ? product.msrp - product.price : 0;
 
-  const purchasabilityStatus = product?.purchasabilityStatus == "available";
+  const purchasabilityStatus = product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
 
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
@@ -99,23 +100,24 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 {hasBothPrices ? (
                   <span className=" text-[#333333]">
                     <ProductPrice
-                      price={originalPrice}
+                      price={product?.msrp}
+                      // price={originalPrice}
                       inline={true}
                       className="text-[15px]! text-[#333333]"
                     />
                   </span>
                 ) : (
                   <ProductPrice
-                    price={currentPrice}
+                    price={product?.msrp}
                     inline={true}
                     className="text-[15px]! text-[#333333]"
                   />
                 )}
               </p>
               <h2 className="text-[20px] text-[#FF482E]">
-                {currentPrice > 0 && (
+                {Number(product.price) > 0 && (
                   <ProductPrice
-                    price={currentPrice}
+                    price={Number(product.price)}
                     inline={true}
                     textColor="#FF482E"
                     className="text-[20px]!"
@@ -354,11 +356,11 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           product={
             product
               ? {
-                  name: product.name ?? "",
-                  image: product?.image?.[0]?.path,
-                  sku: product?.sku ?? "",
-                  id: product.id,
-                }
+                name: product.name ?? "",
+                image: product?.image?.[0]?.path,
+                sku: product?.sku ?? "",
+                id: product.id,
+              }
               : undefined
           }
         />

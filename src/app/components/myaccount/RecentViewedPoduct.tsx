@@ -40,7 +40,7 @@ const RecentViewedRow = ({ product }: { product: any }) => {
   const brandSlug =
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
-  const purchasable = product?.purchasabilityStatus === "available";
+  const purchasable = product?.purchasabilityStatus === "available" && Number(product?.price) > 0;
   const hasMsrp = product?.msrp && Number(product.msrp) > 0;
   const productUrl = product?.productUrl || "";
 
