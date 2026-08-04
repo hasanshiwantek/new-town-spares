@@ -2677,10 +2677,10 @@ const CheckoutForm = () => {
             {/* STEP 1: Customer */}
             {/* STEP 1: Customer */}
             <div
-              className={`p-6 border-b-[1px]  items-center border-b-[#8b8b8b] ${currentStep >= 2 ? "flex gap-10" : "block"}`}
+              className={`p-6 border-b-[1px]  items-center  border-b-[#8b8b8b] ${currentStep >= 2 ? "flex gap-10" : "block"}`}
             >
               <h2
-                className={`hidden md:flex text-[1.92308rem] font-normal mb-4 text-[#545454] `}
+                className={`hidden md:flex text-[1.92308rem] font-normal mb-2 text-[#545454] `}
               >
                 Customer
               </h2>

@@ -51,18 +51,19 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
     <>
       {isCompleted && !isActive ? (
         // Show completed state with email and edit button
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center justify-between  w-full">
           <span className="text-[13px] leading-[19.5px] text-[#333333]">
             {emailValue}
           </span>
+          <div></div>
           {
             auth?.isAuthenticated ? (
               <button
                 type="button"
                 onClick={handleSignOut}
-                className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
+                className="text-[12px] text-[#333333] h-12 w-[80px] border border-[#D9D9D9]  hover:text-[#FF482E] shrink-0"
               >
-                SIGN OUT
+                Sign Out
               </button>
             ) : (
               <button
