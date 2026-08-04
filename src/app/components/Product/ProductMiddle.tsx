@@ -59,7 +59,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
 
           {/* Rating & Reviews */}
           <div className="flex flex-wrap items-center gap-2 text-[14px] leading-[21px] text-[#333333]">
-            {stats?.count ? (
+            {/* {stats?.count ? (
               <>
                 {stats?.rating && (
                   <Image
@@ -87,7 +87,16 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                   Write a Review
                 </button>
               </>
-            )}
+            )} */}
+            <>
+              <button
+                type="button"
+                onClick={() => setIsReviewModalOpen(true)}
+                className="underline font-semibold"
+              >
+                Write a Review
+              </button>
+            </>
           </div>
         </div>
         <hr className="mt-6 hidden min-[1261px]:block" />
