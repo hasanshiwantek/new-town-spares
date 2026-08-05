@@ -67,7 +67,11 @@ const FooterBottom = () => {
 
     loadCategories();
   }, []); // ✅ run once on mount
-
+  useEffect(() => {
+  if (auth?.user?.email) {
+    setEmail(auth.user.email);
+  }
+}, [auth?.user]);
   useEffect(() => {
     const user = localStorage.getItem("persist:auth");
     const parsedAuth = user ? JSON.parse(user) : null;

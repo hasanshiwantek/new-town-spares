@@ -8,14 +8,9 @@ import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  FieldLabel,
-  addrInputCls,
-  addrSelectCls,
-} from "./addressFormHelpers";
+import { FieldLabel, addrInputCls, addrSelectCls } from "./addressFormHelpers";
 import { Country, State } from "country-state-city";
 import { toast } from "react-toastify";
-
 
 const MyAddress = () => {
   const dispatch = useAppDispatch();
@@ -24,6 +19,15 @@ const MyAddress = () => {
   );
   const [editData, setEditData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    addressLine1: "",
+    city: "",
+    country: "",
+    state: "",
+    zip: "",
+  });
 
   const countryList = Country.getAllCountries().map((c) => ({
     name: c.name,
@@ -37,10 +41,11 @@ const MyAddress = () => {
       code: s.isoCode,
     }));
   }, [editData?.country]);
+  console.log("editData?.country", editData?.country);
 
   useEffect(() => {
     dispatch(fetchCustomerAddress());
-  }, [dispatch]);
+  }, []);
   const handleDelete = async (id: number | string) => {
     const confirmDelete = confirm(
       `Are you sure you want to delete address with ID: ${id}?`,
@@ -74,40 +79,48 @@ const MyAddress = () => {
   };
 
   const handleUpdate = async () => {
-    if (editData.firstName && editData.lastName && editData.addressLine1 && editData.city && editData.state && editData.country && editData.zip) {
-      // Proceed with update
-      const payload = {
-        address_line_1: editData.addressLine1,
-        address_line_2: editData.addressLine2,
-        city: editData.city,
-        state: editData.state,
-        zip: editData.zip,
-        country: editData.country,
-        first_name: editData.firstName,
-        last_name: editData.lastName,
-        company_name: editData.companyName,
-        phone_number: editData.phone,
-      };
+    const newErrors = {
+      firstName: editData.firstName ? "" : "First Name is required",
+      lastName: editData.lastName ? "" : "Last Name is required",
+      addressLine1: editData.addressLine1 ? "" : "Address Line 1 is required",
+      city: editData.city ? "" : "City is required",
+      country: editData.country ? "" : "Country is required",
+      state: editData.state ? "" : "State is required",
+      zip: editData.zip ? "" : "Zip/Postcode is required",
+    };
 
-      try {
-        await dispatch(
-          updateCustomerAddress({
-            id: editData.addressId,
-            data: payload,
-          }),
-        ).unwrap();
+    setErrors(newErrors);
 
-        setShowModal(false);
-        dispatch(fetchCustomerAddress());
-      } catch (err) {
-        console.error("Update failed:", err);
-      }
-    } else {
-      toast.error("Please fill in all required fields before updating the address.");
+    if (Object.values(newErrors).some((error) => error !== "")) {
       return;
     }
 
+    const payload = {
+      address_line_1: editData.addressLine1,
+      address_line_2: editData.addressLine2,
+      city: editData.city,
+      state: editData.state,
+      zip: editData.zip,
+      country: editData.country,
+      first_name: editData.firstName,
+      last_name: editData.lastName,
+      company_name: editData.companyName,
+      phone_number: editData.phone,
+    };
 
+    try {
+      await dispatch(
+        updateCustomerAddress({
+          id: editData.addressId,
+          data: payload,
+        }),
+      ).unwrap();
+
+      setShowModal(false);
+      dispatch(fetchCustomerAddress());
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
   };
 
   return (
@@ -231,6 +244,11 @@ const MyAddress = () => {
                       })
                     }
                   />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-[12px] mt-1">
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -248,6 +266,11 @@ const MyAddress = () => {
                       })
                     }
                   />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -299,7 +322,11 @@ const MyAddress = () => {
                       })
                     }
                   />
-
+                  {errors.addressLine1 && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.addressLine1}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -334,7 +361,11 @@ const MyAddress = () => {
                       })
                     }
                   />
-
+                  {errors.city && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.city}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -344,16 +375,17 @@ const MyAddress = () => {
                   <select
                     id="edit-country"
                     className={addrSelectCls()}
-                    value={editData?.country || ""}
+                    value={editData?.country}
                     onChange={(e) => {
                       setEditData({
                         ...editData,
                         country: e.target.value,
-                      })
-                      setEditData({
-                        ...editData,
-                        state: '',
-                      })
+                        state: "",
+                      });
+                      // setEditData({
+                      //   ...editData,
+                      //   state: "",
+                      // });
                     }}
                   >
                     <option value="" disabled>
@@ -366,7 +398,11 @@ const MyAddress = () => {
                       </option>
                     ))}
                   </select>
-
+                  {errors.country && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.country}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -394,7 +430,11 @@ const MyAddress = () => {
                       </option>
                     ))}
                   </select>
-
+                  {errors.state && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.state}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -412,6 +452,11 @@ const MyAddress = () => {
                       })
                     }
                   />
+                  {errors.zip && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.zip}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

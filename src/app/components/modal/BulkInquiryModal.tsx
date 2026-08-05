@@ -67,10 +67,10 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
       // captcha check
-    // if (!captchaToken) {
-    //   toast.error("Please verify the captcha.");
-    //   return;
-    // }
+    if (!captchaToken) {
+      toast.error("Please verify the captcha.");
+      return;
+    }
     const payload = {
       sku: product?.sku ?? "",
       ...formData,
