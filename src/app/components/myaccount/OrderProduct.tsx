@@ -7,6 +7,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import AccountEmptyState from "./AccountEmptyState";
 import ReturnItemsModal from "./ReturnItemsModal"; // Import modal
+import ProductPrice from "../productprice/ProductPrice";
 
 const OrderProduct = () => {
   const dispatch = useAppDispatch();
@@ -101,10 +102,10 @@ const OrderProduct = () => {
                     <span className={valueClass}>
                       {item?.created_at
                         ? new Date(item.created_at).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
                         : "-"}
                     </span>
                   </div>
@@ -115,7 +116,10 @@ const OrderProduct = () => {
                   >
                     <span className={labelClass}>Total</span>
                     <span className={valueClass}>
-                      ${Number(item?.total_amount || 0).toFixed(2)}
+                      <ProductPrice
+                        price={item?.total_amount || 0}
+                        inline={true}
+                      />
                     </span>
                   </div>
 
