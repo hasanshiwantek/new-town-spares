@@ -15,6 +15,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://new-town-spares.vercel.app"),
+  robots: { index: false, follow: false },
   title: {
     default: "New Town Spares",
     template: "%s | New Town Spares",
