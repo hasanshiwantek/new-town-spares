@@ -1,4 +1,3 @@
-"use client";
 import MyAddress from "@/app/components/myaccount/MyAddress";
 
 const page = () => {
