@@ -1,69 +1,52 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   deletecustomeraddress,
-  fetchAccountAddress,
   fetchCustomerAddress,
-  updatecustomer,
   updateCustomerAddress,
 } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import countries from "world-countries";
-import {
-  ErrorMsg,
-  FieldLabel,
-  addrInputCls,
-  addrSelectCls,
-} from "./addressFormHelpers";
-
-interface AddressFormValues {
-  firstName: string;
-  lastName: string;
-  companyName?: string;
-  phoneNumber?: string;
-  address1: string;
-  address2?: string;
-  suburb: string;
-  country: string;
-  state: string;
-  postcode: string;
-}
+import { useEffect, useMemo, useState } from "react";
+import { FieldLabel, addrInputCls, addrSelectCls } from "./addressFormHelpers";
+import { Country, State } from "country-state-city";
+import { toast } from "react-toastify";
 
 const MyAddress = () => {
   const dispatch = useAppDispatch();
-
-  const { address, loading, error, customerAddresses } = useAppSelector(
+  const { loading, error, customerAddresses } = useAppSelector(
     (state: RootState) => state.myaccount,
   );
-
-  const auth = useAppSelector((state: RootState) => state.auth);
   const [editData, setEditData] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
-  const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    addressLine1: "",
+    city: "",
+    country: "",
+    state: "",
+    zip: "",
+  });
 
-  // const {
-  //   register,
-  //   handleSubmit,
-  //   reset,
-  //   formState: { errors },
-  // } = useForm<AddressFormValues>();
+  const countryList = Country.getAllCountries().map((c) => ({
+    name: c.name,
+    code: c.isoCode,
+  }));
+  const stateList = useMemo(() => {
+    if (!editData?.country) return [];
 
-  const countryList = countries
-    .map((c) => ({ name: c.name.common, code: c.cca2 }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
-  // useEffect(() => {
-  //   dispatch(fetchAccountAddress());
-  // }, [dispatch]);
+    return State?.getStatesOfCountry(editData?.country).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [editData?.country]);
+  console.log("editData?.country", editData?.country);
 
   useEffect(() => {
     dispatch(fetchCustomerAddress());
-  }, [dispatch]);
+  }, []);
   const handleDelete = async (id: number | string) => {
-    console.log(id, "ya id hy");
     const confirmDelete = confirm(
       `Are you sure you want to delete address with ID: ${id}?`,
     );
@@ -96,6 +79,22 @@ const MyAddress = () => {
   };
 
   const handleUpdate = async () => {
+    const newErrors = {
+      firstName: editData.firstName ? "" : "First Name is required",
+      lastName: editData.lastName ? "" : "Last Name is required",
+      addressLine1: editData.addressLine1 ? "" : "Address Line 1 is required",
+      city: editData.city ? "" : "City is required",
+      country: editData.country ? "" : "Country is required",
+      state: editData.state ? "" : "State is required",
+      zip: editData.zip ? "" : "Zip/Postcode is required",
+    };
+
+    setErrors(newErrors);
+
+    if (Object.values(newErrors).some((error) => error !== "")) {
+      return;
+    }
+
     const payload = {
       address_line_1: editData.addressLine1,
       address_line_2: editData.addressLine2,
@@ -245,6 +244,11 @@ const MyAddress = () => {
                       })
                     }
                   />
+                  {errors.firstName && (
+                    <p className="text-red-500 text-[12px] mt-1">
+                      {errors.firstName}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -262,6 +266,11 @@ const MyAddress = () => {
                       })
                     }
                   />
+                  {errors.lastName && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.lastName}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -302,35 +311,39 @@ const MyAddress = () => {
                   <FieldLabel htmlFor="edit-address1" required>
                     Address Line 1
                   </FieldLabel>
-                 <input
-  id="edit-address1"
-  className={addrInputCls()}
-  value={editData?.addressLine1 || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      addressLine1: e.target.value,
-    })
-  }
-/>
-                  
+                  <input
+                    id="edit-address1"
+                    className={addrInputCls()}
+                    value={editData?.addressLine1 || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        addressLine1: e.target.value,
+                      })
+                    }
+                  />
+                  {errors.addressLine1 && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.addressLine1}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-address2">
                     Address Line 2
                   </FieldLabel>
-                 <input
-  id="edit-address2"
-  className={addrInputCls()}
-  value={editData?.addressLine2 || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      addressLine2: e.target.value,
-    })
-  }
-/>
+                  <input
+                    id="edit-address2"
+                    className={addrInputCls()}
+                    value={editData?.addressLine2 || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        addressLine2: e.target.value,
+                      })
+                    }
+                  />
                 </div>
 
                 <div>
@@ -338,71 +351,112 @@ const MyAddress = () => {
                     Suburb/City
                   </FieldLabel>
                   <input
-  id="edit-suburb"
-  className={addrInputCls()}
-  value={editData?.city || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      city: e.target.value,
-    })
-  }
-/>
-                  
+                    id="edit-suburb"
+                    className={addrInputCls()}
+                    value={editData?.city || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        city: e.target.value,
+                      })
+                    }
+                  />
+                  {errors.city && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.city}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-country" required>
                     Country
                   </FieldLabel>
-                 <select
-  id="edit-country"
-  className={addrSelectCls()}
-  value={editData?.country || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      country: e.target.value,
-    })
-  }
->
-  <option value="" disabled>
-    Choose a Country
-  </option>
+                  <select
+                    id="edit-country"
+                    className={addrSelectCls()}
+                    value={editData?.country}
+                    onChange={(e) => {
+                      setEditData({
+                        ...editData,
+                        country: e.target.value,
+                        state: "",
+                      });
+                      // setEditData({
+                      //   ...editData,
+                      //   state: "",
+                      // });
+                    }}
+                  >
+                    <option value="" disabled>
+                      Choose a Country
+                    </option>
 
-  {countryList.map((c) => (
-    <option key={c.code} value={c.code}>
-      {c.name}
-    </option>
-  ))}
-</select>
-                  
+                    {countryList.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.country && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.country}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <FieldLabel htmlFor="edit-state" required>
                     State/Province
                   </FieldLabel>
-                  <input
-  id="edit-state"
-  className={addrInputCls()}
-  value={editData?.state || ""}
-  onChange={(e) =>
-    setEditData({
-      ...editData,
-      state: e.target.value,
-    })
-  }
-/>
-                
+                  <select
+                    id="edit-state"
+                    className={addrInputCls()}
+                    value={editData?.state || ""}
+                    defaultValue=""
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        state: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="" disabled>
+                      Choose a State/Province
+                    </option>
+                    {stateList.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.state && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.state}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <FieldLabel htmlFor="edit-postcode" required>
+                  <FieldLabel htmlFor="edit-zip" required>
                     Zip/Postcode
                   </FieldLabel>
-                  
-                  
+                  <input
+                    id="edit-zip"
+                    className={addrInputCls()}
+                    value={editData?.zip || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        zip: e.target.value,
+                      })
+                    }
+                  />
+                  {errors.zip && (
+                    <p className="text-red-500 text-[14px] mt-1">
+                      {errors.zip}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

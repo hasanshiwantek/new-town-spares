@@ -51,7 +51,7 @@ const BlogCategories = ({
         ) : blogPosts && blogPosts.length > 0 ? (
           // ✅ Grid UI
           <div className="w-full mx-auto grid gap-3 sm:grid-cols-2 lg:grid-cols-4" style={{fontFamily:poppinsFont}}>
-            {blogPosts.map((blog) => (
+            {blogPosts?.map((blog) => (
               <Link
                 href={`blogs/${blog.slug}`}
                 key={blog.id}
@@ -70,19 +70,21 @@ const BlogCategories = ({
                     priority={blog.id === blogPosts[0]?.id}  // ✅ First blog priority
                   />
                 </div> */}
-                {blog.thumbnail && (
-                  <div className="relative h-72 w-full overflow-hidden">
-                    <Image
-                      src={blog.thumbnail}
-                      alt={blog.title}
-                      fill
-                      className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 384px"
-                      priority={blog.id === blogPosts[0]?.id}
-                    />
-                  </div>
-                )}
-
+              
+<div className="relative h-72 w-full overflow-hidden bg-[#f5f5f5]">
+  {blog.thumbnail && (
+    <Image
+      src={blog.thumbnail}
+      alt={blog.title}
+      fill
+      className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+      sizes="(max-width: 768px) 100vw,
+             (max-width: 1200px) 50vw,
+             384px"
+      priority={blog.id === blogPosts[0]?.id}
+    />
+  )}
+</div>
                 {/* Content */}
                 <div className="p-3">
                   <p className="text-[13px] text-[#333333] mb-2">

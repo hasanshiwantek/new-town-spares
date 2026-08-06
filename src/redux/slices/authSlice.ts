@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "@/lib/axiosInstance";
+import axiosInstance, { baseURL, storeId } from "@/lib/axiosInstance";
 
 export interface RegisterPayload {
   firstName: string;
@@ -141,6 +141,15 @@ const authSlice = createSlice({
         state.token = token;
         state.expireAt = expireAt;
         state.isAuthenticated = true;
+        // state.stores = action.payload.stores.map((store: any) => ({
+        //   storeId: store.id,
+        //   name: store.name,
+        // }));
+
+        // localStorage.setItem("token", action.payload.token);
+        // if (action.payload.stores?.length === 1) {
+        //   localStorage.setItem("storeId", action.payload.stores[0].id.toString());
+        // }
       })
 
       // Fulfilled - register
@@ -153,7 +162,8 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
       })
       .addCase(customerProfile.fulfilled, (state, action) => {
-        const { user, customer, token, expireAt } = action.payload.data || action.payload;
+
+        const { user, customer, token, expireAt } = action.payload
         state.loginloading = false;
         state.user = user || customer;
         state.token = token;

@@ -1,5 +1,10 @@
 "use client";
 import { Input } from "@/components/ui/input";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { RootState } from "@/redux/store";
 import {
   Select,
   SelectContent,
@@ -7,33 +12,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice";
-import { fetchShippingRates } from "@/redux/slices/shippingSlice";
-import { RootState } from "@/redux/store";
 import { Country, State } from "country-state-city";
-import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import {
+  checkoutFormSave,
+  fetchShippingRate,
+  fetchShippingRates,
+  getCheckoutForm,
+  resetShippingRates,
+} from "@/redux/slices/shippingSlice";
 import { calculatePackage } from "../CheckoutComponent/Shippingstep";
+import { addShippingCost } from "@/redux/slices/shippingSlice";
+import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
-  const cart = useAppSelector((state: RootState) => state.carts.items);
+  const dispatch = useAppDispatch();
+  const cart = useAppSelector((state: RootState) => state.carts?.items);
   const {
     appliedCoupon,
     discountAmount,
     loading: couponLoading,
   } = useAppSelector((state: RootState) => state.coupon);
-  const dispatch = useAppDispatch();
   const router = useRouter();
-  const [couponCode, setCouponCode] = useState("");
-  const [showCouponInput, setShowCouponInput] = useState(false);
+
+  const [showCoupon, setShowCoupon] = useState(false);
   const [showShipping, setShowShipping] = useState(false);
-  const { shippingRates, ratesLoader } = useAppSelector(
-    (state) => state.shippingZone,
-  );
+  const [couponCode, setCouponCode] = useState("");
+  const [discountOpen, setDiscountOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingDetectCountry, setLoadingDetectCountry] = useState(false);
+  const [fedexShow, setFedexShow] = useState(false);
   const [selectedShippingMethod, setSelectedShippingMethod] = useState("");
+  const shippingCostLoading = useAppSelector(
+    (state: RootState) => state.shippingZone?.loading,
+  );
+  const { shippingDetail, saveDetail } = useAppSelector(
+    (state: any) => state.shippingZone,
+  );
+  const cartItems = useAppSelector((state: RootState) => state?.carts?.items);
   const [shippingData, setShippingData] = useState({
     country: "",
     state: "",
@@ -44,8 +60,6 @@ const OrderSummary = () => {
     name: c.name,
     code: c.isoCode,
   }));
-
-
   const stateList = useMemo(() => {
     if (!shippingData.country) return [];
     return State.getStatesOfCountry(shippingData.country).map((s) => ({
@@ -53,9 +67,6 @@ const OrderSummary = () => {
       code: s.isoCode,
     }));
   }, [shippingData.country]);
-  const totalItems = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.quantity, 0);
-  }, [cart]);
 
   const subtotal = useMemo(() => {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -63,7 +74,7 @@ const OrderSummary = () => {
 
   const shipping = useMemo(() => {
     if (typeof window !== "undefined") {
-      const savedCost = localStorage.getItem("shippingCost");
+      const savedCost = Number(shippingDetail?.rate?.total_charge);
       if (savedCost) return Number(savedCost);
     }
 
@@ -73,50 +84,38 @@ const OrderSummary = () => {
       const cost = Number(item.fixedShippingCost || 0);
       return sum + cost;
     }, 0);
-  }, [cart]);
+  }, [cart, shippingDetail]);
 
-  const total = subtotal + shipping;
-  const grandTotal = Math.max(total - (discountAmount || 0), 0);
-  const shippingCost = Number(localStorage.getItem("shippingCost"));
+  const packageInfo = useMemo(() => calculatePackage(cart), [cart]);
 
-  const handleApplyCoupon = useCallback(() => {
-    const code = couponCode.trim();
-    if (!code) {
-      toast.error("Please enter a coupon code");
-      return;
-    }
-
-    dispatch(applyCoupon({ couponCode: code, total }))
-      .unwrap()
-      .then(() => { 
-        toast.success("Coupon applied");
-        setShowCouponInput(false);
-      })
-      .catch((err) => {
-        toast.error(typeof err === "string" ? err : "Failed to apply coupon");
-      });
-  }, [couponCode, dispatch, total]);
-
-  const handleProceedToCheckout = useCallback(() => {
-    if (!cart.length) {
-      toast.error("Please add something");
-      return;
-    }
-
-    router.push("/checkout");
-  }, [cart.length, router]);
-
+  const shippingLabel = `FedEx priority $${shipping.toFixed(2)}`;
+  const totalItems = cart?.reduce(
+    (sum, i) => sum + (i?.quantity || 0),
+    0,
+  );
+  // Total before discount
+  const totalBeforeDiscount = subtotal + shipping;
+  const shippingCost = Number(shippingDetail?.rate?.total_charge);
+  // Final total after discount
+  const finalTotal = Math.max(totalBeforeDiscount - discountAmount, 0);
+  const { shippingRates, ratesLoader } = useAppSelector(
+    (state) => state.shippingZone,
+  );
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const pkg = calculatePackage(cart);
+    const { city, zip, country, ...restShippingData } = shippingData;
+
+    dispatch(resetShippingRates());
     dispatch(
       fetchShippingRates({
         data: {
           destination: {
-            ...shippingData,
-            country_code: shippingData?.country?.trim(),
-            postal_code: shippingData?.zip?.trim(),
+            ...restShippingData,
+            country_code: country?.trim(),
+            postal_code: zip?.trim(),
+            ...(city?.trim() && { city: city.trim() }),
           },
           package: pkg,
         },
@@ -125,33 +124,90 @@ const OrderSummary = () => {
       .unwrap()
       .finally(() => {
         setLoading(false);
+        setFedexShow(true);
       });
   };
 
+  const handleCouponSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("i'm here", totalBeforeDiscount);
+
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      await dispatch(
+        applyCoupon({ couponCode, total: totalBeforeDiscount }),
+      ).unwrap();
+      toast.success("Coupon applied successfully!");
+      setCouponCode("");
+      setShowCoupon(false); // Close coupon form after success
+    } catch (err: any) {
+      toast.error(err || "Failed to apply coupon");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    dispatch(removeCoupon());
+    setCouponCode("");
+    toast.info("Coupon removed");
+  };
+
+  const handleProceedToCheckout = useCallback(() => {
+    if (!cart.length) {
+      toast.error("Please add something");
+      return;
+    }
+    router.push("/checkout");
+  }, [cart.length, router]);
+
   useEffect(() => {
+    // if (shippingDetail?.country) return; // already hai, mat karo
+
     const detectCountry = async () => {
+      setLoadingDetectCountry(true);
       try {
-        const res = await fetch("/api/detect-country"); // apna Next.js route
+        const res = await fetch("/api/detect-country");
         const data = await res.json();
         if (data.country_code) {
+          setShowShipping(false);
+          // dispatch(fetchShippingRate({}))
           setShippingData((prev) => ({
             ...prev,
             country: data.country_code,
-            // state: data.state ?? "",
-            // city: data.city ?? "",
-            // zip: data.zip ?? "",
           }));
         }
-        const shippingDataLocal = localStorage.getItem("shippingData"); // Clear any previously saved shipping cost when component mounts
-        if (shippingDataLocal) {
-          setShippingData(JSON.parse(shippingDataLocal));
-        }
       } catch {
-        setShippingData({ ...shippingData, country: "US" });
+        setShippingData((prev) => ({ ...prev, country: "US" }));
+      } finally {
+        setLoadingDetectCountry(false);
       }
     };
+    const getShippingRates = async () => {
+      try {
+        await dispatch(fetchShippingRate({})).unwrap();
+      } catch (err) {
+        detectCountry();
+      }
+    };
+    getShippingRates();
+  }, [cart]);
 
-    detectCountry();
+  useEffect(() => {
+    if (shippingDetail?.country) {
+      setShippingData({
+        country: shippingDetail.country,
+        city: shippingDetail.city,
+        state: shippingDetail.state,
+        zip: shippingDetail.zip,
+      });
+    }
+  }, [shippingDetail]);
+
+  useEffect(() => {
+    dispatch(getCheckoutForm());
   }, []);
 
   return (
@@ -169,7 +225,11 @@ const OrderSummary = () => {
             Subtotal:
           </span>
           <span className="text-[14px] text-[#333333]">
-            ${subtotal.toFixed(2)}
+
+            <ProductPrice
+              price={subtotal}
+              inline={true}
+            />
           </span>
         </div>
 
@@ -177,16 +237,38 @@ const OrderSummary = () => {
           <span className="text-[14px] font-bold text-[#333333]">
             Shipping:
           </span>
-          {shippingCost ? (
+          {shippingCostLoading || loadingDetectCountry ? (
+            <span
+              className={
+                showShipping
+                  ? " text-[14px] inline-block cursor-pointer italic "
+                  : " text-[14px]   inline-block "
+              }
+            >
+              <div className="h-6 w-6 rounded-full border-[3px] border-gray-300 border-t-orange-500 animate-spin" />
+            </span>
+          ) : shippingCost ? (
             <button
-              className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+              // className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+              className={
+                shippingCost
+                  ? "text-[14px] text-orange-500 border-b border-orange-500 inline-block cursor-pointer"
+                  : "text-[14px] border-b border-gray-500 inline-block cursor-pointer"
+              }
               onClick={() => setShowShipping(!showShipping)}
             >
-              {!showShipping ? `$${shippingCost.toFixed(2)}` : ""}
+              {!showShipping ? <ProductPrice
+                price={shippingCost}
+                inline={true}
+              /> : ""}
             </button>
           ) : (
             <button
-              className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+              className={
+                showShipping
+                  ? " text-[14px]  border-b hover:border-orange-500 border-gray-500 inline-block cursor-pointer italic hover:text-orange-500"
+                  : "hover:border-orange-500 hover:text-orange-500 text-[14px] border-b border-gray-500 inline-block cursor-pointer"
+              }
               onClick={() => setShowShipping(!showShipping)}
             >
               {showShipping ? "Cancel" : "Add Info"}
@@ -202,19 +284,18 @@ const OrderSummary = () => {
             <div className="flex flex-col justify-between gap-4">
               <label className="w-full text-[14px]">Country</label>
 
-            <Select
-  value={shippingData.country}
-  onValueChange={(value) => {
-    console.log("Selected:", value);
-    setShippingData({ ...shippingData, country: value });
-  }}
->
-                <SelectTrigger className="w-full outline-none ">
+              <Select
+                value={shippingData.country}
+                onValueChange={(value) => {
+                  setShippingData({ ...shippingData, country: value });
+                }}
+              >
+                <SelectTrigger className="w-full outline-none max-w-none  !h-[var(--select-height,32px)] ">
                   <SelectValue placeholder="Choose a Country" />
                 </SelectTrigger>
-                <SelectContent className="w-full outline-none ">
+                <SelectContent>
                   {countryList.map((country) => (
-                    <SelectItem key={country.code} value={country.code}>
+                    <SelectItem key={country.code} value={country.code} >
                       {country.name}
                     </SelectItem>
                   ))}
@@ -232,10 +313,10 @@ const OrderSummary = () => {
                     setShippingData({ ...shippingData, state: value })
                   }
                 >
-                  <SelectTrigger className="w-full outline-none ">
+                  <SelectTrigger className="w-full  max-w-none outline-none !h-[var(--select-height,32px)]  ">
                     <SelectValue placeholder="State/Province" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full outline-none ">
+                  </SelectTrigger >
+                  <SelectContent >
                     {stateList.map((state) => (
                       <SelectItem key={state.code} value={state.code}>
                         {state.name}
@@ -245,7 +326,7 @@ const OrderSummary = () => {
                 </Select>
               ) : (
                 <Input
-                  className="w-full"
+                   className="w-full !h-[30px]  max-w-none"
                   onChange={(e) =>
                     setShippingData({ ...shippingData, state: e.target.value })
                   }
@@ -258,7 +339,7 @@ const OrderSummary = () => {
               <label className="w-full text-[14px]">Suburb/City</label>
               <Input
                 value={shippingData.city}
-                className="w-full h-[32px]!"
+                className="w-full !h-[30px]  max-w-none"
                 onChange={(e) =>
                   setShippingData({ ...shippingData, city: e.target.value })
                 }
@@ -269,7 +350,7 @@ const OrderSummary = () => {
             <div className="flex flex-col gap-4">
               <label className="w-full text-[14px]">Zip/Postcode</label>
               <Input
-                className="w-full h-[32px]!"
+                className="w-full !h-[30px] max-w-none"
                 value={shippingData.zip}
                 onChange={(e) =>
                   setShippingData({ ...shippingData, zip: e.target.value })
@@ -282,68 +363,68 @@ const OrderSummary = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full text-white bg-[#fd5430] font-medium rounded-md px-4 py-[6px] text-xl transition-all my-1 duration-200 cursor-pointer text-[13px]!"
-                // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                className="w-full text-white bg-[#fd5430] !h-[42px] font-medium rounded-md px-4 py-[6px] text-xl transition-all my-1 duration-200 cursor-pointer !text-[13px]"
+              // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
               >
                 {loading ? "Loading..." : "Estimate Shipping"}
               </button>
             </div>
 
-            {shippingRates?.length > 0 && (
-              <div className="">
+            {shippingRates?.length > 0 && fedexShow && (
+              <div>
                 {ratesLoader
                   ? Array.from({ length: 2 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 border rounded p-4 animate-pulse"
-                      >
-                        <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-gray-200 rounded w-3/4" />
-                          <div className="h-5 bg-gray-200 rounded w-16" />
-                        </div>
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 border rounded p-4 animate-pulse"
+                    >
+                      <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+                        <div className="h-5 bg-gray-200 rounded w-16" />
                       </div>
-                    ))
+                    </div>
+                  ))
                   : shippingRates?.map((rate, i) => {
-                      return (
-                        <label
-                          key={`${rate.method_id}-${rate.service_type}`}
-                          className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
-                        >
-                          <input
-                            type="radio"
-                            name="shippingMethod"
-                            value={rate.service_type}
-                            checked={
-                              selectedShippingMethod === rate.service_type
-                            }
-                            onChange={(e) =>
-                              setSelectedShippingMethod(e.target.value)
-                            }
-                            className="mt-1"
-                          />
-                          <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
-                            <div className="flex items-center gap-2 font-normal">
-                              {rate.is_fedex && <span>FedEx</span>}
-                              <span className="">
-                                {rate.is_fedex
-                                  ? `(${rate.service_name})`
-                                  : rate.display_name}
-                              </span>
-                            </div>
-                            <div className=" font-bold flex-shrink-0">
-                              {rate.total_charge === 0
-                                ? "Free"
-                                : `$${Number(rate.total_charge).toFixed(2)}`}
-                            </div>
+                    return (
+                      <label
+                        key={`${rate.method_id}-${rate.service_type}`}
+                        className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
+                      >
+                        <input
+                          type="radio"
+                          name="shippingMethod"
+                          value={rate.service_type}
+                          checked={
+                            selectedShippingMethod === rate.service_type
+                          }
+                          onChange={(e) =>
+                            setSelectedShippingMethod(e.target.value)
+                          }
+                          className="mt-1"
+                        />
+                        <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
+                          <div className="flex items-center gap-2 font-normal">
+                            {rate.is_fedex && <span>FedEx</span>}
+                            <span className="">
+                              {rate.is_fedex
+                                ? `(${rate.service_name})`
+                                : rate.display_name}
+                            </span>
                           </div>
-                        </label>
-                      );
-                    })}
+                          <div className=" font-bold flex-shrink-0">
+                            {rate.total_charge === 0
+                              ? "Free"
+                              : `$${Number(rate.total_charge).toFixed(2)}`}
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })}
                 <div className="flex justify-end mt-1.5 mb-1.5">
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       if (!selectedShippingMethod) {
                         toast.error("Please select a shipping method");
                         return;
@@ -355,17 +436,51 @@ const OrderSummary = () => {
                       const cost = selectedRate
                         ? Number(selectedRate.total_charge).toFixed(2)
                         : "0";
-                      localStorage.setItem("shippingCost", cost);
-                      localStorage.setItem(
-                        "shippingData",
-                        JSON.stringify(shippingData),
-                      );
-                      window.location.reload(); // Refresh to update totals with new shipping cost
+                      const shippingPayload: any = {
+                        country: shippingData.country,
+                        city: shippingData.city,
+                        state: shippingData.state,
+                        zip: shippingData.zip,
+                        cartId: cartItems.map((item) => item.cartItemId),
+                        rate: {
+                          service_type: selectedRate?.service_type,
+                          method_type: selectedRate?.method_type,
+                          total_charge: cost,
+                        },
+                      };
+                      await dispatch(addShippingCost(shippingPayload))
+                        .unwrap()
+                        .then(() => {
+                          if (shippingData && saveDetail) {
+                            const updatedShippingFormData = {
+                              ...saveDetail.shipping_form_data, // ← existing preserve
+                              country: shippingData.country,
+                              city: shippingData.city,
+                              state: shippingData.state || null,
+                              zip: shippingData.zip,
+                              shippingMethod: selectedShippingMethod,
+                            };
+
+                            dispatch(
+                              checkoutFormSave({
+                                data: {
+                                  shippingFormData: updatedShippingFormData,
+                                  billingFormData:
+                                    saveDetail.billing_form_data || {},
+                                },
+                              }),
+                            );
+                          }
+                          window.location.reload();
+                        });
                     }}
+                    disabled={shippingCostLoading}
                     className="w-full md:w-[55%] text-[18px] btn-primary"
-                    // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                  // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
                   >
-                    Update Shipping Cost
+                    {shippingCostLoading
+                      ? "Loading..."
+                      : "Update Shipping Cost"}
                   </button>
                 </div>
               </div>
@@ -377,92 +492,96 @@ const OrderSummary = () => {
 
         <div className="flex justify-between items-center py-[14px]">
           <span className="text-[14px] font-bold text-[#333333]">
-            Coupon Code:
+            Coupon Code:{" "} {appliedCoupon ? appliedCoupon.couponCode.toUpperCase() : ""}
           </span>
+          {/* If coupon already applied, show it here */}
           {appliedCoupon ? (
-            <div className="flex items-center gap-3">
-              <span className="text-[14px] text-[#333333]">
-                {appliedCoupon.couponCode}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  dispatch(removeCoupon());
-                  toast.success("Coupon removed");
-                }}
-                className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
-              >
-                Remove
-              </button>
-            </div>
-          ) : !showCouponInput ? (
-            <button
-              type="button"
-              onClick={() => setShowCouponInput(true)}
-              className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
-            >
-              Add Coupon
-            </button>
+            <span className="text-[14px] font-medium">
+              -${discountAmount.toFixed(2)}
+            </span>
           ) : (
-            <button
-              type="button"
-              onClick={() => setShowCouponInput(false)}
-              className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
+            <span
+              className="text-[14px] border-b border-gray-500 inline-block cursor-pointer"
+              onClick={() => setShowCoupon(!showCoupon)}
             >
-              Cancel
-            </button>
+              {showCoupon ? "Cancel" : "Add Coupon"}
+            </span>
           )}
         </div>
-
-        {showCouponInput && (
-          <div className="flex mb-[14px]">
+        {/* Show applied coupon details */}
+        {appliedCoupon && (
+          <div className="flex  items-center rounded">
+            {/* <span className="text-sm">
+                ${Number(appliedCoupon.discountAmount).toFixed(2)} off (
+                {appliedCoupon.couponCode.toUpperCase()})
+              </span> */}
+            <button
+              onClick={handleRemoveCoupon}
+              className=" text-[14px] underline text-red-600 hover:text-red-700"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+        {/* Coupon input - only show if no coupon applied */}
+        {showCoupon && !appliedCoupon && (
+          <form
+            onSubmit={handleCouponSubmit}
+            className="flex flex-col md:flex-row  my-2"
+          >
+            {/* <div className="flex mb-[14px]"> */}
             <Input
               id="discountCode"
               type="text"
               placeholder="Enter your coupon code"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
+              disabled={couponLoading}
               className="flex-1 h-10 border border-gray-300 text-[14px] text-[#333333] rounded-none rounded-l!"
             />
             <button
-              type="button"
-              onClick={handleApplyCoupon}
+              type="submit"
               disabled={couponLoading}
               className="text-[14px] text-white bg-[#F15939] border border-[#F15939] px-[11px] rounded-r h-10 shrink-0 disabled:opacity-60"
             >
-              Apply
+              {couponLoading ? "..." : "Apply"}
             </button>
-          </div>
+            {/* </div> */}
+          </form>
         )}
 
         <hr />
-        {discountAmount > 0 && (
+        {/* {discountAmount > 0 && (
           <div className="flex justify-between items-center py-2">
             <span className="text-[14px] text-[#333333]">Discount:</span>
             <span className="text-[14px] text-[#333333] font-semibold">
               -${discountAmount.toFixed(2)}
             </span>
           </div>
-        )}
+        )} */}
 
         <div className="flex justify-between items-center py-[14px]">
           <span className="text-[14px] font-bold text-[#333333]">
             Grand total:
           </span>
           <span className="text-[25px] leading-none text-[#333333] font-bold">
-            ${grandTotal.toFixed(2)}
+            <ProductPrice
+              price={finalTotal}
+              inline={true}
+            />
           </span>
         </div>
 
         <button
           type="button"
+          disabled={shippingCostLoading || loadingDetectCountry}
           onClick={handleProceedToCheckout}
           className="w-full h-[39px] bg-[#FF482E] hover:bg-[#e04f33] text-[14px] font-light text-white rounded-[4px] mt-2 transition"
         >
           Check out
         </button>
 
-        <p className="text-center text-[14px] text-[#333333] py-6">
+        {/* <p className="text-center text-[14px] text-[#333333] py-6">
           -- or use --
         </p>
 
@@ -472,7 +591,7 @@ const OrderSummary = () => {
             alt="Google Pay"
             className="w-16 h-8 object-contain"
           />
-        </button>
+        </button> */}
       </div>
     </div>
   );

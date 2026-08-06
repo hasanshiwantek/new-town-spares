@@ -9,6 +9,7 @@ import {
   clearAllCart,
   fetchCartList,
   removeFromCart,
+  updateCart,
   updateQty,
 } from "@/redux/slices/cartsSlice";
 import { deleteCart } from "@/redux/slices/cartsSlice";
@@ -17,6 +18,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import ProductPrice from "../productprice/ProductPrice";
 const CartList = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -61,7 +63,7 @@ const CartList = () => {
   useEffect(() => {
     const updatedQuantities: { [key: string]: number } = {};
     cart.forEach((item) => {
-      updatedQuantities[item.id] = item.quantity;
+      updatedQuantities[item.cartItemId] = item.quantity;
     });
     setQuantities(updatedQuantities);
   }, [cart]);
@@ -73,6 +75,7 @@ const CartList = () => {
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
+
       const inputValue = quantities[id];
       const parsed = Number(inputValue);
 
@@ -82,12 +85,24 @@ const CartList = () => {
           ? parsed
           : 1;
 
-      dispatch(updateQty({ id, quantity: newQty }));
+      dispatch(
+        updateCart({
+          id,
+          data: {
+            quantity: newQty,
+          },
+        })
+      )
+        .unwrap()
+        .then(() => {
+          dispatch(fetchCartList());
+          removeLocalShipping();
 
-      setQuantities((prev) => ({
-        ...prev,
-        [id]: newQty,
-      }));
+          setQuantities((prev) => ({
+            ...prev,
+            [id]: newQty,
+          }));
+        });
 
       e.currentTarget.blur();
     }
@@ -101,13 +116,13 @@ const CartList = () => {
       <input
         type="number"
         value={
-          quantities[item.id] === undefined
+          quantities[item.cartItemId] === undefined
             ? item.quantity
-            : quantities[item.id]
+            : quantities[item.cartItemId]
         }
-        onChange={(e) => handleChange(item.id, e.target.value)}
+        onChange={(e) => handleChange(item.cartItemId, e.target.value)}
         onKeyDown={(e) =>
-          handleManualQtyUpdate(e, item.id, item.maxPurchaseQuantity)
+          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
         }
         className="w-[50px] h-[40px] text-center py-2 outline-none !text-[15px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
@@ -187,7 +202,10 @@ const CartList = () => {
                           Price
                         </span>
                         <span className="text-[14px] text-[#333333]">
-                          ${Number(item.price).toFixed(2)}
+                          <ProductPrice
+                            price={item.price}
+                            inline={true}
+                          />
                         </span>
                       </div>
                       <div className="flex items-center gap-3 py-1">
@@ -201,7 +219,10 @@ const CartList = () => {
                           Total
                         </span>
                         <strong className="text-[14px] font-bold text-[#333333]">
-                          ${Number(item.price * item.quantity).toFixed(2)}
+                          <ProductPrice
+                            price={Number(item?.price * item?.quantity)}
+                            inline={true}
+                          />
                         </strong>
                         {removeButton(item)}
                       </div>
@@ -234,13 +255,19 @@ const CartList = () => {
                     {item.sku || "N/A"}
                   </p>
                   <p className="text-[14px] text-[#333333] text-right pr-[11px]">
-                    ${Number(item.price).toFixed(2)}
+                          <ProductPrice
+                            price={Number(item.price)}
+                            inline={true}
+                          />
                   </p>
                   <div className="flex justify-center">{qtyInput(item)}</div>
 
                   <div className="flex items-center justify-end gap-[14px]">
                     <strong className="text-[14px] font-bold text-[#333333]">
-                      ${Number(item.price * item.quantity).toFixed(2)}
+                         <ProductPrice
+                        price={Number(item.price * item.quantity)}
+                        inline={true}
+                      />
                     </strong>
                     {removeButton(item)}
                   </div>

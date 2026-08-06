@@ -20,12 +20,15 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   const originalPrice = Number(product?.price) || 0;
   const currentPrice = Number(product?.retailPrice) || 0;
   const hasBothPrices = originalPrice > 0 && currentPrice > 0;
+  // const savings =
+  //   hasBothPrices && originalPrice > currentPrice
+  //     ? originalPrice - currentPrice
+  //     : 0;
   const savings =
-    hasBothPrices && originalPrice > currentPrice
-      ? originalPrice - currentPrice
-      : 0;
+    product?.msrp && product?.price ? product.msrp - product.price : 0;
 
-  const purchasabilityStatus = product?.purchasabilityStatus == "available";
+  const purchasabilityStatus =
+    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
 
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
@@ -58,7 +61,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
 
           {/* Rating & Reviews */}
           <div className="flex flex-wrap items-center gap-2 text-[14px] leading-[21px] text-[#333333]">
-            {false ? (
+            {/* {stats?.count ? (
               <>
                 {stats?.rating && (
                   <Image
@@ -86,7 +89,16 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                   Write a Review
                 </button>
               </>
-            )}
+            )} */}
+            <>
+              <button
+                type="button"
+                onClick={() => setIsReviewModalOpen(true)}
+                className="underline font-semibold"
+              >
+                Write a Review
+              </button>
+            </>
           </div>
         </div>
         <hr className="mt-6 hidden min-[1261px]:block" />
@@ -99,23 +111,24 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 {hasBothPrices ? (
                   <span className=" text-[#333333]">
                     <ProductPrice
-                      price={originalPrice}
+                      price={product?.msrp}
+                      // price={originalPrice}
                       inline={true}
                       className="text-[15px]! text-[#333333]"
                     />
                   </span>
                 ) : (
                   <ProductPrice
-                    price={currentPrice}
+                    price={product?.msrp}
                     inline={true}
                     className="text-[15px]! text-[#333333]"
                   />
                 )}
               </p>
               <h2 className="text-[20px] text-[#FF482E]">
-                {currentPrice > 0 && (
+                {Number(product.price) > 0 && (
                   <ProductPrice
-                    price={currentPrice}
+                    price={Number(product.price)}
                     inline={true}
                     textColor="#FF482E"
                     className="text-[20px]!"
@@ -144,7 +157,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </Link>
             </div>
           )}
-          {purchasabilityStatus && (
+          {/* {purchasabilityStatus && (
             <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
               <span className="inline-flex items-center align-middle gap-[3.5px] rounded-[7px] bg-[#E2E2FF] text-[#4242CF] text-[14px] leading-[21px] font-normal py-[1.75px] px-[7px] mr-2 whitespace-nowrap">
                 <svg
@@ -167,7 +180,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 See if you qualify
               </span>
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="mt-6 hidden min-[801px]:grid grid-cols-1 sm:grid-cols-2 border border-gray-200 overflow-hidden bg-white">
@@ -238,7 +251,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </svg>
               <span className="leading-none">Customer Help</span>
             </span>
-            <span className="text-[14px] font-normal font-normal leading-[21px] text-[#808080] ml-[24px]">
+            <span className="text-[14px] font-normal leading-[21px] text-[#808080] ml-[24px]">
               (209) 651-6864
             </span>
           </div>
@@ -358,7 +371,6 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                   image: product?.image?.[0]?.path,
                   sku: product?.sku ?? "",
                   id: product.id,
-                  brand: product?.brand?.name ?? "",
                 }
               : undefined
           }

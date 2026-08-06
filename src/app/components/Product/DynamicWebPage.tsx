@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { decode } from "html-entities";
 import WebContactForm from "./WebContactForm";
 
 const DynamicWebPage = ({ webPages }: { webPages: any }) => {
@@ -7,6 +8,10 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
         webPages?.pageType == "4"
             ? webPages?.rawHtml
             : webPages?.pageContent;
+
+    const decodedHtml = decode(
+        html?.replace(/<pre[^>]*>/gi, "")?.replace(/<\/pre>/gi, "")
+    );
     return (
         <main className="flex flex-col gap-30" role="main">
             <div className="w-full max-w-[1170px] mx-auto lg:px-6 xl:px-0">
@@ -14,6 +19,9 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                         {/* Content */}
                         <div className="lg:col-span-12">
+                            <div className='hidden md:flex'>
+
+                           
                             <h2 className=""><Link href="/" className="text-[11px] "
                                 itemProp="name"
                             >
@@ -24,9 +32,12 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
                             >
                                     {webPages?.pageName}
                                 </span></h2>
+                                 </div>
 
                             {/* Page Title */}
-                            <h1 className="text-4xl mb-4 text-[#4A4A4A] mt-5">
+
+                           <div className="w-full max-w-[900px]  mx-auto pt-10">
+                            <h1 className="!text-[28px] mb-4 text-[#333333] mt-5">
                                 {webPages?.pageName}
                             </h1>
 
@@ -42,12 +53,13 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
                [&_td]:border [&_th]:border [&_td]:p-2 [&_th]:p-2
                break-words"
                                 dangerouslySetInnerHTML={{
-                                    __html: html || "",
+                                    __html: decodedHtml || "",
                                 }}
                             />
                             {webPages?.pageType == "3" && (
                                 <WebContactForm showTheseFields={showTheseFields} />
                             )}
+                        </div>
                         </div>
                     </div>
                 </div>

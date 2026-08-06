@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import ProductPrice from "../productprice/ProductPrice";
 
 interface Brand {
   id: number;
@@ -48,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const minQty = product.minPurchaseQuantity || 1;
   const maxQty = product.maxPurchaseQuantity;
-  const purchasabilityStatus = product?.purchasabilityStatus == "available";
+  const purchasabilityStatus = product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
 
   const [quantity, setQuantity] = useState<number>(minQty);
 
@@ -74,11 +75,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    
+
     const val = parseInt(e.target.value, 10);
-   
-      setQuantity(val);
-    
+
+    setQuantity(val);
+
   };
 
   const handleQuantityBlur = () => {
@@ -126,20 +127,30 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {product?.msrp && Number(product.msrp) > 0 ? (
                 <>
                   <span className="text-[#333333] text-[14px] leading-[21px]">
-                    Price: $
+                    Price: {" "}
                     <span>
-                      {(Number(product.price) + Number(product.msrp)).toFixed(
-                        2,
-                      )}
+                      <ProductPrice
+                        price={product.msrp}
+                        inline={true}
+                        className="text-[15px]! text-[#333333]"
+                      />
                     </span>
                   </span>
                   <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
-                    ${Number(product.price)}
+                    <ProductPrice
+                      price={Number(product.price)}
+                      inline={true}
+                      className="text-[15px]! text-[#333333]"
+                    />
                   </span>
                 </>
               ) : (
                 <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
-                  ${Number(product.price)}
+                  <ProductPrice
+                    price={Number(product.price)}
+                    inline={true}
+                    className="text-[15px]! text-[#333333]"
+                  />
                 </span>
               )}
             </div>
@@ -171,10 +182,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 value={quantity}
                 onChange={handleQuantityChange}
                 onBlur={handleQuantityBlur}
-                 onFocus={(e) => {
-  console.log("focused");
-  console.log( e.target.select())
-}}
+
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
@@ -185,47 +193,47 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               >
                 Add to Cart
               </button> */}
-               <button
-            onClick={() => {
-              if (purchasabilityStatus) {
-                const cartItem = cart.find(
-                  (item: any) => item.id === product.id,
-                );
-                const minQty = product.minPurchaseQuantity || 1;
-                const maxQty = product.maxPurchaseQuantity;
-                const currentQty = cartItem?.quantity || 0;
-                const remaining = maxQty ? maxQty - currentQty : Infinity;
-                if (remaining <= 0) {
-                  toast.error(
-                    `You have already reached the maximum limit (${maxQty}) for this product.`,
-                  );
-                  return;
-                }
-                // dispatch(addToCart(product));
-                // Add only up to the allowed maximum
-                const quantityToAdd = Math.min(minQty, remaining);
+              <button
+                onClick={() => {
+                  if (purchasabilityStatus) {
+                    const cartItem = cart.find(
+                      (item: any) => item.id === product.id,
+                    );
+                    const minQty = product.minPurchaseQuantity || 1;
+                    const maxQty = product.maxPurchaseQuantity;
+                    const currentQty = cartItem?.quantity || 0;
+                    const remaining = maxQty ? maxQty - currentQty : Infinity;
+                    if (remaining <= 0) {
+                      toast.error(
+                        `You have already reached the maximum limit (${maxQty}) for this product.`,
+                      );
+                      return;
+                    }
+                    // dispatch(addToCart(product));
+                    // Add only up to the allowed maximum
+                    const quantityToAdd = Math.min(minQty, remaining);
 
-                dispatch(
-                  addCart({
-                    data: {
-                      productId: product?.id,
-                      quantity: quantity,
-                    },
-                  }),
-                )
-                  .unwrap()
-                  .then(() => {
-                    toast.success(`${product.name} added to cart!`);
-                    dispatch(fetchCartList());
-                    router.push("/cart");
-                  });
-              }
-            }}
-            disabled={!purchasabilityStatus || cartLoad}
-            className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
-          >
-            {"ADD TO CART"}
-          </button>
+                    dispatch(
+                      addCart({
+                        data: {
+                          productId: product?.id,
+                          quantity: quantity,
+                        },
+                      }),
+                    )
+                      .unwrap()
+                      .then(() => {
+                        toast.success(`${product.name} added to cart!`);
+                        dispatch(fetchCartList());
+                        // router.push("/cart");
+                      });
+                  }
+                }}
+                disabled={!purchasabilityStatus || cartLoad}
+                className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
+              >
+                {"ADD TO CART"}
+              </button>
             </div>
           )}
         </div>
