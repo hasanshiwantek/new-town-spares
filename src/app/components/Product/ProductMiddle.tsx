@@ -24,9 +24,11 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   //   hasBothPrices && originalPrice > currentPrice
   //     ? originalPrice - currentPrice
   //     : 0;
-  const savings = product?.msrp && product?.price ? product.msrp - product.price : 0;
+  const savings =
+    product?.msrp && product?.price ? product.msrp - product.price : 0;
 
-  const purchasabilityStatus = product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const purchasabilityStatus =
+    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
 
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
@@ -82,7 +84,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 <button
                   type="button"
                   onClick={() => setIsReviewModalOpen(true)}
-                  className="underline font-semibold"
+                  className="underline font-normal"
                 >
                   Write a Review
                 </button>
@@ -249,7 +251,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
               </svg>
               <span className="leading-none">Customer Help</span>
             </span>
-            <span className="text-[14px] font-normal font-normal leading-[21px] text-[#808080] ml-[24px]">
+            <span className="text-[14px] font-normal leading-[21px] text-[#808080] ml-[24px]">
               (209) 651-6864
             </span>
           </div>
@@ -365,11 +367,11 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           product={
             product
               ? {
-                name: product.name ?? "",
-                image: product?.image?.[0]?.path,
-                sku: product?.sku ?? "",
-                id: product.id,
-              }
+                  name: product.name ?? "",
+                  image: product?.image?.[0]?.path,
+                  sku: product?.sku ?? "",
+                  id: product.id,
+                }
               : undefined
           }
         />

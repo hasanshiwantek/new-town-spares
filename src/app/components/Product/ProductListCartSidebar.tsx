@@ -6,7 +6,12 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { toast } from "react-toastify";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
-import { addBySku, deleteCart, fetchCartList, updateCart } from "@/redux/slices/cartsSlice";
+import {
+  addBySku,
+  deleteCart,
+  fetchCartList,
+  updateCart,
+} from "@/redux/slices/cartsSlice";
 import Image from "next/image";
 import { useState } from "react";
 import { X } from "lucide-react";
@@ -19,19 +24,11 @@ export default function ProductListCartSidebar() {
     [key: string]: number | string;
   }>({});
 
-  const { loading } = useAppSelector(
-    (state: RootState) => state.carts
-  )
+  const { loading } = useAppSelector((state: RootState) => state.carts);
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const {
-    skuInput,
-    setSkuInput,
-    qty,
-    setQty,
-    adding,
-    handleAddBySku,
-  } = useAddProductBySku();
+  const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
+    useAddProductBySku();
   function removeLocalShipping() {
     localStorage.removeItem("shippingCost");
     localStorage.removeItem("shippingData");
@@ -75,7 +72,7 @@ export default function ProductListCartSidebar() {
           data: {
             quantity: newQty,
           },
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -86,7 +83,8 @@ export default function ProductListCartSidebar() {
             ...prev,
             [id]: newQty,
           }));
-        }).catch(() => {
+        })
+        .catch(() => {
           setUpdatingQty(null);
         });
 
@@ -112,21 +110,24 @@ export default function ProductListCartSidebar() {
   );
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
   const handleSkuCart = async () => {
     if (skuInput == "" || qty < 1) {
-      return
+      return;
     }
-    const result = await dispatch(addBySku({ sku: skuInput, quantity: qty }))
+    const result = await dispatch(addBySku({ sku: skuInput, quantity: qty }));
     if (addBySku.fulfilled.match(result)) {
       toast.success(result.payload.message);
       setSkuInput("");
       setQty(1);
-      dispatch(fetchCartList())
+      dispatch(fetchCartList());
     } else {
       //  toast.error(result.payload.message);
     }
-  }
+  };
 
   return (
     <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto">
@@ -176,15 +177,11 @@ export default function ProductListCartSidebar() {
 
                     <div className="mt-2 flex items-center gap-2">
                       <div className="w-[35px] h-8 border border-gray-300 overflow-hidden bg-white shrink-0">
-
                         {qtyInput(item)}
                       </div>
                       <span className="text-[#333333]">×</span>
                       <span className="text-[#FD5430] text-[14px]">
-                        <ProductPrice
-                          price={itemPrice}
-                          inline={true}
-                        />
+                        <ProductPrice price={itemPrice} inline={true} />
                       </span>
                       <div className="flex-1" />
                       <button
@@ -197,7 +194,6 @@ export default function ProductListCartSidebar() {
                       </button>
                     </div>
                   </div>
-
                 </div>
               );
             })}
@@ -220,10 +216,8 @@ export default function ProductListCartSidebar() {
                 </div>
               </div>
             )}
-
           </div>
         )}
-
       </div>
 
       <div className="space-y-4 bg-white border-b border-gray-200">
@@ -242,7 +236,9 @@ export default function ProductListCartSidebar() {
               min={1}
               value={qty}
               onFocus={(e) => e.target.select()}
-              onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
+              onChange={(e) =>
+                setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
+              }
               className="w-full h-full text-gray-800 text-lg bg-transparent text-center outline-none ml-5"
               style={{ appearance: "textfield" }}
             />
@@ -266,19 +262,15 @@ export default function ProductListCartSidebar() {
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Subtotal:</span>
           <span>
-
-            <ProductPrice
-              price={subtotal}
-              inline={true}
-            />
+            <ProductPrice price={subtotal} inline={true} />
           </span>
         </div>
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Grand total:</span>
-          <span> <ProductPrice
-            price={subtotal}
-            inline={true}
-          /></span>
+          <span>
+            {" "}
+            <ProductPrice price={subtotal} inline={true} />
+          </span>
         </div>
       </div>
 
