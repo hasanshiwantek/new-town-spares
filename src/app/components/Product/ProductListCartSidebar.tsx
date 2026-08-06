@@ -23,13 +23,13 @@ export default function ProductListCartSidebar() {
     adding,
     handleAddBySku,
   } = useAddProductBySku();
-  
+
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
    const handleSkuCart = async ()=>{
       if(skuInput == "" || qty<1){
-        return 
+        return
       }
          const result =  await dispatch(addBySku({sku:skuInput,quantity:qty}))
          if (addBySku.fulfilled.match(result)) {

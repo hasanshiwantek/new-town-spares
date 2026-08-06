@@ -1,11 +1,7 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
@@ -139,7 +135,6 @@ const CartList = () => {
           : "w-full 2xl:w-full shadow-[0_0_1px_0_rgba(0,0,0,0.5)] p-[21px]"
       }
     >
-      {/* Column header — desktop table layout only (live hides it below 801px) */}
       {!isEmpty && (
         <div className="hidden min-[801px]:grid grid-cols-[1fr_12%_15%_15%_15%] pb-[14px] text-[14px] font-bold text-[#333333]">
           <span>Item</span>
@@ -159,7 +154,6 @@ const CartList = () => {
                   idx === cart.length - 1 ? "" : "border-b border-[#ebebeb]"
                 }
               >
-                {/* Mobile (<=800): image floated left, brand/title, then stacked info rows */}
                 <div className="min-[801px]:hidden py-4">
                   <Image
                     width={98}
@@ -215,7 +209,6 @@ const CartList = () => {
                   </div>
                 </div>
 
-                {/* Desktop (>=801): table row matching live columns */}
                 <div className="hidden min-[801px]:grid grid-cols-[1fr_12%_15%_15%_15%] items-center pt-[11px] pb-[21px]">
                   <div className="flex items-center gap-[21px] pr-[21px] min-w-0">
                     <Image
@@ -269,7 +262,6 @@ const CartList = () => {
         </div>
       )}
 
-      {/* Footer: Empty Cart */}
       {!isEmpty && (
         <div className="flex justify-end items-center">
           <button
@@ -280,33 +272,39 @@ const CartList = () => {
           </button>
         </div>
       )}
-      {/* ShadCN Dialog for Delete Confirmation */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Delete Item</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to remove{" "}
-              <strong>{itemToDelete?.name}</strong> from your cart? This action
-              cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-end gap-3">
-            <Button
-              variant="outline"
+        <DialogContent
+          showCloseButton={false}
+          className="sm:max-w-[500px] p-[20px] rounded-[4px] border-0 gap-0 text-center"
+        >
+          <DialogTitle className="sr-only">Delete Item</DialogTitle>
+
+          <div className="mx-auto mt-[20px] mb-[30px] flex h-[80px] w-[80px] items-center justify-center rounded-full border-4 border-[#cc4749]">
+            <span className="text-[60px] font-normal leading-none text-[#cc4749]">
+              !
+            </span>
+          </div>
+
+          <p className="text-center text-[16px] font-light text-[#333333]">
+            Are you sure you want to delete this item?
+          </p>
+
+          <div className="mt-[25px] mb-[12px] flex items-center justify-center">
+            <button
+              type="button"
+              onClick={confirmDelete}
+              className="rounded-[4px] border-[0.667px] border-[#ebebeb] bg-transparent py-[8px] px-[32px] text-[14px] text-[#333333] outline-none transition-colors hover:border-[#ff482e] focus:border-[#ff482e] focus:ring-1 focus:ring-[#ff482e]"
+            >
+              OK
+            </button>
+            <button
+              type="button"
               onClick={() => setIsDialogOpen(false)}
-              className="!p-4 !text-lg"
+              className="ml-[11px] rounded-[4px] border-[0.667px] border-[#ff482e] bg-[#ff482e] py-[8px] px-[32px] text-[14px] text-white transition-colors hover:bg-[#e63e26]"
             >
               Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              className="!p-4 !text-[#ffffff] !text-lg"
-            >
-              Confirm
-            </Button>
-          </DialogFooter>
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

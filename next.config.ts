@@ -126,6 +126,7 @@ const nextConfig: NextConfig = {
         { source: "/checkout/:path+", destination: "/checkout/:path+" },
         { source: "/about-us/:path+", destination: "/about-us/:path+" },
         { source: "/my-account/:path+", destination: "/my-account/:path+" },
+        { source: "/wishlist/:path+", destination: "/wishlist/:path+" },
         { source: "/products/:path+", destination: "/products/:path+" },
         { source: "/order-success/:path+", destination: "/order-success/:path+" },
         { source: "/payment-options/:path+", destination: "/payment-options/:path+" },

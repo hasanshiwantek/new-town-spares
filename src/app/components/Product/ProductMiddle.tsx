@@ -58,7 +58,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
 
           {/* Rating & Reviews */}
           <div className="flex flex-wrap items-center gap-2 text-[14px] leading-[21px] text-[#333333]">
-            {stats?.count ? (
+            {false ? (
               <>
                 {stats?.rating && (
                   <Image
@@ -81,7 +81,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                 <button
                   type="button"
                   onClick={() => setIsReviewModalOpen(true)}
-                  className="underline font-semibold"
+                  className="underline font-normal"
                 >
                   Write a Review
                 </button>
@@ -358,6 +358,7 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
                   image: product?.image?.[0]?.path,
                   sku: product?.sku ?? "",
                   id: product.id,
+                  brand: product?.brand?.name ?? "",
                 }
               : undefined
           }
