@@ -8,6 +8,7 @@ import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { fetchOrderDetails } from "@/redux/slices/cartSlice";
 import { useReactToPrint } from "react-to-print";
 import { Invoice } from "./helpers/OrderDetails";
+import ProductPrice from "../productprice/ProductPrice";
 interface OrderData {
   id: number;
   orderNumber: string;
@@ -70,7 +71,7 @@ const SingleOrder = () => {
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-   const invoiceRef = useRef<HTMLDivElement>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: invoiceRef, // v3 API: pass the ref here
     documentTitle: `Server Blink LLC -`,
@@ -170,7 +171,7 @@ const SingleOrder = () => {
 
   const blockTypography = "text-[15px] leading-[22.5px] text-[#333333]";
   const blockClass = `${blockTypography} w-full p-[21px] border-b border-[#ebebeb] min-[801px]:w-1/2 min-[1261px]:w-auto min-[1261px]:flex-1 min-[1261px]:border-b-0 min-[1261px]:p-0`;
-  
+
   const actionsBlockClass = `${blockTypography} w-full p-[21px] pb-0 min-[801px]:w-full min-[801px]:flex-[1_0_auto] min-[1261px]:max-w-[120px] min-[1261px]:p-0`;
   const blockHeading =
     "text-[13px] leading-[15.6px] capitalize text-[#333333] mb-[5px] pb-[5px]";
@@ -182,7 +183,7 @@ const SingleOrder = () => {
       {/* Sidebar band — Order Details / Ship To / Bill To / (spacer) / Actions.
           A bordered white card in a horizontal flex row on desktop, stacked
           full-width below 801 (matches live .order-details-sidebar). */}
-            <div className="hidden print:block">
+      <div className="hidden print:block">
         <Invoice ref={invoiceRef} order={order} />
       </div>
       <div className="bg-white border border-[#ebebeb] mb-[21px] w-full min-[801px]:flex min-[801px]:flex-wrap min-[801px]:pb-[21px] min-[1261px]:flex-nowrap min-[1261px]:p-[21px]">
@@ -312,7 +313,10 @@ const SingleOrder = () => {
                       {quantity} × {item.sku} - {item.name}
                     </h5>
                     <div className="text-[15px] leading-[22.5px] text-[#FF482E]">
-                      ${(parseFloat(item.price) * quantity).toFixed(2)}
+                      <ProductPrice
+                        price={Number(item.price) * quantity}
+                        inline={true}
+                      />
                     </div>
                   </div>
                 </React.Fragment>
@@ -329,20 +333,35 @@ const SingleOrder = () => {
 
           <div className={summaryRow}>
             <span>Subtotal:</span>
-            <span className="float-right">${order?.totalAmount}</span>
+            <span className="float-right">
+              <ProductPrice
+                price={Number(order?.totalAmount)}
+                inline={true}
+              />
+            </span>
           </div>
           <div className={summaryRow}>
             <span>Shipping:</span>
-            <span className="float-right">${shippingCost.toFixed(2)}</span>
+            <span className="float-right">
+              <ProductPrice
+                price={shippingCost}
+                inline={true}
+              />
+            </span>
           </div>
           <div
             className={`${summaryRow} font-semibold border-t border-[#ebebeb]`}
           >
             <span>Grand total:</span>
-            <span className="float-right">${total.toFixed(2)}</span>
+            <span className="float-right">
+              <ProductPrice
+                price={total}
+                inline={true}
+              />
+            </span>
           </div>
 
-          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]"   onClick={() => handlePrint()}>
+          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]" onClick={() => handlePrint()}>
             Print Invoice
           </button>
         </div>

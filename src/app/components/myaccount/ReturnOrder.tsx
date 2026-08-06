@@ -19,7 +19,6 @@ const ReturnOrder = () => {
         const res = await axiosInstance.get(
           "dashboard/orders/get-return-order",
         );
-        console.log("API Response:", res?.data?.data);
 
         if (res?.data?.data && res.data.data.length > 0) {
           setOrders(res.data.data);
