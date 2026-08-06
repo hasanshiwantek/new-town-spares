@@ -37,9 +37,13 @@ const ContactUs = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue
   } = useForm<ContactFormData>();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state: any) => state.contact);
+  const { user, isAuthenticated } = useAppSelector(
+  (state: any) => state.auth
+);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -48,6 +52,14 @@ const ContactUs = () => {
       document.documentElement.style.scrollBehavior = "auto";
     };
   }, []);
+
+  useEffect(() => {
+  if (user) {
+    setValue("full_name", `${user.firstName} ${user.lastName}`);
+    setValue("email", user.email);
+    setValue("phone_number", user.phone);
+  }
+}, [user, setValue]);
   const onSubmit = (data: ContactFormData) => {
     // You can also log it in a more formatted way
     dispatch(contactRequests(data))
