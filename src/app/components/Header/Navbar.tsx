@@ -186,14 +186,20 @@ const Navbar: React.FC = () => {
     localStorage.removeItem("shippingData");
   }
 
-  const confirmDelete = (item: any) => {
-    dispatch(deleteCart({ id: item.cartItemId }))
-      .unwrap()
-      .then(() => {
-        dispatch(fetchCartList());
-        removeLocalShipping();
-      });
-  };
+const confirmDelete = (item: any) => {
+  setUpdatingQty(item.cartItemId);
+
+  dispatch(deleteCart({ id: item.cartItemId }))
+    .unwrap()
+    .then(() => {
+      dispatch(fetchCartList());
+      removeLocalShipping();
+      setUpdatingQty(null);
+    })
+    .catch(() => {
+      setUpdatingQty(null);
+    });
+};
   useEffect(() => {
     if (!auth?.isAuthenticated || !isAccountOpen) return;
 

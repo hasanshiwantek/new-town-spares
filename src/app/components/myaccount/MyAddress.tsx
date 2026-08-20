@@ -205,7 +205,7 @@ const MyAddress = () => {
               <input
                 id="edit-companyName"
                 className={addrInputCls()}
-                value={editData?.companyName || ""}
+                value={editData?.companyName || ""}               
                 onChange={(e) =>
                   setEditData({
                     ...editData,
@@ -213,6 +213,17 @@ const MyAddress = () => {
                   })
                 }
               />
+
+
+
+
+
+
+
+
+
+              
+
             </div>
 
             {/* Phone */}

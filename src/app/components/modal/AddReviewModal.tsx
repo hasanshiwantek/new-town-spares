@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { addReview } from "@/redux/slices/homeSlice";
 import { toast } from "react-toastify";
 import { RootState } from "@/redux/store";
+
 interface AddReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -87,8 +88,6 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     });
   };
 
-  
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!captchaToken) {
@@ -114,6 +113,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
       setLoading(false);
     }
   };
+
   useEffect(() => {
     setFormData({
       name: auth?.user
