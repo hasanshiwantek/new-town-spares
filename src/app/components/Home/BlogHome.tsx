@@ -8,6 +8,20 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { getBlogs } from "@/redux/slices/storeFrontSlice";
 
 const BlogHome = () => {
+ const stripHtml = (html: string = "") => {
+  const div = document.createElement("div");
+
+  // Decode HTML entities first
+  div.innerHTML = html;
+  const decodedHtml = div.textContent || "";
+
+  // Remove actual HTML tags after decoding
+  div.innerHTML = decodedHtml;
+
+  return (div.textContent || "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
   const dispatch = useAppDispatch();
   const { blogs, loading, error } = useAppSelector(
     (state: any) => state.storeFront,
@@ -46,11 +60,13 @@ const BlogHome = () => {
               const dateText = blog?.createdAt
                 ? dayjs(blog.createdAt).format("MMM D, YYYY")
                 : "";
-              const desc =
-                blog?.metaDescription ||
-                blog?.shortDescription ||
-                blog?.body?.replace(/<[^>]*>/g, "")?.slice(0, 140) ||
-                "";
+              const rawDesc =
+  blog?.metaDescription ||
+  blog?.shortDescription ||
+  blog?.body ||
+  "";
+
+const desc = stripHtml(rawDesc).slice(0, 140);
               const imageUrl = blog?.thumbnail?.trim();
 
               return (
@@ -102,6 +118,7 @@ const BlogHome = () => {
       )}
 
       {/* View All */}
+      
       <div className="text-center mt-6">
         <Link
           href="/blogs"

@@ -31,11 +31,32 @@ const BlogCategories = ({
   //   return text;
   // };
    const poppinsFont = "Poppins, sans-serif";
-  const getExcerpt = (html: string, maxLength = 100) => {
-    if (!html) return "";
-    const text = html.replace(/<[^>]*>/g, "").trim();
-    return text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
-  };
+const getExcerpt = (html: string, maxLength = 100) => {
+  if (!html) return "";
+
+  let text = html;
+
+  // Decode HTML entities
+  for (let i = 0; i < 2; i++) {
+    text = text
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ");
+  }
+
+  // Remove HTML tags
+  text = text
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return text.length > maxLength
+    ? text.slice(0, maxLength) + "..."
+    : text;
+};
 
   const totalPages = pagination?.totalPages || 1;
 

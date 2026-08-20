@@ -152,7 +152,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
           {/* ── Skeleton ── */}
           {loading && (
             <div className="grid grid-cols-1 min-[551px]:grid-cols-2 min-[801px]:grid-cols-3 min-[1261px]:grid-cols-4 gap-3">
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 4 }).map((_, i) => (
                 <ProductSkeleton key={i} />
               ))}
             </div>

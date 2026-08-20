@@ -41,14 +41,20 @@ export default function ProductListCartSidebar() {
       }));
     }
   };
-  const confirmDelete = (item: any) => {
-    dispatch(deleteCart({ id: item.cartItemId }))
-      .unwrap()
-      .then(() => {
-        dispatch(fetchCartList());
-        removeLocalShipping();
-      });
-  };
+const confirmDelete = (item: any) => {
+  setUpdatingQty(item.cartItemId);
+
+  dispatch(deleteCart({ id: item.cartItemId }))
+    .unwrap()
+    .then(() => {
+      dispatch(fetchCartList());
+      removeLocalShipping();
+      setUpdatingQty(null);
+    })
+    .catch(() => {
+      setUpdatingQty(null);
+    });
+};
   const handleManualQtyUpdate = (
     e: React.KeyboardEvent<HTMLInputElement>,
     id: string,
