@@ -2,7 +2,9 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import countries from "world-countries";
+// import countries from "world-countries";
+import { Country, State, City } from "country-state-city";
+
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
@@ -11,7 +13,7 @@ import { RootState } from "@/redux/store";
 import { registerUser } from "@/redux/slices/authSlice";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { baseURL, sitekey, storeId } from "@/lib/axiosInstance";
 import { fetchCartList } from "@/redux/slices/cartSlice";
@@ -59,28 +61,41 @@ function FieldLabel({
     </div>
   );
 }
+const inputClass =
+  "w-full h-[42px] !max-w-full !text-[14px] bg-white border border-[#ebebeb] rounded-[4px] px-[14px] text-[#333333] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]";
+const rowClass = "grid grid-cols-1 min-[551px]:grid-cols-2 gap-7 min-[551px]:gap-5";
 
 const SignupPage = () => {
-  const countryList = countries
-    .map((country) => ({
-      name: country.name.common,
-      code: country.cca2,
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
-
+  const countryList = Country.getAllCountries().map((c) => ({
+    name: c.name,
+    code: c.isoCode,
+  }));
   const {
     register,
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors },
-  } = useForm<SignupFormValues>();
+  } = useForm<SignupFormValues>({
+    mode: "onBlur",
+    reValidateMode: "onChange",
+  });
+  const password = watch("password");
+  const watchedCountry = watch("country");
+  const watchedState = watch("state");
   const dispatch = useAppDispatch();
   const { registerLoading } = useAppSelector((state: RootState) => state?.auth);
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const stateList = useMemo(() => {
+    if (!watchedCountry) return [];
+    return State.getStatesOfCountry(watchedCountry).map((s) => ({
+      name: s.name,
+      code: s.isoCode,
+    }));
+  }, [watchedCountry]);
   const onSubmit = async (data: SignupFormValues) => {
     //   if (!captchaToken) {
     //   toast("Please verify the captcha.");
@@ -93,45 +108,45 @@ const SignupPage = () => {
       };
       const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
-  const token = result.payload.token;
-  const sessionId = localStorage.getItem("sessionId");
+        const token = result.payload.token;
+        const sessionId = localStorage.getItem("sessionId");
 
-  await fetch(`${baseURL}web/cart/transfer`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      storeId: storeId,
-      "X-Session-ID": sessionId || "",
-      "Content-Type": "application/json",
-    },
-  });
-   const {
-            email,
-            userRole,
-            password,
-            password_confirmation,
-            suburb,
-            ...body
-          } = payload;
+        await fetch(`${baseURL}web/cart/transfer`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            storeId: storeId,
+            "X-Session-ID": sessionId || "",
+            "Content-Type": "application/json",
+          },
+        });
+        const {
+          email,
+          userRole,
+          password,
+          password_confirmation,
+          suburb,
+          ...body
+        } = payload;
 
-          const addressPayload = {
-            ...body,
-            city: suburb,
-          };
-          dispatch(
-            addCustomerAddress({
-              id: result?.payload?.user?.id,
-              data: addressPayload,
-            }),
-          );
+        const addressPayload = {
+          ...body,
+          city: suburb,
+        };
+        dispatch(
+          addCustomerAddress({
+            id: result?.payload?.user?.id,
+            data: addressPayload,
+          }),
+        );
 
-  await dispatch(fetchCartList());
+        await dispatch(fetchCartList());
 
-  reset();
-  toast.success("Account created successfully!");
-  router.push("/action");
-}
-       else {
+        reset();
+        toast.success("Account created successfully!");
+        router.push("/action");
+      }
+      else {
         const errorMessage =
           (result.payload as string) || "Registration failed. Please try again.";
         toast.error(errorMessage);
@@ -141,11 +156,23 @@ const SignupPage = () => {
     }
   };
 
-  const password = watch("password");
+  useEffect(() => {
+    const detectCountry = async () => {
+      try {
+        const res = await fetch("/api/detect-country"); // apna Next.js route
+        const data = await res.json();
 
-  const inputClass =
-    "w-full h-[42px] !max-w-full !text-[14px] bg-white border border-[#ebebeb] rounded-[4px] px-[14px] text-[#333333] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]";
-  const rowClass = "grid grid-cols-1 min-[551px]:grid-cols-2 gap-7 min-[551px]:gap-5";
+        if (data.country_code) {
+          setValue("country", data.country_code);
+          // setValue("state", data.state);
+        }
+      } catch {
+        setValue("country", "US");
+      }
+    };
+
+    detectCountry();
+  }, [setValue]);
 
   return (
     <section className="w-full mt-[9px] mb-20">
@@ -354,11 +381,23 @@ const SignupPage = () => {
               <FieldLabel htmlFor="state" required>
                 State/Province
               </FieldLabel>
-              <Input
+              {/* <Input
                 id="state"
                 className={inputClass}
                 {...register("state", { required: true })}
-              />
+              /> */}
+              <select
+                id="state"
+                className={`${inputClass} cursor-pointer`}
+                {...register("state", { required: true })}
+              >
+                <option value="">Choose a State</option>
+                {stateList.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
               {errors.state && (
                 <p className="text-[10px] text-red-500 mt-0.5">Required</p>
               )}
