@@ -42,11 +42,11 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
     );
 
 
-    useEffect(() => {
-        if (appliedCoupon && discountAmount > 0) {
-            setDiscountOpen(true);
-        }
-    }, [appliedCoupon, discountAmount])
+    // useEffect(() => {
+    //     if (appliedCoupon && discountAmount > 0) {
+    //         setDiscountOpen(true);
+    //     }
+    // }, [appliedCoupon, discountAmount])
 
     return (
         <div className="bg-white border-[1px] border-[#8b8b8b] rounded-sm shadow-sm py-6 h-fit sticky top-9">
