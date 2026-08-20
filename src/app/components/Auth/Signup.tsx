@@ -391,7 +391,7 @@ const SignupPage = () => {
                 className={`${inputClass} cursor-pointer`}
                 {...register("state", { required: true })}
               >
-                <option value="">Choose a Country</option>
+                <option value="">Choose a State</option>
                 {stateList.map((c) => (
                   <option key={c.code} value={c.code}>
                     {c.name}
