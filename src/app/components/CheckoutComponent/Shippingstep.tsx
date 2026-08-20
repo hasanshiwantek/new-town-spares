@@ -904,11 +904,18 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         <input
                           type="radio"
                           value={rate.service_type}
-                          // {...register("shippingMethod", {
-                          //   required: "Please select a shipping method",
-                          // })}
                           {...register("shippingMethod", {
                             required: "Please select a shipping method",
+                            validate: () => {
+                              if (
+                                !shippingRates ||
+                                shippingRates.length === 0
+                              ) {
+                                return "No shipping method is available";
+                              }
+
+                              return true;
+                            },
                           })}
                           onChange={async (e) => {
                             register("shippingMethod").onChange(e); // keep react-hook-form in sync
@@ -987,20 +994,16 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             />
           </div>
 
-          {shippingRates?.length ? (
-            <button
-              disabled={ratesLoader || shippingCostLoading}
-              type="button"
-              onClick={() => {
-                onContinue();
-              }}
-              className="btn-primary"
-            >
-              CONTINUE
-            </button>
-          ) : (
-            <></>
-          )}
+          <button
+            disabled={ratesLoader || shippingCostLoading}
+            type="button"
+            onClick={() => {
+              onContinue();
+            }}
+            className="btn-primary"
+          >
+            CONTINUE
+          </button>
         </>
       )}
     </div>
