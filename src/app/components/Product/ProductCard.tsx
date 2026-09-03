@@ -29,17 +29,11 @@ const ProductCard = ({ product }: { product: any }) => {
 
     dispatch(
       addRecentView({
-        ...product,
-        sku: product?.sku,
-        productUrl: product?.productUrl,
-        name: product?.name,
-        image: product?.image,
-        price: Number(product?.price) || 0,
-        id: product?.id,
-        brand: product?.brand,
-      }),
+        id: product.id,
+        sku: product.sku,
+      })
     );
-  }, [product]);
+  }, [product?.id]);
 
   const increment = () => {
     if (
@@ -84,8 +78,8 @@ const ProductCard = ({ product }: { product: any }) => {
               sku: product?.sku,
             }}
             quantity={quantity}
-            setQuantity = {setQuantity}
-            
+            setQuantity={setQuantity}
+
             increment={increment}
             decrement={decrement}
             onAddToCart={() => {

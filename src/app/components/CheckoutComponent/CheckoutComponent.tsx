@@ -15,7 +15,7 @@ import {
   clearCart,
 } from "@/redux/slices/cartSlice";
 import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice"; // ADD THIS
-import axiosInstance, { baseURL } from "@/lib/axiosInstance";
+import axiosInstance, { baseURL, stripePublishableKey } from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -26,6 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import countries from "world-countries";
 import { Country, State, City } from "country-state-city";
 import { useForm } from "react-hook-form";
 import { loadStripe } from "@stripe/stripe-js";
@@ -57,14 +58,13 @@ import ShippingStep from "./Shippingstep";
 import BillingStep from "./Billingstep";
 import PaymentStep from "./Paymentstep";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
-// import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
+import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
 import { calculatePackage } from "./Shippingstep";
 import {
   addCustomerAddress,
   fetchCustomerAddress,
 } from "@/redux/slices/myaccountSlice";
 import { fetchCartList, removeProducts } from "@/redux/slices/cartsSlice";
-import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
 
 export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
 function splitName(fullName: string) {
@@ -77,7 +77,7 @@ function splitName(fullName: string) {
 }
 // Stripe publishable key
 const stripePromise = loadStripe(
-  "pk_test_51TTnoo8vkezGA3pyz8ekc5xIQNyhweCnxiumTB1si5Dejq5YWPGHDJIJPpBHMLw9hYRkbSkOGpdCzPrlW8g59HZ600cueNQymh",
+  stripePublishableKey,
 );
 
 // Pre-compute country list at module level
@@ -134,9 +134,8 @@ interface CheckoutFormValues {
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
-  const { loading } = useAppSelector((state: RootState) => state?.carts);
+  const { loading, redirectToCart, cartLoading } = useAppSelector((state: RootState) => state?.carts);
   const auth = useAppSelector((state: RootState) => state?.auth);
-  console.log("auth", auth);
 
   // ADD COUPON STATE FROM REDUX
   const { appliedCoupon, discountAmount } = useAppSelector(
@@ -187,22 +186,24 @@ const CheckoutForm = () => {
 
   useEffect(() => {
     if (!loading) {
-      if (cart.length === 0) {
+      if (cart?.length === 0 && redirectToCart === "true") {
         if (skipEmptyCartCheckRef.current) {
           return;
         }
 
         if (!emptyCartWarningShownRef.current) {
           emptyCartWarningShownRef.current = true;
-          toast.error("Please add something");
+          // toast.error("Please add something");
 
-          // router.push("/cart");
+          // if (redirectToCart === "true") {
+          router.push("/cart");
+          // }
         }
       } else {
         emptyCartWarningShownRef.current = false;
       }
     }
-  }, [cart.length, router]);
+  }, [cart?.length, router, redirectToCart]);
 
   const {
     register,
@@ -591,14 +592,14 @@ const CheckoutForm = () => {
     };
   }, [stripe, cart, finalTotal]); // DEPENDENCY: finalTotal instead of total
   const getDeviceType = () => {
-    if (typeof window === "undefined") return "Server Blink (Desktop)";
+    if (typeof window === "undefined") return "New Town Spares (Desktop)";
 
     const userAgent = navigator.userAgent;
 
-    if (/mobile/i.test(userAgent)) return "Server Blink (Mobile)";
-    if (/tablet/i.test(userAgent)) return "Server Blink (Tablet)";
+    if (/mobile/i.test(userAgent)) return "New Town Spares (Mobile)";
+    if (/tablet/i.test(userAgent)) return "New Town Spares (Tablet)";
 
-    return "Server Blink (Desktop)";
+    return "New Town Spares (Desktop)";
   };
 
   // const buildOrderPayload = useCallback(
@@ -639,7 +640,12 @@ const CheckoutForm = () => {
           deviceType: getDeviceType(),
           ipAddress: ipAddress,
           email: data.email,
-          paymentMethod: data.paymentMethod == "credit_card" ? "Credit Card (Via Stripe)" : data.paymentMethod == "apple_pay" ? "Apple Pay" : "Google Pay",
+          paymentMethod:
+            data.paymentMethod == "credit_card"
+              ? "Credit Card (Via Stripe)"
+              : data.paymentMethod == "apple_pay"
+                ? "Apple Pay"
+                : "Google Pay",
           discountAmount: discountAmount,
           couponCode: appliedCoupon?.couponCode,
           shippingCost: shipping,
@@ -676,7 +682,9 @@ const CheckoutForm = () => {
               zip: dest.address?.zip || "",
               country: dest.address?.country || "",
               shippingMethod: dest.selectedShippingMethod,
-              shippingData: shippingRates.find((item) => item?.service_type == dest.selectedShippingMethod),
+              shippingData: shippingRates.find(
+                (item) => item?.service_type == dest.selectedShippingMethod,
+              ),
               shippingCost: selectedRate
                 ? Number(selectedRate.total_charge)
                 : 0,
@@ -710,9 +718,16 @@ const CheckoutForm = () => {
         state: data.state || "",
         zip: data.zip,
         country: data.country,
-        paymentMethod: data.paymentMethod == "credit_card" ? "Credit Card (Via Stripe)" : data.paymentMethod == "apple_pay" ? "Apple Pay" : "Google Pay",
+        paymentMethod:
+          data.paymentMethod == "credit_card"
+            ? "Credit Card (Via Stripe)"
+            : data.paymentMethod == "apple_pay"
+              ? "Apple Pay"
+              : "Google Pay",
         shippingMethod: data.shippingMethod,
-        shippingData: shippingRates.find((item) => item?.service_type == data.shippingMethod),
+        shippingData: shippingRates.find(
+          (item) => item?.service_type == data.shippingMethod,
+        ),
         discountAmount: discountAmount,
         couponCode: appliedCoupon?.couponCode,
         shippingCost: shipping,
@@ -967,6 +982,10 @@ const CheckoutForm = () => {
 
   const handleEditBilling = () => {
     setCurrentStep(3);
+
+    setTimeout(() => {
+      setValue("billingSame", false);
+    }, 100)
   };
 
   const handleEditPayment = () => {
@@ -1206,15 +1225,15 @@ const CheckoutForm = () => {
       setCompletedSteps((prev) => [...new Set([...prev, 3])]);
     } else if (!watchedBillingSame) {
       if (isRestoringRef.current) return;
-      setValue("billingFirstName", "");
-      setValue("billingLastName", "");
-      setValue("billingCompany", "");
-      setValue("billingPhone", "");
-      setValue("billingAddress1", "");
-      setValue("billingAddress2", "");
-      setValue("billingCity", "");
-      setValue("billingZip", "");
-      // setCompletedSteps((prev) => prev.filter((s) => s !== 3));
+      // setValue("billingFirstName", "");
+      // setValue("billingLastName", "");
+      // setValue("billingCompany", "");
+      // setValue("billingPhone", "");
+      // setValue("billingAddress1", "");
+      // setValue("billingAddress2", "");
+      // setValue("billingCity", "");
+      // setValue("billingZip", "");
+      setCompletedSteps((prev) => prev.filter((s) => s !== 3));
     }
   }, [
     watchedBillingSame,
@@ -1381,7 +1400,7 @@ const CheckoutForm = () => {
 
     saveTimeoutRef.current = setTimeout(() => {
       const shippingFormData = {
-        email: watchedValues.email || "",
+        email: auth?.user?.email || watchedValues.email || "",
         firstName: watchedValues.firstName || "",
         lastName: watchedValues.lastName || "",
         company: watchedValues.company || "",
@@ -1574,10 +1593,10 @@ const CheckoutForm = () => {
             {/* STEP 1: Customer */}
             {/* STEP 1: Customer */}
             <div
-              className={`p-6 border-b-[1px]  items-center  border-b-[#8b8b8b] ${currentStep >= 2 ? "flex gap-10" : "block"}`}
+              className={`p-6 border-b-[1px]  items-center border-b-[#8b8b8b] ${currentStep >= 2 ? "flex gap-10" : "block"}`}
             >
               <h2
-                className={`hidden md:flex text-[1.92308rem] font-normal mb-2 text-[#545454] `}
+                className={`hidden md:flex text-[1.92308rem] font-normal mb-4 text-[#545454] `}
               >
                 Customer
               </h2>
@@ -1614,20 +1633,6 @@ const CheckoutForm = () => {
                 isCompleted={completedSteps.includes(2)}
                 onEdit={handleEditShipping}
                 onAddressSelect={handleShippingAddressSelect}
-                // shippingInfo={{
-                //   firstName: watch("firstName"),
-                //   lastName: watch("lastName"),
-                //   address: watch("address1"),
-                //   city: watch("city"),
-                //   state: watch("state"),
-                //   country: watch("country"),
-                //   zip: watch("zip"),
-
-                //   company: watch("company"),
-                //   address1: watch("address1"),
-                //   address2: watch("address2"),
-                //   phone: watch("phone"),
-                // }}
                 shippingInfo={shippingInfoMemo}
                 watchedShippingMethod={watchedShippingMethod}
               />
@@ -1637,7 +1642,7 @@ const CheckoutForm = () => {
             <div
               className={`p-6 border-b-[1px]  items-center border-b-[#8b8b8b] ${currentStep >= 4 ? "flex gap-16" : "block"}`}
             >
-              <h2 className="hidden md:flex text-[1.92308rem] font-normal mb-4 text-[#545454]">
+              <h2 className="hidden md:flex text-[25px] font-normal mb-4 text-[#545454]">
                 Billing
               </h2>
               <BillingStep
@@ -1654,20 +1659,6 @@ const CheckoutForm = () => {
                 onEdit={handleEditBilling}
                 onAddressSelect={handleBillingAddressSelect}
                 billingInfo={billingInfoMemo}
-              // billingInfo={{
-              //   firstName: watch("billingFirstName"),
-              //   lastName: watch("billingLastName"),
-              //   address: watch("billingAddress1"),
-              //   city: watch("billingCity"),
-              //   state: watch("billingState"),
-              //   country: watch("billingCountry"),
-              //   zip: watch("billingZip"),
-
-              //   company: watch("billingCompany"),
-              //   address1: watch("billingAddress1"),
-              //   address2: watch("billingAddress2"),
-              //   phone: watch("billingPhone"),
-              // }}
               />
             </div>
 
@@ -1737,7 +1728,6 @@ const CheckoutForm = () => {
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
             />
-
           )}
         </div>
       </form>

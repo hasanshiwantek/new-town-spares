@@ -20,31 +20,31 @@ const CheckoutForm = () => {
   const params = useParams();
   const orderId = params.orderId;
   const router = useRouter();
-  const customerOrderDetail = useAppSelector((state: RootState) => state?.customerMessage?.orderDetail);
-  const orderCustomer = customerOrderDetail?.customer ? customerOrderDetail : null;
+  const customerOrderDetail = useAppSelector(
+    (state: RootState) => state?.customerMessage?.orderDetail,
+  );
+  const orderCustomer = customerOrderDetail?.customer
+    ? customerOrderDetail
+    : null;
   const cart: any = customerOrderDetail?.products
     ? customerOrderDetail.products.map((product: any) => ({
       ...product,
       quantity: product.quantity || 1,
     }))
     : [];
-  // ADD COUPON STATE FROM REDUX
-  const { appliedCoupon, discountAmount } = useAppSelector(
-    (state: RootState) => state.coupon
-  );
 
+  // ADD COUPON STATE FROM REDUX
   const [promoCode, setPromoCode] = useState("");
 
   // Memoized calculations
   const subtotal = useMemo(() => {
     return cart.reduce(
       (acc: any, item: any) => acc + Number(item.price) * (item.quantity || 1),
-      0
+      0,
     );
   }, [cart]);
 
   const shipping = useMemo(() => {
-
     // ✅ Cart page se localStorage mein saved cost
     if (typeof window !== "undefined") {
       const savedCost = customerOrderDetail?.shippingCost;
@@ -52,18 +52,25 @@ const CheckoutForm = () => {
     }
 
     if (cart.length === 0) return 0;
-    return cart.reduce((sum: any, item: any) => sum + Number(item.fixedShippingCost || 0), 0);
+    return cart.reduce(
+      (sum: any, item: any) => sum + Number(item.fixedShippingCost || 0),
+      0,
+    );
   }, [cart]);
 
   const tax = 0;
 
   // Total before discount
-  const totalBeforeDiscount = useMemo(() => subtotal + shipping + tax, [subtotal, shipping]);
+  const totalBeforeDiscount = useMemo(
+    () => subtotal + shipping + tax,
+    [subtotal, shipping],
+  );
 
   // Final total after discount
-  const finalTotal = useMemo(() =>
-    Math.max(totalBeforeDiscount - discountAmount, 0),
-    [totalBeforeDiscount, discountAmount]
+  const finalTotal = useMemo(
+    () =>
+      Math.max(totalBeforeDiscount - Number(orderCustomer?.discountAmount), 0),
+    [totalBeforeDiscount, orderCustomer?.discountAmount],
   );
 
   // ADD COUPON HANDLERS
@@ -75,7 +82,7 @@ const CheckoutForm = () => {
 
     try {
       await dispatch(
-        applyCoupon({ couponCode: promoCode, total: totalBeforeDiscount })
+        applyCoupon({ couponCode: promoCode, total: totalBeforeDiscount }),
       ).unwrap();
       toast.success("Promo code applied successfully!");
       setPromoCode("");
@@ -108,7 +115,7 @@ const CheckoutForm = () => {
           <div className="lg:col-span-2 mt-[18px] roboto-font" >
             <div className="mt-[1px]">
               <h2 className="text-4xl font-normal text-[#545454] mb-8">
-                Thank You {orderCustomer?.customer?.firstName} {orderCustomer?.customer?.lastName}!
+                Thank You {orderCustomer?.billingAddress?.name}!{" "}
               </h2>
 
               <h6 className="text-lg font-medium mb-6 text-[#545454]">

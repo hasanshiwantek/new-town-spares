@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
-import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { logout } from "@/redux/slices/authSlice";
@@ -40,7 +39,7 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
   const isLoggedIn = Boolean(auth?.isAuthenticated);
   const handleSignOut = () => {
     dispatch(logout());
-    window.location.reload()
+    window.location.href = "/auth/login";
   };
   useEffect(() => {
     if (auth?.isAuthenticated) {

@@ -54,6 +54,12 @@ export default function AdvancedSearchForm({ initialKeyword = "", onSearch, cate
         window.location.reload()
         onSearch?.(searchFilters);
     };
+    const handleReset = () => {
+        if (!keyword) return;
+        localStorage.removeItem("advancedSearchFilters");
+        router.push(`/advanced-search`);
+        window.location.reload()
+    };
 
     useEffect(() => {
         const stored = localStorage.getItem("advancedSearchFilters");
@@ -191,12 +197,18 @@ export default function AdvancedSearchForm({ initialKeyword = "", onSearch, cate
             </div>
 
             {/* Search Button */}
-            <div className="mt-6">
+            <div className="mt-6 flex gap-4 justify-center md:justify-start">
                 <button
                     onClick={handleSearch}
                     className="btn-primary h-[32px] !p-3 !rounded-sm w-[40%] md:w-[30%] max-w-[9rem]"
                 >
                     Search
+                </button>
+                <button
+                    onClick={handleReset}
+                    className="btn-primary h-[36px] !p-3 !rounded-none w-[40%] md:w-[30%] max-w-[9rem]"
+                >
+                    Reset
                 </button>
             </div>
         </div>

@@ -103,7 +103,7 @@ export default function ProductPage({
                             <ProductTabs
                                 tabs={[
                                     { label: "PRODUCTS", count: productCount },
-                                    { label: "NEWS & INFORMATION", count: 0 },
+                                    // { label: "NEWS & INFORMATION", count: 0 },
                                     { label: searchForm ? "HIDE SEARCH FORM" : "SHOW SEARCH FORM", isDivided: true },
                                 ]}
                                 activeTab={currentTab}
@@ -140,13 +140,13 @@ export default function ProductPage({
                                 <ProductsClientWrapper />
                             </div>
                         </div>
-                        {products?.length === 0 && (
+                        {/* {products?.length === 0 && (
                             <NoResults
                                 searchTerm={query || ""}
                                 suggestedTerm=""
                                 onRefineSearch={() => setCurrentTab(2)}
                             />
-                        )}
+                        )} */}
                     </article>
                 </div>
             </main>
