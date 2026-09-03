@@ -51,7 +51,7 @@ const FooterBottom = () => {
     } else {
       dispatch(logout());
       toast.success("Logged out successfully!");
-      router.replace("/auth/login");
+      window.location.href = "/auth/login";
     }
   };
 
@@ -68,10 +68,10 @@ const FooterBottom = () => {
     loadCategories();
   }, []); // ✅ run once on mount
   useEffect(() => {
-  if (auth?.user?.email) {
-    setEmail(auth.user.email);
-  }
-}, [auth?.user]);
+    if (auth?.user?.email) {
+      setEmail(auth.user.email);
+    }
+  }, [auth?.user]);
   useEffect(() => {
     const user = localStorage.getItem("persist:auth");
     const parsedAuth = user ? JSON.parse(user) : null;

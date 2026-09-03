@@ -14,18 +14,12 @@ interface ProductTabsProps {
   onTabChange?: (index: number) => void;
 }
 
-export default function ProductTabs({ tabs, activeTab: controlledActive, onTabChange }: ProductTabsProps) {
+const poppinsFont = "Poppins, sans-serif";
+export default function ProductTabs({ tabs = [], activeTab: controlledActive, onTabChange }: ProductTabsProps) {
   const [internalActive, setInternalActive] = useState(0);
   const activeIndex = controlledActive ?? internalActive;
 
-  const defaultTabs: Tab[] = [
-    { label: "PRODUCTS", count: 10000 },
-    { label: "NEWS & INFORMATION", count: 0 },
-    { label: "SHOW SEARCH FORM", isDivided: true },
-  ];
-
-  const items = tabs || defaultTabs;
- const poppinsFont = "Poppins, sans-serif";
+  const items = tabs
   const handleClick = (index: number) => {
     if (onTabChange) {
       onTabChange(index);
@@ -35,19 +29,18 @@ export default function ProductTabs({ tabs, activeTab: controlledActive, onTabCh
   };
 
   return (
-    <div className="flex items-center w-full gap-1 sm:gap-3.5  border-gray-200 pb-2 mt-2 text-[13px] !font-normal" style={{fontFamily:poppinsFont}}>
-      {items.map((tab, index) => (
+    <div className="flex items-center w-full gap-1 sm:gap-3.5  border-gray-200 pb-2 mt-2 text-[13px] !font-normal" style={{ fontFamily: poppinsFont }}>
+      {items?.map((tab, index) => (
         <div key={index} className="flex items-center  sm:gap-3.5">
           {tab.isDivided && (
             <div className="hidden md:flexn w-px h-7 bg-gray-400" />
           )}
           <button
             onClick={() => handleClick(index)}
-            className={`uppercase tracking-wide transition-colors ${
-              activeIndex === index
-                ? "text-[#333333] border-b-1 border-[#333] "
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`uppercase tracking-wide transition-colors ${activeIndex === index
+              ? "text-[#333333] border-b-1 border-[#333] "
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
             {tab.label}
             {tab.count !== undefined && ` (${tab.count})`}

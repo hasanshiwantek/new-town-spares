@@ -1,8 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import ProductPrice from "../productprice/ProductPrice";
 
 interface OrderSummaryProps {
@@ -34,19 +32,11 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
     onApplyCoupon,
     onRemoveCoupon,
 }) => {
-    const pathname = usePathname();
-    const [discountOpen, setDiscountOpen] = useState(false);
-    const cartItemCount = cart.reduce(
+    const cartItemCount = cart?.reduce(
         (sum, item: any) => sum + (item?.quantity ?? 1),
         0
     );
 
-
-    // useEffect(() => {
-    //     if (appliedCoupon && discountAmount > 0) {
-    //         setDiscountOpen(true);
-    //     }
-    // }, [appliedCoupon, discountAmount])
 
     return (
         <div className="bg-white border-[1px] border-[#8b8b8b] rounded-sm shadow-sm py-6 h-fit sticky top-9">
@@ -117,25 +107,9 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
                         {/* Discounts header with arrow */}
                         <div
                             className="flex text-[13px] justify-between items-center text-gray-700 cursor-pointer select-none"
-                            onClick={() => setDiscountOpen((prev) => !prev)}
                         >
                             <span className="flex items-center gap-1 font-medium">
                                 Discounts
-                                {/* Arrow */}
-                                <svg
-                                    className={`w-4 h-4 transition-transform ${discountOpen ? "rotate-180" : "rotate-0"
-                                        }`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
                             </span>
 
                             {/* Discount value */}
@@ -148,22 +122,15 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
                         </div>
 
                         {/* Expanded details */}
-                        {discountOpen && (
-                            <div className="flex justify-between text-gray-600 text-[13px] mt-1">
-                                <span>
-                                    <ProductPrice
-                                        price={Number(appliedCoupon?.discountAmount)}
-                                        inline={true}
-                                    />off the order total ({appliedCoupon.couponCode.toUpperCase()})
-                                </span>
-                                <span className="font-medium">
-                                    -<ProductPrice
-                                        price={Number(discountAmount)}
-                                        inline={true}
-                                    />
-                                </span>
-                            </div>
-                        )}
+                        <div className="flex justify-between text-gray-600 text-[13px] mt-1">
+                            <span>
+                                <ProductPrice
+                                    price={Number(discountAmount)}
+                                    inline={true}
+                                /> off the
+                                order total ({appliedCoupon?.toUpperCase()})
+                            </span>
+                        </div>
                     </div>
                 )}
 

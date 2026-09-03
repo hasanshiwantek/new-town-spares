@@ -178,7 +178,7 @@ const Navbar: React.FC = () => {
     } else {
       dispatch(logout());
       toast.success("Logged out successfully!");
-      router.replace("/auth/login");
+      window.location.href = "/auth/login";
     }
   };
   function removeLocalShipping() {
@@ -186,20 +186,20 @@ const Navbar: React.FC = () => {
     localStorage.removeItem("shippingData");
   }
 
-const confirmDelete = (item: any) => {
-  setUpdatingQty(item.cartItemId);
+  const confirmDelete = (item: any) => {
+    setUpdatingQty(item.cartItemId);
 
-  dispatch(deleteCart({ id: item.cartItemId }))
-    .unwrap()
-    .then(() => {
-      dispatch(fetchCartList());
-      removeLocalShipping();
-      setUpdatingQty(null);
-    })
-    .catch(() => {
-      setUpdatingQty(null);
-    });
-};
+    dispatch(deleteCart({ id: item.cartItemId }))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
+        setUpdatingQty(null);
+      })
+      .catch(() => {
+        setUpdatingQty(null);
+      });
+  };
   useEffect(() => {
     if (!auth?.isAuthenticated || !isAccountOpen) return;
 
