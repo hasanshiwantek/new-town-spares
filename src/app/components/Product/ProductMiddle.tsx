@@ -8,14 +8,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AddReviewModal from "../modal/AddReviewModal";
 import ProductPrice from "../productprice/ProductPrice";
+import { fetchProductReviews } from "@/redux/slices/storeFrontSlice";
+import { log } from "console";
 
-const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
+const ProductMiddle = ({ product }: any) => {
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const cart = useAppSelector((state: RootState) => state.carts.items);
-  const { reviews, reviewsLoading, reviewsError, stats } = useAppSelector(
-    (state) => state.home,
-  );
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const originalPrice = Number(product?.price) || 0;
   const currentPrice = Number(product?.retailPrice) || 0;
@@ -41,8 +38,12 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
   useEffect(() => {
     dispatch(fetchReviews());
     dispatch(fetchStats());
-  }, [dispatch]);
+  }, []);
+  useEffect(() => {
+    if (!product?.id) return;
 
+    dispatch(fetchProductReviews(product.id));
+  }, [product?.id, dispatch]);
   return (
     <section className=" product-middle  flex flex-col h-full w-full [grid-area:info]">
       <div>
@@ -367,11 +368,11 @@ const ProductMiddle = ({ product, quantity, increment, decrement }: any) => {
           product={
             product
               ? {
-                  name: product.name ?? "",
-                  image: product?.image?.[0]?.path,
-                  sku: product?.sku ?? "",
-                  id: product.id,
-                }
+                name: product.name ?? "",
+                image: product?.image?.[0]?.path,
+                sku: product?.sku ?? "",
+                id: product.id,
+              }
               : undefined
           }
         />

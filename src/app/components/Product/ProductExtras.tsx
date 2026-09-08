@@ -1,6 +1,7 @@
 "use client"; // ⚠️ Must be a Client Component
 
 import dynamic from "next/dynamic";
+// import { ProductReviews } from "./ProductReviews";
 
 const ProductFAQs = dynamic(
   () => import("@/app/components/Product/ProductFAQs"),
@@ -9,6 +10,10 @@ const ProductFAQs = dynamic(
 
 const ProductReview = dynamic(
   () => import("@/app/components/Product/ProductReview"),
+  { ssr: false, loading: () => <p>Loading Reviews...</p> }
+);
+const ProductReviews = dynamic(
+  () => import("@/app/components/Product/ProductReviews"),
   { ssr: false, loading: () => <p>Loading Reviews...</p> }
 );
 
@@ -26,6 +31,7 @@ export default function ProductExtras({ products }: Props) {
     <>
       {/* <ProductFAQs />
       <ProductReview /> */}
+      <ProductReviews />
       <RelatedProduct products={products} />
     </>
   );

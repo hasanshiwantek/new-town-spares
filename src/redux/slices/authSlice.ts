@@ -103,6 +103,20 @@ export const updatePassword = createAsyncThunk(
     }
   }
 );
+export const checkAuthToken = createAsyncThunk(
+  "auth/checkToken",
+  async (_, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post(`web/customer/check-token`);
+      return res.data;
+    } catch (err: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to check token",
+      );
+    }
+  },
+);
 
 // Slice
 const authSlice = createSlice({

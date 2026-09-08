@@ -91,16 +91,32 @@ export const getWebPageById = createAsyncThunk(
     }
   }
 );
+export const fetchProductReviews = createAsyncThunk(
+  "reviews/fetchProductReviews",
+  async (productId: number | string, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post(
+        `web/reviews/web-reviews?productId=${productId}`
+      );
 
+      return res.data;
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to fetch reviews"
+      );
+    }
+  }
+);
 // 2. Initial State
 const initialState = {
   blogs: [],
   singleBlog: [],
   webPages: [],
-    websiteSeo: null,
+  websiteSeo: null,
   singleWebPage: [],
   loading: false,
   error: null as string | null,
+  reviews: [] as any[],
 };
 
 // 3. Slice
@@ -151,7 +167,7 @@ const storeFrontSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-        // get Website Seo 
+      // get Website Seo 
       // 
       .addCase(getWebsiteSeo.pending, (state, action) => {
         state.loading = true;
@@ -183,6 +199,19 @@ const storeFrontSlice = createSlice({
       })
 
 
+      // fetchProductReviews
+      .addCase(fetchProductReviews.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProductReviews.fulfilled, (state, action) => {
+        state.loading = false;
+        state.reviews = action.payload?.data ?? [];
+      })
+      .addCase(fetchProductReviews.rejected, (state, action) => {
+        state.loading = false;
+        state.error = (action.payload as string) || "Failed to fetch reviews";
+      });
   },
 });
 
