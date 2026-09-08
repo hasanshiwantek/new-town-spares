@@ -7,7 +7,7 @@ import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getWebPages, visitorSession } from "@/redux/slices/storeFrontSlice";
 import { getBrands } from "@/redux/slices/homeSlice";
-import { customerProfile, logout } from "@/redux/slices/authSlice";
+import { checkAuthToken, customerProfile, logout } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { toast } from "react-toastify";
 import { RootState } from "@/redux/store";
@@ -76,6 +76,15 @@ const FooterBottom = () => {
     const user = localStorage.getItem("persist:auth");
     const parsedAuth = user ? JSON.parse(user) : null;
     const t = parsedAuth?.token ? JSON.parse(parsedAuth.token) : null;
+    if (t) {
+      dispatch(checkAuthToken()).unwrap().then((res) => {
+      }).catch((err) => {
+        if (err) {
+          dispatch(logout());
+          window.location.href = "/auth/login";
+        }
+      });
+    }
     setToken(t);
   }, []);
   useEffect(() => {
