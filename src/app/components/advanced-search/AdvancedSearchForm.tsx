@@ -57,7 +57,6 @@ export default function AdvancedSearchForm({ initialKeyword = "", onSearch, cate
     const handleReset = () => {
         if (!keyword) return;
         localStorage.removeItem("advancedSearchFilters");
-        router.push(`/advanced-search`);
         window.location.reload()
     };
 

@@ -386,7 +386,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               ? "Choose where to ship each item"
               : "Shipping Address"}
           </h3>
-          {cart?.reduce((sum, item) => sum + (item.quantity || 1), 0) > 1 && (
+          {/* temperary comment */}
+          {/* {cart?.reduce((sum, item) => sum + (item.quantity || 1), 0) > 1 && (
             <button
               type="button"
               onClick={() => {
@@ -407,7 +408,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                 ? "Ship to a single address"
                 : "Ship to multiple addresses"}
             </button>
-          )}
+          )} */}
         </div>
         {!isMultiAddress &&
           auth?.isAuthenticated &&
