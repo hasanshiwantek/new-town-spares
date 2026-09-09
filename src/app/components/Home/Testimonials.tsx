@@ -232,8 +232,6 @@ const Testimonials = () => {
           ) : (
             <Carousel
               value={reviews}
-              page={pageIndex}
-              onPageChange={(e) => setPageIndex(e.page)}
               numVisible={visibleItems}
               numScroll={1}
               responsiveOptions={responsiveOptions.map((r) => ({
