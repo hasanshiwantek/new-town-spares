@@ -95,9 +95,9 @@ export default function ProductPage({
                             </h2>
                         </div>
                         <div>
-                            <h1 className="text-[28px] text-[#545454]">
+                            {productCount ? <h1 className="text-[28px] text-[#545454]">
                                 {productCount || 0} results for {query}
-                            </h1>
+                            </h1> : <></>}
                         </div>
                         <div>
                             <ProductTabs
