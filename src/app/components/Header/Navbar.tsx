@@ -60,6 +60,7 @@ const Navbar: React.FC = () => {
   const [updatingQty, setUpdatingQty] = useState<string | null>(null);
   const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
     useAddProductBySku();
+    const [validationMessage, setValidationMessage] = useState("");
   const handleChange = (id: string, value: string) => {
     if (value === "" || /^\d*$/.test(value)) {
       setQuantities((prev) => ({
@@ -69,10 +70,14 @@ const Navbar: React.FC = () => {
     }
   };
   const handleSkuCart = async () => {
-    if (skuInput == "" || qty < 1) {
+    if (skuInput == "" || Number(qty) < 1) {
+       setValidationMessage(
+      "Please complete the SKU and quantity fields"
+    );
       return;
     }
-    const result = await dispatch(addBySku({ sku: skuInput, quantity: qty }));
+      setValidationMessage("");
+    const result = await dispatch(addBySku({ sku: skuInput, quantity: Number(qty) }));
     if (addBySku.fulfilled.match(result)) {
       toast.success(result.payload.message);
       setSkuInput("");
@@ -299,11 +304,14 @@ const Navbar: React.FC = () => {
               <GlobalSearchBar />
             </div>
 
-            <div className="flex items-center justify-end xl:max-w-[300px]">
+          <div className="relative flex items-center justify-end xl:max-w-[300px]">
               <input
                 type="text"
                 value={skuInput}
-                onChange={(e) => setSkuInput(e.target.value)}
+                 onChange={(e) => {
+    setSkuInput(e.target.value);
+    setValidationMessage("");
+  }}
                 placeholder="Add SKU to Cart"
                 className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
               />
@@ -311,13 +319,12 @@ const Navbar: React.FC = () => {
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
                 <input
                   type="number"
-                  min={1}
                   value={qty}
-                  onChange={(e) =>
-                    setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
-                  }
-                  className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
-                  style={{ appearance: "textfield" }}
+                 onChange={(e) => {
+      setQty(e.target.value);
+      setValidationMessage("");
+    }}
+                  className="w-full h-full text-center !text-[14px] bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 
@@ -329,6 +336,11 @@ const Navbar: React.FC = () => {
               >
                 {loading ? "loading" : "Add to Cart"}
               </button>
+              {validationMessage && (
+  <div className="absolute left-0 top-full mt-1 z-50 w-[360px]  h-14 rounded-none bg-[#2f2f2f] px-3 py-4 text-white text-[14px] leading-tight">
+    {validationMessage}
+  </div>
+)}
             </div>
           </div>
 
@@ -362,7 +374,7 @@ const Navbar: React.FC = () => {
             </div> */}
 
             {/* Account */}
-            <div className="relative" ref={accountRef}>
+            <div className="relative " ref={accountRef}>
               <div
                 onClick={() =>
                   auth?.isAuthenticated
@@ -374,32 +386,15 @@ const Navbar: React.FC = () => {
                 <div className="w-7 h-7 flex items-center justify-center">
                   <FaUser className="text-black hover:text-[#FF482E] w-full h-full" />
                 </div>
-
-                <div className="hidden min-[1500px]:flex items-center gap-1">
-                  <span className="text-black text-xl">Account</span>
-                  <svg
-                    className={`w-5 h-5 text-black transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
-                      }`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </div>
               </div>
 
               {auth?.isAuthenticated && (
                 <div
-                  className={`absolute right-0 mt-5 w-max bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${isAccountOpen
-                    ? "opacity-100 visible"
-                    : "opacity-0 invisible"
-                    }`}
+                  className={`absolute right-0 mt-5 w-max bg-white shadow-lg rounded-md border z-50 transition-all duration-200 ${
+                    isAccountOpen
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible"
+                  }`}
                 >
                   <ul className="flex flex-col gap-3 px-6 py-4 text-[14px] text-gray-700 font-normal *:underline *:decoration-current *:hover:text-[#FF482E] cursor-pointer">
                     <li>
@@ -561,7 +556,6 @@ const Navbar: React.FC = () => {
                             <div className="flex justify-between border-t border-gray-200 pt-3">
                               <span>Subtotal:</span>
                               <span>
-
                                 <ProductPrice
                                   price={subtotal}
                                   // price={originalPrice}

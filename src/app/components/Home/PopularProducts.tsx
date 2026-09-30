@@ -176,7 +176,7 @@ const PopularProducts = () => {
                     <button
                       onClick={() => {
                         dispatch(addToCart(product));
-                        toast.success(`${product.name} added to cart!`);
+                        
                       }}
                       className="btn-primary xl:!text-2xl 2xl:!text-[22px] 2xl:!font-medium 
                                  w-full sm:w-[48%] md:w-[45%] lg:w-[50%] xl:w-[45%]
