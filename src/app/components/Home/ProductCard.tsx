@@ -186,7 +186,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
-              {/* Add to Cart Button */}
+              {/*  Button */}
               {/* <button
                 onClick={handleAddToCart}
                 className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
@@ -223,7 +223,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     )
                       .unwrap()
                       .then(() => {
-                        toast.success(`${product.name} added to cart!`);
+                     
                         dispatch(fetchCartList());
                         // router.push("/cart");
                       });
