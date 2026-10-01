@@ -121,10 +121,10 @@ const confirmDelete = (item: any) => {
     0,
   );
   const handleSkuCart = async () => {
-    if (skuInput == "" || qty < 1) {
+    if (skuInput == "" || Number(qty) < 1) {
       return;
     }
-    const result = await dispatch(addBySku({ sku: skuInput, quantity: qty }));
+    const result = await dispatch(addBySku({ sku: skuInput, quantity: Number(qty) }));
     if (addBySku.fulfilled.match(result)) {
       toast.success(result.payload.message);
       setSkuInput("");
