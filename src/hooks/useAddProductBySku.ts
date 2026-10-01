@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 export function useAddProductBySku() {
   const dispatch = useAppDispatch();
   const [skuInput, setSkuInput] = useState("");
-  const [qty, setQty] = useState(1);
+const [qty, setQty] = useState<number | string>("");
   const [adding, setAdding] = useState(false);
 
   const handleAddBySku = async () => {

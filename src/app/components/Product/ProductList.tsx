@@ -13,6 +13,7 @@ import SortDropdown from "./SortDropdown";
 import { useMemo } from "react";
 import { decode } from "html-entities";
 import SortingBar from "./SortingBar";
+import RecentViewedProduct from "../myaccount/RecentViewedPoduct";
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
@@ -338,8 +339,13 @@ w-full
             }}
           />
         )}
-        <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto"></div>
-      </div>
+         </div>
+        {/* <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto"></div> */}
+        <div className=" mb-5 text-[22px]! font-medium">
+          <h2>Recently Viewed</h2>
+        </div>
+        <RecentViewedProduct />
+     
     </section>
   );
 }
