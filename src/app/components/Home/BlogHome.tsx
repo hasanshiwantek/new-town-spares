@@ -45,9 +45,9 @@ const BlogHome = () => {
           ? Array.from({ length: 4 }).map((_, idx) => (
               <div
                 key={idx}
-                className="bg-white overflow-hidden border border-gray-200 animate-pulse"
+                className="bg-white h-[250px] overflow-hidden border border-gray-200 animate-pulse"
               >
-                <div className="h-[195px] bg-gray-200" />
+                <div className=" bg-gray-200" />
                 <div className="p-4.5 space-y-3">
                   <div className="h-3 bg-gray-200 w-24" />
                   <div className="h-5 bg-gray-200 w-4/5" />
@@ -76,7 +76,7 @@ const desc = stripHtml(rawDesc).slice(0, 140);
                   className="bg-white transition duration-300 overflow-hidden shadow-[0_0_1px_0_rgba(51,51,51,0.5)] block"
                 >
                   {/* Image */}
-                  <div className="relative h-[167px] w-full overflow-hidden group bg-[#f5f5f5]">
+                  <div className="relative h-[200px]! w-full overflow-hidden group bg-[#f5f5f5]">
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
