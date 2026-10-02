@@ -13,6 +13,7 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
+import { CONTACT_INFO } from "@/const/contact";
 
 interface Category {
   id: number;
@@ -276,7 +277,9 @@ const LinkHeader = () => {
           <div className="flex items-center gap-2">
             <TfiHeadphoneAlt className=" w-8 h-8" />
             <span className="text-sm sm:text-base md:text-lg lg:text-xl">
-              (209) 651-6864
+              <a href={CONTACT_INFO.phone.href}>
+    {CONTACT_INFO.phone.display}
+  </a>
             </span>
           </div>
         </div>

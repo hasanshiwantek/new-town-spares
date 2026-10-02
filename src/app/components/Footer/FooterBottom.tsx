@@ -15,6 +15,7 @@ import {
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { toast } from "react-toastify";
 import { RootState } from "@/redux/store";
+import { CONTACT_INFO } from "@/const/contact";
 interface Category {
   id: number;
   name: string;
@@ -208,7 +209,13 @@ const FooterBottom = () => {
                 <div className="h-12" />
 
                 <p>orders@newtownspares.com</p>
-                <p className="mt-4">Call us : (209) 651-6864</p>
+                <p className="mt-4">
+                  {" "}
+                  Call us:{" "}
+                  <a href={CONTACT_INFO.phone.href}>
+                    {CONTACT_INFO.phone.display}
+                  </a>
+                </p>
               </address>
 
               {/* PAGES */}
@@ -271,7 +278,6 @@ const FooterBottom = () => {
                 </ul>
               </nav>
 
-              {/* ACCOUNT */}
               <nav>
                 <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
                   Account

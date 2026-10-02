@@ -49,7 +49,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const minQty = product.minPurchaseQuantity || 1;
   const maxQty = product.maxPurchaseQuantity;
-  const purchasabilityStatus = product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const purchasabilityStatus =
+    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
 
   const [quantity, setQuantity] = useState<number>(minQty);
 
@@ -75,11 +76,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-
     const val = parseInt(e.target.value, 10);
 
     setQuantity(val);
-
   };
 
   const handleQuantityBlur = () => {
@@ -87,7 +86,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setQuantity(1);
     }
   };
-
 
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
@@ -127,7 +125,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {product?.msrp && Number(product.msrp) > 0 ? (
                 <>
                   <span className="text-[#333333] text-[14px] leading-[21px]">
-                    Price: {" "}
+                    Price:{" "}
                     <span>
                       <ProductPrice
                         price={product.msrp}
@@ -182,7 +180,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 value={quantity}
                 onChange={handleQuantityChange}
                 onBlur={handleQuantityBlur}
-
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
@@ -223,13 +220,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     )
                       .unwrap()
                       .then(() => {
-                     
                         dispatch(fetchCartList());
-                        // router.push("/cart");
+                        router.push("/cart");
                       });
                   }
                 }}
-                disabled={!purchasabilityStatus || cartLoad}
+                disabled={!purchasabilityStatus}
                 className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
               >
                 {"ADD TO CART"}
