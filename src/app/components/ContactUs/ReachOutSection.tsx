@@ -3,6 +3,7 @@
 import React from "react";
 import { Phone, Mail, MapPin } from "lucide-react";
 import Link from "next/link";
+import { CONTACT_INFO } from "@/const/contact";
 
 export default function ReachOutSection() {
   return (
@@ -41,12 +42,12 @@ export default function ReachOutSection() {
               </div>
               <div>
                 <p className="h6-medium !text-[#AEAEAE] mb-1">Call us:</p>
-                <Link
-                  href="tel:+12096516864"
+                <a
+                  href={CONTACT_INFO.phone.href}
                   className="h4-medium !text-[#2A2A2A] hover:text-[#F15939] transition-colors"
                 >
-                  (209) 651-6864
-                </Link>
+                  {CONTACT_INFO.phone.display}
+                </a>
               </div>
             </div>
 

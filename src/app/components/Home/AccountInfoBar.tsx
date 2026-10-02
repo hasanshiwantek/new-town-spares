@@ -3,7 +3,7 @@ import React from "react";
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import Link from "next/link";
-
+import { CONTACT_INFO } from "@/const/contact";
 const AccountInfoBar = () => {
   const auth = useAppSelector((state: RootState) => state?.auth);
   const isLoggedIn = Boolean(auth?.isAuthenticated);
@@ -56,7 +56,8 @@ const AccountInfoBar = () => {
         <div>
           <p className={labelClass}>Need help?</p>
           <Link href="tel:2096516864" className={linkClass}>
-            Call us: (209) 651-6864
+            Call us:{" "}
+            <a href={CONTACT_INFO.phone.href}>{CONTACT_INFO.phone.display}</a>
           </Link>
         </div>
       </div>

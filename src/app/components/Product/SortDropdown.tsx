@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 
 const sortOptions = [
   { value: "", label: "Sort By" },
-  { value: "bestSelling", label: "Best Selling" },
-  { value: "nameAsc", label: "A to Z" },
-  { value: "nameDesc", label: "Z to A" },
-  { value: "featured", label: "Featured Items" },
-  { value: "newest", label: "Newest Items" },
-  { value: "priceLowToHigh", label: "Price: Ascending" },
-  { value: "priceHighToLow", label: "Price: Descending" },
+  { value: "best selling", label: "Best Selling" },
+  { value: "a to z", label: "A to Z" },
+  { value: "z to a", label: "Z to A" },
+  { value: "featured item", label: "Featured Items" },
+  { value: "newest items", label: "Newest Items" },
+  { value: "price ascending", label: "Price: Ascending" },
+  { value: "price descending", label: "Price: Descending" },
 ];
 
 export default function SortDropdown({ filters, setFilters }: any) {

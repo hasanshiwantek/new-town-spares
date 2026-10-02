@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import { toast } from "react-toastify";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+
 import {
   addBySku,
   deleteCart,
@@ -41,6 +42,7 @@ export default function ProductListCartSidebar() {
       }));
     }
   };
+  
 const confirmDelete = (item: any) => {
   setUpdatingQty(item.cartItemId);
 
