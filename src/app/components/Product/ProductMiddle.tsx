@@ -10,7 +10,7 @@ import AddReviewModal from "../modal/AddReviewModal";
 import ProductPrice from "../productprice/ProductPrice";
 import { fetchProductReviews } from "@/redux/slices/storeFrontSlice";
 import { log } from "console";
-
+import { CONTACT_INFO } from "@/const/contact";
 const ProductMiddle = ({ product }: any) => {
   const dispatch = useAppDispatch();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -253,7 +253,7 @@ const ProductMiddle = ({ product }: any) => {
               <span className="leading-none">Customer Help</span>
             </span>
             <span className="text-[14px] font-normal leading-[21px] text-[#808080] ml-[24px]">
-              (209) 651-6864
+              <a href={CONTACT_INFO.phone.href}>{CONTACT_INFO.phone.display}</a>
             </span>
           </div>
           {/* Secure Payment */}
@@ -368,11 +368,11 @@ const ProductMiddle = ({ product }: any) => {
           product={
             product
               ? {
-                name: product.name ?? "",
-                image: product?.image?.[0]?.path,
-                sku: product?.sku ?? "",
-                id: product.id,
-              }
+                  name: product.name ?? "",
+                  image: product?.image?.[0]?.path,
+                  sku: product?.sku ?? "",
+                  id: product.id,
+                }
               : undefined
           }
         />
