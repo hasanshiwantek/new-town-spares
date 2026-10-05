@@ -170,7 +170,7 @@ const saveCartToCheckoutStorage = (items: CartItem[]) => {
     const savedData = getFromStorage(CHECKOUT_STORAGE_KEY);
     if (!savedData) return;
 
-    const checkoutData = savedData
+    const checkoutData = savedData;
     checkoutData._cartItems = items.map((item) => ({
       id: item.id,
       productId: item.productId,
@@ -181,7 +181,7 @@ const saveCartToCheckoutStorage = (items: CartItem[]) => {
       // Add any other fields you need
     }));
 
-   setInStorage(CHECKOUT_STORAGE_KEY, checkoutData);
+    setInStorage(CHECKOUT_STORAGE_KEY, checkoutData);
   } catch (e) {}
 };
 
