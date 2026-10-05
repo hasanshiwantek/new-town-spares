@@ -468,12 +468,45 @@ const BillingStep: React.FC<BillingStepProps> = ({
               >
                 State/Province
               </label>
-              <Input
-                id="billingState"
-                type="text"
-                className="w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
-                {...register("billingState")}
-              />
+              {stateList.length > 0 ? (
+                <Controller
+                  name="billingState"
+                  control={control}
+                  rules={{ required: "State/Province is required" }}
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setValue("billingCity", "");
+                        setValue("billingZip", "");
+                      }}
+                      value={field.value}
+                    >
+                      <SelectTrigger
+                        className={`w-full !max-w-full h-[40px] ${
+                          errors.state ? "border-red-500" : ""
+                        }`}
+                      >
+                        <SelectValue placeholder="Select state/province" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stateList.map((state) => (
+                          <SelectItem key={state.code} value={state.code}>
+                            {state.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              ) : (
+                <Input
+                  id="billingState"
+                  type="text"
+                  className="w-full !max-w-full h-[40px]"
+                  {...register("billingState")}
+                />
+              )}
             </div>
 
             <div className="flex flex-col">
