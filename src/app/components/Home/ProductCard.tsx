@@ -90,6 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
       {/* Image */}
+      <Link href={`${product?.productUrl}`}>
       <div className="relative w-full aspect-square">
         <Image
           src={imageSrc}
@@ -98,6 +99,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className="object-contain"
         />
       </div>
+      </Link>
 
       {/* Info Wrapper */}
       <div className="flex flex-col flex-1">
