@@ -11,8 +11,7 @@ export const baseURL =
   process.env.NEXT_PUBLIC_API_URL || "https://backend.sparemicro.com/api/";
 export const siteURL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://new-town-spares.vercel.app";
-export const storeId = "10";
-// export const storeId = process.env.NEXT_PUBLIC_STORE_ID || "4";
+export const storeId = process.env.NEXT_PUBLIC_STORE_ID || "4";
 export const sitekey =
   process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
   "6LdD8CgtAAAAADZaKjM6MRA6nQ6VppSfiu2vspFr";
