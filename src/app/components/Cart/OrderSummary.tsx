@@ -130,8 +130,6 @@ const OrderSummary = () => {
 
   const handleCouponSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("i'm here", totalBeforeDiscount);
-
     if (!couponCode.trim()) {
       toast.error("Please enter a coupon code");
       return;
