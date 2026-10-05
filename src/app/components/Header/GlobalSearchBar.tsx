@@ -1,6 +1,7 @@
 "use client";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { globalSearch } from "@/redux/slices/homeSlice";
+import { setInStorage } from "@/utils/storage";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -29,6 +30,7 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
   // Cache state object for storing search results
   const [searchCache, setSearchCache] = useState<{ [key: string]: any[] }>({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -78,8 +80,6 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
       // Store in cache with lowercase trimmed query as key
       const cacheKey = debouncedQuery.trim().toLowerCase();
       if (cacheKey.length > 1) {
-        console.log("💾 Cache mein store ho raha hai:", cacheKey);
-        console.log("Stored Data:", mapped);
         setSearchCache((prevCache) => ({
           ...prevCache,
           [cacheKey]: mapped,
@@ -94,16 +94,22 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
       setShowDropdown(true);
     }
   }, [searchData, results]);
-  const handleOnChange = (value?: string) => {
-    const trimmed = (value ?? query).trim();
+  const handleOnChange = (value: string) => {
+    // dispatch(setSearchQuery(value));
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (trimmed.length > 1) {
-      debounceRef.current = setTimeout(() => {
-        const cacheKey = trimmed.toLowerCase();
-        dispatch(globalSearch({ query: trimmed }));
-        setShowDropdown(true);
-      }, 500);
+    abortRef.current?.abort();
+
+    const query = value.trim();
+    if (!query) {
+      // dispatch(setShowSearchDropdown(false));
+      return;
     }
+
+    debounceRef.current = setTimeout(() => {
+      abortRef.current = new AbortController();
+      dispatch(globalSearch({ query, signal: abortRef.current.signal }));
+    }, 1000);
   };
 
   const handleSearch = () => {
@@ -147,23 +153,16 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
             type="search"
             placeholder="Search by keyword, brand or SKU"
             value={query}
-            // onChange={(e) => setQuery(e.target.value)}
             onChange={(e) => {
               handleOnChange(e.target.value);
               setQuery(e.target.value);
             }}
-            // onKeyDown={(e) => {
-            //   if (e.key === "Enter") handleSearch();
-            // }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
                 const q = query.trim();
                 if (q) {
-                  localStorage.setItem(
-                    "advancedSearchFilters",
-                    JSON.stringify({ q }),
-                  );
+                  setInStorage("advancedSearchFilters", { q });
                   window.dispatchEvent(new Event("searchFiltersUpdated"));
                   if (pathname === "/advanced-search") {
                     window.location.reload();
@@ -179,28 +178,17 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
             <button
               aria-label="search"
               name="search"
-              // onClick={() => {
-              //   if (query.trim()) {
-              //     dispatch(globalSearch({ query }));
-              //     setShowDropdown(true); // ensure it opens immediately
-              //   }
-              // }}
-              // onClick={handleSearch}
               onClick={(e) => {
                 e.preventDefault();
                 const q = query.trim();
                 if (q) {
-                  localStorage.setItem(
-                    "advancedSearchFilters",
-                    JSON.stringify({ q }),
-                  );
+                  setInStorage("advancedSearchFilters", { q });
                   window.dispatchEvent(new Event("searchFiltersUpdated"));
                   if (pathname === "/advanced-search") {
                     window.location.reload();
                   } else {
                     router.push(`/advanced-search`);
                   }
-                  // router.push(`/advanced-search?q=${q}`);
                 }
               }}
               className="

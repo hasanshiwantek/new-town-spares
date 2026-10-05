@@ -3,7 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import ProductPrice from "../productprice/ProductPrice";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { addToCart } from "@/redux/slices/cartSlice";
 import { toast } from "sonner";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
@@ -104,7 +103,7 @@ export default function ProductGridCard({ product }: { product: Product }) {
 >
   <button
      onClick={() => {
-                          dispatch(addToCart(product));
+                          // dispatch(addToCart(product));
                           toast.success(`${product?.name} added to cart!`);
                         }}
     className="btn-primary xl:!text-2xl 2xl:!text-[22px] 2xl:!font-medium 

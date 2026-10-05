@@ -1,5 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance, { baseURL, storeId } from "@/lib/axiosInstance";
+import {
+  removeFromSessionStorage,
+  removeFromStorage,
+  setInStorage,
+} from "@/utils/storage";
+import { removeManualDiscount } from "./couponSlice";
 
 export interface RegisterPayload {
   firstName: string;
@@ -49,13 +55,12 @@ export const loginUser = createAsyncThunk(
 
       return res.data;
     } catch (err: any) {
-
       console.groupEnd();
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Login failed"
+        err.response?.data?.message || "Login failed",
       );
     }
-  }
+  },
 );
 // customer profile thunk
 export const customerProfile = createAsyncThunk(
@@ -66,10 +71,10 @@ export const customerProfile = createAsyncThunk(
       return res.data;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch profile"
+        err.response?.data?.message || "Failed to fetch profile",
       );
     }
-  }
+  },
 );
 
 // Register thunk
@@ -82,10 +87,10 @@ export const registerUser = createAsyncThunk(
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Registration failed"
+        err.response?.data?.message || "Registration failed",
       );
     }
-  }
+  },
 );
 
 // Update Password thunk
@@ -98,10 +103,10 @@ export const updatePassword = createAsyncThunk(
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Password Updation failed"
+        err.response?.data?.message || "Password Updation failed",
       );
     }
-  }
+  },
 );
 export const checkAuthToken = createAsyncThunk(
   "auth/checkToken",
@@ -117,7 +122,9 @@ export const checkAuthToken = createAsyncThunk(
     }
   },
 );
-
+const clearAuthStorage = () => {
+  removeManualDiscount();
+};
 // Slice
 const authSlice = createSlice({
   name: "auth",
@@ -128,7 +135,7 @@ const authSlice = createSlice({
       state.token = null;
       state.expireAt = null;
       state.isAuthenticated = false;
-      // localStorage.removeItem("token");
+      clearAuthStorage();
     },
   },
   extraReducers: (builder) => {
@@ -149,26 +156,19 @@ const authSlice = createSlice({
 
       // Fulfilled - login
       .addCase(loginUser.fulfilled, (state, action) => {
-        const { user, customer, token, expireAt } = action.payload.data || action.payload;
+        const { user, customer, token, expireAt } =
+          action.payload.data || action.payload;
         state.loginloading = false;
         state.user = user || customer;
         state.token = token;
         state.expireAt = expireAt;
         state.isAuthenticated = true;
-        // state.stores = action.payload.stores.map((store: any) => ({
-        //   storeId: store.id,
-        //   name: store.name,
-        // }));
-
-        // localStorage.setItem("token", action.payload.token);
-        // if (action.payload.stores?.length === 1) {
-        //   localStorage.setItem("storeId", action.payload.stores[0].id.toString());
-        // }
       })
 
       // Fulfilled - register
       .addCase(registerUser.fulfilled, (state, action) => {
-        const { user, customer, token, expireAt } = action.payload.data || action.payload;
+        const { user, customer, token, expireAt } =
+          action.payload.data || action.payload;
         state.registerLoading = false;
         state.user = customer || user;
         state.token = token;
@@ -176,16 +176,15 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
       })
       .addCase(customerProfile.fulfilled, (state, action) => {
-
-        const { user, customer, token, expireAt } = action.payload
+        const { user, customer, token, expireAt } = action.payload;
         state.loginloading = false;
         state.user = user || customer;
         state.token = token;
         state.expireAt = expireAt;
         state.isAuthenticated = true;
-        localStorage.setItem("token", token);
-        localStorage.setItem("tokenExpiry", expireAt);
-        localStorage.setItem("user", JSON.stringify(customer));
+        setInStorage("token", token);
+        setInStorage("tokenExpiry", expireAt);
+        setInStorage("user", customer);
       })
       // Rejected
       .addCase(loginUser.rejected, (state, action) => {

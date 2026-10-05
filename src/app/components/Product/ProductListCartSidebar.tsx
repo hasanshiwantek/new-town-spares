@@ -17,6 +17,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { X } from "lucide-react";
 import ProductPrice from "../productprice/ProductPrice";
+import { removeFromStorage } from "@/utils/storage";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -31,8 +32,8 @@ export default function ProductListCartSidebar() {
   const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
     useAddProductBySku();
   function removeLocalShipping() {
-    localStorage.removeItem("shippingCost");
-    localStorage.removeItem("shippingData");
+    removeFromStorage("shippingCost");
+    removeFromStorage("shippingData");
   }
   const handleChange = (id: string, value: string) => {
     if (value === "" || /^\d*$/.test(value)) {
