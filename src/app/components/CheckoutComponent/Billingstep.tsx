@@ -512,9 +512,15 @@ const BillingStep: React.FC<BillingStepProps> = ({
             <div className="flex flex-col">
               <label
                 htmlFor="billingZip"
-                className="text-[13px] font-medium mb-2 text-[#333333]"
+                className={cn(
+                  "mb-2  flex items-baseline justify-between gap-2 text-base",
+                  errors.billingZip ? "text-red-500" : "text-gray-700",
+                )}
               >
-                Postal Code
+                <span>Postal Code</span>
+                {!hasPostalCode && (
+                  <span className="shrink-0 text-gray-400">(Optional)</span>
+                )}
               </label>
               <Input
                 id="billingZip"
@@ -523,7 +529,13 @@ const BillingStep: React.FC<BillingStepProps> = ({
                   errors.billingZip ? "border-red-500" : ""
                 }`}
                 {...register("billingZip", {
-                  required: "Postal code is required",
+                  validate: (value) => {
+                    if (hasPostalCode && !value?.trim()) {
+                      return "Postal code is required";
+                    }
+
+                    return true;
+                  },
                 })}
               />
               {errors.billingZip && (
