@@ -16,8 +16,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { baseURL, sitekey, storeId } from "@/lib/axiosInstance";
-import { fetchCartList } from "@/redux/slices/cartSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice"; 
 import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
+import { getFromStorage } from "@/utils/storage";
 
 interface SignupFormValues {
   firstName: string;
@@ -109,7 +110,7 @@ const SignupPage = () => {
       const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
         const token = result.payload.token;
-        const sessionId = localStorage.getItem("sessionId");
+        const sessionId = getFromStorage("sessionId");
 
         await fetch(`${baseURL}web/cart/transfer`, {
           method: "POST",

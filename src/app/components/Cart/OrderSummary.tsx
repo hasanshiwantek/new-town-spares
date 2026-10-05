@@ -12,7 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice";
+import {
+  applyCoupon,
+  fetchMyCouponUsage,
+  removeCoupon,
+} from "@/redux/slices/couponSlice";
 import { Country, State } from "country-state-city";
 import {
   checkoutFormSave,
@@ -24,21 +28,23 @@ import {
 import { calculatePackage } from "../CheckoutComponent/Shippingstep";
 import { addShippingCost } from "@/redux/slices/shippingSlice";
 import ProductPrice from "../productprice/ProductPrice";
+import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const {
     appliedCoupon,
     discountAmount,
+    manualDiscount,
     loading: couponLoading,
   } = useAppSelector((state: RootState) => state.coupon);
-  const router = useRouter();
+  const discountTotal = Number(discountAmount) + Number(manualDiscount);
 
   const [showCoupon, setShowCoupon] = useState(false);
   const [showShipping, setShowShipping] = useState(false);
   const [couponCode, setCouponCode] = useState("");
-  const [discountOpen, setDiscountOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingDetectCountry, setLoadingDetectCountry] = useState(false);
   const [fedexShow, setFedexShow] = useState(false);
@@ -86,18 +92,12 @@ const OrderSummary = () => {
     }, 0);
   }, [cart, shippingDetail]);
 
-  const packageInfo = useMemo(() => calculatePackage(cart), [cart]);
-
-  const shippingLabel = `FedEx priority $${shipping.toFixed(2)}`;
-  const totalItems = cart?.reduce(
-    (sum, i) => sum + (i?.quantity || 0),
-    0,
-  );
+  const totalItems = cart?.reduce((sum, i) => sum + (i?.quantity || 0), 0);
   // Total before discount
   const totalBeforeDiscount = subtotal + shipping;
   const shippingCost = Number(shippingDetail?.rate?.total_charge);
   // Final total after discount
-  const finalTotal = Math.max(totalBeforeDiscount - discountAmount, 0);
+  const finalTotal = Math.max(totalBeforeDiscount - discountTotal, 0);
   const { shippingRates, ratesLoader } = useAppSelector(
     (state) => state.shippingZone,
   );
@@ -131,26 +131,31 @@ const OrderSummary = () => {
   const handleCouponSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!couponCode.trim()) {
-      toast.error("Please enter a coupon code");
+      errorMessage("Please enter a coupon code");
       return;
     }
 
     try {
       await dispatch(
-        applyCoupon({ couponCode, total: totalBeforeDiscount }),
+        applyCoupon({
+          couponCode,
+          total: totalBeforeDiscount,
+          productIds: cart.map((item) => item.id),
+        }),
       ).unwrap();
-      toast.success("Coupon applied successfully!");
+      await dispatch(fetchMyCouponUsage());
+      successMessage("Coupon applied successfully!");
       setCouponCode("");
       setShowCoupon(false); // Close coupon form after success
     } catch (err: any) {
-      toast.error(err || "Failed to apply coupon");
+      errorMessage(err || "Failed to apply coupon");
     }
   };
 
   const handleRemoveCoupon = () => {
     dispatch(removeCoupon());
     setCouponCode("");
-    toast.info("Coupon removed");
+    infoMessage("Coupon removed");
   };
 
   const handleProceedToCheckout = useCallback(() => {
@@ -185,7 +190,7 @@ const OrderSummary = () => {
     };
     const getShippingRates = async () => {
       try {
-        await dispatch(fetchShippingRate({})).unwrap();
+        await dispatch(fetchShippingRate()).unwrap();
       } catch (err) {
         detectCountry();
       }
@@ -206,6 +211,7 @@ const OrderSummary = () => {
 
   useEffect(() => {
     dispatch(getCheckoutForm());
+    dispatch(fetchMyCouponUsage());
   }, []);
 
   return (
@@ -223,11 +229,7 @@ const OrderSummary = () => {
             Subtotal:
           </span>
           <span className="text-[14px] text-[#333333]">
-
-            <ProductPrice
-              price={subtotal}
-              inline={true}
-            />
+            <ProductPrice price={subtotal} inline={true} />
           </span>
         </div>
 
@@ -255,10 +257,11 @@ const OrderSummary = () => {
               }
               onClick={() => setShowShipping(!showShipping)}
             >
-              {!showShipping ? <ProductPrice
-                price={shippingCost}
-                inline={true}
-              /> : ""}
+              {!showShipping ? (
+                <ProductPrice price={shippingCost} inline={true} />
+              ) : (
+                ""
+              )}
             </button>
           ) : (
             <button
@@ -293,7 +296,7 @@ const OrderSummary = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {countryList.map((country) => (
-                    <SelectItem key={country.code} value={country.code} >
+                    <SelectItem key={country.code} value={country.code}>
                       {country.name}
                     </SelectItem>
                   ))}
@@ -313,8 +316,8 @@ const OrderSummary = () => {
                 >
                   <SelectTrigger className="w-full  max-w-none outline-none !h-[var(--select-height,32px)]  ">
                     <SelectValue placeholder="State/Province" />
-                  </SelectTrigger >
-                  <SelectContent >
+                  </SelectTrigger>
+                  <SelectContent>
                     {stateList.map((state) => (
                       <SelectItem key={state.code} value={state.code}>
                         {state.name}
@@ -324,7 +327,7 @@ const OrderSummary = () => {
                 </Select>
               ) : (
                 <Input
-                   className="w-full !h-[30px]  max-w-none"
+                  className="w-full !h-[30px]  max-w-none"
                   onChange={(e) =>
                     setShippingData({ ...shippingData, state: e.target.value })
                   }
@@ -362,7 +365,7 @@ const OrderSummary = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full text-white bg-[#fd5430] !h-[42px] font-medium rounded-md px-4 py-[6px] text-xl transition-all my-1 duration-200 cursor-pointer !text-[13px]"
-              // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
               >
                 {loading ? "Loading..." : "Estimate Shipping"}
               </button>
@@ -372,53 +375,53 @@ const OrderSummary = () => {
               <div>
                 {ratesLoader
                   ? Array.from({ length: 2 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-3 border rounded p-4 animate-pulse"
-                    >
-                      <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded w-3/4" />
-                        <div className="h-5 bg-gray-200 rounded w-16" />
-                      </div>
-                    </div>
-                  ))
-                  : shippingRates?.map((rate, i) => {
-                    return (
-                      <label
-                        key={`${rate.method_id}-${rate.service_type}`}
-                        className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 border rounded p-4 animate-pulse"
                       >
-                        <input
-                          type="radio"
-                          name="shippingMethod"
-                          value={rate.service_type}
-                          checked={
-                            selectedShippingMethod === rate.service_type
-                          }
-                          onChange={(e) =>
-                            setSelectedShippingMethod(e.target.value)
-                          }
-                          className="mt-1"
-                        />
-                        <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
-                          <div className="flex items-center gap-2 font-normal">
-                            {rate.is_fedex && <span>FedEx</span>}
-                            <span className="">
-                              {rate.is_fedex
-                                ? `(${rate.service_name})`
-                                : rate.display_name}
-                            </span>
-                          </div>
-                          <div className=" font-bold flex-shrink-0">
-                            {rate.total_charge === 0
-                              ? "Free"
-                              : `$${Number(rate.total_charge).toFixed(2)}`}
-                          </div>
+                        <div className="w-4 h-4 mt-1 bg-gray-200 rounded-full flex-shrink-0" />
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4" />
+                          <div className="h-5 bg-gray-200 rounded w-16" />
                         </div>
-                      </label>
-                    );
-                  })}
+                      </div>
+                    ))
+                  : shippingRates?.map((rate, i) => {
+                      return (
+                        <label
+                          key={`${rate.method_id}-${rate.service_type}`}
+                          className={`flex items-start gap-3  p-4 transition-colors cursor-pointer ${selectedShippingMethod === rate.service_type ? "" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="shippingMethod"
+                            value={rate.service_type}
+                            checked={
+                              selectedShippingMethod === rate.service_type
+                            }
+                            onChange={(e) =>
+                              setSelectedShippingMethod(e.target.value)
+                            }
+                            className="mt-1"
+                          />
+                          <div className="min-w-0 flex-1 flex items-center justify-between gap-3 text-[#545454] text-[14px] ">
+                            <div className="flex items-center gap-2 font-normal">
+                              {rate.is_fedex && <span>FedEx</span>}
+                              <span className="">
+                                {rate.is_fedex
+                                  ? `(${rate.service_name})`
+                                  : rate.display_name}
+                              </span>
+                            </div>
+                            <div className=" font-bold flex-shrink-0">
+                              {rate.total_charge === 0
+                                ? "Free"
+                                : `$${Number(rate.total_charge).toFixed(2)}`}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
                 <div className="flex justify-end mt-1.5 mb-1.5">
                   <button
                     type="button"
@@ -474,7 +477,7 @@ const OrderSummary = () => {
                     }}
                     disabled={shippingCostLoading}
                     className="w-full md:w-[55%] text-[18px] btn-primary"
-                  // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
+                    // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
                   >
                     {shippingCostLoading
                       ? "Loading..."
@@ -485,17 +488,33 @@ const OrderSummary = () => {
             )}
           </form>
         )}
+        <hr />
+
+        {manualDiscount > 0 && (
+          <>
+            {/* Manual Discount */}
+            <div className="flex justify-between py-[14px]">
+              <span className="text-[14px] font-bold text-[#393939]">
+                Manual Discount:
+              </span>
+              <span className="text-[14px] font-medium">
+                -<ProductPrice price={manualDiscount} inline={true} />
+              </span>
+            </div>
+          </>
+        )}
 
         <hr />
 
         <div className="flex justify-between items-center py-[14px]">
           <span className="text-[14px] font-bold text-[#333333]">
-            Coupon Code:{" "} {appliedCoupon ? appliedCoupon.couponCode.toUpperCase() : ""}
+            Coupon Code:{" "}
+            {appliedCoupon ? appliedCoupon?.couponCode?.toUpperCase() : ""}
           </span>
           {/* If coupon already applied, show it here */}
           {appliedCoupon ? (
             <span className="text-[14px] font-medium">
-              -${discountAmount.toFixed(2)}
+              -<ProductPrice price={discountAmount} inline={true} />
             </span>
           ) : (
             <span
@@ -509,10 +528,6 @@ const OrderSummary = () => {
         {/* Show applied coupon details */}
         {appliedCoupon && (
           <div className="flex  items-center rounded">
-            {/* <span className="text-sm">
-                ${Number(appliedCoupon.discountAmount).toFixed(2)} off (
-                {appliedCoupon.couponCode.toUpperCase()})
-              </span> */}
             <button
               onClick={handleRemoveCoupon}
               className=" text-[14px] underline text-red-600 hover:text-red-700"
@@ -527,7 +542,6 @@ const OrderSummary = () => {
             onSubmit={handleCouponSubmit}
             className="flex flex-col md:flex-row  my-2"
           >
-            {/* <div className="flex mb-[14px]"> */}
             <Input
               id="discountCode"
               type="text"
@@ -544,7 +558,6 @@ const OrderSummary = () => {
             >
               {couponLoading ? "..." : "Apply"}
             </button>
-            {/* </div> */}
           </form>
         )}
 
@@ -563,10 +576,7 @@ const OrderSummary = () => {
             Grand total:
           </span>
           <span className="text-[25px] leading-none text-[#333333] font-bold">
-            <ProductPrice
-              price={finalTotal}
-              inline={true}
-            />
+            <ProductPrice price={finalTotal} inline={true} />
           </span>
         </div>
 

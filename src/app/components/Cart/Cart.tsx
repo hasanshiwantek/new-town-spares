@@ -1,14 +1,49 @@
 "use client";
-import { useAppSelector } from "@/hooks/useReduxHooks";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 import Link from "next/link";
 import CartList from "./CartList";
 import OrderSummary from "./OrderSummary";
 import SaveCartToList from "./SaveCartToList";
+import { useSearchParams } from "next/navigation";
+import {
+  fetchLoadSavedQuote,
+  removeCoupon,
+  removeManualDiscount,
+} from "@/redux/slices/couponSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
+import { logout } from "@/redux/slices/authSlice";
+
 const Cart = () => {
+  const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+  const action = searchParams.get("action");
+  const quoteToken = searchParams.get("quoteToken");
+  const shouldLoadQuote = action === "loadSavedQuote" && !!quoteToken;
   const auth = useAppSelector((state: RootState) => state?.auth);
   const cart = useAppSelector((state: RootState) => state.carts.items);
   const isLoggedIn = Boolean(auth?.isAuthenticated);
+
+  useEffect(() => {
+    if (!shouldLoadQuote || !quoteToken) return;
+    dispatch(fetchLoadSavedQuote(quoteToken))
+      .unwrap()
+      .then(async (res) => {
+        const response = res?.data;
+        if (auth?.user?.id != response?.customer?.id) return;
+        await dispatch(fetchCartList());
+      })
+      .catch((error) => {
+        if (error) {
+          dispatch(removeCoupon());
+          dispatch(removeManualDiscount());
+          dispatch(logout());
+          window.location.href = `/auth/login?action=loadSavedQuote&quoteToken=${quoteToken}`;
+        }
+      });
+  }, [shouldLoadQuote, quoteToken]);
+
   return (
     <main className="w-full flex justify-center py-4">
       <div className="w-full flex flex-col">

@@ -1,22 +1,31 @@
+import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/axiosInstance";
 
 export const globalSearch = createAsyncThunk(
   "home/globalSearch",
-  async ({ query }: { query: any }, thunkAPI) => {
+  async (
+    { query, signal }: { query: string; signal?: AbortSignal },
+    thunkAPI,
+  ) => {
     try {
       const res = await axiosInstance.get(
-        `web/products/search-product?query=${query}`
+        `web/products/search-product?query=${query}`,
+        {
+          signal: signal ?? thunkAPI.signal,
+        },
       );
-      console.log("Main Search Data: ", res?.data);
       return res.data;
     } catch (err: any) {
+      if (axios.isCancel(err) || err.code === "ERR_CANCELED") {
+        return thunkAPI.rejectWithValue("canceled");
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch search data"
+        err.response?.data?.message || "Failed to fetch search data",
       );
     }
-  }
+  },
 );
 
 export const getBrands = createAsyncThunk(

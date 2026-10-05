@@ -1,4 +1,5 @@
 // configSlice.ts
+import { getFromStorage, removeFromStorage, setInStorage } from '@/utils/storage';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ConfigState {
@@ -6,7 +7,7 @@ interface ConfigState {
 }
 
 const initialState: ConfigState = {
-  storeId: typeof window !== 'undefined' ? Number(localStorage.getItem('storeId')) || null : null,
+  storeId: typeof window !== 'undefined' ? Number(getFromStorage('storeId')) || null : null,
 };
 
 const configSlice = createSlice({
@@ -15,11 +16,11 @@ const configSlice = createSlice({
   reducers: {
     setStoreId: (state, action: PayloadAction<number>) => {
       state.storeId = action.payload;
-      localStorage.setItem('storeId', action.payload.toString());
+      setInStorage('storeId', action.payload.toString());
     },
     clearStoreId: (state) => {
       state.storeId = null;
-      localStorage.removeItem('storeId');
+      removeFromStorage('storeId');
     },
   },
 });

@@ -1,7 +1,7 @@
 "use client";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
-import { fetchOrderDetails } from "@/redux/slices/cartSlice";
+import { fetchOrderDetails } from "@/redux/slices/cartsSlice";
 import React, { useEffect, useState } from "react";
 
 interface ReturnItemsModalProps {

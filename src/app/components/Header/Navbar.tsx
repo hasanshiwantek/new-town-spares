@@ -27,6 +27,7 @@ import usaFlag from "../../../../public/usa-logo.png";
 import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
 import ProductPrice from "../productprice/ProductPrice";
+import { removeFromStorage } from "@/utils/storage";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -187,8 +188,8 @@ const Navbar: React.FC = () => {
     }
   };
   function removeLocalShipping() {
-    localStorage.removeItem("shippingCost");
-    localStorage.removeItem("shippingData");
+    removeFromStorage("shippingCost");
+    removeFromStorage("shippingData");
   }
 
   const confirmDelete = (item: any) => {

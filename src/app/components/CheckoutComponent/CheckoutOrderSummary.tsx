@@ -13,6 +13,8 @@ interface OrderSummaryProps {
   finalTotal: number;
   discountAmount: number;
   appliedCoupon: any;
+  manualDiscount: number;
+  discountTotal: number;
   promoCode: string;
   setPromoCode: (code: string) => void;
   onApplyCoupon: () => void;
@@ -28,19 +30,19 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   finalTotal,
   discountAmount,
   appliedCoupon,
+  manualDiscount,
+  discountTotal,
   promoCode,
   setPromoCode,
   onApplyCoupon,
   onRemoveCoupon,
 }) => {
   const [showCouponInput, setShowCouponInput] = useState(false);
-
+  const [discountOpen, setDiscountOpen] = useState(false);
   return (
     <div className="bg-white border border-[#ebebeb] rounded-[4px] h-fit sticky top-9">
       <div className="flex items-center justify-between p-[19.5px] border-b border-[#ebebeb]">
-        <h2 className="text-[15px] text-[#333333]">
-          Order Summary
-        </h2>
+        <h2 className="text-[15px] text-[#333333]">Order Summary</h2>
         <Link
           href="/cart"
           className="text-[13px] text-[#333333] hover:underline"
@@ -56,10 +58,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       {/* Cart Items */}
       <div className="space-y-4 max-h-[400px] overflow-y-auto p-[19.5px] border-b border-[#ebebeb]">
         {cart.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-start gap-4"
-          >
+          <div key={item.id} className="flex items-start gap-4">
             <div className="relative w-[60px] shrink-0">
               <Image
                 src={item.image?.[0]?.path || "/checkouticon/orderimg.png"}
@@ -117,9 +116,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
             {/* Show applied coupon */}
             {appliedCoupon && (
               <div className="flex gap-3 items-center px-4 py-2 rounded">
-                <span>
-                  {appliedCoupon.couponCode.toUpperCase()}
-                </span>
+                <span>{appliedCoupon.couponCode.toUpperCase()}</span>
                 <button
                   onClick={onRemoveCoupon}
                   className="font-bold hover:text-red-700"
@@ -136,28 +133,100 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-3 text-[13px] pt-[19.5px] px-[19.5px]">
         <div className="flex justify-between text-[#333333]">
           <span>Subtotal</span>
-          <span> <ProductPrice
-            price={subtotal}
-            inline={true}
-          /></span>
+          <span>
+            {" "}
+            <ProductPrice price={subtotal} inline={true} />
+          </span>
         </div>
+        {(appliedCoupon && discountAmount > 0) || manualDiscount > 0 ? (
+          <div className="mt-2 overflow-hidden transition-all duration-300 ease-in-out">
+            <div
+              className="flex text-[13px] justify-between items-center text-gray-700 cursor-pointer select-none transition-colors duration-200 hover:text-[#2b2b2b]"
+              onClick={() => setDiscountOpen((prev) => !prev)}
+            >
+              <span className="flex items-center gap-1 font-medium">
+                Discounts
+                <svg
+                  className={`w-4 h-4 transition-transform duration-300 ${
+                    discountOpen ? "rotate-180" : "rotate-0"
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+              <span className="font-medium">
+                -<ProductPrice price={Number(discountTotal)} inline={true} />
+              </span>
+            </div>
 
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${
+                discountOpen
+                  ? "grid-rows-[1fr] opacity-100 py-4"
+                  : "grid-rows-[0fr] opacity-0 mt-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="text-[13px] text-gray-600">
+                  {manualDiscount > 0 && (
+                    <div className="flex justify-between mt-1">
+                      <span>Manual Discount</span>
+                      <span>
+                        -
+                        <ProductPrice
+                          price={Number(manualDiscount)}
+                          inline={true}
+                        />
+                      </span>
+                    </div>
+                  )}
+
+                  {appliedCoupon && discountAmount > 0 && (
+                    <div className="flex justify-between mt-1">
+                      <span>
+                        <ProductPrice
+                          price={Number(discountAmount)}
+                          inline={true}
+                        />{" "}
+                        off the order total (
+                        {appliedCoupon?.couponCode?.toUpperCase()})
+                      </span>
+                      <span>
+                        -
+                        <ProductPrice
+                          price={Number(discountAmount)}
+                          inline={true}
+                        />
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
         <div className="flex justify-between text-[#333333]">
           <span>Shipping</span>
           <span>
-            {shipping === 0 ? "Free" : <ProductPrice
-              price={shipping}
-              inline={true}
-            />}
+            {shipping === 0 ? (
+              "Free"
+            ) : (
+              <ProductPrice price={shipping} inline={true} />
+            )}
           </span>
         </div>
         <div className="flex justify-between text-[#333333]">
           <span>Tax</span>
           <span>
-            <ProductPrice
-              price={tax}
-              inline={true}
-            />
+            <ProductPrice price={tax} inline={true} />
           </span>
         </div>
       </div>
@@ -166,10 +235,10 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="flex flex-col py-[19.5px] px-[19.5px] mt-[19.5px] border-t border-[#ebebeb] text-[#333333]">
         <div className="flex justify-between items-center">
           <span className="text-[15px]">Total</span>
-          <span className="text-[30px] font-bold leading-none text-[#FF482E]">    <ProductPrice
-            price={finalTotal}
-            inline={true}
-          /></span>
+          <span className="text-[30px] font-bold leading-none text-[#FF482E]">
+            {" "}
+            <ProductPrice price={finalTotal} inline={true} />
+          </span>
         </div>
       </div>
     </div>

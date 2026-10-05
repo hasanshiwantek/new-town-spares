@@ -5,19 +5,19 @@ import { persistReducer, persistStore } from "redux-persist";
 import homeReducer from "./slices/homeSlice";
 import authReducer from "./slices/authSlice";
 import configReducer from "./slices/configSlice";
-import cartSliceReducer from "./slices/cartSlice";
+// import cartSliceReducer from "./slices/cartSlice";
 import currencyReducer from "./slices/currencySlice";
 import storeFrontReducer from "./slices/storeFrontSlice";
 import myaccountReducer from "./slices/myaccountSlice";
 import recentReducer from "./slices/recentSlice";
 import orderReducer from "./slices/orderslice";
-import couponReducer from "./slices/couponSlice"
-import shippingZoneReducer from "./slices/shippingSlice"
+import couponReducer from "./slices/couponSlice";
+import shippingZoneReducer from "./slices/shippingSlice";
 import scriptReducer from "./slices/scriptSlice";
 import contactReducer from "./slices/contactSlice";
 import multiAddressReducer from "./slices/multiAddressSlice";
 import advanceSearchReducer from "./slices/advanceSearchSlice";
-import orderMessageReducer from "./slices/OrderMessage"
+import orderMessageReducer from "./slices/OrderMessage";
 import cartsSliceReducer from "./slices/cartsSlice";
 
 // ✅ only cart persist hoga
@@ -32,7 +32,6 @@ const authPersistConfig = {
   storage,
 };
 
-
 // ✅ only recent persist hoga
 const recentPersistConfig = {
   key: "recent",
@@ -45,7 +44,6 @@ const orderPersistConfig = {
   storage,
 };
 
-
 // ✅ only order persist hoga
 const couponPersistConfig = {
   key: "coupon",
@@ -57,7 +55,7 @@ const rootReducer = combineReducers({
   currency: currencyReducer,
   auth: persistReducer(authPersistConfig, authReducer), // persisted
   config: configReducer,
-  cart: persistReducer(cartPersistConfig, cartSliceReducer), // persisted
+  // cart: persistReducer(cartPersistConfig, cartSliceReducer), // persisted
   recent: persistReducer(recentPersistConfig, recentReducer),
   order: persistReducer(orderPersistConfig, orderReducer),
   coupon: persistReducer(couponPersistConfig, couponReducer),
@@ -68,8 +66,8 @@ const rootReducer = combineReducers({
   contact: contactReducer,
   advanceSearch: advanceSearchReducer,
   scripts: scriptReducer,
-   carts: cartsSliceReducer,
-    customerMessage: orderMessageReducer,
+  carts: cartsSliceReducer,
+  customerMessage: orderMessageReducer,
 });
 
 export const store = configureStore({

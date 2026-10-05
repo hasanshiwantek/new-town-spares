@@ -3,6 +3,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/axiosInstance";
 import { CHECKOUT_STORAGE_KEY } from "@/app/components/CheckoutComponent/CheckoutComponent";
 import { toast } from "react-toastify";
+import { getFromStorage, setInStorage } from "@/utils/storage";
 export interface CartItem {
   productId: any;
   quantity: number;
@@ -166,10 +167,10 @@ export const removeProducts = createAsyncThunk(
 // Helper function to save cart into checkout localStorage
 const saveCartToCheckoutStorage = (items: CartItem[]) => {
   try {
-    const savedData = localStorage.getItem(CHECKOUT_STORAGE_KEY);
+    const savedData = getFromStorage(CHECKOUT_STORAGE_KEY);
     if (!savedData) return;
 
-    const checkoutData = JSON.parse(savedData);
+    const checkoutData = savedData
     checkoutData._cartItems = items.map((item) => ({
       id: item.id,
       productId: item.productId,
@@ -180,8 +181,8 @@ const saveCartToCheckoutStorage = (items: CartItem[]) => {
       // Add any other fields you need
     }));
 
-    localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(checkoutData));
-  } catch (e) { }
+   setInStorage(CHECKOUT_STORAGE_KEY, checkoutData);
+  } catch (e) {}
 };
 
 const initialState: CartState = {
@@ -211,7 +212,6 @@ const cartsSlice = createSlice({
           ...newProduct,
           quantity: newProduct.quantity || 1,
         });
-        saveCartToCheckoutStorage(state.items); // ✅ Save to localStorage whenever cart is updated
       }
     },
 
@@ -225,7 +225,6 @@ const cartsSlice = createSlice({
       if (item) {
         item.quantity += 1;
       }
-      saveCartToCheckoutStorage(state.items);
     },
 
     decreaseQty: (state, action: PayloadAction<string | number>) => {
@@ -233,7 +232,6 @@ const cartsSlice = createSlice({
       if (item && item.quantity > 1) {
         item.quantity -= 1;
       }
-      saveCartToCheckoutStorage(state.items);
     },
     updateQty: (
       state,
@@ -244,11 +242,9 @@ const cartsSlice = createSlice({
       if (item) {
         item.quantity = quantity < 1 ? 1 : quantity;
       }
-      saveCartToCheckoutStorage(state.items);
     },
     clearCart: (state) => {
       state.items = [];
-      saveCartToCheckoutStorage(state.items);
     },
     // ✅ Restore Cart from localStorage
     restoreCart: (state, action: PayloadAction<any[]>) => {
@@ -292,7 +288,8 @@ const cartsSlice = createSlice({
       })
       .addCase(fetchCartList.fulfilled, (state, action) => {
         state.cartLoading = false;
-        state.redirectToCart = action.payload?.data?.length == 0 ? "true" : "false";
+        state.redirectToCart =
+          action.payload?.data?.length == 0 ? "true" : "false";
         state.items =
           action.payload?.data?.map((item: any) => ({
             ...item.product,

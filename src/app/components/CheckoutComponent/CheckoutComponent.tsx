@@ -1,49 +1,35 @@
 "use client";
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useEffect,
-  useRef,
-} from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
-import {
-  decreaseQty,
-  increaseQty,
-  removeFromCart,
-  clearCart,
-} from "@/redux/slices/cartSlice";
-import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice"; // ADD THIS
-import axiosInstance, { baseURL, stripePublishableKey } from "@/lib/axiosInstance";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import countries from "world-countries";
-import { Country, State, City } from "country-state-city";
-import { useForm } from "react-hook-form";
-import { loadStripe } from "@stripe/stripe-js";
-import type { PaymentRequest as StripePaymentRequest } from "@stripe/stripe-js";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import axiosInstance, {
+  baseURL,
+  stripePublishableKey,
+} from "@/lib/axiosInstance";
 import {
-  Elements,
-  CardNumberElement,
-  PaymentRequestButtonElement,
-  useStripe,
-  useElements,
-} from "@stripe/react-stripe-js";
-import { useRouter } from "next/navigation";
-import { setLastOrder } from "@/redux/slices/orderslice";
+  clearCart,
+  decreaseQty,
+  increaseQty,
+  removeFromCart,
+} from "@/redux/slices/cartsSlice";
+import {
+  applyCoupon,
+  fetchMyCouponUsage,
+  removeCoupon,
+  removeManualDiscount,
+} from "@/redux/slices/couponSlice"; // ADD THIS
 import {
   resetMultiAddress,
   setIsMultiAddress,
 } from "@/redux/slices/multiAddressSlice";
+import { setLastOrder } from "@/redux/slices/orderslice";
 import {
   checkoutFormSave,
   fetchShippingRate,
@@ -52,19 +38,39 @@ import {
   removeShippingRate,
   resetShippingRates,
 } from "@/redux/slices/shippingSlice";
+import { RootState } from "@/redux/store";
+import {
+  CardNumberElement,
+  Elements,
+  PaymentRequestButtonElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
+import type { PaymentRequest as StripePaymentRequest } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { City, Country, State } from "country-state-city";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 // Import step components
-import CustomerStep from "./CustomerStep";
-import ShippingStep from "./Shippingstep";
-import BillingStep from "./Billingstep";
-import PaymentStep from "./Paymentstep";
-import CheckoutOrderSummary from "./CheckoutOrderSummary";
-import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
-import { calculatePackage } from "./Shippingstep";
+import { fetchCartList, removeProducts } from "@/redux/slices/cartsSlice";
+import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import {
   addCustomerAddress,
   fetchCustomerAddress,
 } from "@/redux/slices/myaccountSlice";
-import { fetchCartList, removeProducts } from "@/redux/slices/cartsSlice";
+import { errorMessage, infoMessage, successMessage } from "@/utils/message";
+import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
+import BillingStep from "./Billingstep";
+import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
+import CheckoutOrderSummary from "./CheckoutOrderSummary";
+import CustomerStep from "./CustomerStep";
+import PaymentStep from "./Paymentstep";
+import ShippingStep, {
+  calculatePackage,
+  getProductShippingRate,
+  getSavedShippingCost,
+} from "./Shippingstep";
 
 export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
 function splitName(fullName: string) {
@@ -76,9 +82,7 @@ function splitName(fullName: string) {
   };
 }
 // Stripe publishable key
-const stripePromise = loadStripe(
-  stripePublishableKey,
-);
+const stripePromise = loadStripe(stripePublishableKey);
 
 // Pre-compute country list at module level
 // const countryList = countries
@@ -134,15 +138,19 @@ interface CheckoutFormValues {
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
-  const { loading, redirectToCart, cartLoading } = useAppSelector((state: RootState) => state?.carts);
+  const { loading, redirectToCart } = useAppSelector(
+    (state: RootState) => state?.carts,
+  );
   const auth = useAppSelector((state: RootState) => state?.auth);
 
   // ADD COUPON STATE FROM REDUX
-  const { appliedCoupon, discountAmount } = useAppSelector(
+  const { appliedCoupon, discountAmount, manualDiscount } = useAppSelector(
     (state: RootState) => state.coupon,
   );
-  const hasRestoredRef = useRef(false); // ✅ Sirf ek baar restore
-  const isRestoringRef = useRef(true); // ✅ Initially true — restore chal raha hai
+  const discountTotal = Number(discountAmount) + Number(manualDiscount);
+
+  const hasRestoredRef = useRef(false);
+  const isRestoringRef = useRef(true);
 
   const [promoCode, setPromoCode] = useState("");
 
@@ -152,6 +160,7 @@ const CheckoutForm = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [ipAddress, setIpAddress] = useState("");
+  const [orderPlaceCountry, setOrderPlaceCountry] = useState("");
   const [cardCompletion, setCardCompletion] = useState({
     number: false,
     expiry: false,
@@ -180,8 +189,8 @@ const CheckoutForm = () => {
   const user: any = localStorage.getItem("persist:auth");
   const parsedAuth = auth ? JSON.parse(user) : null;
   const token = parsedAuth?.token ? JSON.parse(parsedAuth.token) : null;
-  const { shippingDetail, saveDetail } = useAppSelector(
-    (state: any) => state.shippingZone,
+  const { shippingDetail } = useAppSelector(
+    (state: any) => state?.shippingZone,
   );
 
   useEffect(() => {
@@ -193,7 +202,7 @@ const CheckoutForm = () => {
 
         if (!emptyCartWarningShownRef.current) {
           emptyCartWarningShownRef.current = true;
-          // toast.error("Please add something");
+          // errorMessage("Please add something");
 
           // if (redirectToCart === "true") {
           router.push("/cart");
@@ -213,6 +222,7 @@ const CheckoutForm = () => {
     control,
     trigger,
     getValues,
+    clearErrors,
     setError,
     formState: { errors },
   } = useForm<CheckoutFormValues>({
@@ -313,7 +323,7 @@ const CheckoutForm = () => {
     };
     const getShippingRates = async () => {
       try {
-        await dispatch(fetchShippingRate({})).unwrap();
+        await dispatch(fetchShippingRate()).unwrap();
       } catch (err) {
         detectCountry();
       }
@@ -354,25 +364,21 @@ const CheckoutForm = () => {
       }, 0);
     }
 
+    // Fixed/free shipping products — cart se hi rate nikalo
+    const productShippingRate = getProductShippingRate(cart);
+    if (productShippingRate) return productShippingRate.total_charge;
+
     // Single address — existing logic
     if (watchedShippingMethod) {
       if (!shippingRates?.length) return 0;
       const selected = shippingRates.find(
         (rate: any) => rate.service_type === watchedShippingMethod,
       );
-      return selected ? Number(selected.total_charge) : 0;
+      return selected
+        ? Number(selected.total_charge)
+        : getSavedShippingCost(shippingDetail, productShippingRate);
     }
-    // ✅ Cart page se localStorage mein saved cost
-    if (typeof window !== "undefined") {
-      const savedCost = Number(shippingDetail?.rate?.total_charge);
-      if (savedCost) return Number(savedCost);
-    }
-
-    if (cart.length === 0) return 0;
-    return cart.reduce(
-      (sum, item) => sum + Number(item.fixedShippingCost || 0),
-      0,
-    );
+    return getSavedShippingCost(shippingDetail, productShippingRate);
   }, [
     isMultiAddress,
     destinations,
@@ -382,7 +388,6 @@ const CheckoutForm = () => {
     cart,
     shippingDetail,
   ]);
-
   const tax = 0;
 
   // Total before discount
@@ -393,32 +398,37 @@ const CheckoutForm = () => {
 
   // Final total after discount
   const finalTotal = useMemo(
-    () => Math.max(totalBeforeDiscount - discountAmount, 0),
-    [totalBeforeDiscount, discountAmount],
+    () => Math.max(totalBeforeDiscount - discountTotal, 0),
+    [totalBeforeDiscount, discountTotal],
   );
 
   // ADD COUPON HANDLERS
   const handleApplyCoupon = async () => {
     if (!promoCode.trim()) {
-      toast.error("Please enter a promo code");
+      errorMessage("Please enter a promo code");
       return;
     }
 
     try {
       await dispatch(
-        applyCoupon({ couponCode: promoCode, total: totalBeforeDiscount }),
+        applyCoupon({
+          couponCode: promoCode,
+          total: totalBeforeDiscount,
+          productIds: cart.map((item) => item.id),
+        }),
       ).unwrap();
-      toast.success("Promo code applied successfully!");
+      await dispatch(fetchMyCouponUsage());
+      successMessage("Promo code applied successfully!");
       setPromoCode("");
     } catch (err: any) {
-      toast.error(err || "Failed to apply coupon");
+      errorMessage(err || "Failed to apply coupon");
     }
   };
 
   const handleRemoveCoupon = () => {
     dispatch(removeCoupon());
     setPromoCode("");
-    toast.info("Coupon removed");
+    infoMessage("Coupon removed");
   };
 
   // Memoized handlers
@@ -602,35 +612,6 @@ const CheckoutForm = () => {
     return "New Town Spares (Desktop)";
   };
 
-  // const buildOrderPayload = useCallback(
-  //   (data: CheckoutFormValues & { paymentIntentId?: string | null }) => ({
-  //     userType: token ? null : "guest",
-  //     deviceType: getDeviceType(),
-  //     firstName: data.firstName,
-  //     lastName: data.lastName,
-  //     companyName: data.company || "",
-  //     email: data.email,
-  //     phone: data.phone || "",
-  //     addressLine1: data.address1,
-  //     addressLine2: data.address2 || "",
-  //     city: data.city,
-  //     state: data.state || "",
-  //     zip: data.zip,
-  //     country: data.country,
-  //     paymentMethod: data.paymentMethod,
-  //     shippingMethod: data.shippingMethod,
-  //     discountAmount: discountAmount ? finalTotal : 0,
-  //     shippingCost: shipping,
-  //     comments: data.orderComment || "",
-  //     paymentIntentId: data.paymentIntentId ?? "",
-  //     products: cart.map((item) => ({
-  //       product_id: item.id,
-  //       quantity: item.quantity || 1,
-  //     })),
-  //   }),
-  //   [cart, shipping]
-  // );
-
   const buildOrderPayload = useCallback(
     (data: CheckoutFormValues & { paymentIntentId?: string | null }) => {
       // ✅ Multi address mode
@@ -681,10 +662,13 @@ const CheckoutForm = () => {
               state: dest.address?.state || "",
               zip: dest.address?.zip || "",
               country: dest.address?.country || "",
-              shippingMethod: dest.selectedShippingMethod,
-              shippingData: shippingRates.find(
-                (item) => item?.service_type == dest.selectedShippingMethod,
-              ),
+              shippingMethod:
+                dest.selectedShippingMethod ||
+                shippingDetail?.rate?.method_type,
+              shippingData:
+                shippingRates.find(
+                  (item) => item?.service_type == dest.selectedShippingMethod,
+                ) || shippingDetail?.rate?.service_type,
               shippingCost: selectedRate
                 ? Number(selectedRate.total_charge)
                 : 0,
@@ -703,7 +687,8 @@ const CheckoutForm = () => {
       return {
         userType: token ? null : "guest",
         deviceType: getDeviceType(),
-        ipAddress: ipAddress,
+        ipAddress,
+        orderPlaceCountry,
         isSaveAddressForShipping: data?.isSaveAddressForShipping,
         isSaveAddressForBilling: data?.isSaveAddressForBilling,
         billingSame: data?.billingSame,
@@ -724,10 +709,12 @@ const CheckoutForm = () => {
             : data.paymentMethod == "apple_pay"
               ? "Apple Pay"
               : "Google Pay",
-        shippingMethod: data.shippingMethod,
-        shippingData: shippingRates.find(
-          (item) => item?.service_type == data.shippingMethod,
-        ),
+        shippingMethod:
+          data.shippingMethod || shippingDetail?.rate?.method_type,
+        shippingData:
+          shippingRates.find(
+            (item) => item?.service_type == data.shippingMethod,
+          ) || shippingDetail?.rate?.service_type,
         discountAmount: discountAmount,
         couponCode: appliedCoupon?.couponCode,
         shippingCost: shipping,
@@ -739,6 +726,7 @@ const CheckoutForm = () => {
           product_id: item.id,
           quantity: item.quantity || 1,
         })),
+        ...(manualDiscount ? { manualDiscount } : {}),
       };
     },
     [
@@ -761,8 +749,7 @@ const CheckoutForm = () => {
         orderPayload,
       );
       const orderData = orderResponse.data?.data || orderResponse.data;
-      dispatch(fetchShippingRate({}));
-      // localStorage.removeItem("shippingCost"); // ✅ Clear saved shipping cost after order is placed
+      dispatch(fetchShippingRate());
       return orderData || null;
     },
     [buildOrderPayload],
@@ -796,7 +783,7 @@ const CheckoutForm = () => {
     const handlePaymentMethod = async (event: any) => {
       if (!pendingWalletForm) {
         event.complete("fail");
-        toast.error("Unable to process wallet payment. Please try again.");
+        errorMessage("Unable to process wallet payment. Please try again.");
         setIsProcessing(false);
         return;
       }
@@ -808,7 +795,7 @@ const CheckoutForm = () => {
 
         if (!paymentIntentId) {
           event.complete("fail");
-          toast.error("Failed to generate payment intent.");
+          errorMessage("Failed to generate payment intent.");
           setIsProcessing(false);
           return;
         }
@@ -822,31 +809,26 @@ const CheckoutForm = () => {
 
         skipEmptyCartCheckRef.current = true;
         const orderNumber = orderData?.[0]?.orderNumber;
-        const productIds = cart.map((item) => item.id);
-
-        dispatch(
-          removeProducts({
-            product_ids: productIds,
-          }),
-        );
 
         dispatch(removeShippingRate());
-        dispatch(fetchShippingRate({}));
+        dispatch(fetchShippingRate());
         dispatch(setLastOrder(orderData));
         dispatch(clearCart());
+        removeFromSessionStorage("quoteToken");
+        dispatch(removeManualDiscount());
         dispatch(removeCoupon());
         dispatch(resetMultiAddress()); // ✅ ADD
         dispatch(resetShippingRates()); // ✅ ADD
         dispatch(setIsMultiAddress(false));
         dispatch(fetchCartList());
-        localStorage.removeItem(CHECKOUT_STORAGE_KEY);
-        router.push(`/checkout/order-information/${orderNumber}`);
+        removeFromStorage("sessionId");
+        window.location.href = `/checkout/order-information/${orderNumber}`;
       } catch (err: any) {
         event.complete("fail");
-        const errorMessage =
+        const message =
           err?.response?.data?.message || err?.message || "Payment failed.";
 
-        toast.error(errorMessage);
+        errorMessage(message);
         setIsProcessing(false);
       } finally {
         setPendingWalletForm(null);
@@ -985,7 +967,7 @@ const CheckoutForm = () => {
 
     setTimeout(() => {
       setValue("billingSame", false);
-    }, 100)
+    }, 100);
   };
 
   const handleEditPayment = () => {
@@ -997,7 +979,7 @@ const CheckoutForm = () => {
 
     if (!paymentRequest) {
       const methodName = method === "apple_pay" ? "Apple Pay" : "Google Pay";
-      toast.error(
+      errorMessage(
         `${methodName} is not available. Please use a supported device/browser or try credit card payment.`,
       );
       return;
@@ -1011,7 +993,7 @@ const CheckoutForm = () => {
       paymentRequest.show();
     } catch (err: any) {
       const methodName = method === "apple_pay" ? "Apple Pay" : "Google Pay";
-      toast.error(
+      errorMessage(
         `Could not open ${methodName}. Please ensure you have a card set up in your wallet or try credit card payment.`,
       );
       setIsProcessing(false);
@@ -1036,12 +1018,12 @@ const CheckoutForm = () => {
         const message =
           "Please complete your card details before placing the order.";
         setCardError(message);
-        toast.error(message);
+        errorMessage(message);
         return;
       }
 
       if (cardError) {
-        toast.error(cardError);
+        errorMessage(cardError);
         return;
       }
     }
@@ -1053,7 +1035,7 @@ const CheckoutForm = () => {
           : walletSupport.googlePay;
 
       if (!paymentRequest || !walletAvailable) {
-        toast.error("This wallet is not available on your device.");
+        errorMessage("This wallet is not available on your device.");
         return;
       }
 
@@ -1063,7 +1045,7 @@ const CheckoutForm = () => {
       try {
         paymentRequest.show();
       } catch (err: any) {
-        toast.error("Could not open the wallet sheet. Please try again.");
+        errorMessage("Could not open the wallet sheet. Please try again.");
         setIsProcessing(false);
         setPendingWalletForm(null);
       }
@@ -1078,7 +1060,7 @@ const CheckoutForm = () => {
 
       if (requiresStripeCard) {
         if (!stripe || !elements) {
-          toast.error("Payment service is not ready yet. Please try again.");
+          errorMessage("Payment service is not ready yet. Please try again.");
           setIsProcessing(false);
           return;
         }
@@ -1086,7 +1068,7 @@ const CheckoutForm = () => {
         const cardNumberElement = elements.getElement(CardNumberElement);
 
         if (!cardNumberElement) {
-          toast.error(
+          errorMessage(
             "Payment form is not ready. Please refresh and try again.",
           );
           setIsProcessing(false);
@@ -1113,7 +1095,7 @@ const CheckoutForm = () => {
           });
 
         if (pmError) {
-          toast.error(pmError.message || "Unable to create payment method.");
+          errorMessage(pmError.message || "Unable to create payment method.");
           setIsProcessing(false);
           return;
         }
@@ -1122,7 +1104,7 @@ const CheckoutForm = () => {
           paymentIntentId = await handleStripeCharge(paymentMethod.id);
 
           if (!paymentIntentId) {
-            toast.error("Failed to generate payment intent.");
+            errorMessage("Failed to generate payment intent.");
             setIsProcessing(false);
             return;
           }
@@ -1133,75 +1115,75 @@ const CheckoutForm = () => {
       const orderNumber = orderData?.[0]?.orderNumber;
       const orderDetail = orderData?.[0];
       skipEmptyCartCheckRef.current = true;
-      const productIds = cart.map((item) => item.id);
 
-      if (auth?.user?.id) {
-        if (orderDetail?.isSaveAddressForBilling) {
-          const splitNameRes = splitName(orderDetail?.billingAddress?.name);
-          const billingAddress = {
-            ...splitNameRes,
-            companyName: orderDetail?.billingAddress?.companyName,
-            phoneNumber: orderDetail?.billingAddress?.phone,
-            addressLine1: orderDetail?.billingAddress?.addressLine1,
-            addressLine2: orderDetail?.billingAddress?.addressLine2,
-            city: orderDetail?.billingAddress?.city,
-            state: orderDetail?.billingAddress?.state,
-            zip: orderDetail?.billingAddress?.zip,
-            country: orderDetail?.billingAddress?.country,
-          };
-          dispatch(
-            addCustomerAddress({
-              id: auth?.user?.id,
-              data: billingAddress,
-            }),
-          );
-        }
+      // if (auth?.user?.id) {
+      //   if (orderDetail?.isSaveAddressForBilling) {
+      //     const splitNameRes = splitName(orderDetail?.billingAddress?.name);
+      //     const billingAddress = {
+      //       ...splitNameRes,
+      //       companyName: orderDetail?.billingAddress?.companyName,
+      //       phoneNumber: orderDetail?.billingAddress?.phone,
+      //       addressLine1: orderDetail?.billingAddress?.addressLine1,
+      //       addressLine2: orderDetail?.billingAddress?.addressLine2,
+      //       city: orderDetail?.billingAddress?.city,
+      //       state: orderDetail?.billingAddress?.state,
+      //       zip: orderDetail?.billingAddress?.zip,
+      //       country: orderDetail?.billingAddress?.country,
+      //     };
+      //     dispatch(
+      //       addCustomerAddress({
+      //         id: auth?.user?.id,
+      //         data: billingAddress,
+      //       }),
+      //     );
+      //   }
 
-        if (orderDetail?.isSaveAddressForShipping) {
-          const shippingAddress = {
-            firstName: orderDetail?.billingInformation?.firstName,
-            lastName: orderDetail?.billingInformation?.firstName,
-            companyName: orderDetail?.billingInformation?.companyName,
-            phoneNumber: orderDetail?.billingInformation?.phone,
-            addressLine1: orderDetail?.billingInformation?.addressLine1,
-            addressLine2: orderDetail?.billingInformation?.addressLine2,
-            city: orderDetail?.billingInformation?.city,
-            state: orderDetail?.billingInformation?.state,
-            zip: orderDetail?.billingInformation?.zip,
-            country: orderDetail?.billingInformation?.country,
-          };
-          dispatch(
-            addCustomerAddress({
-              id: auth?.user?.id,
-              data: shippingAddress,
-            }),
-          );
-        }
+      //   if (orderDetail?.isSaveAddressForShipping) {
+      //     const shippingAddress = {
+      //       firstName: orderDetail?.billingInformation?.firstName,
+      //       lastName: orderDetail?.billingInformation?.firstName,
+      //       companyName: orderDetail?.billingInformation?.companyName,
+      //       phoneNumber: orderDetail?.billingInformation?.phone,
+      //       addressLine1: orderDetail?.billingInformation?.addressLine1,
+      //       addressLine2: orderDetail?.billingInformation?.addressLine2,
+      //       city: orderDetail?.billingInformation?.city,
+      //       state: orderDetail?.billingInformation?.state,
+      //       zip: orderDetail?.billingInformation?.zip,
+      //       country: orderDetail?.billingInformation?.country,
+      //     };
+      //     dispatch(
+      //       addCustomerAddress({
+      //         id: auth?.user?.id,
+      //         data: shippingAddress,
+      //       }),
+      //     );
+      //   }
+      // }
+      if (data?.newsletter) {
+        const email = data?.email;
+        dispatch(subscribeNewsletter({ email: email.trim() }));
       }
 
-      dispatch(
-        removeProducts({
-          product_ids: productIds,
-        }),
-      );
       dispatch(removeShippingRate());
-      dispatch(fetchShippingRate({}));
+      dispatch(fetchShippingRate());
       dispatch(setLastOrder(orderData));
       dispatch(clearCart());
+      removeFromSessionStorage("quoteToken");
+      dispatch(removeManualDiscount());
       dispatch(removeCoupon());
       dispatch(resetMultiAddress());
       dispatch(resetShippingRates());
       dispatch(setIsMultiAddress(false));
       dispatch(fetchCartList());
-      localStorage.removeItem(CHECKOUT_STORAGE_KEY);
-      router.push(`/checkout/order-information/${orderNumber}`);
+      removeFromStorage("sessionId");
+      window.location.href = `/checkout/order-information/${orderNumber}`;
     } catch (err: any) {
-      const errorMessage =
+      const message =
         err.response?.data?.message ||
         err.message ||
         "An error occurred while processing your order.";
 
-      toast.error(errorMessage);
+      errorMessage(message);
       setIsProcessing(false);
     }
   };
@@ -1249,7 +1231,6 @@ const CheckoutForm = () => {
     watchedCity,
   ]);
 
-  const isInitialLoad = useRef(true);
   const isRestored = useRef(false); // ✅ NEW
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -1264,7 +1245,6 @@ const CheckoutForm = () => {
           const billing = apiData.billing_form_data;
 
           if (
-            shipping.city &&
             shipping.country &&
             shipping.zip &&
             shipping.state &&
@@ -1277,7 +1257,7 @@ const CheckoutForm = () => {
                     country_code: shipping.country,
                     state: shipping.state,
                     postal_code: shipping.zip,
-                    city: shipping.city,
+                    ...(shipping.city && { city: shipping.city }),
                   },
                   package: calculatePackage(cart),
                 },
@@ -1432,29 +1412,29 @@ const CheckoutForm = () => {
       // billingSame false → actual billing values use karo (sirf agar filled hain)
       const billingFormData = watchedValues.billingSame
         ? {
-          billingFirstName: watchedValues.firstName || "",
-          billingLastName: watchedValues.lastName || "",
-          billingCompany: watchedValues.company || "",
-          billingPhone: watchedValues.phone || "",
-          billingAddress1: watchedValues.address1 || "",
-          billingAddress2: watchedValues.address2 || "",
-          billingCity: watchedValues.city || "",
-          billingCountry: watchedValues.country || "",
-          billingState: watchedValues.state || "",
-          billingZip: watchedValues.zip || "",
-        }
+            billingFirstName: watchedValues.firstName || "",
+            billingLastName: watchedValues.lastName || "",
+            billingCompany: watchedValues.company || "",
+            billingPhone: watchedValues.phone || "",
+            billingAddress1: watchedValues.address1 || "",
+            billingAddress2: watchedValues.address2 || "",
+            billingCity: watchedValues.city || "",
+            billingCountry: watchedValues.country || "",
+            billingState: watchedValues.state || "",
+            billingZip: watchedValues.zip || "",
+          }
         : {
-          billingFirstName: watchedValues.billingFirstName || "",
-          billingLastName: watchedValues.billingLastName || "",
-          billingCompany: watchedValues.billingCompany || "",
-          billingPhone: watchedValues.billingPhone || "",
-          billingAddress1: watchedValues.billingAddress1 || "",
-          billingAddress2: watchedValues.billingAddress2 || "",
-          billingCity: watchedValues.billingCity || "",
-          billingCountry: watchedValues.billingCountry || "",
-          billingState: watchedValues.billingState || "",
-          billingZip: watchedValues.billingZip || "",
-        };
+            billingFirstName: watchedValues.billingFirstName || "",
+            billingLastName: watchedValues.billingLastName || "",
+            billingCompany: watchedValues.billingCompany || "",
+            billingPhone: watchedValues.billingPhone || "",
+            billingAddress1: watchedValues.billingAddress1 || "",
+            billingAddress2: watchedValues.billingAddress2 || "",
+            billingCity: watchedValues.billingCity || "",
+            billingCountry: watchedValues.billingCountry || "",
+            billingState: watchedValues.billingState || "",
+            billingZip: watchedValues.billingZip || "",
+          };
 
       dispatch(
         checkoutFormSave({ data: { shippingFormData, billingFormData } }),
@@ -1557,14 +1537,19 @@ const CheckoutForm = () => {
       watchedValues.phone,
     ],
   );
-  //  const auth = useAppSelector((state: RootState) => state?.auth);
-  // Pass karo
 
   useEffect(() => {
     fetch("/api/get-ip")
       .then((res) => res.json())
       .then((data) => setIpAddress(data.ip));
+    fetch("/api/detect-country")
+      .then((res) => res.json())
+      .then((data) => setOrderPlaceCountry(data?.country_code));
   }, []);
+
+  useEffect(() => {
+    dispatch(fetchMyCouponUsage());
+  }, [dispatch]);
 
   useEffect(() => {
     if (auth?.isAuthenticated) {
@@ -1626,6 +1611,7 @@ const CheckoutForm = () => {
                 control={control}
                 setValue={setValue}
                 onContinue={handleContinueToBilling}
+                clearErrors={clearErrors}
                 countryList={countryList}
                 stateList={stateList}
                 cityList={cityList}
@@ -1654,6 +1640,7 @@ const CheckoutForm = () => {
                 countryList={countryList}
                 stateList={billingStateList}
                 cityList={billingCityList}
+                clearErrors={clearErrors}
                 isActive={currentStep === 3}
                 isCompleted={completedSteps.includes(3)}
                 onEdit={handleEditBilling}
@@ -1708,6 +1695,8 @@ const CheckoutForm = () => {
               finalTotal={finalTotal}
               discountAmount={discountAmount}
               appliedCoupon={appliedCoupon}
+              manualDiscount={manualDiscount}
+              discountTotal={discountTotal}
               promoCode={promoCode}
               setPromoCode={setPromoCode}
               onApplyCoupon={handleApplyCoupon}

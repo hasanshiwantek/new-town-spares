@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchPopularProducts } from "@/redux/slices/homeSlice";
-import { addToCart } from "@/redux/slices/cartSlice";
+import { addToCart } from "@/redux/slices/cartsSlice";
 import PopularProductSkeleton from "../loader/PopularProductSkeleton";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
