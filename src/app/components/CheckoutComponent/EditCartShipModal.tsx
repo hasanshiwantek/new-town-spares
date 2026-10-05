@@ -12,6 +12,7 @@ import { resetMultiAddress, setIsMultiAddress } from "@/redux/slices/multiAddres
 import { resetShippingRates } from "@/redux/slices/shippingSlice";
 import { CHECKOUT_STORAGE_KEY } from "./CheckoutComponent";
 import { useRouter } from "next/navigation";
+import { removeFromStorage } from "@/utils/storage";
 
 interface EditCartShipModalProps {
     open: boolean;
@@ -30,7 +31,7 @@ const EditCartShipModal: React.FC<EditCartShipModalProps> = ({
         dispatch(resetMultiAddress());
         dispatch(resetShippingRates());
         dispatch(setIsMultiAddress(false));
-        localStorage.removeItem(CHECKOUT_STORAGE_KEY);
+        removeFromStorage(CHECKOUT_STORAGE_KEY);
         router.push("/cart");
         onClose();
     };

@@ -6,7 +6,6 @@ import BulkInquiryModal from "../modal/BulkInquiryModal";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { addToCart } from "@/redux/slices/cartSlice";
 import { toast } from "sonner";
 import ProductPrice from "../productprice/ProductPrice";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
@@ -56,19 +55,6 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     }
   };
 
-  const handleAddToCart = () => {
-    if (quantity < 1) {
-      toast.error("Quantity must be at least 1.");
-      return;
-    }
-    if (quantity > 5) {
-      toast.error("Maximum quantity allowed is 5.");
-      return;
-    }
-    dispatch(addToCart({ ...product, quantity }));
-    toast.success(`${product?.name ?? "Product"} added to cart!`);
-    // router.push("/cart");
-  };
 
   const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";
   const brandName = product.brand?.name ?? "";
@@ -177,7 +163,6 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                       );
                       return;
                     }
-                    // dispatch(addToCart(product));
                     // Add only up to the allowed maximum
                     const quantityToAdd = Math.min(minQty, remaining);
 

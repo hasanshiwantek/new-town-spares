@@ -1,9 +1,5 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   clearAllCart,
@@ -19,10 +15,11 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
+import { removeFromStorage } from "@/utils/storage";
+import { removeShippingRate, resetShippingRates } from "@/redux/slices/shippingSlice";
 const CartList = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts.items);
-  console.log("Cart Items:", cart);
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
   }>({});
@@ -37,19 +34,12 @@ const CartList = () => {
     }
   };
   function removeLocalShipping() {
-    localStorage.removeItem("shippingCost");
-    localStorage.removeItem("shippingData");
+    dispatch(removeShippingRate());
+    dispatch(resetShippingRates());
   }
-  // const confirmDelete = () => {
-  //   if (itemToDelete) {
-  //     dispatch(removeFromCart(itemToDelete.id));
-  //     setItemToDelete(null);
-  //   }
-  //   setIsDialogOpen(false);
-  // };
+
   const confirmDelete = () => {
     if (itemToDelete) {
-      // dispatch(removeFromCart(itemToDelete.id));
       dispatch(deleteCart({ id: itemToDelete?.cartItemId }))
         .unwrap()
         .then(() => {
@@ -91,7 +81,7 @@ const CartList = () => {
           data: {
             quantity: newQty,
           },
-        })
+        }),
       )
         .unwrap()
         .then(() => {
@@ -202,10 +192,7 @@ const CartList = () => {
                           Price
                         </span>
                         <span className="text-[14px] text-[#333333]">
-                          <ProductPrice
-                            price={item.price}
-                            inline={true}
-                          />
+                          <ProductPrice price={item.price} inline={true} />
                         </span>
                       </div>
                       <div className="flex items-center gap-3 py-1">
@@ -255,16 +242,13 @@ const CartList = () => {
                     {item.sku || "N/A"}
                   </p>
                   <p className="text-[14px] text-[#333333] text-right pr-[11px]">
-                          <ProductPrice
-                            price={Number(item.price)}
-                            inline={true}
-                          />
+                    <ProductPrice price={Number(item.price)} inline={true} />
                   </p>
                   <div className="flex justify-center">{qtyInput(item)}</div>
 
                   <div className="flex items-center justify-end gap-[14px]">
                     <strong className="text-[14px] font-bold text-[#333333]">
-                         <ProductPrice
+                      <ProductPrice
                         price={Number(item.price * item.quantity)}
                         inline={true}
                       />

@@ -3,8 +3,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
-import { applyCoupon, removeCoupon } from "@/redux/slices/couponSlice"; // ADD THIS
-import { toast } from "sonner";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import LoadTrustpilotScript from "./TrustpilotWidget";
@@ -15,7 +13,7 @@ import { CONTACT_INFO } from "@/const/contact";
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
   const params = useParams();
-  const orderId = params.orderId;
+  const orderId = params?.orderId;
   const router = useRouter();
   const customerOrderDetail = useAppSelector(
     (state: RootState) => state?.customerMessage?.orderDetail,
@@ -23,6 +21,9 @@ const CheckoutForm = () => {
   const orderCustomer = customerOrderDetail?.customer
     ? customerOrderDetail
     : null;
+  const discountTotal =
+    Number(orderCustomer?.discountAmount) +
+    Number(orderCustomer?.manualDiscount);
   const cart: any = customerOrderDetail?.products
     ? customerOrderDetail.products.map((product: any) => ({
         ...product,
@@ -65,34 +66,9 @@ const CheckoutForm = () => {
 
   // Final total after discount
   const finalTotal = useMemo(
-    () =>
-      Math.max(totalBeforeDiscount - Number(orderCustomer?.discountAmount), 0),
+    () => Math.max(totalBeforeDiscount - discountTotal, 0),
     [totalBeforeDiscount, orderCustomer?.discountAmount],
   );
-
-  // ADD COUPON HANDLERS
-  const handleApplyCoupon = async () => {
-    if (!promoCode.trim()) {
-      toast.error("Please enter a promo code");
-      return;
-    }
-
-    try {
-      await dispatch(
-        applyCoupon({ couponCode: promoCode, total: totalBeforeDiscount }),
-      ).unwrap();
-      toast.success("Promo code applied successfully!");
-      setPromoCode("");
-    } catch (err: any) {
-      toast.error(err || "Failed to apply coupon");
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    dispatch(removeCoupon());
-    setPromoCode("");
-    toast.info("Coupon removed");
-  };
 
   useEffect(() => {
     if (!orderId) return;
@@ -160,10 +136,10 @@ const CheckoutForm = () => {
               finalTotal={finalTotal}
               discountAmount={Number(orderCustomer?.discountAmount)}
               appliedCoupon={orderCustomer?.couponCode}
+              manualDiscount={Number(orderCustomer?.manualDiscount)}
+              discountTotal={discountTotal}
               promoCode={promoCode}
               setPromoCode={setPromoCode}
-              onApplyCoupon={handleApplyCoupon}
-              onRemoveCoupon={handleRemoveCoupon}
             />
           </div>
         </div>

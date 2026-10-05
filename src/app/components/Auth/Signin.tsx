@@ -12,8 +12,9 @@ import { RootState } from "@/redux/store";
 import { useState } from "react";
 import { Eye, EyeOff, X } from "lucide-react";
 import { toast } from "react-toastify";
-import { fetchCartList } from "@/redux/slices/cartsSlice"; 
+import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { baseURL, storeId } from "@/lib/axiosInstance";
+import { getFromStorage } from "@/utils/storage";
 interface SigninFormValues {
   email: string;
   password: string;
@@ -39,7 +40,7 @@ const SigninPage = () => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = localStorage.getItem("sessionId");
+          const sessionId = getFromStorage("sessionId");
           await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
@@ -56,9 +57,8 @@ const SigninPage = () => {
             .then((res) => {
               if (res?.data?.length > 0) {
                 router.push("/cart");
-              }else {
+              } else {
                 router.push("/my-account/orders");
-
               }
             });
         };
