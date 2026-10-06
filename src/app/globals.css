@@ -488,12 +488,12 @@ img {
 }
 
 .faqs-section .accordion h3 label:hover {
-  background: #FF482E;
+  background: #ff482e;
   color: #fff;
 }
 
 .faqs-section .accordion input:checked + h3 label {
-  background: #FF482E;
+  background: #ff482e;
   color: #fff;
 }
 
@@ -1072,5 +1072,105 @@ overview description */
   .description-content p {
     font-size: 20px;
     line-height: 26px;
+  }
+}
+
+/* Rich-text banners (TinyMCE HTML): restore the browser defaults that Tailwind
+   preflight strips, so the storefront matches what the editor shows. */
+@layer components {
+  .banner-html {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .banner-html h1 {
+    font-size: 2em;
+    font-weight: 700;
+    margin: 0.67em 0;
+  }
+  .banner-html h2 {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin: 0.83em 0;
+  }
+  .banner-html h3 {
+    font-size: 1.17em;
+    font-weight: 700;
+    margin: 1em 0;
+  }
+  .banner-html h4 {
+    font-weight: 700;
+    margin: 1.33em 0;
+  }
+  .banner-html h5 {
+    font-size: 0.83em;
+    font-weight: 700;
+    margin: 1.67em 0;
+  }
+  .banner-html h6 {
+    font-size: 0.67em;
+    font-weight: 700;
+    margin: 2.33em 0;
+  }
+  .banner-html p {
+    margin: 1em 0;
+  }
+  .banner-html a {
+    color: #0000ee;
+    text-decoration: underline;
+  }
+  .banner-html strong,
+  .banner-html b {
+    font-weight: 700;
+  }
+  .banner-html em,
+  .banner-html i {
+    font-style: italic;
+  }
+  .banner-html ul {
+    list-style: disc;
+    padding-left: 40px;
+    margin: 1em 0;
+  }
+  .banner-html ol {
+    list-style: decimal;
+    padding-left: 40px;
+    margin: 1em 0;
+  }
+  .banner-html blockquote {
+    margin: 1em 40px;
+  }
+  .banner-html hr {
+    border-top: 1px solid #ccc;
+    margin: 0.5em 0;
+  }
+  .banner-html > :first-child {
+    margin-top: 0;
+  }
+  .banner-html > :last-child {
+    margin-bottom: 0;
+  }
+  .banner-html img {
+    display: inline-block;
+    max-width: 100%;
+    vertical-align: middle;
+  }
+  .banner-html video,
+  .banner-html iframe {
+    max-width: 100%;
+  }
+  .banner-html table {
+    border-collapse: collapse;
+    max-width: 100%;
+  }
+  .banner-html table[border] td,
+  .banner-html table[border] th {
+    border: 1px solid #ccc;
+  }
+  .banner-html td,
+  .banner-html th {
+    padding: 0.4rem;
+  }
+  .banner-html th {
+    font-weight: 700;
   }
 }
