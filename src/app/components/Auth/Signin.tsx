@@ -1,20 +1,20 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import Link from "next/link";
-import { loginUser } from "@/redux/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { useRouter } from "next/navigation";
-import { RootState } from "@/redux/store";
-import { useState } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
-import { toast } from "react-toastify";
-import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { baseURL, storeId } from "@/lib/axiosInstance";
+import { loginUser } from "@/redux/slices/authSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
+import { RootState } from "@/redux/store";
+import { errorMessage } from "@/utils/message";
 import { getFromStorage } from "@/utils/storage";
+import { Eye, EyeOff, X } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 interface SigninFormValues {
   email: string;
   password: string;
@@ -64,12 +64,12 @@ const SigninPage = () => {
         };
         fetchCartListInner();
       } else {
-        const errorMessage =
+        const errorMsg =
           typeof result?.payload === "string"
             ? result.payload
             : "Login failed. Please try again.";
-        toast.error(errorMessage);
-        console.error("❌ Login rejected with message:", errorMessage);
+        errorMessage(errorMsg);
+        console.error("❌ Login rejected with message:", errorMsg);
       }
     } catch (err: unknown) {
       console.error("🚨 Unexpected error during onSubmit:", err);
@@ -160,7 +160,7 @@ const SigninPage = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder=""
-                  className="w-full h-[42px] !max-w-full !text-[14px] bg-white border border-[#ebebeb] rounded-[4px] px-[14px] pr-12 focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]"
+                  className="w-full h-[42px] max-w-full! text-[14px]! bg-white border border-[#ebebeb] rounded-[4px] px-[14px] pr-12 focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]"
                   {...register("password", {
                     required: "Password is required",
                   })}

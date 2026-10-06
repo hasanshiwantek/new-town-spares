@@ -70,21 +70,21 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
       const result = await dispatch(registerUser(payload));
 
       if (registerUser.fulfilled.match(result)) {
-        const token = result?.payload?.token
+        const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getFromStorage("sessionId")
+          const sessionId = getFromStorage("sessionId");
           const res = await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
-              "Authorization": `Bearer ${token}`,
-              "storeId": storeId,
+              Authorization: `Bearer ${token}`,
+              storeId: storeId,
               "X-Session-ID": sessionId || "",
               "Content-Type": "application/json",
             },
           });
           window.location.reload();
         };
-        fetchCartListInner()
+        fetchCartListInner();
         setState({
           firstName: "",
           lastName: "",
@@ -94,111 +94,109 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
       } else {
         const errorMessage =
           result.payload || "Registration failed. Please try again.";
-
-     
       }
-    } catch (err) {
-    
-    }
+    } catch (err) {}
   };
   return (
     <div className="w-[600px]">
-    <div className="w-full space-y-5">
-      {/* First + Last Name Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="w-full">
+      <div className="w-full space-y-5">
+        {/* First + Last Name Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="w-full">
+            <label className="block text-[14px] text-[#545454] mb-2">
+              First Name
+            </label>
+
+            <Input
+              className="w-full h-15 max-w-full py-[15px]"
+              placeholder="First Name"
+              required
+              value={state.firstName}
+              onChange={(e) =>
+                setState({ ...state, firstName: e.target.value })
+              }
+            />
+            {errors.firstName && (
+              <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+            )}
+          </div>
+
+          <div className="w-full">
+            <label className="block text-[14px] text-[#545454] mb-2">
+              Last Name
+            </label>
+
+            <Input
+              className="w-full h-15 max-w-full py-[15px]"
+              placeholder="Last Name"
+              required
+              value={state.lastName}
+              onChange={(e) => setState({ ...state, lastName: e.target.value })}
+            />
+            {errors.lastName && (
+              <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Email Full Width */}
+        <div className="w-full block">
           <label className="block text-[14px] text-[#545454] mb-2">
-            First Name
+            Email Address
           </label>
 
           <Input
-            className="w-full h-15 max-w-full py-[15px]"
-            placeholder="First Name"
+            type="email"
+            className="w-full h-15 max-w-full py-[15px] !foucs:outline-none"
+            placeholder="Email Address"
             required
-            value={state.firstName}
-            onChange={(e) => setState({ ...state, firstName: e.target.value })}
+            value={state.email}
+            onChange={(e) => setState({ ...state, email: e.target.value })}
           />
-          {errors.firstName && (
-            <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
           )}
         </div>
 
-        <div className="w-full">
+        {/* Password Full Width */}
+        <div className="!w-full block">
           <label className="block text-[14px] text-[#545454] mb-2">
-            Last Name
+            Password
           </label>
 
           <Input
-            className="w-full h-15 max-w-full py-[15px]"
-            placeholder="Last Name"
+            type="password"
+            className="w-full h-15 max-w-full py-[15px] mb-3 rounded-none"
+            placeholder="Password"
             required
-            value={state.lastName}
-            onChange={(e) => setState({ ...state, lastName: e.target.value })}
+            value={state.password}
+            onChange={(e) => setState({ ...state, password: e.target.value })}
           />
-          {errors.lastName && (
-            <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
           )}
         </div>
-      </div>
 
-      {/* Email Full Width */}
-      <div className="w-full block">
-        <label className="block text-[14px] text-[#545454] mb-2">
-          Email Address
-        </label>
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+          <button
+            type="button"
+            onClick={onSubmit}
+            className="btn-primary w-full !h-16 !rounded-none sm:w-auto !mt-[9px] !mb-[15px] sm:!mb-0 sm:!mt-0"
+          >
+            CREATE ACCOUNT
+          </button>
 
-        <Input
-          type="email"
-          className="w-full h-15 max-w-full py-[15px] !foucs:outline-none"
-          placeholder="Email Address"
-          required
-          value={state.email}
-          onChange={(e) => setState({ ...state, email: e.target.value })}
-        />
-        {errors.email && (
-          <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-        )}
-      </div>
-
-      {/* Password Full Width */}
-      <div className="!w-full block">
-        <label className="block text-[14px] text-[#545454] mb-2">
-          Password
-        </label>
-
-        <Input
-          type="password"
-          className="w-full h-15 max-w-full py-[15px] mb-3 rounded-none"
-          placeholder="Password"
-          required
-          value={state.password}
-          onChange={(e) => setState({ ...state, password: e.target.value })}
-        />
-        {errors.password && (
-          <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-        )}
-      </div>
-
-      {/* Buttons */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-        <button
-          type="button"
-          onClick={onSubmit}
-          className="btn-primary w-full !h-16 !rounded-none sm:w-auto !mt-[9px] !mb-[15px] sm:!mb-0 sm:!mt-0"
-        >
-          CREATE ACCOUNT
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onCancel?.()}
-          className="btn-primary  !h-16 !rounded-none !bg-white !h-12 !text-black !text-[15px] !w-[100px] !border !border-gray-300 sm:w-auto"
-        >
-          CANCEL
-        </button>
+          <button
+            type="button"
+            onClick={() => onCancel?.()}
+            className="btn-primary  !h-16 !rounded-none !bg-white !h-12 !text-black !text-[15px] !w-[100px] !border !border-gray-300 sm:w-auto"
+          >
+            CANCEL
+          </button>
+        </div>
       </div>
     </div>
-      </div>
   );
 };
 

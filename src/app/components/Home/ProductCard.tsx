@@ -3,11 +3,11 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
+import { errorMessage } from "@/utils/message";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { toast } from "sonner";
 import ProductPrice from "../productprice/ProductPrice";
 
 interface Brand {
@@ -90,6 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
       {/* Image */}
+      <Link href={product?.productUrl!}>
       <div className="relative w-full aspect-square">
         <Image
           src={imageSrc}
@@ -98,6 +99,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           className="object-contain"
         />
       </div>
+      </Link>
 
       {/* Info Wrapper */}
       <div className="flex flex-col flex-1">
@@ -111,7 +113,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <span className="text-[13px]">SKU: {product.sku}</span>
         </p>
 
-        <Link href={`${product?.productUrl}`}>
+        <Link href={product?.productUrl!}>
           <p className="text-[#212529] text-[15px] leading-[18px] font-normal mb-[7px] line-clamp-4 hover:text-[#D42020]">
             {productName}
           </p>
@@ -201,7 +203,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
                     if (remaining <= 0) {
-                      toast.error(
+                      errorMessage(
                         `You have already reached the maximum limit (${maxQty}) for this product.`,
                       );
                       return;

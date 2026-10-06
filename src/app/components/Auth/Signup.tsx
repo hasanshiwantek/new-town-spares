@@ -1,24 +1,23 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 // import countries from "world-countries";
-import { Country, State, City } from "country-state-city";
-
 import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
-import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
+import { baseURL, storeId } from "@/lib/axiosInstance";
 import { registerUser } from "@/redux/slices/authSlice";
-import { toast } from "react-toastify";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
+import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
+import { RootState } from "@/redux/store";
+import { errorMessage, successMessage } from "@/utils/message";
+import { getFromStorage } from "@/utils/storage";
+import { Country, State } from "country-state-city";
+import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { baseURL, sitekey, storeId } from "@/lib/axiosInstance";
-import { fetchCartList } from "@/redux/slices/cartsSlice"; 
-import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
-import { getFromStorage } from "@/utils/storage";
+import { useForm } from "react-hook-form";
 
 interface SignupFormValues {
   firstName: string;
@@ -64,7 +63,8 @@ function FieldLabel({
 }
 const inputClass =
   "w-full h-[42px] !max-w-full !text-[14px] bg-white border border-[#ebebeb] rounded-[4px] px-[14px] text-[#333333] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]";
-const rowClass = "grid grid-cols-1 min-[551px]:grid-cols-2 gap-7 min-[551px]:gap-5";
+const rowClass =
+  "grid grid-cols-1 min-[551px]:grid-cols-2 gap-7 min-[551px]:gap-5";
 
 const SignupPage = () => {
   const countryList = Country.getAllCountries().map((c) => ({
@@ -144,16 +144,16 @@ const SignupPage = () => {
         await dispatch(fetchCartList());
 
         reset();
-        toast.success("Account created successfully!");
+        successMessage("Account created successfully!");
         router.push("/action");
-      }
-      else {
-        const errorMessage =
-          (result.payload as string) || "Registration failed. Please try again.";
-        toast.error(errorMessage);
+      } else {
+        const errorMsg =
+          (result.payload as string) ||
+          "Registration failed. Please try again.";
+        errorMessage(errorMsg);
       }
     } catch {
-      toast.error("Registration failed. Please try again.");
+      errorMessage("Registration failed. Please try again.");
     }
   };
 
@@ -186,7 +186,6 @@ const SignupPage = () => {
         <span className="text-[#333333] text-[13px]">Create Account</span>
       </div>
       <div className="max-w-full mx-auto w-full">
-
         <h1 className="text-[28px] leading-[34px] tracking-[0.25px] text-[#333333] mt-[26.25px] mb-[26.25px]">
           New Account
         </h1>
@@ -253,11 +252,7 @@ const SignupPage = () => {
                 className="absolute right-3 top-[45px] text-gray-500 hover:text-gray-700"
                 aria-label="Toggle password"
               >
-                {showConfirmPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
               {errors.password_confirmation && (
                 <p className="text-[10px] text-red-500 mt-0.5">

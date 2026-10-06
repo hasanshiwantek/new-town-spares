@@ -1,10 +1,5 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import React, { useMemo, useCallback, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
 import {
   Select,
   SelectContent,
@@ -12,23 +7,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
   fetchMyCouponUsage,
   removeCoupon,
 } from "@/redux/slices/couponSlice";
-import { Country, State } from "country-state-city";
 import {
+  addShippingCost,
   checkoutFormSave,
   fetchShippingRate,
   fetchShippingRates,
   getCheckoutForm,
   resetShippingRates,
 } from "@/redux/slices/shippingSlice";
-import { calculatePackage } from "../CheckoutComponent/Shippingstep";
-import { addShippingCost } from "@/redux/slices/shippingSlice";
-import ProductPrice from "../productprice/ProductPrice";
+import { RootState } from "@/redux/store";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
+import { Country, State } from "country-state-city";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { calculatePackage } from "../CheckoutComponent/Shippingstep";
+import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
@@ -160,7 +159,7 @@ const OrderSummary = () => {
 
   const handleProceedToCheckout = useCallback(() => {
     if (!cart.length) {
-      toast.error("Please add something");
+      errorMessage("Please add something");
       return;
     }
     router.push("/checkout");

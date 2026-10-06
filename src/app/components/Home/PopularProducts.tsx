@@ -1,31 +1,30 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { addToCart } from "@/redux/slices/cartsSlice";
+import { fetchPopularProducts } from "@/redux/slices/homeSlice";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { fetchPopularProducts } from "@/redux/slices/homeSlice";
-import { addToCart } from "@/redux/slices/cartsSlice";
+import { useEffect, useMemo, useState } from "react";
 import PopularProductSkeleton from "../loader/PopularProductSkeleton";
-import { toast } from "sonner";
-import dynamic from "next/dynamic";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
   () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false }
+  { ssr: false },
 );
 
 const AnimatePresence = dynamic(
   () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false }
+  { ssr: false },
 );
 
 const PopularProducts = () => {
   const dispatch = useAppDispatch();
   const { popularProducts, popularProductsLoading, error } = useAppSelector(
-    (state: any) => state.home
+    (state: any) => state.home,
   );
   const products = popularProducts?.data || [];
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,7 +38,7 @@ const PopularProducts = () => {
   const brands = useMemo(() => {
     if (!products.length) return [];
     const uniqueBrands = Array.from(
-      new Set(products.map((p: any) => p.brand?.name).filter(Boolean))
+      new Set(products.map((p: any) => p.brand?.name).filter(Boolean)),
     );
     return ["All", ...uniqueBrands];
   }, [products]);
@@ -176,7 +175,6 @@ const PopularProducts = () => {
                     <button
                       onClick={() => {
                         dispatch(addToCart(product));
-                        
                       }}
                       className="btn-primary xl:!text-2xl 2xl:!text-[22px] 2xl:!font-medium 
                                  w-full sm:w-[48%] md:w-[45%] lg:w-[50%] xl:w-[45%]
