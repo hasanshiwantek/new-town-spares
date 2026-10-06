@@ -3,7 +3,7 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
-import { errorMessage } from "@/utils/message";
+import { errorMessage, successMessage } from "@/utils/message";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -72,6 +72,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     product.image?.[1]?.path ||
     "/default-product-image.svg";
 
+  const productHref =
+    product?.productUrl || (product?.slug ? `/${product.slug}` : "#");
+
   const brandSlug =
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
@@ -90,15 +93,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
       {/* Image */}
-      <Link href={product?.productUrl!}>
-      <div className="relative w-full aspect-square">
-        <Image
-          src={imageSrc}
-          alt={productName}
-          fill
-          className="object-contain"
-        />
-      </div>
+      <Link href={productHref}>
+        <div className="relative w-full aspect-square">
+          <Image
+            src={imageSrc}
+            alt={productName}
+            fill
+            className="object-contain"
+          />
+        </div>
       </Link>
 
       {/* Info Wrapper */}
@@ -113,7 +116,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <span className="text-[13px]">SKU: {product.sku}</span>
         </p>
 
-        <Link href={product?.productUrl!}>
+        <Link href={productHref}>
           <p className="text-[#212529] text-[15px] leading-[18px] font-normal mb-[7px] line-clamp-4 hover:text-[#D42020]">
             {productName}
           </p>
@@ -140,7 +143,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     <ProductPrice
                       price={Number(product.price)}
                       inline={true}
-                      className="text-[15px]! text-[#333333]"
+                      className="text-[20px]!"
+                      textColor="#FF482E"
                     />
                   </span>
                 </>
@@ -149,7 +153,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   <ProductPrice
                     price={Number(product.price)}
                     inline={true}
-                    className="text-[15px]! text-[#333333]"
+                    className="text-[20px]!"
+                    textColor="#FF482E"
                   />
                 </span>
               )}
@@ -222,8 +227,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     )
                       .unwrap()
                       .then(() => {
+                        successMessage(`${product.name} added to cart!`);
                         dispatch(fetchCartList());
-                        router.push("/cart");
                       });
                   }
                 }}

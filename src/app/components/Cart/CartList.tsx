@@ -58,42 +58,46 @@ const CartList = () => {
     setQuantities(updatedQuantities);
   }, [cart]);
 
-  const handleManualQtyUpdate = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    id: string,
-    maxPurchaseQuantity?: number,
-  ) => {
+  // Commits the edited qty on blur (Enter just blurs the input).
+  const handleQtyCommit = (item: any) => {
+    const id = item.cartItemId;
+    const parsed = Number(quantities[id]);
+    const maxPurchaseQuantity = item.maxPurchaseQuantity;
+
+    const newQty = maxPurchaseQuantity
+      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+      : parsed > 0
+        ? parsed
+        : 1;
+
+    if (newQty === Number(item.quantity)) {
+      setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      return;
+    }
+
+    setQuantities((prev) => ({ ...prev, [id]: newQty }));
+
+    dispatch(
+      updateCart({
+        id,
+        data: {
+          quantity: newQty,
+        },
+      }),
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
+      })
+      .catch(() => {
+        setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      });
+  };
+
+  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-
-      const inputValue = quantities[id];
-      const parsed = Number(inputValue);
-
-      const newQty = maxPurchaseQuantity
-        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-        : parsed > 0
-          ? parsed
-          : 1;
-
-      dispatch(
-        updateCart({
-          id,
-          data: {
-            quantity: newQty,
-          },
-        }),
-      )
-        .unwrap()
-        .then(() => {
-          dispatch(fetchCartList());
-          removeLocalShipping();
-
-          setQuantities((prev) => ({
-            ...prev,
-            [id]: newQty,
-          }));
-        });
-
       e.currentTarget.blur();
     }
   };
@@ -111,9 +115,8 @@ const CartList = () => {
             : quantities[item.cartItemId]
         }
         onChange={(e) => handleChange(item.cartItemId, e.target.value)}
-        onKeyDown={(e) =>
-          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
-        }
+        onKeyDown={handleQtyKeyDown}
+        onBlur={() => handleQtyCommit(item)}
         className="w-[50px] h-[40px] text-center py-2 outline-none !text-[15px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
     </div>
