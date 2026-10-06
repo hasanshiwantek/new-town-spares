@@ -26,6 +26,7 @@ import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
 import { errorMessage, successMessage } from "@/utils/message";
 import { removeFromStorage } from "@/utils/storage";
+import ConfirmationModal from "../modal/confirmationModal";
 import usaFlag from "../../../../public/usa-logo.png";
 import ProductPrice from "../productprice/ProductPrice";
 
@@ -54,6 +55,7 @@ const Navbar: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement | null>(null);
   const accountRef = useRef<HTMLDivElement | null>(null);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
@@ -178,15 +180,8 @@ const Navbar: React.FC = () => {
 
   const router = useRouter();
   const handleLogout = () => {
-    const confirm = window.confirm("Confirm Logout?");
-    if (!confirm) {
-      return;
-    } else {
-      dispatch(logout());
-      successMessage("Logged out successfully!");
-      window.location.href = "/auth/login";
-    }
-  };
+  setShowLogoutModal(true);
+};
   function removeLocalShipping() {
     removeFromStorage("shippingCost");
     removeFromStorage("shippingData");
@@ -860,6 +855,19 @@ const Navbar: React.FC = () => {
           </div>
         )}
       </nav>
+          <ConfirmationModal
+        open={showLogoutModal}
+        onOpenChange={setShowLogoutModal}
+        variant="warning"
+        title="Confirm Logout?"
+        description="Are you sure you want to logout?"
+        onConfirm={() => {
+          dispatch(logout());
+          successMessage("Logged out successfully!");
+          setShowLogoutModal(false);
+          router.replace("/auth/login");
+        }}
+      />
     </header>
   );
 };

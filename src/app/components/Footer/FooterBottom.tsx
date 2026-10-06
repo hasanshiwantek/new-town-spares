@@ -12,12 +12,15 @@ import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { getBrands } from "@/redux/slices/homeSlice";
 import { getWebPages, visitorSession } from "@/redux/slices/storeFrontSlice";
 import { RootState } from "@/redux/store";
-import { successMessage } from "@/utils/message";
+
+import ConfirmationModal from "../modal/confirmationModal";
+
 import {
   getFromStorage,
   getPersistedAuth,
   setInStorage,
 } from "@/utils/storage";
+import { successMessage } from "@/utils/message";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -37,7 +40,7 @@ const FooterBottom = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [email, setEmail] = useState("");
   const auth = useAppSelector((state: RootState) => state?.auth);
-
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
   const { newsletterLoading, newsletterSuccess, newsletterError } =
@@ -54,15 +57,8 @@ const FooterBottom = () => {
     router.push(url);
   };
   const handleLogout = () => {
-    const confirm = window.confirm("Confirm Logout?");
-    if (!confirm) {
-      return;
-    } else {
-      dispatch(logout());
-      successMessage("Logged out successfully!");
-      window.location.href = "/auth/login";
-    }
-  };
+  setShowLogoutModal(true);
+};
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -376,6 +372,19 @@ const FooterBottom = () => {
             </p>
           </div>
         </footer>
+             <ConfirmationModal
+  open={showLogoutModal}
+  onOpenChange={setShowLogoutModal}
+  variant="warning"
+  title="Confirm Logout?"
+  description="Are you sure you want to logout?"
+  onConfirm={() => {
+    dispatch(logout());
+    successMessage("Logged out successfully!");
+    setShowLogoutModal(false);
+    router.replace("/auth/login");
+  }}
+/>
       </div>
     </React.Fragment>
   );
