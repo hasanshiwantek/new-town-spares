@@ -106,18 +106,11 @@ const Navbar: React.FC = () => {
     });
     setQuantities(updated);
   }, [cart]);
+
+  
   useEffect(() => {
     dispatch(fetchLogos());
-  }, []);
-
-  // const handleQtyChange = (id: string, value: string) => {
-  //   if (value === "" || /^\d*$/.test(value)) {
-  //     setQuantities((prev) => ({
-  //       ...prev,
-  //       [id]: value,
-  //     }));
-  //   }
-  // };
+  }, [dispatch]);
 
   // Commits the edited qty on blur (Enter just blurs the input).
   const handleQtyCommit = (item: any) => {
