@@ -406,12 +406,13 @@ const MyAddress = () => {
                 >
                   <div className="relative min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
                     <h5 className="text-[15px] leading-[18px] font-normal text-[#333333] mb-[11px]">
-                      {item.first_name || "N/A"} {item.last_name}
+                      {item.first_name} {item.last_name}
                     </h5>
+                    {item.company_name && <p>{item.company_name}</p>}
                     <p> {item.address_line_1}</p>
                     {item.address_line_2 && <p> {item.address_line_2}</p>}
                     <p>
-                      {item.city} {item.zip}
+                      {item.city} {item?.state} {item.zip}
                     </p>
                     <p>{item.country}</p>
 

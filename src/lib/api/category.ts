@@ -8,18 +8,16 @@ export const fetchCategories = async () => {
       "Content-Type": "application/json",
       storeId: storeId,
     },
-    // ✅ ISR: cache once, refresh every 5 min
-    next: { revalidate: 60},
   });
 
   if (!res.ok) throw new Error("Failed to fetch categories");
 
   const data = await res.json();
-  
+
   return data?.data || [];
 };
 
-export const fetchCategoryById = async (id: number | string ) => {
+export const fetchCategoryById = async (id: number | string) => {
   const res = await fetch(`${baseURL}web/categories/categories/${id}`, {
     method: "GET",
     headers: {

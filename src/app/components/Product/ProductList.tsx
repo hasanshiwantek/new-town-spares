@@ -339,13 +339,12 @@ w-full
             }}
           />
         )}
-         </div>
-        {/* <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto"></div> */}
-        <div className=" mb-5 text-[22px]! font-medium">
-          <h2>Recently Viewed</h2>
-        </div>
-        <RecentViewedProduct />
-     
+      </div>
+      {/* <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto"></div> */}
+      <div className=" mb-5 text-[22px]! font-medium">
+        <h2>Recently Viewed</h2>
+      </div>
+      <RecentViewedProduct />
     </section>
   );
 }
