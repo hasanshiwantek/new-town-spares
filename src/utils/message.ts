@@ -2,12 +2,12 @@ import { toast } from "react-toastify";
 
 //success message
 export const successMessage = (data: string) => {
-  successMessage(data);
+  toast.success(data);
 };
 
 //error message
 export const errorMessage = (data: string) => {
-  errorMessage(data, {
+  toast.error(data, {
     style: {
       fontSize: "12px",
       fontWeight: "bold",
