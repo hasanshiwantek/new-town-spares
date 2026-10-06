@@ -63,13 +63,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  topBanner,
+  bottomBanner,
 }: {
   children: React.ReactNode;
+  topBanner: React.ReactNode;
+  bottomBanner: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
-        <LayoutWrapper>
+        <LayoutWrapper topBanner={topBanner} bottomBanner={bottomBanner}>
           <ScriptInjector />
           <DynamicFavicon />
           {children}

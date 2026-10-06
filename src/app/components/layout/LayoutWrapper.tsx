@@ -1,19 +1,27 @@
 import React from "react";
-import Header from "./Header";
-import Footer from "./Footer";
-import PageTransition from "./PageTransition";
 import Providers from "../Providers";
+import Footer from "./Footer";
+import Header from "./Header";
+import PageTransition from "./PageTransition";
 interface LayoutWrapperProps {
   children: React.ReactNode;
+  topBanner?: React.ReactNode;
+  bottomBanner?: React.ReactNode;
 }
 
-const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
+const LayoutWrapper: React.FC<LayoutWrapperProps> = ({
+  children,
+  topBanner,
+  bottomBanner,
+}) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Providers>
-      <Header />
-      <PageTransition>{children}</PageTransition>
-      <Footer />
+        {topBanner}
+        <Header />
+        <PageTransition>{children}</PageTransition>
+        {bottomBanner}
+        <Footer />
       </Providers>
     </div>
   );

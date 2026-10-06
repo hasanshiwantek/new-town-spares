@@ -48,11 +48,13 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.22",
     "html-entities": "^2.6.0",
+    "isomorphic-dompurify": "^4.5.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.525.0",
     "next": "^15.5.7",
     "next-sitemap": "^4.2.3",
     "next-themes": "^0.4.6",
+    "postcss": "^8.5.29",
     "primereact": "^10.9.7",
     "react": "19.1.0",
     "react-country-flag": "^3.1.0",
@@ -91,5 +93,10 @@
     "last 2 Firefox versions",
     "last 2 Safari versions",
     "Edge >= 18"
-  ]
+  ],
+  "overrides": {
+    "isomorphic-dompurify": {
+      "jsdom": "26.1.0"
+    }
+  }
 }
