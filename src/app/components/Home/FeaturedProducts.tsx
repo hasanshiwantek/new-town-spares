@@ -29,9 +29,8 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { products } = useAppSelector((state: any) => state.home);
+  const [products, setProducts] = useState<any>([]);
   const productsData = products?.data || [];
-
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -83,7 +82,10 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     setLocalError(null);
     dispatch(fetchProductsData(endpoint))
       .unwrap()
-      .then(() => setLocalError(null))
+      .then((res) => {
+        setProducts(res);
+        setLocalError(null);
+      })
       .catch((err: any) => setLocalError(err || `No ${title} found`))
       .finally(() => setLoading(false));
   }, [dispatch, endpoint, title]);
