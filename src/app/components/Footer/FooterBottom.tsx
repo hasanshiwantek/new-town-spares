@@ -17,6 +17,12 @@ import { toast } from "react-toastify";
 import { RootState } from "@/redux/store";
 import { CONTACT_INFO } from "@/const/contact";
 import ConfirmationModal from "../modal/confirmationModal";
+import {
+  getFromStorage,
+  getPersistedAuth,
+  setInStorage,
+} from "@/utils/storage";
+import { successMessage } from "@/utils/message";
 interface Category {
   id: number;
   name: string;
@@ -71,9 +77,8 @@ const FooterBottom = () => {
     }
   }, [auth?.user]);
   useEffect(() => {
-    const user = localStorage.getItem("persist:auth");
-    const parsedAuth = user ? JSON.parse(user) : null;
-    const t = parsedAuth?.token ? JSON.parse(parsedAuth.token) : null;
+    const auth = getPersistedAuth();
+    const t = auth?.token || null;
     if (t) {
       dispatch(checkAuthToken())
         .unwrap()
@@ -94,21 +99,21 @@ const FooterBottom = () => {
   }, []);
 
   useEffect(() => {
-    const existingSession = localStorage.getItem("sessionId");
+    const existingSession = getFromStorage("sessionId");
     if (existingSession) {
       dispatch(visitorSession({ sessionId: existingSession }));
     } else {
       const randomString = Math.random().toString(36).substring(2, 15);
-      localStorage.setItem("sessionId", randomString);
+      setInStorage("sessionId", randomString);
     }
   }, []);
   useEffect(() => {
     if (!paramsToken) return;
     const login = async () => {
       const auth = {
-        token: JSON.stringify(paramsToken),
+        token: paramsToken,
       };
-      localStorage.setItem("persist:auth", JSON.stringify(auth));
+      setInStorage("persist:auth", auth);
       const result = await dispatch(customerProfile());
       if (customerProfile.fulfilled.match(result)) {
         dispatch(fetchCartList());
@@ -374,7 +379,7 @@ const FooterBottom = () => {
   description="Are you sure you want to logout?"
   onConfirm={() => {
     dispatch(logout());
-    // successMessage("Logged out successfully!");
+    successMessage("Logged out successfully!");
     setShowLogoutModal(false);
     router.replace("/auth/login");
   }}

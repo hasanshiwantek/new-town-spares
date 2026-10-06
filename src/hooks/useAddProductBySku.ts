@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { addToCart } from "@/redux/slices/cartSlice";
+import { addToCart } from "@/redux/slices/cartsSlice";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "react-toastify";
 

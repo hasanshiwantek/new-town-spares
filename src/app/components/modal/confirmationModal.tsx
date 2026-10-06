@@ -90,7 +90,7 @@ export default function ConfirmationModal({
     type="button"
     onClick={onConfirm}
     disabled={loading}
-    className="min-w-[85px] bg-confirmation hover:bg-confirmation-hover px-10 py-3 h-auto text-xl font-bold text-white transition border-b border-black rounded-none"
+     className="min-w-[85px] bg-confirmation hover:bg-confirmation px-10 py-3 h-auto text-xl font-bold text-white rounded-none border-0 shadow-none ring-0 focus:ring-0 focus-visible:ring-0"
   >
     {loading ? "Please wait..." : c.confirmLabel}
   </Button>
@@ -98,7 +98,7 @@ export default function ConfirmationModal({
   <Button
     type="button"
     onClick={() => onOpenChange(false)}
-    className="min-w-[123px] bg-confirmation hover:bg-confirmation-hover px-10 py-3 h-auto text-xl font-bold text-white transition border-b border-black rounded-none"
+     className="min-w-[123px] bg-confirmation hover:bg-confirmation px-10 py-3 h-auto text-xl font-bold text-white rounded-none border-0 shadow-none ring-0 focus:ring-0 focus-visible:ring-0"
   >
     CANCEL
   </Button>

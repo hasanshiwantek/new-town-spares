@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SignupForm from "./SignupForm";
 import { baseURL, storeId } from "@/lib/axiosInstance";
+import { getFromStorage } from "@/utils/storage";
 
 interface SigninFormValues {
   email: string;
@@ -45,7 +46,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = localStorage.getItem("sessionId");
+          const sessionId = getFromStorage("sessionId");
           const res = await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {

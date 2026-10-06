@@ -17,6 +17,7 @@ import {
   Controller,
   useWatch,
   UseFormSetValue,
+  UseFormClearErrors,
 } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -36,12 +37,14 @@ import {
 import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
 import { CHECKOUT_STORAGE_KEY } from "./CheckoutComponent";
 import { fetchAccountAddress } from "@/redux/slices/myaccountSlice";
+import { countriesWithoutPostalCode } from "@/const/country-level";
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
   control: any;
   setValue: UseFormSetValue<any>;
+  clearErrors: UseFormClearErrors<any>;
   onContinue: () => void;
   countryList: Array<{ name: string; code: string }>;
   stateList: Array<{ name: string; code: string }>;
@@ -122,11 +125,62 @@ export function calculatePackage(products: any[]) {
     package_value: orderTotal,
   };
 }
+export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];
+export function getSavedShippingCost(
+  shippingDetail: any,
+  productShippingRate: { service_type: string } | null,
+) {
+  const rate = shippingDetail?.rate;
+  if (!rate) return 0;
+  if (
+    PRODUCT_SHIPPING_TYPES.includes(rate.service_type) &&
+    rate.service_type !== productShippingRate?.service_type
+  )
+    return 0;
+  return Number(rate.total_charge) || 0;
+}
+
+const hasFixedShipping = (p: any) => Number(p?.fixedShippingCost) > 0.0;
+const hasFreeShipping = (p: any) => Boolean(p?.freeShipping);
+
+export function getProductShippingRate(products: any[]) {
+  if (!products?.length) return null;
+  if (!products.every((p) => hasFixedShipping(p) || hasFreeShipping(p)))
+    return null;
+
+  if (products.some(hasFixedShipping)) {
+    const total = products.reduce(
+      (sum, p) =>
+        hasFixedShipping(p)
+          ? sum + Number(p.fixedShippingCost) * (p.quantity || 1)
+          : sum,
+      0,
+    );
+    return {
+      method_id: "fixed_shipping",
+      service_type: "fixed_shipping",
+      method_type: "fixed_shipping",
+      display_name: "Fixed Shipping",
+      total_charge: Number(total.toFixed(2)),
+      is_fedex: false,
+    };
+  }
+
+  return {
+    method_id: "free_shipping",
+    service_type: "free_shipping",
+    method_type: "free_shipping",
+    display_name: "Free Shipping",
+    total_charge: 0,
+    is_fedex: false,
+  };
+}
 const ShippingStep: React.FC<ShippingStepProps> = ({
   register,
   errors,
   control,
   setValue,
+  clearErrors,
   onContinue,
   countryList,
   stateList,
@@ -169,23 +223,23 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
 
   const userAddresses = Array.isArray(customerAddresses)
     ? customerAddresses?.map((item: any) => ({
-      id: item.id,
-      storeId: item.store_id,
-      customerId: item.customer_id,
-      firstName: item.first_name,
-      lastName: item.last_name,
-      companyName: item.company_name,
-      phone: item.phone_number,
-      addressLine1: item.address_line_1,
-      addressLine2: item.address_line_2,
-      city: item.city,
-      state: item.state,
-      zip: item.zip,
-      country: item.country,
-      isDefault: item.is_default,
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-    }))
+        id: item.id,
+        storeId: item.store_id,
+        customerId: item.customer_id,
+        firstName: item.first_name,
+        lastName: item.last_name,
+        companyName: item.company_name,
+        phone: item.phone_number,
+        addressLine1: item.address_line_1,
+        addressLine2: item.address_line_2,
+        city: item.city,
+        state: item.state,
+        zip: item.zip,
+        country: item.country,
+        isDefault: item.is_default,
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+      }))
     : [];
   // Watch form values to check if shipping address is complete
   const firstName = useWatch({ control, name: "firstName" });
@@ -195,6 +249,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const country = useWatch({ control, name: "country" });
   const zip = useWatch({ control, name: "zip" });
   const state = useWatch({ control, name: "state" });
+  const hasPostalCode = !countriesWithoutPostalCode.includes(country);
+
   const getDestRate = (dest: any) => {
     if (!dest.selectedShippingMethod) return null;
 
@@ -215,7 +271,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
       zip?.trim()
     );
   }, [firstName, lastName, address1, city, country, zip]);
-
+  const productShippingRate = useMemo(
+    () => getProductShippingRate(cart),
+    [cart],
+  );
   useEffect(() => {
     if (!city?.trim() && !country?.trim() && !zip?.trim() && !state?.trim())
       return;
@@ -264,6 +323,44 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
     }
   }, [auth?.isAuthenticated, userAddresses, saveDetail]);
 
+  const saveShippingMethod = async (serviceType: string, rate?: any) => {
+    const selectedRate =
+      rate || shippingRates?.find((r: any) => r.service_type === serviceType);
+    const cost = selectedRate
+      ? Number(selectedRate.total_charge).toFixed(2)
+      : "0";
+    const shippingData: any = {
+      country: country?.trim(),
+      city: city?.trim(),
+      state: state?.trim(),
+      zip: zip?.trim(),
+      cartId: cart?.map((item) => item.cartItemId),
+      rate: {
+        service_type: selectedRate?.service_type,
+        method_type: selectedRate?.method_type,
+        total_charge: cost,
+      },
+    };
+    await dispatch(addShippingCost(shippingData))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchShippingRate());
+      });
+  };
+  useEffect(() => {
+    if (!productShippingRate || !isShippingComplete || !isActive) return;
+    setValue("shippingMethod", productShippingRate.service_type);
+    clearErrors("shippingMethod");
+    saveShippingMethod(
+      productShippingRate.service_type,
+      productShippingRate,
+    ).catch(() => {});
+  }, [
+    productShippingRate?.service_type,
+    productShippingRate?.total_charge,
+    isShippingComplete,
+    isActive,
+  ]);
 
   if (isCompleted && !isActive) {
     if (isMultiAddress) {
@@ -551,285 +648,302 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
           />
         ) : (
           <>
-            {(addressMode === "new" || addressMode === "none") && (<>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="firstName"
-                    className="text-[13px] font-medium mb-2 text-[#333333]"
-                  >
-                    First Name
-                  </label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.firstName ? "border-red-500" : ""
-                      }`}
-                    {...register("firstName", {
-                      required: "First name is required",
-                    })}
-                  />
-                  {errors.firstName && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.firstName.message as string}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="lastName"
-                    className="text-[13px] font-medium mb-2 text-[#333333]"
-                  >
-                    Last Name
-                  </label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.lastName ? "border-red-500" : ""
-                      }`}
-                    {...register("lastName", {
-                      required: "Last name is required",
-                    })}
-                  />
-                  {errors.lastName && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.lastName.message as string}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-col mt-4">
-                <label
-                  htmlFor="company"
-                  className="text-[13px] font-medium mb-2 text-[#333333]"
-                >
-                  Company Name <span>(Optional)</span>
-                </label>
-                <Input
-                  id="company"
-                  type="text"
-                  className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
-                  {...register("company")}
-                />
-              </div>
-
-              <div className="flex flex-col mt-4">
-                <label
-                  htmlFor="phone"
-                  className="text-[13px] font-medium mb-2 text-[#333333]"
-                >
-                  Phone Number <span>(Optional)</span>
-                </label>
-                <Input
-                  id="phone"
-                  type="text"
-                  className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
-                  {...register("phone")}
-                />
-              </div>
-
-              <div className="flex flex-col mt-4">
-                <label
-                  htmlFor="address1"
-                  className="text-[13px] font-medium mb-2 text-[#333333]"
-                >
-                  Address Line 1
-                </label>
-                <Input
-                  id="address1"
-                  type="text"
-                  className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.address1 ? "border-red-500" : ""
-                    }`}
-                  {...register("address1", {
-                    required: "Address is required",
-                  })}
-                />
-                {errors.address1 && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.address1.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col mt-4">
-                <label
-                  htmlFor="address2"
-                  className="text-[13px] font-medium mb-2 text-[#333333]"
-                >
-                  Address Line 2 <span>(Optional)</span>
-                </label>
-                <Input
-                  id="address2"
-                  type="text"
-                  className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
-                  {...register("address2")}
-                />
-              </div>
-
-              <div className="flex flex-col mt-4">
-                <label
-                  htmlFor="city"
-                  className="text-[13px] font-medium mb-2 text-[#333333]"
-                >
-                  City
-                </label>
-                <Input
-                  id="city"
-                  type="text"
-                  className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.city ? "border-red-500" : ""}`}
-                  {...register("city", {
-                    required: "City is required",
-                  })}
-                />
-                {errors.city && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.city.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col mt-4">
-                <label
-                  htmlFor="country"
-                  className="text-[13px] font-medium mb-2 text-[#333333]"
-                >
-                  Country
-                </label>
-                <Controller
-                  name="country"
-                  control={control}
-                  rules={{ required: "Country is required" }}
-                  render={({ field }) => (
-                    <Select
-                      onValueChange={(val) => {
-                        field.onChange(val);
-                        setValue("state", ""); //  state reset
-                      }}
-                      // onValueChange={field.onChange}
-                      value={field.value}
+            {(addressMode === "new" || addressMode === "none") && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="firstName"
+                      className="text-[13px] font-medium mb-2 text-[#333333]"
                     >
-                      <SelectTrigger
-                        className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.country ? "border-red-500" : ""
-                          }`}
-                      >
-                        <SelectValue placeholder="Select country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countryList.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.country && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.country.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="state"
-                    className="text-[13px] font-medium mb-2 text-[#333333] flex items-baseline"
-                  >
-                    <span className="">State/Province</span>
-                    {!stateList.length && (
-                      <span className="shrink-0">(Optional)</span>
-                    )}
-                  </label>
-                  {stateList.length > 0 ? (
-                    <Controller
-                      name="state"
-                      disabled={!country?.trim()}
-                      control={control}
-                      rules={{ required: "State/Province is required" }}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={(val) => {
-                            field.onChange(val);
-                          }}
-                          value={field.value}
-                        >
-                          <SelectTrigger
-                            className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.state ? "border-red-500" : ""
-                              }`}
-                          >
-                            <SelectValue placeholder="Select state/province" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {stateList.map((state) => (
-                              <SelectItem key={state.code} value={state.code}>
-                                {state.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                  ) : (
+                      First Name
+                    </label>
                     <Input
-                      id="state"
+                      id="firstName"
                       type="text"
-                      className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.state ? "border-red-500" : ""
-                        }`}
-                      {...register("state")}
+                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                        errors.firstName ? "border-red-500" : ""
+                      }`}
+                      {...register("firstName", {
+                        required: "First name is required",
+                      })}
                     />
-                  )}
-                  {/* <Input
-                id="state"
-                type="text"
-                className="w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
-                {...register("state")}
-              /> */}
+                    {errors.firstName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.firstName.message as string}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="lastName"
+                      className="text-[13px] font-medium mb-2 text-[#333333]"
+                    >
+                      Last Name
+                    </label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                        errors.lastName ? "border-red-500" : ""
+                      }`}
+                      {...register("lastName", {
+                        required: "Last name is required",
+                      })}
+                    />
+                    {errors.lastName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.lastName.message as string}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex flex-col mt-4">
                   <label
-                    htmlFor="zip"
+                    htmlFor="company"
                     className="text-[13px] font-medium mb-2 text-[#333333]"
                   >
-                    Postal Code
+                    Company Name <span>(Optional)</span>
                   </label>
                   <Input
-                    id="zip"
+                    id="company"
                     type="text"
-                    className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.zip ? "border-red-500" : ""
-                      }`}
-                    {...register("zip", {
-                      required: "Postal code is required",
+                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    {...register("company")}
+                  />
+                </div>
+
+                <div className="flex flex-col mt-4">
+                  <label
+                    htmlFor="phone"
+                    className="text-[13px] font-medium mb-2 text-[#333333]"
+                  >
+                    Phone Number <span>(Optional)</span>
+                  </label>
+                  <Input
+                    id="phone"
+                    type="text"
+                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    {...register("phone")}
+                  />
+                </div>
+
+                <div className="flex flex-col mt-4">
+                  <label
+                    htmlFor="address1"
+                    className="text-[13px] font-medium mb-2 text-[#333333]"
+                  >
+                    Address Line 1
+                  </label>
+                  <Input
+                    id="address1"
+                    type="text"
+                    className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      errors.address1 ? "border-red-500" : ""
+                    }`}
+                    {...register("address1", {
+                      required: "Address is required",
                     })}
                   />
-                  {errors.zip && (
+                  {errors.address1 && (
                     <p className="text-sm text-red-500 mt-1">
-                      {errors.zip.message as string}
+                      {errors.address1.message as string}
                     </p>
                   )}
                 </div>
-              </div>
-              {auth?.isAuthenticated && (
-                <div className="flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
-                    id="isSaveAddressForShipping"
-                    {...register("isSaveAddressForShipping")}
-                    className="w-4 h-4"
-                  />
+
+                <div className="flex flex-col mt-4">
                   <label
-                    htmlFor="isSaveAddressForShipping"
-                    className="text-[13px] text-[#545454]"
+                    htmlFor="address2"
+                    className="text-[13px] font-medium mb-2 text-[#333333]"
                   >
-                    Save this address in my address book.
+                    Address Line 2 <span>(Optional)</span>
                   </label>
+                  <Input
+                    id="address2"
+                    type="text"
+                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    {...register("address2")}
+                  />
                 </div>
-              )}
-            </>)}
+
+                <div className="flex flex-col mt-4">
+                  <label
+                    htmlFor="city"
+                    className="text-[13px] font-medium mb-2 text-[#333333]"
+                  >
+                    City
+                  </label>
+                  <Input
+                    id="city"
+                    type="text"
+                    className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.city ? "border-red-500" : ""}`}
+                    {...register("city", {
+                      required: "City is required",
+                    })}
+                  />
+                  {errors.city && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.city.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex flex-col mt-4">
+                  <label
+                    htmlFor="country"
+                    className="text-[13px] font-medium mb-2 text-[#333333]"
+                  >
+                    Country
+                  </label>
+                  <Controller
+                    name="country"
+                    control={control}
+                    rules={{ required: "Country is required" }}
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={(val) => {
+                          field.onChange(val);
+                          setValue("state", ""); //  state reset
+                          if (countriesWithoutPostalCode.includes(val)) {
+                            clearErrors("zip");
+                          }
+                        }}
+                        // onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger
+                          className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                            errors.country ? "border-red-500" : ""
+                          }`}
+                        >
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countryList.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.country && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.country.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="state"
+                      className="text-[13px] font-medium mb-2 text-[#333333] flex items-baseline"
+                    >
+                      <span className="">State/Province</span>
+                      {!stateList.length && (
+                        <span className="shrink-0">(Optional)</span>
+                      )}
+                    </label>
+                    {stateList.length > 0 ? (
+                      <Controller
+                        name="state"
+                        disabled={!country?.trim()}
+                        control={control}
+                        rules={{ required: "State/Province is required" }}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={(val: any) => {
+                              field.onChange(val);
+                              register("state").onChange(val);
+                            }}
+                            value={field.value}
+                          >
+                            <SelectTrigger
+                              className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                                errors.state ? "border-red-500" : ""
+                              }`}
+                            >
+                              <SelectValue placeholder="Select state/province" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {stateList.map((state) => (
+                                <SelectItem key={state.code} value={state.code}>
+                                  {state.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                    ) : (
+                      <Input
+                        id="state"
+                        type="text"
+                        className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                          errors.state ? "border-red-500" : ""
+                        }`}
+                        {...register("state")}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label
+                      htmlFor="zip"
+                      className="mb-2 flex items-baseline justify-between gap-2 text-[13px] text-[#333333]"
+                    >
+                      <span>Postal Code</span>
+                      {!hasPostalCode && (
+                        <span className="shrink-0 text-gray-400">
+                          (Optional)
+                        </span>
+                      )}
+                    </label>
+                    <Input
+                      id="zip"
+                      type="text"
+                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                        errors.zip ? "border-red-500" : ""
+                      }`}
+                      {...register("zip", {
+                        validate: (value) => {
+                          if (hasPostalCode && !value) {
+                            return "Postal code is required";
+                          }
+                          return true;
+                        },
+                      })}
+                    />
+                    {errors.zip && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.zip.message as string}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {auth?.isAuthenticated && (
+                  <div className="flex items-center gap-2 mt-4">
+                    <input
+                      type="checkbox"
+                      id="isSaveAddressForShipping"
+                      {...register("isSaveAddressForShipping")}
+                      className="w-4 h-4"
+                    />
+                    <label
+                      htmlFor="isSaveAddressForShipping"
+                      className="text-[13px] text-[#545454]"
+                    >
+                      Save this address in my address book.
+                    </label>
+                  </div>
+                )}
+              </>
+            )}
             <div className="flex items-center gap-2 mt-4">
               <input
                 type="checkbox"
@@ -852,10 +966,12 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         <>
           {/* Shipping Method */}
           <div>
-            <h3 className={cn(
-              "mb-4 text-sm font-medium",
-              errors.shippingMethod ? "text-red-500" : "text-[#545454]",
-            )}>
+            <h3
+              className={cn(
+                "mb-4 text-sm font-medium",
+                errors.shippingMethod ? "text-red-500" : "text-[#545454]",
+              )}
+            >
               Shipping Method
             </h3>
 
@@ -870,106 +986,103 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               <div className=" border border-black">
                 {ratesLoader
                   ? // Skeleton
-                  Array.from({ length: 3 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-3 border rounded p-4"
-                    >
-                      {/* Radio circle */}
-                      <div className="w-4 h-4 mt-1 rounded-full border-2 border-gray-200 flex-shrink-0 animate-pulse" />
-
-                      <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                        {/* Left: service name */}
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 bg-gray-200 rounded animate-pulse w-12" />
-                          <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
-                        </div>
-
-                        {/* Right: price */}
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-14 flex-shrink-0" />
-                      </div>
-                    </div>
-                  ))
-                  : shippingRates?.map((rate, i) => {
-                    return (
-                      <label
-                        key={`${rate.method_id}-${rate.service_type}`}
-                        className={`flex items-start gap-3 border rounded p-4 transition-colors ${isShippingComplete
-                          ? "cursor-pointer"
-                          : "cursor-not-allowed opacity-50"
-                          } ${watchedShippingMethod == rate.service_type
-                            ? "border-black  !bg-[#ffffff]"
-                            : ""
-                          }`}
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 border rounded p-4"
                       >
-                        <input
-                          type="radio"
-                          value={rate.service_type}
-                          {...register("shippingMethod", {
-                            required: "Please select a shipping method",
-                            validate: () => {
-                              if (
-                                !shippingRates ||
-                                shippingRates.length === 0
-                              ) {
-                                return "No shipping method is available";
-                              }
+                        {/* Radio circle */}
+                        <div className="w-4 h-4 mt-1 rounded-full border-2 border-gray-200 flex-shrink-0 animate-pulse" />
 
-                              return true;
-                            },
-                          })}
-                          onChange={async (e) => {
-                            register("shippingMethod").onChange(e); // keep react-hook-form in sync
-                            const selectedRate = shippingRates?.find(
-                              (r: any) => r.service_type === e.target.value,
-                            );
-                            const cost = selectedRate
-                              ? Number(selectedRate.total_charge).toFixed(2)
-                              : "0";
-                            const shippingData: any = {
-                              country: country?.trim(),
-                              city: city?.trim(),
-                              state: state?.trim(),
-                              zip: zip?.trim(),
-                              cartId: cart?.map((item) => item.cartItemId),
-                              rate: {
-                                service_type: selectedRate?.service_type,
-                                method_type: selectedRate?.method_type,
-                                total_charge: cost,
-                              },
-                            };
-                            await dispatch(addShippingCost(shippingData))
-                              .unwrap()
-                              .then(() => {
-                                dispatch(fetchShippingRate({}));
-                              });
-                            // localStorage.setItem("shippingCost", cost);
-                            // localStorage.setItem(
-                            //   "shippingData",
-                            //   JSON.stringify(shippingData),
-                            // );
-                          }}
-                          className="mt-1"
-                          disabled={!isShippingComplete}
-                        />
                         <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
-                            {rate.is_fedex && <span>FedEx</span>}
-                            <span>
-                              {rate.is_fedex
-                                ? `(${rate.service_name})`
-                                : rate.display_name}
-                            </span>
+                          {/* Left: service name */}
+                          <div className="flex items-center gap-2">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-12" />
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
                           </div>
-                          <div className="text-base font-bold flex-shrink-0">
-                            {rate.total_charge === 0
-                              ? "Free"
-                              : `$${Number(rate.total_charge).toFixed(2)}`}
-                          </div>
+
+                          {/* Right: price */}
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-14 flex-shrink-0" />
                         </div>
-                      </label>
-                    );
-                  })}
+                      </div>
+                    ))
+                  : shippingRates?.map((rate, i) => {
+                      return (
+                        <label
+                          key={`${rate.method_id}-${rate.service_type}`}
+                          className={`flex items-start gap-3 border rounded p-4 transition-colors ${
+                            isShippingComplete
+                              ? "cursor-pointer"
+                              : "cursor-not-allowed opacity-50"
+                          } ${
+                            watchedShippingMethod == rate.service_type
+                              ? "border-black  !bg-[#ffffff]"
+                              : ""
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            value={rate.service_type}
+                            {...register("shippingMethod", {
+                              required: "Please select a shipping method",
+                              validate: () => {
+                                if (
+                                  !shippingRates ||
+                                  shippingRates.length === 0
+                                ) {
+                                  return "No shipping method is available";
+                                }
+
+                                return true;
+                              },
+                            })}
+                            onChange={async (e) => {
+                              register("shippingMethod").onChange(e); // keep react-hook-form in sync
+                              const selectedRate = shippingRates?.find(
+                                (r: any) => r.service_type === e.target.value,
+                              );
+                              const cost = selectedRate
+                                ? Number(selectedRate.total_charge).toFixed(2)
+                                : "0";
+                              const shippingData: any = {
+                                country: country?.trim(),
+                                city: city?.trim(),
+                                state: state?.trim(),
+                                zip: zip?.trim(),
+                                cartId: cart?.map((item) => item.cartItemId),
+                                rate: {
+                                  service_type: selectedRate?.service_type,
+                                  method_type: selectedRate?.method_type,
+                                  total_charge: cost,
+                                },
+                              };
+                              await dispatch(addShippingCost(shippingData))
+                                .unwrap()
+                                .then(() => {
+                                  dispatch(fetchShippingRate());
+                                });
+                            }}
+                            className="mt-1"
+                            disabled={!isShippingComplete}
+                          />
+                          <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
+                              {rate.is_fedex && <span>FedEx</span>}
+                              <span>
+                                {rate.is_fedex
+                                  ? `(${rate.service_name})`
+                                  : rate.display_name}
+                              </span>
+                            </div>
+                            <div className="text-base font-bold flex-shrink-0">
+                              {rate.total_charge === 0
+                                ? "Free"
+                                : `$${Number(rate.total_charge).toFixed(2)}`}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
               </div>
             )}
 
@@ -990,8 +1103,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             </label>
             <textarea
               id="orderComment"
+              rows={4}
               className="w-full border border-[#ebebeb] rounded-[4px] p-3 !text-[13px] resize-none max-h-[45px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-300 focus-visible:border-orange-500"
               {...register("orderComment")}
+              placeholder="Add any special instructions..."
             />
           </div>
 

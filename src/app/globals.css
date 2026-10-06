@@ -43,6 +43,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+    --color-confirmation: var(--confirmation-color);
+  --color-confirmation-hover: var(--confirmation-hover);
+    --color-confirmation-text: var(--confirmation-text);
 
   /* ✅ Add your Figma-based breakpoints here */
   --breakpoint-xs: 375px;
@@ -98,6 +101,10 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+   --confirmation-color: #FF482E;
+  --confirmation-hover: #b81a1a;
+   --confirmation-text: #2d2d2d;
+   --color-text-primary: #545454;
 }
 
 body {
