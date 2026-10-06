@@ -103,18 +103,11 @@ const Navbar: React.FC = () => {
     });
     setQuantities(updated);
   }, [cart]);
+
+  
   useEffect(() => {
     dispatch(fetchLogos());
-  }, []);
-
-  // const handleQtyChange = (id: string, value: string) => {
-  //   if (value === "" || /^\d*$/.test(value)) {
-  //     setQuantities((prev) => ({
-  //       ...prev,
-  //       [id]: value,
-  //     }));
-  //   }
-  // };
+  }, [dispatch]);
 
   const handleManualQtyUpdate = (
     e: React.KeyboardEvent<HTMLInputElement>,

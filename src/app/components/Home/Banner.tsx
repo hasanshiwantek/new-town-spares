@@ -1,9 +1,12 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { baseURL, storeId } from "@/lib/axiosInstance";
 import { loginUser } from "@/redux/slices/authSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
+import { getSessionId } from "@/utils/storage";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -29,7 +32,22 @@ const Banner = () => {
     try {
       const result = await dispatch(loginUser(data));
       if (loginUser.fulfilled.match(result)) {
-        reset();
+         const token = result?.payload?.token
+         const fetchCartListInner = async () => {
+          const sessionId = getSessionId()
+          await fetch(`${baseURL}web/cart/transfer`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "storeId": storeId,
+              "X-Session-ID": sessionId || "",
+              "Content-Type": "application/json",
+            },
+          });
+          reset();
+          dispatch(fetchCartList());
+        };
+        fetchCartListInner()
       } else {
         const errorMsg =
           typeof result?.payload === "string"
