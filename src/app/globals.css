@@ -3,6 +3,11 @@
 @import "currency-flags/dist/currency-flags.css";
 @custom-variant dark (&:is(.dark *));
 
+body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
+  pointer-events: auto !important;
+}
+
+
 @theme inline {
   --font-poppins: "Poppins", sans-serif;
 

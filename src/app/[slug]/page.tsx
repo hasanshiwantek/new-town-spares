@@ -208,7 +208,7 @@ export default async function ProductPage({
                     products={products?.filter((p: any) => p.id !== product.id)}
                   />
                 )}
-                <ProductRecent productId={product?.id} />
+                <ProductRecent />
               </Suspense>
             </article>
           </main>
