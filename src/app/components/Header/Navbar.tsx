@@ -3,7 +3,7 @@ import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { logout } from "@/redux/slices/authSlice";
-import { updateCart, updateQty } from "@/redux/slices/cartsSlice";
+import { updateCart } from "@/redux/slices/cartsSlice";
 import { fetchCurrencies } from "@/redux/slices/currencySlice";
 import { RootState } from "@/redux/store";
 import { ChevronRight, Menu, X } from "lucide-react";
@@ -17,19 +17,18 @@ import {
   FaShoppingCart,
   FaUser,
 } from "react-icons/fa";
-import { toast } from "react-toastify";
 import GlobalSearchBar from "./GlobalSearchBar";
 import MobileSearchBar from "./MobileSearchBar";
 
 // ✅ Optimized imports (Next Image optimized assets)
 import { fetchCategories } from "@/lib/api/category";
-import usaFlag from "../../../../public/usa-logo.png";
 import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
-import ProductPrice from "../productprice/ProductPrice";
+import { errorMessage, successMessage } from "@/utils/message";
 import { removeFromStorage } from "@/utils/storage";
 import ConfirmationModal from "../modal/confirmationModal";
-import { successMessage } from "@/utils/message";
+import usaFlag from "../../../../public/usa-logo.png";
+import ProductPrice from "../productprice/ProductPrice";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -64,7 +63,7 @@ const Navbar: React.FC = () => {
   const [updatingQty, setUpdatingQty] = useState<string | null>(null);
   const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
     useAddProductBySku();
-    const [validationMessage, setValidationMessage] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
   const handleChange = (id: string, value: string) => {
     if (value === "" || /^\d*$/.test(value)) {
       setQuantities((prev) => ({
@@ -75,20 +74,20 @@ const Navbar: React.FC = () => {
   };
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) {
-       setValidationMessage(
-      "Please complete the SKU and quantity fields"
-    );
+      setValidationMessage("Please complete the SKU and quantity fields");
       return;
     }
-      setValidationMessage("");
-    const result = await dispatch(addBySku({ sku: skuInput, quantity: Number(qty) }));
+    setValidationMessage("");
+    const result = await dispatch(
+      addBySku({ sku: skuInput, quantity: Number(qty) }),
+    );
     if (addBySku.fulfilled.match(result)) {
-      toast.success(result.payload.message);
+      successMessage(result.payload.message);
       setSkuInput("");
       setQty(1);
       dispatch(fetchCartList());
     } else {
-      //  toast.error(result.payload.message);
+      //  errorMessage(result.payload.message);
     }
   };
   useEffect(() => {
@@ -301,14 +300,14 @@ const Navbar: React.FC = () => {
               <GlobalSearchBar />
             </div>
 
-          <div className="relative flex items-center justify-end xl:max-w-[300px]">
+            <div className="relative flex items-center justify-end xl:max-w-[300px]">
               <input
                 type="text"
                 value={skuInput}
-                 onChange={(e) => {
-    setSkuInput(e.target.value);
-    setValidationMessage("");
-  }}
+                onChange={(e) => {
+                  setSkuInput(e.target.value);
+                  setValidationMessage("");
+                }}
                 placeholder="Add SKU to Cart"
                 className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
               />
@@ -317,10 +316,10 @@ const Navbar: React.FC = () => {
                 <input
                   type="number"
                   value={qty}
-                 onChange={(e) => {
-      setQty(e.target.value);
-      setValidationMessage("");
-    }}
+                  onChange={(e) => {
+                    setQty(e.target.value);
+                    setValidationMessage("");
+                  }}
                   className="w-full h-full text-center !text-[14px] bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
@@ -334,10 +333,10 @@ const Navbar: React.FC = () => {
                 {loading ? "loading" : "Add to Cart"}
               </button>
               {validationMessage && (
-  <div className="absolute left-0 top-full mt-1 z-50 w-[360px]  h-14 rounded-none bg-[#2f2f2f] px-3 py-4 text-white text-[14px] leading-tight">
-    {validationMessage}
-  </div>
-)}
+                <div className="absolute left-0 top-full mt-1 z-50 w-[360px]  h-14 rounded-none bg-[#2f2f2f] px-3 py-4 text-white text-[14px] leading-tight">
+                  {validationMessage}
+                </div>
+              )}
             </div>
           </div>
 
@@ -588,7 +587,7 @@ const Navbar: React.FC = () => {
                           type="button"
                           onClick={() => {
                             if (cart.length === 0) {
-                              toast.error("Your cart is empty");
+                              errorMessage("Your cart is empty");
                               return;
                             }
                             setIsCartOpen(false);

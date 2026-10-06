@@ -1,15 +1,14 @@
 "use client";
-import React, { useState } from "react";
-import ProductPrice from "../productprice/ProductPrice";
-import BulkInquiryModal from "../modal/BulkInquiryModal";
-import Link from "next/link";
-import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
+import { CONTACT_INFO } from "@/const/contact";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { errorMessage, successMessage } from "@/utils/message";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CONTACT_INFO } from "@/const/contact";
+import { useState } from "react";
+import BulkInquiryModal from "../modal/BulkInquiryModal";
+import ProductPrice from "../productprice/ProductPrice";
 interface ProductRightProps {
   product?: {
     name?: string;
@@ -117,7 +116,7 @@ const ProductRight = ({
                     : quantity;
 
                   if (remainingQty <= 0) {
-                    toast.error(
+                    errorMessage(
                       `Cannot add more than ${product?.maxPurchaseQuantity} units of ${product.name} to cart.`,
                     );
                     return;
@@ -135,7 +134,7 @@ const ProductRight = ({
                     .unwrap()
                     .then(() => {
                       dispatch(fetchCartList());
-                      toast.success(
+                      successMessage(
                         `${product.name} added to cart (${quantityToAdd})!`,
                       );
                       // router.push("/cart")
