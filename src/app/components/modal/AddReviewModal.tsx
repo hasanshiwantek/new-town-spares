@@ -125,7 +125,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         showCloseButton={false}
-        className="!max-w-[900px] w-[92vw] max-h-[90vh] p-0 gap-0 rounded-none! border-0 flex flex-col overflow-hidden"
+        className="!max-w-[900px] w-[92vw] max-h-[90vh] p-0 gap-0 rounded-none! border-0 flex flex-col overflow-y-auto  shadow-sm"
       >
         <div className="shrink-0 flex items-center justify-between px-[32px] py-[14px] border-b-[0.667px] border-[#ebebeb] bg-white">
           <DialogTitle className="text-[25px] leading-[30px] font-normal text-[#333333]">
