@@ -26,8 +26,8 @@ import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
 import { errorMessage, successMessage } from "@/utils/message";
 import { removeFromStorage } from "@/utils/storage";
-import ConfirmationModal from "../modal/confirmationModal";
 import usaFlag from "../../../../public/usa-logo.png";
+import ConfirmationModal from "../modal/confirmationModal";
 import ProductPrice from "../productprice/ProductPrice";
 
 const Navbar: React.FC = () => {
@@ -55,7 +55,7 @@ const Navbar: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const cartRef = useRef<HTMLDivElement | null>(null);
   const accountRef = useRef<HTMLDivElement | null>(null);
-    const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
@@ -75,6 +75,9 @@ const Navbar: React.FC = () => {
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) {
       setValidationMessage("Please complete the SKU and quantity fields");
+      setTimeout(() => {
+        setValidationMessage("");
+      }, 2000);
       return;
     }
     setValidationMessage("");
@@ -116,45 +119,48 @@ const Navbar: React.FC = () => {
   //   }
   // };
 
-  const handleManualQtyUpdate = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    id: string,
-    maxPurchaseQuantity?: number,
-  ) => {
+  // Commits the edited qty on blur (Enter just blurs the input).
+  const handleQtyCommit = (item: any) => {
+    const id = item.cartItemId;
+    const parsed = Number(quantities[id]);
+    const maxPurchaseQuantity = item.maxPurchaseQuantity;
+
+    const newQty = maxPurchaseQuantity
+      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+      : parsed > 0
+        ? parsed
+        : 1;
+
+    if (newQty === Number(item.quantity)) {
+      setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      return;
+    }
+
+    setQuantities((prev) => ({ ...prev, [id]: newQty }));
+    setUpdatingQty(id);
+    dispatch(
+      updateCart({
+        id,
+        data: {
+          quantity: newQty,
+        },
+      }),
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
+        setUpdatingQty(null);
+      })
+      .catch(() => {
+        setUpdatingQty(null);
+        setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      });
+  };
+
+  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-
-      const inputValue = quantities[id];
-      const parsed = Number(inputValue);
-
-      const newQty = maxPurchaseQuantity
-        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-        : parsed > 0
-          ? parsed
-          : 1;
-      setUpdatingQty(id);
-      dispatch(
-        updateCart({
-          id,
-          data: {
-            quantity: newQty,
-          },
-        }),
-      )
-        .unwrap()
-        .then(() => {
-          dispatch(fetchCartList());
-          removeLocalShipping();
-          setUpdatingQty(null);
-          setQuantities((prev) => ({
-            ...prev,
-            [id]: newQty,
-          }));
-        })
-        .catch(() => {
-          setUpdatingQty(null);
-        });
-
       e.currentTarget.blur();
     }
   };
@@ -170,18 +176,17 @@ const Navbar: React.FC = () => {
             : quantities[item.cartItemId]
         }
         onChange={(e) => handleChange(item.cartItemId, e.target.value)}
-        onKeyDown={(e) =>
-          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
-        }
-        className="w-full h-full text-center py-2 outline-none !text-[10px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        onKeyDown={handleQtyKeyDown}
+        onBlur={() => handleQtyCommit(item)}
+        className="w-full h-full text-center py-2 outline-none text-[10px]! font-bold! text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
     </div>
   );
 
   const router = useRouter();
   const handleLogout = () => {
-  setShowLogoutModal(true);
-};
+    setShowLogoutModal(true);
+  };
   function removeLocalShipping() {
     removeFromStorage("shippingCost");
     removeFromStorage("shippingData");
@@ -262,7 +267,7 @@ const Navbar: React.FC = () => {
       "
         >
           {/* Left: Hamburger + Logo */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             {/* Hamburger Button (Only below lg) */}
             <button
               aria-label="burger-menu"
@@ -309,7 +314,7 @@ const Navbar: React.FC = () => {
                   setValidationMessage("");
                 }}
                 placeholder="Add SKU to Cart"
-                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
+                className="w-[42%] xl:w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm text-[14px]!"
               />
 
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -320,7 +325,7 @@ const Navbar: React.FC = () => {
                     setQty(e.target.value);
                     setValidationMessage("");
                   }}
-                  className="w-full h-full text-center !text-[14px] bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full h-full text-center text-[14px]! bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 
@@ -436,9 +441,9 @@ const Navbar: React.FC = () => {
               </button>
 
               {isCartOpen && (
-                <div className="absolute right-0 top-[110%] mt-4 w-[330px] bg-white border border-gray-200 shadow-xl z-[120]">
-                  <div className="absolute -top-7 right-1 z-[120]">
-                    <ChevronRight className="w-8 h-8 rotate-[-90deg] text-black opacity-20 drop-shadow-md" />
+                <div className="absolute right-0 top-[110%] mt-4 w-[330px] bg-white border border-gray-200 shadow-xl z-120">
+                  <div className="absolute -top-7 right-1 z-120">
+                    <ChevronRight className="w-8 h-8 -rotate-90 text-black opacity-20 drop-shadow-md" />
                   </div>
                   <div>
                     <div className="px-5 py-4 border-b border-gray-200">
@@ -618,7 +623,7 @@ const Navbar: React.FC = () => {
               value={skuInput}
               onChange={(e) => setSkuInput(e.target.value)}
               placeholder="Add SKU to Cart"
-              className="w-[170px] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm !text-[14px]"
+              className="w-[170px] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black rounded-l-sm text-[14px]!"
             />
 
             <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -628,7 +633,7 @@ const Navbar: React.FC = () => {
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }
-                className="w-full h-full text-center !text-[14px] bg-transparent outline-none"
+                className="w-full h-full text-center text-[14px]! bg-transparent outline-none"
                 style={{ appearance: "textfield" }}
                 onFocus={(e) => e.target.select()}
               />
@@ -651,7 +656,7 @@ const Navbar: React.FC = () => {
         {/* Mobile Burger Dropdown Menu (Only below lg) */}
         {burgerMenuOpen && (
           // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200 overflow-visible">
-          <div className="lg:hidden fixed inset-0 top-[172.98px] left-0 right-0 bottom-0 bg-white !z-[150] p-6 overflow-y-auto overflow-x-visible">
+          <div className="lg:hidden fixed inset-0 top-[172.98px] left-0 right-0 bottom-0 bg-white z-150! p-6 overflow-y-auto overflow-x-visible">
             {/* // <div className="lg:hidden absolute top-full left-0 right-0 w-full bg-white shadow-lg !z-[150] p-6 border-t border-gray-200"> */}
             <div className="space-y-6">
               {/* Search Section */}
@@ -696,7 +701,7 @@ const Navbar: React.FC = () => {
                     onChange={(e) => setSkuInput(e.target.value)}
                     placeholder="Add SKU to Cart"
                     onFocus={(e) => e.target.select()}
-                    className="w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black !text-[14px]"
+                    className="w-[50%] h-[42px] border px-2 border-[#d9d9d9] outline-none text-black text-[14px]!"
                   />
 
                   <div className="w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
@@ -705,7 +710,7 @@ const Navbar: React.FC = () => {
                       onChange={(e) =>
                         setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                       }
-                      className="w-full h-full text-center !text-[14px] bg-transparent outline-none cursor-pointer"
+                      className="w-full h-full text-center text-[14px]! bg-transparent outline-none cursor-pointer"
                       aria-label="Quantity"
                     >
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
@@ -855,7 +860,7 @@ const Navbar: React.FC = () => {
           </div>
         )}
       </nav>
-          <ConfirmationModal
+      <ConfirmationModal
         open={showLogoutModal}
         onOpenChange={setShowLogoutModal}
         variant="warning"
