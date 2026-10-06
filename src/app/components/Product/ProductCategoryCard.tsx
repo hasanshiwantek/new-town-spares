@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import BulkInquiryModal from "../modal/BulkInquiryModal";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { toast } from "sonner";
-import ProductPrice from "../productprice/ProductPrice";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
+import { errorMessage, successMessage } from "@/utils/message";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import BulkInquiryModal from "../modal/BulkInquiryModal";
+import ProductPrice from "../productprice/ProductPrice";
 interface Product {
   id: number;
   name: string;
@@ -54,7 +54,6 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       setQuantity(1);
     }
   };
-
 
   const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";
   const brandName = product.brand?.name ?? "";
@@ -158,7 +157,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
                     if (remaining <= 0) {
-                      toast.error(
+                      errorMessage(
                         `You have already reached the maximum limit (${maxQty}) for this product.`,
                       );
                       return;
@@ -176,7 +175,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                     )
                       .unwrap()
                       .then(() => {
-                        toast.success(`${product.name} added to cart!`);
+                        successMessage(`${product.name} added to cart!`);
                         dispatch(fetchCartList());
                         // router.push("/cart");
                       });

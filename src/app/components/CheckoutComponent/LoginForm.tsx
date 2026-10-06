@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { baseURL, storeId } from "@/lib/axiosInstance";
 import { loginUser } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import SignupForm from "./SignupForm";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { errorMessage } from "@/utils/message";
 import { getFromStorage } from "@/utils/storage";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import SignupForm from "./SignupForm";
 
 interface SigninFormValues {
   email: string;
@@ -64,12 +64,12 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
           password: "",
         });
       } else {
-        const errorMessage =
+        const errorMsg =
           typeof result?.payload === "string"
             ? result.payload
             : "Login failed. Please try again.";
 
-        toast.error(errorMessage);
+        errorMessage(errorMsg);
       }
     } catch (err) {}
   };

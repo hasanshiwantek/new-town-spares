@@ -1,24 +1,18 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { X, ChevronDown } from "lucide-react";
-import ReCAPTCHA from "react-google-recaptcha";
-import { sitekey } from "@/lib/axiosInstance";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { sitekey } from "@/lib/axiosInstance";
 import { addReview } from "@/redux/slices/homeSlice";
-import { toast } from "react-toastify";
 import { RootState } from "@/redux/store";
+import { errorMessage, successMessage } from "@/utils/message";
+import { ChevronDown, X } from "lucide-react";
+import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 interface AddReviewModalProps {
   isOpen: boolean;
@@ -91,7 +85,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!captchaToken) {
-      toast.error("Please verify the captcha.");
+      errorMessage("Please verify the captcha.");
       return;
     }
     setLoading(true);
@@ -103,7 +97,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     try {
       if (addReview.fulfilled.match(result)) {
         onClose();
-        toast.success("Review submitted successfully!");
+        successMessage("Review submitted successfully!");
       } else {
         console.log("Error Sending Quote: ", result?.payload);
       }

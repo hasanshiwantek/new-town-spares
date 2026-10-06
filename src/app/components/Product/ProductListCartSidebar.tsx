@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
-import { toast } from "react-toastify";
-import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   addBySku,
@@ -13,11 +12,12 @@ import {
   fetchCartList,
   updateCart,
 } from "@/redux/slices/cartsSlice";
+import { errorMessage, successMessage } from "@/utils/message";
+import { removeFromStorage } from "@/utils/storage";
+import { X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { X } from "lucide-react";
 import ProductPrice from "../productprice/ProductPrice";
-import { removeFromStorage } from "@/utils/storage";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -43,21 +43,21 @@ export default function ProductListCartSidebar() {
       }));
     }
   };
-  
-const confirmDelete = (item: any) => {
-  setUpdatingQty(item.cartItemId);
 
-  dispatch(deleteCart({ id: item.cartItemId }))
-    .unwrap()
-    .then(() => {
-      dispatch(fetchCartList());
-      removeLocalShipping();
-      setUpdatingQty(null);
-    })
-    .catch(() => {
-      setUpdatingQty(null);
-    });
-};
+  const confirmDelete = (item: any) => {
+    setUpdatingQty(item.cartItemId);
+
+    dispatch(deleteCart({ id: item.cartItemId }))
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
+        setUpdatingQty(null);
+      })
+      .catch(() => {
+        setUpdatingQty(null);
+      });
+  };
   const handleManualQtyUpdate = (
     e: React.KeyboardEvent<HTMLInputElement>,
     id: string,
@@ -127,14 +127,16 @@ const confirmDelete = (item: any) => {
     if (skuInput == "" || Number(qty) < 1) {
       return;
     }
-    const result = await dispatch(addBySku({ sku: skuInput, quantity: Number(qty) }));
+    const result = await dispatch(
+      addBySku({ sku: skuInput, quantity: Number(qty) }),
+    );
     if (addBySku.fulfilled.match(result)) {
-      toast.success(result.payload.message);
+      successMessage(result.payload.message);
       setSkuInput("");
       setQty(1);
       dispatch(fetchCartList());
     } else {
-      //  toast.error(result.payload.message);
+      //  errorMessage(result.payload.message);
     }
   };
 
@@ -294,7 +296,7 @@ const confirmDelete = (item: any) => {
           type="button"
           onClick={() => {
             if (cart.length === 0) {
-              toast.error("Your cart is empty");
+              errorMessage("Your cart is empty");
               return;
             }
             router.push("/checkout");

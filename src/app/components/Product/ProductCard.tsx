@@ -1,21 +1,19 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
+import { useAppDispatch } from "@/hooks/useReduxHooks";
+import { addToCart } from "@/redux/slices/cartsSlice";
+import { addRecentView } from "@/redux/slices/recentSlice";
+import { successMessage } from "@/utils/message";
+import { useEffect, useState } from "react";
 import ProductLeft from "./ProductLeft";
 import ProductMiddle from "./ProductMiddle";
 import ProductRight from "./ProductRight";
-import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { toast } from "react-toastify";
-import { addToCart } from "@/redux/slices/cartsSlice";
-import { addRecentView } from "@/redux/slices/recentSlice";
-import Link from "next/link";
 
 const ProductCard = ({ product }: { product: any }) => {
   const [quantity, setQuantity] = useState(1);
   const dispatch = useAppDispatch();
   const addtocart = () => {
     dispatch(addToCart(product));
-    toast.success(`${product?.name} added to cart!`);
+    successMessage(`${product?.name} added to cart!`);
   };
   const images =
     product?.image?.length > 0
@@ -31,7 +29,7 @@ const ProductCard = ({ product }: { product: any }) => {
       addRecentView({
         id: product.id,
         sku: product.sku,
-      })
+      }),
     );
   }, [product?.id]);
 
@@ -79,12 +77,11 @@ const ProductCard = ({ product }: { product: any }) => {
             }}
             quantity={quantity}
             setQuantity={setQuantity}
-
             increment={increment}
             decrement={decrement}
             onAddToCart={() => {
               dispatch(addToCart({ ...product, quantity }));
-              toast.success(`${product?.name} added to cart (${quantity})!`);
+              successMessage(`${product?.name} added to cart (${quantity})!`);
             }}
           />
         </div>

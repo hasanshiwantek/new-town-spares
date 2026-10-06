@@ -1,19 +1,19 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
-import { toast } from "react-toastify";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   addBySku,
   deleteCart,
   fetchCartList,
   updateQty,
 } from "@/redux/slices/cartsSlice";
+import { RootState } from "@/redux/store";
+import { errorMessage, successMessage } from "@/utils/message";
+import { X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function WishlistCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -29,10 +29,12 @@ export default function WishlistCartSidebar() {
   );
 
   const handleSkuCart = async () => {
-    if (skuInput == "" || Number(qty)< 1) return;
-    const result = await dispatch(addBySku({ sku: skuInput, quantity: Number(qty)  }));
+    if (skuInput == "" || Number(qty) < 1) return;
+    const result = await dispatch(
+      addBySku({ sku: skuInput, quantity: Number(qty) }),
+    );
     if (addBySku.fulfilled.match(result)) {
-      toast.success(result.payload.message);
+      successMessage(result.payload.message);
       setSkuInput("");
       setQty(1);
       dispatch(fetchCartList());
@@ -74,10 +76,7 @@ export default function WishlistCartSidebar() {
               "/default-product-image.svg";
             const itemPrice = Number(item?.price || 0);
             return (
-              <div
-                key={item.id}
-                className="py-[14px] flex gap-[14px]"
-              >
+              <div key={item.id} className="py-[14px] flex gap-[14px]">
                 <Link
                   href={item?.productUrl || "#"}
                   className="shrink-0 relative w-[54px] h-[45px] block"
@@ -192,7 +191,7 @@ export default function WishlistCartSidebar() {
           type="button"
           onClick={() => {
             if (cart.length === 0) {
-              toast.error("Your cart is empty");
+              errorMessage("Your cart is empty");
               return;
             }
             router.push("/checkout");
