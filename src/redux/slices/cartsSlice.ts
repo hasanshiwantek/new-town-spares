@@ -1,9 +1,9 @@
 // src/redux/slices/cartsSlice.ts
-import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "@/lib/axiosInstance";
 import { CHECKOUT_STORAGE_KEY } from "@/app/components/CheckoutComponent/CheckoutComponent";
-import { toast } from "react-toastify";
+import axiosInstance from "@/lib/axiosInstance";
+import { errorMessage } from "@/utils/message";
 import { getFromStorage, setInStorage } from "@/utils/storage";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface CartItem {
   productId: any;
   quantity: number;
@@ -329,7 +329,7 @@ const cartsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed update cart";
 
-        toast.error(action.payload.message);
+        errorMessage(action.payload.message);
       });
   },
   // ✅ NEW: Restore cart from localStorage

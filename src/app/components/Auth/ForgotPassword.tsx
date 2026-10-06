@@ -10,13 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
+import { errorMessage } from "@/utils/message";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 
 interface ForgotPasswordValues {
   email: string;
@@ -29,7 +28,6 @@ const ForgotPasswordPage = () => {
     reset,
     formState: { errors },
   } = useForm<ForgotPasswordValues>();
-  const dispatch = useAppDispatch();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
@@ -54,13 +52,15 @@ const ForgotPasswordPage = () => {
         setSuccessOpen(true);
         reset();
       } else {
-        toast.error(body?.message || "Something went wrong. Please try again.");
+        errorMessage(
+          body?.message || "Something went wrong. Please try again.",
+        );
       }
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
         "Unable to send reset email. Please try again later.";
-      toast.error(typeof msg === "string" ? msg : "Request failed");
+      errorMessage(typeof msg === "string" ? msg : "Request failed");
     } finally {
       setLoading(false);
     }

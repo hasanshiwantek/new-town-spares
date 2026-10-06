@@ -1,26 +1,26 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { fetchCategories } from "@/lib/api/category";
+import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { subscribeNewsletter } from "@/redux/slices/contactSlice";
-import { useRouter, useSearchParams } from "next/navigation";
-import { getWebPages, visitorSession } from "@/redux/slices/storeFrontSlice";
-import { getBrands } from "@/redux/slices/homeSlice";
+import { fetchCategories } from "@/lib/api/category";
 import {
   checkAuthToken,
   customerProfile,
   logout,
 } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
-import { toast } from "react-toastify";
+import { subscribeNewsletter } from "@/redux/slices/contactSlice";
+import { getBrands } from "@/redux/slices/homeSlice";
+import { getWebPages, visitorSession } from "@/redux/slices/storeFrontSlice";
 import { RootState } from "@/redux/store";
-import { CONTACT_INFO } from "@/const/contact";
+import { successMessage } from "@/utils/message";
 import {
   getFromStorage,
   getPersistedAuth,
   setInStorage,
 } from "@/utils/storage";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 interface Category {
   id: number;
   name: string;
@@ -59,7 +59,7 @@ const FooterBottom = () => {
       return;
     } else {
       dispatch(logout());
-      toast.success("Logged out successfully!");
+      successMessage("Logged out successfully!");
       window.location.href = "/auth/login";
     }
   };

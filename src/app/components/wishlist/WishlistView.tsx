@@ -1,10 +1,10 @@
 "use client";
 
+import { errorMessage, successMessage } from "@/utils/message";
 import { Files } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
 import WishlistCartSidebar from "./WishlistCartSidebar";
 
 const List = () => (
@@ -205,9 +205,9 @@ const WishlistView = () => {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(WISHLIST.shareUrl);
-      toast.success("Link copied to clipboard!");
+      successMessage("Link copied to clipboard!");
     } catch {
-      toast.error("Unable to copy link.");
+      errorMessage("Unable to copy link.");
     }
   };
 
