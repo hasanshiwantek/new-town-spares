@@ -53,12 +53,9 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 // Import step components
-import { fetchCartList, removeProducts } from "@/redux/slices/cartsSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
-import {
-  addCustomerAddress,
-  fetchCustomerAddress,
-} from "@/redux/slices/myaccountSlice";
+import { fetchCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
 import BillingStep from "./Billingstep";

@@ -20,13 +20,18 @@ import {
   fetchShippingRates,
   getCheckoutForm,
   resetShippingRates,
+  setShippingRates,
 } from "@/redux/slices/shippingSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { Country, State } from "country-state-city";
 import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { calculatePackage } from "../CheckoutComponent/Shippingstep";
+import {
+  calculatePackage,
+  getProductShippingRate,
+  getSavedShippingCost,
+} from "../CheckoutComponent/Shippingstep";
 import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
@@ -77,24 +82,23 @@ const OrderSummary = () => {
     return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [cart]);
 
+  // If every product has fixed/free shipping than no need for an API rates
+  const productShippingRate = useMemo(
+    () => getProductShippingRate(cart),
+    [cart],
+  );
   const shipping = useMemo(() => {
-    if (typeof window !== "undefined") {
-      const savedCost = Number(shippingDetail?.rate?.total_charge);
-      if (savedCost) return Number(savedCost);
-    }
-
-    if (cart.length === 0) return 0;
-
-    return cart.reduce((sum, item) => {
-      const cost = Number(item.fixedShippingCost || 0);
-      return sum + cost;
-    }, 0);
-  }, [cart, shippingDetail]);
+    if (productShippingRate) return productShippingRate.total_charge;
+    return getSavedShippingCost(shippingDetail, productShippingRate);
+  }, [cart, shippingDetail, productShippingRate]);
 
   const totalItems = cart?.reduce((sum, i) => sum + (i?.quantity || 0), 0);
   // Total before discount
   const totalBeforeDiscount = subtotal + shipping;
-  const shippingCost = Number(shippingDetail?.rate?.total_charge);
+  const shippingCost = getSavedShippingCost(
+    shippingDetail,
+    productShippingRate,
+  );
   // Final total after discount
   const finalTotal = Math.max(totalBeforeDiscount - discountTotal, 0);
   const { shippingRates, ratesLoader } = useAppSelector(
@@ -102,6 +106,12 @@ const OrderSummary = () => {
   );
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (productShippingRate) {
+      dispatch(setShippingRates([productShippingRate]));
+      setSelectedShippingMethod(productShippingRate.service_type);
+      setFedexShow(true);
+      return;
+    }
     setLoading(true);
     const pkg = calculatePackage(cart);
     const { city, zip, country, ...restShippingData } = shippingData;
@@ -187,14 +197,16 @@ const OrderSummary = () => {
         setLoadingDetectCountry(false);
       }
     };
-    const getShippingRates = async () => {
-      try {
-        await dispatch(fetchShippingRate()).unwrap();
-      } catch (err) {
-        detectCountry();
-      }
-    };
-    getShippingRates();
+    if (cart?.length > 0) {
+      const getShippingRates = async () => {
+        try {
+          await dispatch(fetchShippingRate()).unwrap();
+        } catch (err) {
+          detectCountry();
+        }
+      };
+      getShippingRates();
+    }
   }, [cart]);
 
   useEffect(() => {
@@ -235,6 +247,14 @@ const OrderSummary = () => {
         <div className="flex justify-between items-center py-[14px]">
           <span className="text-[14px] font-bold text-[#333333]">
             Shipping:
+            {productShippingRate && showShipping && (
+              <span
+                className="ml-2 font-normal text-[#333333] border-b border-gray-500 hover:border-orange-500 hover:text-orange-500 cursor-pointer italic"
+                onClick={() => setShowShipping(false)}
+              >
+                Cancel
+              </span>
+            )}
           </span>
           {shippingCostLoading || loadingDetectCountry ? (
             <span
@@ -246,6 +266,24 @@ const OrderSummary = () => {
             >
               <div className="h-6 w-6 rounded-full border-[3px] border-gray-300 border-t-orange-500 animate-spin" />
             </span>
+          ) : productShippingRate ? (
+            <button
+              className={
+                showShipping
+                  ? "text-[14px] font-bold text-[#333333]"
+                  : "text-[14px] text-orange-500 border-b border-orange-500 inline-block cursor-pointer"
+              }
+              onClick={() => !showShipping && setShowShipping(true)}
+            >
+              {productShippingRate.total_charge === 0 ? (
+                "Free"
+              ) : (
+                <ProductPrice
+                  price={productShippingRate.total_charge}
+                  inline={true}
+                />
+              )}
+            </button>
           ) : shippingCost ? (
             <button
               // className="text-[14px] text-[#333333] underline hover:text-[#F15939] transition-colors"
