@@ -6,6 +6,7 @@ import {
   addBySku,
   deleteCart,
   fetchCartList,
+  updateCart,
   updateQty,
 } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
@@ -14,6 +15,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function WishlistCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -21,6 +23,9 @@ export default function WishlistCartSidebar() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { skuInput, setSkuInput, qty, setQty } = useAddProductBySku();
+  const [quantities, setQuantities] = useState<{
+    [key: string]: number | string;
+  }>({});
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce(
@@ -49,9 +54,43 @@ export default function WishlistCartSidebar() {
   };
 
   const handleQtyChange = (id: string | number, value: string) => {
-    const parsed = parseInt(value, 10);
-    if (isNaN(parsed) || parsed < 1) return;
-    dispatch(updateQty({ id, quantity: parsed }));
+    if (value === "" || /^\d*$/.test(value)) {
+      setQuantities((prev) => ({ ...prev, [id]: value }));
+    }
+  };
+
+  // Commits the edited qty on blur (Enter just blurs the input).
+  const handleQtyCommit = (item: any) => {
+    const id = item.cartItemId;
+    const draft = quantities[id];
+    if (draft === undefined) return;
+
+    const clearDraft = () =>
+      setQuantities((prev) => {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      });
+
+    const parsed = parseInt(String(draft), 10);
+    const max = item.maxPurchaseQuantity;
+    const newQty = Math.min(
+      isNaN(parsed) || parsed < 1 ? 1 : parsed,
+      max || Infinity,
+    );
+
+    if (newQty === Number(item.quantity)) {
+      clearDraft();
+      return;
+    }
+
+    dispatch(updateQty({ id: item.id, quantity: newQty }));
+    clearDraft();
+    dispatch(updateCart({ id, data: { quantity: newQty } }))
+      .unwrap()
+      .then(() => dispatch(fetchCartList()))
+      .catch(() => {
+        dispatch(updateQty({ id: item.id, quantity: item.quantity }));
+      });
   };
 
   return (
@@ -104,9 +143,18 @@ export default function WishlistCartSidebar() {
                     <input
                       type="number"
                       min={1}
-                      value={item.quantity}
+                      value={quantities[item.cartItemId] ?? item.quantity}
                       onFocus={(e) => e.target.select()}
-                      onChange={(e) => handleQtyChange(item.id, e.target.value)}
+                      onChange={(e) =>
+                        handleQtyChange(item.cartItemId, e.target.value)
+                      }
+                      onBlur={() => handleQtyCommit(item)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          e.currentTarget.blur();
+                        }
+                      }}
                       className="w-[35px] h-[24px] border-[0.667px] border-[#ebebeb] rounded-[2px] bg-white text-center outline-none !text-[15px] text-[#333333] shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       aria-label="Quantity"
                     />
