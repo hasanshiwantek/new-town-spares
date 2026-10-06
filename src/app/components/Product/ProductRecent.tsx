@@ -3,24 +3,22 @@
 import React from "react";
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import dynamic from "next/dynamic";
-
-const RecentProduct = dynamic(
-    () => import("@/app/components/Home/RecentProduct"),
-    { ssr: false, loading: () => <p>Loading Recent Products...</p> }
-);
+import RecentViewedProduct from "../myaccount/RecentViewedPoduct";
+import { RootState } from "@/redux/store";
 
 interface Props {
-    productId?: string | number;
+  productId?: string | number;
 }
 
-export default function ProductRecent({ productId }: Props) {
-    const recentProducts = useAppSelector((state: any) => state.recent.items);
-    const filteredProducts = recentProducts?.filter((p: any) => p.id !== productId);
+export default function ProductRecent() {
+  const auth = useAppSelector((state: RootState) => state?.auth);
+  if (auth?.isAuthenticated)
     return (
-        <React.Fragment>
-            {filteredProducts && filteredProducts.length > 0 && (
-                <RecentProduct products={filteredProducts} />
-            )}
-        </React.Fragment>
+      <React.Fragment>
+        <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center w-full my-[26px]">
+          Recently Viewed
+        </h2>
+        <RecentViewedProduct />
+      </React.Fragment>
     );
 }

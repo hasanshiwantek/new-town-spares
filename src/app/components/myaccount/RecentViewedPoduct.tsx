@@ -2,7 +2,10 @@
 
 import React, { useEffect } from "react";
 import { useAppSelector, useAppDispatch } from "@/hooks/useReduxHooks";
-import { clearRecent, fetchRecentProductsByIds } from "@/redux/slices/recentSlice";
+import {
+  clearRecent,
+  fetchRecentProductsByIds,
+} from "@/redux/slices/recentSlice";
 import ProductCard from "../Home/ProductCard";
 
 const RecentViewedProduct = () => {
@@ -16,9 +19,12 @@ const RecentViewedProduct = () => {
   useEffect(() => {
     if (!recentProducts || recentProducts.length === 0) return;
 
-    const timer = setTimeout(() => {
-      dispatch(clearRecent());
-    }, 60 * 60 * 1000); // 2 minutes
+    const timer = setTimeout(
+      () => {
+        dispatch(clearRecent());
+      },
+      60 * 60 * 1000,
+    ); // 2 minutes
 
     return () => clearTimeout(timer); // cleanup on unmount
   }, [recentProducts, dispatch]);
@@ -38,9 +44,17 @@ const RecentViewedProduct = () => {
   }
 
   return (
-    <div className="p-4">
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+    <div className="py-4">
+  
+      <div
+        className="grid grid-rows-1 grid-flow-col gap-3
+              auto-cols-[100%]
+              min-[551px]:auto-cols-[calc(50%-6px)]
+              min-[801px]:auto-cols-[calc(33.333%-8px)]
+              min-[1261px]:auto-cols-[calc(25%-9px)]
+              min-[1441px]:auto-cols-[calc(20%-9.6px)]
+              overflow-x-auto scroll-smooth scrollbar-hide"
+      >
         {products?.map((product: any, index: number) => (
           <ProductCard key={index} product={product} />
         ))}
