@@ -48,7 +48,7 @@ const Cart = () => {
     <main className="w-full flex justify-center py-4">
       <div className="w-full flex flex-col">
         <div className="w-full">
-          <div className="text-[13px]">
+          <div className=" hidden md:flex text-[13px]">
             <Link
               href="/"
               className="hover:text-[#F15939] transition-colors mx-1 text-[#333333] text-[13px] underline"

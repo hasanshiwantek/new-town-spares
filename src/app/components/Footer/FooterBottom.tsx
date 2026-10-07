@@ -135,11 +135,11 @@ const FooterBottom = () => {
         flex flex-col md:flex-row items-center justify-evenly gap-2 md:gap-8 lg:gap-0
       "
             >
-              <div className="hidden md:block text-center  md:text-center">
-                <h3 className="text-[19px] !text-white">
+              <div className="hidden lg:block text-center  lg:text-center">
+                <h3 className="text-[19px] text-white!">
                   Subscribe to our Newsletter
                 </h3>
-                <p className="!text-[#FFFFFF] text-[14px]">
+                <p className="text-[#FFFFFF]! text-[14px]">
                   Get the latest updates on new products and upcoming sales
                 </p>
               </div>
@@ -155,7 +155,7 @@ const FooterBottom = () => {
                       });
                   }
                 }}
-                className="w-full max-w-[400px] flex flex-col md:flex-row  items-center mt-4 md:mt-0 "
+              className="w-full max-w-[400px] mx-auto lg:mx-0 flex flex-col lg:flex-row items-center mt-4 lg:mt-0"
               >
                 <input
                   type="email"
@@ -163,12 +163,12 @@ const FooterBottom = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className=" w-[240px] md:h-[44px] md:w-full px-4 py-3 border border-white !font-normal text-[#333] bg-white focus:outline-none text-sm md:text-base"
+                  className=" w-[240px] md:h-[44px] lg:w-full px-4 py-3 border border-white font-normal! text-[#333] bg-white focus:outline-none text-sm md:text-base"
                 />
                 <button
                   type="submit"
                   disabled={newsletterLoading}
-                  className="btn-primary md:!bg-[#FD5430] !rounded-none h-[44px] text-[14px] !font-light px-4 py-3 hover:!bg-[#FD5430] !text-white"
+                  className="btn-primary md:bg-[#FD5430]! rounded-none! h-[44px] text-[14px] font-light! px-4 py-3 hover:bg-[#FD5430]! text-white!"
                 >
                   {newsletterLoading ? "Loading" : "Subscribe"}
                 </button>
