@@ -467,8 +467,6 @@ const MyAddress = () => {
           )}
         </>
       )}
-<<<<<<< HEAD
-=======
       <ConfirmationModal
         open={deleteId != null}
         onOpenChange={(open) => !open && !deleting && setDeleteId(null)}
@@ -478,7 +476,6 @@ const MyAddress = () => {
         loading={deleting}
         onConfirm={handleDelete}
       />
->>>>>>> 779855b987da997126a63e48d3200098b78e5d4b
     </div>
   );
 };
