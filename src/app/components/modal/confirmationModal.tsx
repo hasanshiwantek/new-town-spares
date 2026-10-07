@@ -1,13 +1,9 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { ShieldCheck, ShieldOff, AlertTriangle } from "lucide-react";
+import { AlertTriangle, ShieldCheck, ShieldOff } from "lucide-react";
 
 type ConfirmVariant = "enable" | "disable" | "warning";
 
@@ -65,14 +61,14 @@ export default function ConfirmationModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!max-w-[520px] p-0 overflow-hidden">
+      <DialogContent className="max-w-[520px]! p-0 overflow-hidden">
         <div className="bg-white px-6 py-12 sm:px-10 sm:py-14 text-center">
           {/* Icon */}
           <div className="mx-auto mb-6 flex h-28 w-28 items-center justify-center rounded-full border-4 border-confirmation">
-  <span className="text-6xl font-extrabold leading-none text-confirmation">
-    !
-  </span>
-</div>
+            <span className="text-6xl font-extrabold leading-none text-confirmation">
+              !
+            </span>
+          </div>
 
           {/* Title */}
           <DialogTitle className="text-xl sm:text-2xl font-medium  text-confirmation-text">
@@ -85,24 +81,23 @@ export default function ConfirmationModal({
           </DialogDescription>
 
           {/* Buttons */}
-         <div className="mt-6 flex items-center justify-center gap-4">
-  <Button
-    type="button"
-    onClick={onConfirm}
-    disabled={loading}
-     className="min-w-[85px] bg-confirmation hover:bg-confirmation px-10 py-3 h-auto text-xl font-bold text-white rounded-none border-0 shadow-none ring-0 focus:ring-0 focus-visible:ring-0"
-  >
-    {loading ? "Please wait..." : c.confirmLabel}
-  </Button>
-
-  <Button
-    type="button"
-    onClick={() => onOpenChange(false)}
-     className="min-w-[123px] bg-confirmation hover:bg-confirmation px-10 py-3 h-auto text-xl font-bold text-white rounded-none border-0 shadow-none ring-0 focus:ring-0 focus-visible:ring-0"
-  >
-    CANCEL
-  </Button>
-</div>
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <Button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="min-w-[123px] bg-confirmation hover:bg-confirmation px-10 py-3 h-auto text-xl font-bold text-white rounded-none border-0 shadow-none ring-0 focus:ring-0 focus-visible:ring-0"
+            >
+              CANCEL
+            </Button>
+            <Button
+              type="button"
+              onClick={onConfirm}
+              disabled={loading}
+              className="min-w-[85px] bg-confirmation hover:bg-confirmation px-10 py-3 h-auto text-xl font-bold text-white rounded-none border-0 shadow-none ring-0 focus:ring-0 focus-visible:ring-0"
+            >
+              {loading ? "Please wait..." : c.confirmLabel}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

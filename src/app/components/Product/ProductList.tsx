@@ -233,10 +233,10 @@ export default function ProductList({
           <ProductListCartSidebar />
         </div>
       )}
-      <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full items-start">
+      <div className="flex flex-col lg:flex-row gap-3 w-full items-start">
         {faqHtml && (
           <div
-            className="faqs-section mt-8 "
+            className="faqs-section my-6"
             dangerouslySetInnerHTML={{
               __html: faqHtml.replace(
                 /type="checkbox"/g,
@@ -246,10 +246,7 @@ export default function ProductList({
           />
         )}
       </div>
-      <div className=" mb-5 text-[22px]! font-medium">
-        <h2>Recently Viewed</h2>
-      </div>
-      <RecentViewedProduct />
+      <RecentViewedProduct headingClassName="mb-5 text-[22px]! font-medium" />
     </section>
   );
 }
