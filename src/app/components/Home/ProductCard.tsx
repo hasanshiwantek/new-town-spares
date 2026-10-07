@@ -54,7 +54,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     product?.purchasabilityStatus,
     product?.price,
   );
-  console.log({ product });
   const [quantity, setQuantity] = useState<number>(minQty);
 
   // safe brand name
