@@ -26,7 +26,7 @@ const ProductMiddle = ({ product }: any) => {
 
   const purchasabilityStatus =
     product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
-
+  const callForPricingPhone = product.callForPricingPhone;
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
     window.open(
@@ -62,35 +62,6 @@ const ProductMiddle = ({ product }: any) => {
 
           {/* Rating & Reviews */}
           <div className="flex flex-wrap items-center gap-2 text-[14px] leading-[21px] text-[#333333]">
-            {/* {stats?.count ? (
-              <>
-                {stats?.rating && (
-                  <Image
-                    width={80}
-                    height={20}
-                    src={stats.image}
-                    alt={`${stats.rating} Stars`}
-                    className="w-20 h-auto cursor-pointer"
-                    onClick={handleSeeMore}
-                  />
-                )}
-                {stats?.rating && (
-                  <span className="font-semibold">{stats.rating}</span>
-                )}
-                <span>{`${stats.count} Reviews`}</span>
-              </>
-            ) : (
-              <>
-                <span>No reviews yet</span>
-                <button
-                  type="button"
-                  onClick={() => setIsReviewModalOpen(true)}
-                  className="underline font-normal"
-                >
-                  Write a Review
-                </button>
-              </>
-            )} */}
             <>
               <button
                 type="button"
@@ -113,7 +84,6 @@ const ProductMiddle = ({ product }: any) => {
                   <span className=" text-[#333333]">
                     <ProductPrice
                       price={product?.msrp}
-                      // price={originalPrice}
                       inline={true}
                       className="text-[15px]! text-[#333333]"
                     />
@@ -151,7 +121,7 @@ const ProductMiddle = ({ product }: any) => {
           ) : (
             <div className="flex flex-col items-start">
               <Link
-                href="tel:0296516864"
+                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
                 className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
               >
                 CALL FOR PRICE

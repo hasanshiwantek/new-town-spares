@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
+import { CONTACT_INFO } from "@/const/contact";
 
 interface Brand {
   id: number;
@@ -31,6 +32,7 @@ interface Product {
   minPurchaseQuantity: number;
   maxPurchaseQuantity: number;
   purchasabilityStatus: string;
+  callForPricingPhone?: string;
 }
 
 interface ProductCardProps {
@@ -51,6 +53,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const maxQty = product.maxPurchaseQuantity;
   const purchasabilityStatus =
     product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const callForPricingPhone = product.callForPricingPhone;
 
   const [quantity, setQuantity] = useState<number>(minQty);
 
@@ -162,7 +165,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : (
             <div className="flex flex-col items-start mb-2">
               <Link
-                href="tel:0296516864"
+                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
                 className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
               >
                 CALL FOR PRICE
@@ -190,13 +193,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
-              {/*  Button */}
-              {/* <button
-                onClick={handleAddToCart}
-                className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
-              >
-                Add to Cart
-              </button> */}
               <button
                 onClick={() => {
                   if (purchasabilityStatus) {

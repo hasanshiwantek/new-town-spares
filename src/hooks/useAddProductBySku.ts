@@ -9,7 +9,7 @@ import { useState } from "react";
 export function useAddProductBySku() {
   const dispatch = useAppDispatch();
   const [skuInput, setSkuInput] = useState("");
-  const [qty, setQty] = useState<number | string>("");
+  const [qty, setQty] = useState<number | string>(1);
   const [adding, setAdding] = useState(false);
 
   const handleAddBySku = async () => {

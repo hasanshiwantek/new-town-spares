@@ -36,16 +36,11 @@ const RecentViewedProduct = () => {
   }, [recentProducts, dispatch]);
   // Handle empty state
   if (!recentProducts || recentProducts?.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No recently viewed products.
-      </div>
-    );
+    return <div className="p-4 text-center text-gray-500"></div>;
   }
 
   return (
     <div className="py-4">
-  
       <div
         className="grid grid-rows-1 grid-flow-col gap-3
               auto-cols-[100%]

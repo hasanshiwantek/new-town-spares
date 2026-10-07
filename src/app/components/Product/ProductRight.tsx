@@ -44,6 +44,8 @@ const ProductRight = ({
   const router = useRouter();
   const minQty = product?.minPurchaseQuantity || 1;
   const maxQty = product?.maxPurchaseQuantity;
+  const callForPricingPhone = product?.callForPricingPhone;
+
   return (
     <>
       <aside className="product-right w-full mt-3 [grid-area:buy]">
@@ -95,14 +97,6 @@ const ProductRight = ({
               />
             </div>
 
-            {/* 
-          <button
-            type="button"
-            onClick={onAddToCart}
-            className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white text-[14px] transition-colors font-light!"
-          >
-            Add to Cart
-          </button> */}
             {purchasabilityStatus && (
               <button
                 aria-label={`Add ${quantity} ${product?.name} to cart`}
@@ -137,7 +131,6 @@ const ProductRight = ({
                       successMessage(
                         `${product.name} added to cart (${quantityToAdd})!`,
                       );
-                      // router.push("/cart")
                     });
                 }}
                 className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#4d2017] text-white text-[14px] transition-colors font-light!"
@@ -149,7 +142,7 @@ const ProductRight = ({
         ) : (
           <div className="border border-gray-300 rounded-lg w-full p-7 ">
             <Link
-              href="tel:0296516864"
+              href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
               className="w-full block text-center py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[15px] transition-colors"
             >
               CALL FOR PRICE
@@ -176,7 +169,7 @@ const ProductRight = ({
               Email
             </a>
             <a
-              href="https://wa.me/12096516864"
+              href={`https://wa.me/${CONTACT_INFO.phone.number}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors w-full text-center"
