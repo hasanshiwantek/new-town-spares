@@ -71,7 +71,7 @@ const Page = async () => {
           title="Featured Products"
         />
         <FeaturedProducts
-          endpoint="web/products/last-week-orders"
+          endpoint="web/products/last-week-product"
           title="New Products"
         />
         <AuthorizedSupplier />
