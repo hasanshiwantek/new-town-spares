@@ -74,7 +74,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const auth = useAppSelector((state: RootState) => state?.auth);
-  console.log(auth, "ya auth hy");
+
   const handleChange = (e: any) => {
     setFormData({
       ...formData,

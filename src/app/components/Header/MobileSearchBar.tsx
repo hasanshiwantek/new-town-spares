@@ -24,7 +24,6 @@ const MobileSearchBar: React.FC = () => {
   const { searchData, loading } = useAppSelector((state: any) => state.home);
 
   const [results, setResults] = useState<any[]>([]);
-  console.log("results:", searchData);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(query, 500);
