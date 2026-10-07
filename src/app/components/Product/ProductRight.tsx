@@ -45,6 +45,7 @@ const ProductRight = ({
   const currentStockEqualent = Number(product?.currentStock) === 0;
   const dispatch = useAppDispatch();
   const maxQty = product?.maxPurchaseQuantity;
+  const callForPricingPhone = product?.callForPricingPhone;
   const availabilityText = currentStockEqualent
     ? "Out of Stock"
     : product?.availabilityText
@@ -147,7 +148,7 @@ const ProductRight = ({
         ) : (
           <div className="border border-gray-300 rounded-lg w-full p-7 ">
             <Link
-              href="tel:0296516864"
+              href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
               className="w-full block text-center py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[15px] transition-colors"
             >
               CALL FOR PRICE
@@ -174,7 +175,7 @@ const ProductRight = ({
               Email
             </a>
             <a
-              href="https://wa.me/12096516864"
+              href={`https://wa.me/${CONTACT_INFO.phone.number}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors w-full text-center"

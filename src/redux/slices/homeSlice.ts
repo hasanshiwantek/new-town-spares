@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/lib/axiosInstance";
+import { errorMessage } from "@/utils/message";
 
 export const globalSearch = createAsyncThunk(
   "home/globalSearch",
@@ -38,10 +39,10 @@ export const getBrands = createAsyncThunk(
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch brands by id"
+        err.response?.data?.message || "Failed to fetch brands by id",
       );
     }
-  }
+  },
 );
 
 export const fetchPopularProducts = createAsyncThunk(
@@ -55,10 +56,10 @@ export const fetchPopularProducts = createAsyncThunk(
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch popular products"
+        err.response?.data?.message || "Failed to fetch popular products",
       );
     }
-  }
+  },
 );
 
 export const fetchReviews = createAsyncThunk(
@@ -66,7 +67,7 @@ export const fetchReviews = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await axiosInstance.get(
-        "https://widget.advertsedge.com/api/reviews-nts"
+        "https://widget.advertsedge.com/api/reviews-nts",
       );
       return res?.data?.data ?? [];
     } catch (err: any) {
@@ -74,10 +75,10 @@ export const fetchReviews = createAsyncThunk(
       return thunkAPI.rejectWithValue(
         err?.response?.data?.message ??
           err?.message ??
-          "Unable to load testimonials. Please try again."
+          "Unable to load testimonials. Please try again.",
       );
     }
-  }
+  },
 );
 export const fetchLogos = createAsyncThunk(
   "home/get-logos",
@@ -88,17 +89,17 @@ export const fetchLogos = createAsyncThunk(
     } catch (err: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch popular products"
+        err.response?.data?.message || "Failed to fetch popular products",
       );
     }
-  }
+  },
 );
 export const fetchStats = createAsyncThunk(
   "home/fetchStats",
   async (_, thunkAPI) => {
     try {
       const res = await axiosInstance.get(
-        "https://widget.advertsedge.com/api/stats-nts"
+        "https://widget.advertsedge.com/api/stats-nts",
       );
       if (res?.data?.status && res?.data?.data) {
         return res.data.data;
@@ -110,7 +111,7 @@ export const fetchStats = createAsyncThunk(
       // Don't reject, just return null
       return null;
     }
-  }
+  },
 );
 
 export const bulkInquiry = createAsyncThunk(
@@ -119,7 +120,7 @@ export const bulkInquiry = createAsyncThunk(
     try {
       const res = await axiosInstance.post(
         `web/bulk-inquiries/submit`,
-        payload
+        payload,
       );
 
       if (res?.data?.status && res?.data?.data) {
@@ -132,7 +133,7 @@ export const bulkInquiry = createAsyncThunk(
       console.error("Error sending bulk inquiry:", err);
       return null;
     }
-  }
+  },
 );
 
 export const contactUs = createAsyncThunk(
@@ -141,7 +142,7 @@ export const contactUs = createAsyncThunk(
     try {
       const res = await axiosInstance.post(
         `web/contact-requests/submit`,
-        payload
+        payload,
       );
 
       if (res?.data?.status && res?.data?.data) {
@@ -154,7 +155,7 @@ export const contactUs = createAsyncThunk(
       console.error("Error sending contact request:", err);
       return null;
     }
-  }
+  },
 );
 export const fetchProductsData = createAsyncThunk(
   "home/fetchProductsData",
@@ -164,19 +165,16 @@ export const fetchProductsData = createAsyncThunk(
       return res.data;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(
-        err.response?.data?.message || "Failed to fetch products"
+        err.response?.data?.message || "Failed to fetch products",
       );
     }
-  }
+  },
 );
 export const addReview = createAsyncThunk(
   "home/addReview",
   async (payload: any, thunkAPI) => {
     try {
-      const res = await axiosInstance.post(
-        `web/reviews/add`,
-        payload
-      );
+      const res = await axiosInstance.post(`web/reviews/add`, payload);
 
       if (res?.data?.status && res?.data?.data) {
         return res.data;
@@ -184,13 +182,12 @@ export const addReview = createAsyncThunk(
 
       return thunkAPI.rejectWithValue(res?.data);
     } catch (err: any) {
-      console.error("Error sending review:", err);
-
+      errorMessage(err?.response?.data?.message);
       return thunkAPI.rejectWithValue(
-        err?.response?.data || "Something went wrong"
+        err?.response?.data || "Something went wrong",
       );
     }
-  }
+  },
 );
 // 2. Initial State
 const initialState = {
@@ -210,7 +207,7 @@ const initialState = {
   error: null as string | null,
   popularProductsLoading: false,
 
-    // logos
+  // logos
   logoUrl: null as string | null,
   logoType: null as string | null,
   faviconUrl: null as string | null,
@@ -285,7 +282,7 @@ const homeSlice = createSlice({
         state.statsLoading = false;
         // Stats error is not critical, so we don't set error state
       })
-       .addCase(fetchProductsData.pending, (state) => {
+      .addCase(fetchProductsData.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchProductsData.fulfilled, (state, action) => {
@@ -297,7 +294,7 @@ const homeSlice = createSlice({
         state.error = action.error.message || "Failed to fetch products data";
       })
 
-            // Logos
+      // Logos
       .addCase(fetchLogos.pending, (state) => {
         state.loading = true;
       })
