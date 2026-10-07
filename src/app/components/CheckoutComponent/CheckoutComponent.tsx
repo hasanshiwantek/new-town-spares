@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -1554,6 +1555,7 @@ const CheckoutForm = () => {
     }
   }, [auth?.isAuthenticated]);
 
+
   return (
     <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
       {paymentRequest && (
@@ -1575,10 +1577,18 @@ const CheckoutForm = () => {
             {/* STEP 1: Customer */}
             {/* STEP 1: Customer */}
             <div
-              className={`p-6 border-b-[1px]  items-center border-b-[#8b8b8b] ${currentStep >= 2 ? "flex gap-10" : "block"}`}
+              className={cn(
+                "p-6 border-b-[1px] border-b-[#8b8b8b]",
+                // Completed step: heading column + summary side by side (desktop)
+                currentStep >= 2 && "md:flex md:items-start md:gap-6",
+              )}
             >
               <h2
-                className={`hidden md:flex text-[1.92308rem] font-normal mb-4 text-[#545454] `}
+                className={cn(
+                  "text-[1.92308rem] font-normal mb-4 text-[#545454]",
+                  currentStep >= 2 &&
+                    "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
+                )}
               >
                 Customer
               </h2>
@@ -1597,9 +1607,18 @@ const CheckoutForm = () => {
 
             {/* STEP 2: Shipping */}
             <div
-              className={`p-6 border-b-[1px]  items-center border-b-[#8b8b8b] ${currentStep >= 3 ? "flex gap-10" : "block"}`}
+              className={cn(
+                "p-6 border-b-[1px] border-b-[#8b8b8b]",
+                currentStep >= 3 && "relative md:flex md:items-start md:gap-6",
+              )}
             >
-              <h2 className="hidden md:flex text-[25px] font-normal mt-6 mb-6 text-[#545454]">
+              <h2
+                className={cn(
+                  "text-[25px] font-normal mt-6 mb-6 text-[#545454]",
+                  currentStep >= 3 &&
+                    "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
+                )}
+              >
                 Shipping
               </h2>
               <ShippingStep
@@ -1623,9 +1642,19 @@ const CheckoutForm = () => {
 
             {/* STEP 3: Billing */}
             <div
-              className={`p-6 border-b-[1px]  items-center border-b-[#8b8b8b] ${currentStep >= 4 ? "flex gap-16" : "block"}`}
+              className={cn(
+                "p-6 border-b-[1px] border-b-[#8b8b8b]",
+                // Completed step: heading column + summary side by side (desktop)
+                currentStep >= 4 && "relative md:flex md:items-start md:gap-6",
+              )}
             >
-              <h2 className="hidden md:flex text-[25px] font-normal mb-4 text-[#545454]">
+              <h2
+                className={cn(
+                  "text-[25px] font-normal mb-4 text-[#545454]",
+                  currentStep >= 4 &&
+                    "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
+                )}
+              >
                 Billing
               </h2>
               <BillingStep

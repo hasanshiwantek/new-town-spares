@@ -29,6 +29,7 @@ import { removeFromStorage } from "@/utils/storage";
 import usaFlag from "../../../../public/usa-logo.png";
 import ConfirmationModal from "../modal/confirmationModal";
 import ProductPrice from "../productprice/ProductPrice";
+import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -383,7 +384,9 @@ const Navbar: React.FC = () => {
                 </div>
                 <span className="hidden min-[1441px]:flex items-center gap-1 text-[16px] text-[#333333]">
                   Account
-                  <FaChevronDown className="w-3 h-3" />
+                  {auth?.isAuthenticated && (
+                    <FaChevronDown className="w-3 h-3" />
+                  )}
                 </span>
               </div>
 
@@ -513,25 +516,7 @@ const Navbar: React.FC = () => {
                             </div>
                           );
                         })}
-                        {(loading || updatingQty) && (
-                          <div className="absolute inset-0 z-30 flex items-center justify-center">
-                            {/* Blur layer */}
-                            <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
-
-                            {/* Loader */}
-                            <div className="relative z-40 flex gap-2">
-                              <span className="w-2 h-2 bg-black rounded-full animate-bounce" />
-                              <span
-                                className="w-2 h-2 bg-black rounded-full animate-bounce"
-                                style={{ animationDelay: "0.15s" }}
-                              />
-                              <span
-                                className="w-2 h-2 bg-black rounded-full animate-bounce"
-                                style={{ animationDelay: "0.3s" }}
-                              />
-                            </div>
-                          </div>
-                        )}
+                        {(loading || updatingQty) && <CartLoadingOverlay />}
                       </div>
                     )}
 
@@ -632,7 +617,7 @@ const Navbar: React.FC = () => {
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }
-                className="w-full h-full text-center text-[14px]! bg-transparent outline-none"
+                className="w-full h-full text-center text-[14px]! bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 style={{ appearance: "textfield" }}
                 onFocus={(e) => e.target.select()}
               />
@@ -689,7 +674,7 @@ const Navbar: React.FC = () => {
               ))}
 
               {/* Add SKU Section */}
-              <div className="hidden sm:block">
+              {/* <div className="hidden sm:block">
                 <h3 className="text-black font-semibold text-lg mb-3">
                   Quick Add to Cart
                 </h3>
@@ -729,7 +714,7 @@ const Navbar: React.FC = () => {
                     {adding ? "..." : "Add"}
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* account */}
 

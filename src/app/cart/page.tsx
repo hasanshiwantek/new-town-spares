@@ -1,11 +1,11 @@
-import React from 'react'
-import Cart from '../components/Cart/Cart'
+import Cart from "../components/Cart/Cart";
+
 const page = () => {
   return (
     <main>
-        <Cart/>
+      <Cart />
     </main>
-  )
-}
+  );
+};
 
-export default page
+export default page;

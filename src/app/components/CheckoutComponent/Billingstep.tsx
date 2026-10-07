@@ -149,9 +149,9 @@ const BillingStep: React.FC<BillingStepProps> = ({
         <button
           type="button"
           onClick={onEdit}
-          className="btn-primary h-[30px] !text-[12px] w-[82px]"
+          className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0 max-md:absolute max-md:top-8 max-md:right-6"
         >
-          EDIT
+          Edit
         </button>
       </div>
     );

@@ -34,6 +34,19 @@ import {
 import MultiAddressShipping from "./MultiAddressShipping";
 import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
 
+const rateRowCls = (selected: boolean, enabled: boolean) =>
+  cn(
+    "flex items-center gap-4 px-5 py-[14px] transition-colors",
+    enabled ? "cursor-pointer hover:bg-[#ebebeb]" : "cursor-not-allowed opacity-50",
+    selected && "bg-[#ebebeb]",
+  );
+
+const rateRadioCls =
+  "appearance-none shrink-0 w-[24px] h-[24px] rounded-full border border-[#d9d9d9] bg-white checked:border-2 checked:border-[#FF482E] checked:bg-[#FF482E] checked:shadow-[inset_0_0_0_4px_#fff]";
+  
+const formatRatePrice = (charge: number | string) =>
+  `$${Number(charge || 0).toFixed(2)}`;
+
 interface ShippingStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
@@ -456,9 +469,16 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         </div>
       );
     }
+    const selectedRate: any =
+      productShippingRate?.service_type === watchedShippingMethod
+        ? productShippingRate
+        : shippingRates?.find(
+            (r: any) => r.service_type === watchedShippingMethod,
+          );
+
     return (
-      <div className="flex items-start justify-between w-full">
-        <div className="text-base text-gray-600">
+      <div className="flex items-start justify-between gap-6 w-full">
+        <div className="text-base text-gray-600 min-w-0 flex-1">
           <p className="font-medium text-[13px] text-[#545454]">
             {shippingInfo?.firstName} {shippingInfo?.lastName}
           </p>
@@ -473,13 +493,26 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             {shippingInfo?.city}, {shippingInfo?.state} {shippingInfo?.zip}{" "}
             {shippingInfo?.country ? ` / ${shippingInfo.country}` : ""}{" "}
           </p>
+          {selectedRate && (
+            <p className="mt-3 pt-3 border-t border-[#e5e5e5] text-[13px] text-[#545454]">
+              {selectedRate.is_fedex
+                ? `FedEx (${selectedRate.service_name})`
+                : selectedRate.display_name}
+              <span className="ml-3">
+                {Number(selectedRate.total_charge) === 0
+                  ? "Free"
+                  : `$${Number(selectedRate.total_charge).toFixed(2)}`}
+              </span>
+            </p>
+          )}
         </div>
         <button
           type="button"
           onClick={onEdit}
-          className="btn-primary h-[30px] !text-[12px] w-[82px]"
+          // Mobile: sits on the step heading row (parent is relative)
+          className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0 max-md:absolute max-md:top-8 max-md:right-6"
         >
-          EDIT
+          Edit
         </button>
       </div>
     );
@@ -989,8 +1022,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
           <div>
             <h3
               className={cn(
-                "mb-4 text-sm font-medium",
-                errors.shippingMethod ? "text-red-500" : "text-[#545454]",
+                "mb-3 text-[16px] font-normal",
+                errors.shippingMethod ? "text-red-500" : "text-[#333333]",
               )}
             >
               Shipping Method
@@ -1004,18 +1037,13 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             )}
 
             {(productShippingRate || shippingRates?.length > 0) && (
-              <div className=" border border-black">
+              <div className="border border-[#e5e5e5] rounded-[4px] overflow-hidden divide-y divide-[#ebebeb]">
                 {productShippingRate ? (
                   <label
-                    className={`flex items-start gap-3 border rounded p-4 transition-colors ${
-                      isShippingComplete
-                        ? "cursor-pointer"
-                        : "cursor-not-allowed opacity-50"
-                    } ${
-                      watchedShippingMethod == productShippingRate.service_type
-                        ? "border-black  !bg-[#ffffff]"
-                        : ""
-                    }`}
+                    className={rateRowCls(
+                      watchedShippingMethod == productShippingRate.service_type,
+                      isShippingComplete,
+                    )}
                   >
                     <input
                       type="radio"
@@ -1030,18 +1058,22 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                           productShippingRate,
                         );
                       }}
-                      className="mt-1"
+                      className={rateRadioCls}
                       disabled={!isShippingComplete}
                     />
-                    <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
-                        <span>{productShippingRate.display_name}</span>
-                      </div>
-                      <div className="text-base font-bold flex-shrink-0">
-                        {productShippingRate.total_charge === 0
-                          ? "Free"
-                          : `$${Number(productShippingRate.total_charge).toFixed(2)}`}
-                      </div>
+                    <div className="min-w-0 flex-1 flex items-center justify-between gap-4">
+                      <span
+                        className={cn(
+                          "text-[15px] leading-[1.5] text-[#333333]",
+                          watchedShippingMethod ==
+                            productShippingRate.service_type && "font-medium",
+                        )}
+                      >
+                        {productShippingRate.display_name}
+                      </span>
+                      <span className="text-[15px] text-[#333333] shrink-0">
+                        {formatRatePrice(productShippingRate.total_charge)}
+                      </span>
                     </div>
                   </label>
                 ) : ratesLoader ? (
@@ -1049,10 +1081,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   Array.from({ length: 3 }).map((_, i) => (
                     <div
                       key={i}
-                      className="flex items-start gap-3 border rounded p-4"
+                      className="flex items-center gap-4 px-5 py-[14px]"
                     >
                       {/* Radio circle */}
-                      <div className="w-4 h-4 mt-1 rounded-full border-2 border-gray-200 flex-shrink-0 animate-pulse" />
+                      <div className="w-[24px] h-[24px] rounded-full border border-gray-200 flex-shrink-0 animate-pulse" />
 
                       <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
                         {/* Left: service name */}
@@ -1071,15 +1103,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     return (
                       <label
                         key={`${rate.method_id}-${rate.service_type}`}
-                        className={`flex items-start gap-3 border rounded p-4 transition-colors ${
-                          isShippingComplete
-                            ? "cursor-pointer"
-                            : "cursor-not-allowed opacity-50"
-                        } ${
-                          watchedShippingMethod == rate.service_type
-                            ? "border-black  !bg-[#ffffff]"
-                            : ""
-                        }`}
+                        className={rateRowCls(
+                          watchedShippingMethod == rate.service_type,
+                          isShippingComplete,
+                        )}
                       >
                         <input
                           type="radio"
@@ -1101,23 +1128,25 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             register("shippingMethod").onChange(e); // keep react-hook-form in sync
                             await saveShippingMethod(e.target.value);
                           }}
-                          className="mt-1"
+                          className={rateRadioCls}
                           disabled={!isShippingComplete}
                         />
-                        <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
-                            {rate.is_fedex && <span>FedEx</span>}
-                            <span>
+                        <div className="min-w-0 flex-1 flex items-center justify-between gap-4">
+                          <div className="min-w-0 text-[15px] leading-[1.5] text-[#333333]">
+                            <p
+                              className={cn(
+                                watchedShippingMethod == rate.service_type &&
+                                  "font-medium",
+                              )}
+                            >
                               {rate.is_fedex
-                                ? `(${rate.service_name})`
+                                ? `FedEx (${rate.service_name})`
                                 : rate.display_name}
-                            </span>
+                            </p>
                           </div>
-                          <div className="text-base font-bold flex-shrink-0">
-                            {rate.total_charge === 0
-                              ? "Free"
-                              : `$${Number(rate.total_charge).toFixed(2)}`}
-                          </div>
+                          <span className="text-[15px] text-[#333333] shrink-0">
+                            {formatRatePrice(rate.total_charge)}
+                          </span>
                         </div>
                       </label>
                     );

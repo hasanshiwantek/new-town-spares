@@ -15,6 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
+import CartLoadingOverlay from "./CartLoadingOverlay";
 import { removeFromStorage } from "@/utils/storage";
 import { removeShippingRate, resetShippingRates } from "@/redux/slices/shippingSlice";
 const CartList = () => {
@@ -23,6 +24,8 @@ const CartList = () => {
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
   }>({});
+  const { loading } = useAppSelector((state: RootState) => state.carts);
+  const [updatingQty, setUpdatingQty] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any | null>(null);
   const handleChange = (id: string, value: string) => {
@@ -40,13 +43,17 @@ const CartList = () => {
 
   const confirmDelete = () => {
     if (itemToDelete) {
+      setUpdatingQty(itemToDelete.cartItemId);
+      setIsDialogOpen(false);
       dispatch(deleteCart({ id: itemToDelete?.cartItemId }))
         .unwrap()
         .then(() => {
           dispatch(fetchCartList());
           removeLocalShipping();
+        })
+        .finally(() => {
           setItemToDelete(null);
-          setIsDialogOpen(false);
+          setUpdatingQty(null);
         });
     }
   };
@@ -76,7 +83,7 @@ const CartList = () => {
     }
 
     setQuantities((prev) => ({ ...prev, [id]: newQty }));
-
+    setUpdatingQty(id);
     dispatch(
       updateCart({
         id,
@@ -89,8 +96,10 @@ const CartList = () => {
       .then(() => {
         dispatch(fetchCartList());
         removeLocalShipping();
+        setUpdatingQty(null);
       })
       .catch(() => {
+        setUpdatingQty(null);
         setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
       });
   };
@@ -154,7 +163,7 @@ const CartList = () => {
       )}
 
       {cart?.length > 0 ? (
-        <>
+        <div className="relative">
           {cart.map((item, idx) => (
             <div key={item?.id}>
               <div
@@ -262,7 +271,8 @@ const CartList = () => {
               </div>
             </div>
           ))}
-        </>
+          {(loading || updatingQty) && <CartLoadingOverlay />}
+        </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center w-full">
           <p className="font-normal text-[22px] text-[#333333] leading-none mb-[11px]">

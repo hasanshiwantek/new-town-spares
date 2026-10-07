@@ -11,6 +11,7 @@ import { RootState } from "@/redux/store";
 import { Country, State } from "country-state-city";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import ConfirmationModal from "../modal/confirmationModal";
 import { addrInputCls, addrSelectCls, FieldLabel } from "./addressFormHelpers";
 
 const MyAddress = () => {
@@ -25,18 +26,19 @@ const MyAddress = () => {
     country: "",
   });
 
-  const { address, loading, error, customerAddresses } = useAppSelector(
+  const { loading, error, customerAddresses } = useAppSelector(
     (state: RootState) => state.myaccount,
   );
 
-  const auth = useAppSelector((state: RootState) => state.auth);
-
+  const [deleteId, setDeleteId] = useState<number | string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const countryList = Country.getAllCountries().map((c) => ({
     name: c.name,
     code: c.isoCode,
   }));
+
   const stateList = useMemo(() => {
     if (!editData?.country) return [];
 
@@ -45,15 +47,17 @@ const MyAddress = () => {
       code: s.isoCode,
     }));
   }, [editData?.country]);
-  const handleDelete = async (id: number | string) => {
-    const confirmDelete = confirm(
-      `Are you sure you want to delete address with ID: ${id}?`,
-    );
-    if (confirmDelete) {
-      try {
-        await dispatch(deletecustomeraddress({ id })).unwrap();
-        dispatch(fetchCustomerAddress());
-      } catch (err) {}
+
+  const handleDelete = async () => {
+    if (deleteId == null) return;
+    setDeleting(true);
+    try {
+      await dispatch(deletecustomeraddress({ id: deleteId })).unwrap();
+      dispatch(fetchCustomerAddress());
+    } catch (err) {
+    } finally {
+      setDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -397,40 +401,47 @@ const MyAddress = () => {
           )}
 
           {!loading && !error && (
-            <ul className="flex flex-wrap -mx-[11px] list-none p-0 m-0">
+            <ul className="flex flex-wrap items-stretch -mx-[11px] list-none p-0 m-0">
               {/* Address List */}
               {customerAddresses?.map((item: any) => (
                 <li
-                  key={item.addressId}
-                  className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]"
+                  key={item.id}
+                  className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px] flex"
                 >
-                  <div className="relative min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
+                  <div className="relative w-full h-full min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
                     <h5 className="text-[15px] leading-[18px] font-normal text-[#333333] mb-[11px]">
                       {item.first_name} {item.last_name}
                     </h5>
+
                     {item.company_name && <p>{item.company_name}</p>}
-                    <p> {item.address_line_1}</p>
-                    {item.address_line_2 && <p> {item.address_line_2}</p>}
+
+                    <p>{item.address_line_1}</p>
+
+                    {item.address_line_2 && <p>{item.address_line_2}</p>}
+
                     <p>
                       {item.city} {item?.state} {item.zip}
                     </p>
+
                     <p>{item.country}</p>
 
                     {item.phone_number && (
                       <p className="mt-2">Phone: {item.phone_number}</p>
                     )}
 
-                    {/* Edit | Delete — anchored bottom-left like live */}
-                    <div className="mt-4 flex items-center text-[14px] leading-[21px] text-[#333333]">
+                    {/* Edit | Delete */}
+                    <div className="absolute bottom-[21px] left-[21px] flex items-center text-[14px] leading-[21px] text-[#333333]">
                       <button
                         onClick={() => openEditModal(item)}
                         className="underline hover:text-[#FF482E]"
                       >
                         Edit
                       </button>
+
                       <span className="mx-[5px]">|</span>
+
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => setDeleteId(item.id)}
                         className="underline hover:text-[#FF482E]"
                       >
                         Delete
@@ -441,10 +452,10 @@ const MyAddress = () => {
               ))}
 
               {/* New Address tile */}
-              <li className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]">
+              <li className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px] flex">
                 <Link
                   href="/my-account/addresses/new-address"
-                  className="flex flex-col items-center justify-center min-h-[215px] bg-white border border-[#ebebeb] text-center text-[#333333] hover:text-[#FF482E] transition-colors"
+                  className="flex w-full h-full min-h-[215px] flex-col items-center justify-center bg-white border border-[#ebebeb] text-center text-[#333333] hover:text-[#FF482E] transition-colors"
                 >
                   <span className="text-[50px] leading-[50px]">+</span>
                   <span className="text-[15px] leading-[18px]">
@@ -456,9 +467,15 @@ const MyAddress = () => {
           )}
         </>
       )}
-      {/* -------------------- EDIT MODAL -------------------- */}
-
-      {/* -------------------- END MODAL -------------------- */}
+      <ConfirmationModal
+        open={deleteId != null}
+        onOpenChange={(open) => !open && !deleting && setDeleteId(null)}
+        variant="warning"
+        title="Delete Address?"
+        description="Are you sure you want to delete this address?"
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };
