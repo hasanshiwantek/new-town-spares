@@ -107,7 +107,6 @@ const Navbar: React.FC = () => {
     setQuantities(updated);
   }, [cart]);
 
-  
   useEffect(() => {
     dispatch(fetchLogos());
   }, [dispatch]);
@@ -191,9 +190,10 @@ const Navbar: React.FC = () => {
     dispatch(deleteCart({ id: item.cartItemId }))
       .unwrap()
       .then(() => {
-        dispatch(fetchCartList());
-        removeLocalShipping();
-        setUpdatingQty(null);
+        dispatch(fetchCartList()).then(() => {
+          removeLocalShipping();
+          setUpdatingQty(null);
+        });
       })
       .catch(() => {
         setUpdatingQty(null);
@@ -313,6 +313,7 @@ const Navbar: React.FC = () => {
               <div className="w-[30px] xl:w-[48px] h-[42px] text-black flex items-center justify-center border-y border-r border-gray-300">
                 <input
                   type="number"
+                  min={1}
                   value={qty}
                   onChange={(e) => {
                     setQty(e.target.value);
@@ -508,7 +509,7 @@ const Navbar: React.FC = () => {
                             </div>
                           );
                         })}
-                        {loading && updatingQty && (
+                        {(loading || updatingQty) && (
                           <div className="absolute inset-0 z-30 flex items-center justify-center">
                             {/* Blur layer */}
                             <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
@@ -623,6 +624,7 @@ const Navbar: React.FC = () => {
               <input
                 type="number"
                 value={qty}
+                min={1}
                 onChange={(e) =>
                   setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
                 }

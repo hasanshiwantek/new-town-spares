@@ -1,16 +1,14 @@
 "use client";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { CONTACT_INFO } from "@/const/contact";
+import { useAppDispatch } from "@/hooks/useReduxHooks";
+import { isAvailableForSale } from "@/lib/utils";
 import { fetchReviews, fetchStats } from "@/redux/slices/homeSlice";
-import { RootState } from "@/redux/store";
+import { fetchProductReviews } from "@/redux/slices/storeFrontSlice";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import AddReviewModal from "../modal/AddReviewModal";
 import ProductPrice from "../productprice/ProductPrice";
-import { fetchProductReviews } from "@/redux/slices/storeFrontSlice";
-import { log } from "console";
-import { CONTACT_INFO } from "@/const/contact";
 const ProductMiddle = ({ product }: any) => {
   const dispatch = useAppDispatch();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -24,8 +22,10 @@ const ProductMiddle = ({ product }: any) => {
   const savings =
     product?.msrp && product?.price ? product.msrp - product.price : 0;
 
-  const purchasabilityStatus =
-    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const availableForSale = isAvailableForSale(
+    product?.purchasabilityStatus,
+    product?.price,
+  );
 
   const handleSeeMore = useCallback(() => {
     // Always go to all reviews page (not single)
@@ -105,7 +105,7 @@ const ProductMiddle = ({ product }: any) => {
         <hr className="mt-6 hidden min-[1261px]:block" />
         {/* Price */}
         <div className="flex flex-col 2xl:gap-[4px] xl:gap-[3.1px] mt-6 ">
-          {purchasabilityStatus ? (
+          {availableForSale ? (
             <div className="hidden min-[1261px]:flex flex-col items-start">
               <p className="text-[15px] text-[#333333]">
                 Price:{" "}
@@ -158,7 +158,7 @@ const ProductMiddle = ({ product }: any) => {
               </Link>
             </div>
           )}
-          {/* {purchasabilityStatus && (
+          {/* {availableForSale && (
             <div className="mt-3 text-[14px] leading-[21px] text-[#121e4d]">
               <span className="inline-flex items-center align-middle gap-[3.5px] rounded-[7px] bg-[#E2E2FF] text-[#4242CF] text-[14px] leading-[21px] font-normal py-[1.75px] px-[7px] mr-2 whitespace-nowrap">
                 <svg
