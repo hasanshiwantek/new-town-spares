@@ -378,9 +378,13 @@ const Navbar: React.FC = () => {
                 }
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <div className="w-7 h-7 flex items-center justify-center">
-                  <FaUser className="text-black hover:text-[#FF482E] w-full h-full" />
+                <div className="w-7 h-7 flex items-center justify-center hover:text-[#FF482E]!">
+                  <FaUser className="text-black w-full h-full" />
                 </div>
+                <span className="hidden min-[1441px]:flex items-center gap-1 text-[16px] text-[#333333]">
+                  Account
+                  <FaChevronDown className="w-3 h-3" />
+                </span>
               </div>
 
               {auth?.isAuthenticated && (
@@ -452,7 +456,7 @@ const Navbar: React.FC = () => {
                     )}
 
                     {cart.length > 0 && (
-                      <div className=" relative max-h-[420px] overflow-y-auto">
+                      <div className="relative max-h-[420px] overflow-y-auto">
                         {cart.map((item) => {
                           const imageUrl =
                             item?.image?.[0]?.path ||

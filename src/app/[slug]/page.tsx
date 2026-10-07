@@ -1,7 +1,7 @@
 import ProductCard from "@/app/components/Product/ProductCard";
 import {
   fetchProductBySlugAndUrl,
-  fetchProducts,
+  fetchRelatedProducts,
   fetchWebPages,
 } from "@/lib/api/products";
 import type { Metadata } from "next";
@@ -126,7 +126,12 @@ export default async function ProductPage({
   //  Parallel data fetching
   const product = await fetchProductBySlugAndUrl(pathname);
   const webPages = await fetchWebPages(pathname);
-  const products = await fetchProducts();
+  const categoryId =
+    product?.categoryHierarchy?.at(-1)?.id ?? product?.categoryIds?.[0];
+
+  const products = product?.relatedProductsEnabled
+    ? await fetchRelatedProducts(product?.brandId, categoryId)
+    : [];
 
   if (!product && !webPages) {
     notFound();

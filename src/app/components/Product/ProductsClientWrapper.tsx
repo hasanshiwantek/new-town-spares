@@ -141,7 +141,7 @@ export default function ProductsClientWrapper({
       </aside>
 
       {/* Product Listing */}
-      <main className="w-full">
+      <main className="w-full min-w-0">
         {(isCategoryPage || isBrandPage) && (
           <div className="mb-4 px-4 md:px-0">
             <Breadcrumb items={breadcrumbItems} />

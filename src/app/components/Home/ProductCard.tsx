@@ -54,7 +54,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     product?.purchasabilityStatus,
     product?.price,
   );
-  console.log({ product });
   const [quantity, setQuantity] = useState<number>(minQty);
 
   // safe brand name
@@ -204,7 +203,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     const cartItem = cart.find(
                       (item: any) => item.id === product.id,
                     );
-                    const minQty = product.minPurchaseQuantity || 1;
                     const maxQty = product.maxPurchaseQuantity;
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
@@ -214,8 +212,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       );
                       return;
                     }
-                    // Add only up to the allowed maximum
-                    const quantityToAdd = Math.min(minQty, remaining);
 
                     dispatch(
                       addCart({

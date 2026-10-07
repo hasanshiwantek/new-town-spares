@@ -1,8 +1,5 @@
-// lib/api/products.ts
 import { baseURL, storeId } from "../axiosInstance";
-import serverAxios from "../serverAxios";
-import { redirect } from "next/navigation";
-// const baseURL = process.env.NEXT_PUBLIC_API_URL;
+
 export const fetchProducts = async () => {
   try {
     const res = await fetch(`${baseURL}web/products/products`, {
@@ -20,14 +17,42 @@ export const fetchProducts = async () => {
   }
 };
 
+export const fetchRelatedProducts = async (
+  brandId?: number,
+  categoryId?: number,
+) => {
+  try {
+    const params = new URLSearchParams();
+    if (brandId) params.set("brandId", String(brandId));
+    if (categoryId) params.set("categoryId", String(categoryId));
+
+    const res = await fetch(
+      `${baseURL}web/products/related-products?${params.toString()}`,
+      {
+        next: { revalidate: 10 },
+        headers: { storeId: storeId },
+      },
+    );
+
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data?.data || [];
+  } catch (error) {
+    return []; // related products are non-critical
+  }
+};
+
 // Get single product by slug (always fresh)
 export const fetchProductBySlugAndUrl = async (slug?: string) => {
-  if (!slug) return
+  if (!slug) return;
   try {
-    const res = await fetch(`${baseURL}web/products/get-product-by-url${slug}`, {
-      cache: "no-store",
-      headers: { storeId: storeId },
-    });
+    const res = await fetch(
+      `${baseURL}web/products/get-product-by-url${slug}`,
+      {
+        cache: "no-store",
+        headers: { storeId: storeId },
+      },
+    );
 
     if (!res?.ok) {
       return null;
@@ -41,7 +66,6 @@ export const fetchProductBySlugAndUrl = async (slug?: string) => {
 
     return data.data;
   } catch (err) {
-
     return null; // always return null, not throw
   }
 };
@@ -53,7 +77,6 @@ export const fetchProductBySlug = async (slug: string) => {
     });
 
     if (!res.ok) {
-
       return null;
     }
 
@@ -65,7 +88,6 @@ export const fetchProductBySlug = async (slug: string) => {
 
     return data.data;
   } catch (err) {
-
     return null; // always return null, not throw
   }
 };
@@ -111,7 +133,6 @@ export async function fetchFilteredProducts(filters: {
   return data; // {status, message, data: []}
 }
 
-
 export const getBlogByIdServer = async (id: string) => {
   try {
     const res = await fetch(`${baseURL}web/blogs/blog-posts/${id}`, {
@@ -132,14 +153,17 @@ export const getBlogByIdServer = async (id: string) => {
   }
 };
 export const fetchWebPages = async (slug?: string) => {
-  if (!slug) return
+  if (!slug) return;
   try {
-    const normalizeSlug = (s: string) => s?.replace(/\/+$/, '');
+    const normalizeSlug = (s: string) => s?.replace(/\/+$/, "");
 
-    const res = await fetch(`${baseURL}web/webpages/web-pages?page=${1}&perPage=${100}`, {
-      cache: "no-store",
-      headers: { storeId: storeId },
-    });
+    const res = await fetch(
+      `${baseURL}web/webpages/web-pages?page=${1}&perPage=${100}`,
+      {
+        cache: "no-store",
+        headers: { storeId: storeId },
+      },
+    );
 
     if (!res?.ok) {
       return null;
@@ -149,7 +173,7 @@ export const fetchWebPages = async (slug?: string) => {
 
     // const filteredPages = data?.data?.find((page: any) => page?.slugWithUrl === slug);
     const filteredPages = data?.data?.find(
-      (page: any) => normalizeSlug(page?.slugWithUrl) === normalizeSlug(slug)
+      (page: any) => normalizeSlug(page?.slugWithUrl) === normalizeSlug(slug),
     );
 
     if (!data?.data) {
