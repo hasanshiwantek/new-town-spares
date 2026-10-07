@@ -58,7 +58,7 @@ const rootReducer = combineReducers({
   // cart: persistReducer(cartPersistConfig, cartSliceReducer), // persisted
   recent: persistReducer(recentPersistConfig, recentReducer),
   order: persistReducer(orderPersistConfig, orderReducer),
-  coupon: persistReducer(couponPersistConfig, couponReducer),
+  coupon: couponReducer,
   storeFront: storeFrontReducer,
   myaccount: myaccountReducer,
   shippingZone: shippingZoneReducer,
