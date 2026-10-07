@@ -8,6 +8,8 @@ import { fetchOrderDetails } from "@/redux/slices/cartsSlice";
 import { useReactToPrint } from "react-to-print";
 import { Invoice } from "./helpers/OrderDetails";
 import ProductPrice from "../productprice/ProductPrice";
+import { errorMessage } from "@/utils/message";
+import axiosInstance from "@/lib/axiosInstance";
 interface OrderData {
   id: number;
   orderNumber: string;
@@ -71,22 +73,36 @@ const SingleOrder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({
-    contentRef: invoiceRef, // v3 API: pass the ref here
-    documentTitle: `Server Blink LLC -`,
-    pageStyle: `
-            @page {
-                size: A4;
-                margin: 16mm;
-            }
-            @media print {
-                body {
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                }
-            }
-        `,
-  });
+const handlePrint = async (orderNumber: string) => {
+  try {
+    const response = await axiosInstance.get(
+      `web/orders/customer/invoices/${orderNumber}`,
+      {
+        responseType: "blob",
+      }
+    );
+
+    const blob = new Blob([response.data], {
+      type: "application/pdf",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const printWindow = window.open(url, "_blank");
+
+    if (!printWindow) {
+      errorMessage("Please allow popups to print the invoice.");
+      return;
+    }
+
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  } catch (error) {
+    console.error("Invoice print error:", error);
+    errorMessage("Unable to print invoice.");
+  }
+};
 
   useEffect(() => {
     const loadOrderDetails = async () => {
@@ -360,7 +376,7 @@ const SingleOrder = () => {
             </span>
           </div>
 
-          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]" onClick={() => handlePrint()}>
+          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]" onClick={() => handlePrint(orderNumber)}>
             Print Invoice
           </button>
         </div>

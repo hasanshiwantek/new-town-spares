@@ -104,14 +104,11 @@ export default function ProductPage({
               </h2>
             </div>
             <div>
-              {productCount ? (
-                <h1 className="text-[28px] text-[#545454]">
+              
+                <h1 className="text-[28px] text-text-secondary">
                   {productCount || 0} results for {query}
                 </h1>
-              ) : (
-                <></>
-              )}
-            </div>
+        </div>
             <div>
               <ProductTabs
                 tabs={[
@@ -131,6 +128,30 @@ export default function ProductPage({
                 }}
               />
             </div>
+                        {productCount === 0 && (
+  <div className="w-full border-t border-gray-200">
+    <div className="px-1 py-5">
+      <p className="text-[14px] leading-6 text-text-secondary">
+        Your search for{" "}
+        <span className="font-bold!">"{query}"</span>{" "}
+        did not match any products or information.
+      </p>
+
+      <div className="mt-4 border-t border-b border-gray-200 py-4">
+        <p className="mb-2 text-[15px] font-medium text-text-secondary">
+          Suggestions:
+        </p>
+
+        <ul className="space-y-1 text-[14px] leading-6 text-text-secondary">
+          <li>Make sure all words are spelled correctly.</li>
+          <li>Try different keywords.</li>
+          <li>Try more general keywords.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
+    
             {searchForm && (
               <div>
                 <AdvancedSearchForm

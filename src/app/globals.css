@@ -51,6 +51,8 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
     --color-confirmation: var(--confirmation-color);
   --color-confirmation-hover: var(--confirmation-hover);
     --color-confirmation-text: var(--confirmation-text);
+    --color-text-primary: var(--color-text-primary);
+    --color-text-secondary: var(--color-text-secondary);
 
   /* ✅ Add your Figma-based breakpoints here */
   --breakpoint-xs: 375px;
@@ -110,6 +112,7 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --confirmation-hover: #b81a1a;
    --confirmation-text: #2d2d2d;
    --color-text-primary: #545454;
+   --color-text-secondary: #333333;
 }
 
 body {
