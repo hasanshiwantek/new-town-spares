@@ -12,6 +12,7 @@ import SortingBar from "./SortingBar";
 import ProductListCartSidebar from "../Product/ProductListCartSidebar";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { setProductView } from "@/redux/slices/uiSlice";
+import CategoryPagination from "../Product/CategoryPagination";
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
@@ -113,13 +114,13 @@ export default function ProductList({
           <MotionDiv
             key={view}
             layout
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className={`mt-4 ${
+            className={`w-full min-w-0 flex-1 ${
               view === "grid"
-                ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4"
+                ? "grid grid-cols-1 min-[551px]:grid-cols-2 min-[1441px]:grid-cols-3 min-[2000px]:grid-cols-4 gap-3"
                 : "space-y-4"
             }`}
           >
@@ -129,10 +130,10 @@ export default function ProductList({
                   <MotionDiv
                     key={`list-${idx}`}
                     layout
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={false}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3 }}
                   >
                     <ProductCategoryCard product={product} />
                   </MotionDiv>
@@ -140,34 +141,33 @@ export default function ProductList({
                   <MotionDiv
                     key={`grid-${idx}`}
                     layout
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={false}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <ProductCard key={product.id} product={product} />
+                    <ProductCard product={product} />
                   </MotionDiv>
                 ),
+              )}
+              {/* Pagination */}
+              {!isLoading && !error && (
+                <div className="col-span-full">
+                  <CategoryPagination
+                    currentPage={filters.page}
+                    totalPages={pagination?.lastPage || 1}
+                    onPageChange={(page) =>
+                      setFilters((prev: any) => ({
+                        ...prev,
+                        page,
+                      }))
+                    }
+                  />
+                </div>
               )}
             </AnimatePresence>
           </MotionDiv>
           <ProductListCartSidebar />
-        </div>
-      )}
-
-      {/* Pagination */}
-      {!isLoading && !error && (
-        <div className="mt-6 flex justify-center sm:justify-start">
-          <Pagination
-            currentPage={filters.page}
-            totalPages={pagination?.lastPage || 1}
-            onPageChange={(page) =>
-              setFilters((prev: any) => ({
-                ...prev,
-                page,
-              }))
-            }
-          />
         </div>
       )}
     </section>

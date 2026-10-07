@@ -5,7 +5,11 @@ import { useState, useEffect } from "react";
 import CategoryTree from "./CategoryTree";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
-import { getFromStorage, removeFromStorage, setInStorage } from "@/utils/storage";
+import {
+  getFromStorage,
+  removeFromStorage,
+  setInStorage,
+} from "@/utils/storage";
 interface AdvancedSearchFormProps {
   initialKeyword?: string;
   onSearch?: (filters: any) => void;
@@ -218,16 +222,16 @@ export default function AdvancedSearchForm({
       </div>
 
       {/* Search Button */}
-      <div className="mt-6 flex gap-4 justify-center md:justify-start">
+      <div className="mt-6 flex gap-4 justify-center md:justify-end">
         <button
           onClick={handleSearch}
-          className="btn-primary h-[32px] !p-3 !rounded-sm w-[40%] md:w-[30%] max-w-[9rem]"
+          className="btn-primary h-[36px] !p-3 !rounded-sm w-[40%] md:w-[30%] max-w-[9rem] flex items-center justify-center"
         >
           Search
         </button>
         <button
           onClick={handleReset}
-          className="btn-primary h-[36px] !p-3 !rounded-none w-[40%] md:w-[30%] max-w-[9rem]"
+          className="btn-primary h-[36px] !p-3 !rounded-sm w-[40%] md:w-[30%] max-w-[9rem] flex items-center justify-center"
         >
           Reset
         </button>

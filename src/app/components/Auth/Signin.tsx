@@ -12,7 +12,7 @@ import { errorMessage } from "@/utils/message";
 import { getFromStorage } from "@/utils/storage";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 interface SigninFormValues {
@@ -28,9 +28,12 @@ const SigninPage = () => {
     formState: { errors },
   } = useForm<SigninFormValues>();
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-
+  const action = searchParams.get("action");
+  const quoteToken = searchParams.get("quoteToken");
+  const shouldLoadQuote = action === "loadSavedQuote" && !!quoteToken;
   const togglePassword = () => setShowPassword((prev) => !prev);
   const { loginloading } = useAppSelector((state: RootState) => state?.auth);
 
@@ -52,15 +55,12 @@ const SigninPage = () => {
           });
 
           reset();
-          await dispatch(fetchCartList())
-            .unwrap()
-            .then((res) => {
-              if (res?.data?.length > 0) {
-                router.push("/cart");
-              } else {
-                router.push("/my-account/orders");
-              }
-            });
+          dispatch(fetchCartList());
+          if (shouldLoadQuote || quoteToken) {
+            window.location.href = `/cart?action=loadSavedQuote&quoteToken=${quoteToken}`;
+          } else {
+            router.push("/my-account/orders");
+          }
         };
         fetchCartListInner();
       } else {
