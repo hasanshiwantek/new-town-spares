@@ -1,11 +1,13 @@
 "use client";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { isAvailableForSale } from "@/lib/utils";
 import { globalSearch } from "@/redux/slices/homeSlice";
 import { setInStorage } from "@/utils/storage";
-import { Search } from "lucide-react";
+import { X } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { FaSearch } from "react-icons/fa";
 
 // Simple debounce helper
 const useDebounce = (value: string, delay: number) => {
@@ -69,7 +71,9 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
         slug: item.categories?.[0]?.slug || item.slug,
         brand: item.brand?.name || "N/A",
         sku: item.sku || "N/A",
-        price: item.price || item.costPrice || "0.00",
+        price: isAvailableForSale(item.purchasabilityStatus, item.price)
+          ? item.price
+          : "0.00",
         url: `/category/${item.categories?.[0]?.slug || item.slug}`,
         productUrl: `${item?.productUrl}`,
         imageUrl: item?.image[0]?.path,
@@ -144,6 +148,8 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const showDropdownResult = showDropdown && query.trim().length > 1;
+
   return (
     <div ref={containerRef} className="relative">
       {/* Input Box */}
@@ -172,9 +178,23 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
                 }
               }
             }}
-            className="w-full pl-[14px] pr-[56px] border-[#d9d9d9] border rounded-sm py-[10.5px] bg-white text-gray-800 text-[14px]! focus:outline-none focus:ring-2 focus:ring-orange-400 h-[42px]"
+            className="w-full pl-[14px] pr-[92px] border-[#d9d9d9] border rounded-sm py-[10.5px] bg-white text-[#333333] text-[14px]! focus:outline-none focus:border-[#FF482E] focus:ring-1 focus:ring-[#FF482E] h-[42px] [&::-webkit-search-cancel-button]:appearance-none"
           />
           <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
+            {query && (
+              <button
+                type="button"
+                aria-label="clear search"
+                onClick={() => {
+                  setQuery("");
+                  setResults([]);
+                  setShowDropdown(false);
+                }}
+                className="mr-3 flex items-center justify-center text-black"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
             <button
               aria-label="search"
               name="search"
@@ -191,36 +211,18 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
                   }
                 }
               }}
-              className="
-        bg-[#FF482E]
-        w-16
-        lg:w-14
-        xl:w-[52px] h-[42px]
-        rounded-r-sm
-        flex items-center justify-center
-      "
+              className="bg-[#FF482E] w-16 lg:w-14 xl:w-[52px] h-[42px] rounded-r-sm flex items-center justify-center"
             >
-              <Search
-                className="
-          w-4 h-4 
-          sm:w-5 sm:h-5 
-          md:w-6 md:h-6 
-          lg:w-7 lg:h-7 
-          xl:w-8 xl:h-8 
-          2xl:w-[19.98px] 2xl:h-[19.98px]
-          text-white
-        "
-              />
+              <FaSearch className="w-5 h-5 text-white" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Dropdown Results */}
-      {showDropdown && query.trim().length > 1 && (
-        // <div className="absolute top-full left-0 w-full mt-2 bg-white text-[#4A4A4A] shadow-lg rounded-md overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+      {showDropdownResult && (
         <div
-          className="absolute top-full left-0 w-full mt-1 bg-white text-[#4A4A4A] shadow-lg overflow-hidden max-h-[400px] overflow-y-auto"
+          className="absolute top-full left-0 w-full mt-1 bg-white text-[#333333] border border-gray-200 shadow-lg overflow-hidden max-h-[400px] overflow-y-auto custom-scrollbar"
           style={{ zIndex: 9999 }}
         >
           {loading && <div className="p-3 text-gray/80">Searching...</div>}
@@ -234,27 +236,29 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               <div
                 key={item.id}
                 onClick={() => handleSelect(item.productUrl)}
-                className="flex items-start gap-3 p-5 border-b border-gray/50
-    hover:bg-[var(--primary-color)] hover:[&_*]:text-white transition-colors cursor-pointer"
+                className="flex items-center px-4 py-2.5 border-b border-gray-200 last:border-b-0 hover:bg-(--primary-color) hover:**:text-white transition-colors cursor-pointer"
                 style={{ zIndex: 300 }}
               >
                 {/* Product Info */}
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={item?.imageUrl}
-                    alt="product image"
-                    width={18}
-                    height={18}
-                  />
-                  <div className="text-[13px] font-normal flex flex-col grow overflow-hidden ml-4">
+                <div className="flex items-center gap-4 min-w-0 w-full">
+                  <div className="w-9 shrink-0 flex items-center justify-center">
+                    {item?.imageUrl && (
+                      <Image
+                        src={item.imageUrl}
+                        alt={item?.name || "product image"}
+                        width={36}
+                        height={36}
+                        className="object-contain"
+                      />
+                    )}
+                  </div>
+                  <div className="text-[13px] leading-[19.5px] font-normal flex flex-col grow min-w-0">
                     <p className="truncate">
                       {item?.brand || "Brand"} |{" "}
                       <span>SKU: {item?.sku || "N/A"}</span>
                     </p>
-                    <p className="text-[15px] font-medium leading-tight line-clamp-2">
-                      {item?.name}
-                    </p>
-                    <p className="font-light text-[#ff482e] mt-1">
+                    <p className="line-clamp-2">{item?.name}</p>
+                    <p className="text-[#FF482E]">
                       {item?.price ? `$${item?.price}` : "$0.00"}
                     </p>
                   </div>

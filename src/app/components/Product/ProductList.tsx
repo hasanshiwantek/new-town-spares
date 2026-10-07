@@ -2,18 +2,16 @@
 
 "use client";
 
-import CategoryPagination from "./CategoryPagination";
+import { decode } from "html-entities";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../Home/ProductCard";
 import ProductSkeleton from "../loader/ProductSkeleton";
+import RecentViewedProduct from "../myaccount/RecentViewedPoduct";
+import CategoryPagination from "./CategoryPagination";
 import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
-import SortDropdown from "./SortDropdown";
-import { useMemo } from "react";
-import { decode } from "html-entities";
 import SortingBar from "./SortingBar";
-import RecentViewedProduct from "../myaccount/RecentViewedPoduct";
 
 // Dynamically import motion.div and AnimatePresence (client only)
 const MotionDiv = dynamic(
@@ -48,7 +46,6 @@ export default function ProductList({
   initialCategorydescription,
 }: ProductListProps) {
   const [view, setView] = useState<"list" | "grid">("grid");
-  const [page, setPage] = useState(1);
   const decodedHtml = decode(
     (initialCategorydescription || "")
       .replace(/<pre[^>]*>/gi, "")
@@ -79,6 +76,7 @@ export default function ProductList({
       faqHtml,
     };
   }, [decodedHtml]);
+
   useEffect(() => {
     const main = document.querySelector(".custom-description-style");
     if (!main) return;
@@ -100,8 +98,8 @@ export default function ProductList({
   return (
     <section
       className="
-        
-w-full
+        w-full
+        min-w-0
         transition-all duration-300
       "
     >
@@ -118,109 +116,17 @@ w-full
         </h1>
         <div className="mt-4">
           {initialCategorydescription && (
-            <>
-              <style>{`
-      .custom-description {
-        color: #333333;
-        font-family: poppins, sans-serif;
-      }
-
-      .custom-description h1,
-      .custom-description h2,
-      .custom-description h3,
-      .custom-description h4,
-      .custom-description h5,
-      .custom-description h6 {
-        color: #333333;
-        margin: 16px 0 10px;
-        line-height: 1.4;
-      }
-       .custom-description h3{
-       font-size:22px
-       }
-        .custom-description h2{
-       font-size:25px
-       }
-      .custom-description p {
-        font-size: 14px;
-        line-height: 1.7;
-        margin: 8px 0;
-        color: #333333;
-      }
-
-      .custom-description strong {
-        font-weight: 700;
-      }
-
-      .custom-description a {
-        color: #333333;
-        text-decoration: underline;
-      }
-
-      .custom-description ul,
-      .custom-description ol {
-        margin: 10px 0 10px 20px;
-      }
-
-      .custom-description li {
-        margin-bottom: 6px;
-        line-height: 1.6;
-        font-size:14px
-      }
-
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #333333;
-      }
-
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #333333;
-      }
-    `}</style>
-
+            <div className="my-6 border border-gray-600 bg-white py-5 px-4 max-h-[240px] overflow-y-auto custom-scrollbar">
               <div
-                className="
-        my-6
-        border
-        border-gray-600
-        bg-white
-        py-5
-        px-4
-        max-h-[240px]
-        overflow-y-auto
-        custom-scrollbar
-      "
-              >
-                <div
-                  className="custom-description custom-description-style prose prose-sm max-w-none break-words"
-                  dangerouslySetInnerHTML={{ __html: contentHtml }}
-                />
-              </div>
-            </>
+                className="custom-description custom-description-style prose prose-sm max-w-none wrap-break-word"
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
+              />
+            </div>
           )}
         </div>
       </div>
 
-      {/* <div className="mb-4">
-        <h2 className="h2-medium ">Heading Text</h2>
-        <p className="h4-regular ">
-          Do you need to fix your computer or make it work better? At
-          NewTownSpares, we have all the IT Accessories you need! It doesn’t
-          matter if it’s for your home, work, or even an old computer. We are
-          here to help you. We have parts from popular brands like Intel, Dell,
-          and HP.
-        </p>
-      </div> */}
-
       {/* Sort Bar */}
-
       <SortingBar
         total={total || 0}
         view={view}
@@ -340,7 +246,6 @@ w-full
           />
         )}
       </div>
-      {/* <div className="hidden xl:block w-full max-w-[30.7%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto"></div> */}
       <div className=" mb-5 text-[22px]! font-medium">
         <h2>Recently Viewed</h2>
       </div>

@@ -45,9 +45,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const currentStockEqualent = Number(product?.currentStock) === 0;
   const minQty = product.minPurchaseQuantity || 1;
-  const maxQty = product.maxPurchaseQuantity;
-  const purchasabilityStatus =
-    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
   const callForPricingPhone = product?.callForPricingPhone;
 
   const availableForSale = isAvailableForSale(
@@ -203,7 +200,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     const cartItem = cart.find(
                       (item: any) => item.id === product.id,
                     );
-                    const minQty = product.minPurchaseQuantity || 1;
                     const maxQty = product.maxPurchaseQuantity;
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
@@ -213,8 +209,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       );
                       return;
                     }
-                    // Add only up to the allowed maximum
-                    const quantityToAdd = Math.min(minQty, remaining);
 
                     dispatch(
                       addCart({

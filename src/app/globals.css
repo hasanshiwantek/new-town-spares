@@ -51,6 +51,8 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
     --color-confirmation: var(--confirmation-color);
   --color-confirmation-hover: var(--confirmation-hover);
     --color-confirmation-text: var(--confirmation-text);
+    --color-text-primary: var(--color-text-primary);
+    --color-text-secondary: var(--color-text-secondary);
 
   /* ✅ Add your Figma-based breakpoints here */
   --breakpoint-xs: 375px;
@@ -110,6 +112,7 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --confirmation-hover: #b81a1a;
    --confirmation-text: #2d2d2d;
    --color-text-primary: #545454;
+   --color-text-secondary: #333333;
 }
 
 body {
@@ -1185,4 +1188,59 @@ overview description */
   .banner-html th {
     font-weight: 700;
   }
+}
+
+/* Category description (ProductList) */
+.custom-description {
+  color: #333333;
+  font-family: poppins, sans-serif;
+}
+.custom-description h1,
+.custom-description h2,
+.custom-description h3,
+.custom-description h4,
+.custom-description h5,
+.custom-description h6 {
+  color: #333333;
+  margin: 16px 0 10px;
+  line-height: 1.4;
+}
+.custom-description h2 {
+  font-size: 25px;
+}
+.custom-description h3 {
+  font-size: 22px;
+}
+.custom-description p {
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 8px 0;
+  color: #333333;
+}
+.custom-description strong {
+  font-weight: 700;
+}
+.custom-description a {
+  color: #333333;
+  text-decoration: underline;
+}
+.custom-description ul,
+.custom-description ol {
+  margin: 10px 0 10px 20px;
+}
+.custom-description li {
+  margin-bottom: 6px;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #333333;
 }

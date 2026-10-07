@@ -42,13 +42,14 @@ const RecentViewedProduct = () => {
   return (
     <div className="py-4">
       <div
-        className="grid grid-rows-1 grid-flow-col gap-3
-              auto-cols-[100%]
-              min-[551px]:auto-cols-[calc(50%-6px)]
-              min-[801px]:auto-cols-[calc(33.333%-8px)]
-              min-[1261px]:auto-cols-[calc(25%-9px)]
-              min-[1441px]:auto-cols-[calc(20%-9.6px)]
-              overflow-x-auto scroll-smooth scrollbar-hide"
+        className="
+    grid
+    grid-cols-1
+    min-[551px]:grid-cols-2
+    min-[801px]:grid-cols-3
+    min-[1261px]:grid-cols-4
+    gap-3
+  "
       >
         {products?.map((product: any, index: number) => (
           <ProductCard key={index} product={product} />

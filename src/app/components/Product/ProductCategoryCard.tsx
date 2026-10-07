@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
+import { CONTACT_INFO } from "@/const/contact";
 interface Product {
   id: number;
   name: string;
@@ -30,13 +31,14 @@ interface Product {
   minPurchaseQuantity?: number;
   maxPurchaseQuantity?: number;
   currentStock?: number;
+  callForPricingPhone?: string;
 }
 
 export default function ProductCategoryCard({ product }: { product: Product }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-
+  const callForPricingPhone = product?.callForPricingPhone;
   const availableForSale = isAvailableForSale(
     product?.purchasabilityStatus,
     product?.price,
@@ -70,15 +72,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       : "In Stock";
 
   return (
-    <div
-      className="
-    bg-white shadow-[0_0_1px_0_rgba(51,51,51,0.5)]
-    grid gap-4 items-start w-full transition-all duration-300
-    grid-cols-1
-    sm:grid-cols-[150px_minmax(0,1fr)_180px]
-    p-[21px]
-  "
-    >
+    <div className="bg-white shadow-[0_0_1px_0_rgba(51,51,51,0.5)] grid gap-4 items-start w-full transition-all duration-300 grid-cols-1 sm:grid-cols-[150px_minmax(0,1fr)_180px] p-[21px]">
       {/* Product Image (Left) */}
       <div className="flex items-center justify-center shrink-0 mx-auto w-full max-w-[150px] aspect-square">
         <Link
@@ -138,11 +132,11 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
             />
           </p>
           <div className="w-full border-t border-gray-200 my-2" />
-          <p className="text-[#333333] text-[14px] w-full text-left">
+          <p className="text-[#333333] text-[14px] w-full text-left mb-2">
             {availabilityText}
           </p>
-          {availableForSale && (
-            <div className="w-full mt-2 flex items-center">
+          {availableForSale ? (
+            <div className="w-full flex items-center">
               <input
                 type="number"
                 value={quantity}
@@ -190,6 +184,15 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
               >
                 Add to Cart
               </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-start">
+              <Link
+                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
+                className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
+              >
+                CALL FOR PRICE
+              </Link>
             </div>
           )}
         </div>
