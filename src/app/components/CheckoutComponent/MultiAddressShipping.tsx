@@ -19,7 +19,7 @@ import {
   removeDestination as removeDestinationAction,
   setCompletedDestinations,
   setDestinations,
-  setDestShippingRatesAction,
+  setDestShippingRate,
   setOrderComment,
   toggleShowItems,
   updateDestinationAddress,
@@ -27,17 +27,14 @@ import {
 } from "@/redux/slices/multiAddressSlice";
 import { fetchShippingRates } from "@/redux/slices/shippingSlice";
 import { City, Country, State } from "country-state-city";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Info,
-  Pencil,
-  X,
-} from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronUp, Info, X } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
-import { calculatePackage } from "./Shippingstep";
 import { HiPencil } from "react-icons/hi2";
+import {
+  calculatePackage,
+  getProductShippingRate,
+  PRODUCT_SHIPPING_TYPES,
+} from "./Shippingstep";
 
 interface CartItem {
   id: string | number;
@@ -538,9 +535,11 @@ const MultiAddressShipping = ({
   const dispatch = useAppDispatch();
 
   // ✅ Redux state
-  const { destinations, orderComment } = useAppSelector(
-    (state) => state.multiAddress,
-  );
+  const {
+    destinations,
+    orderComment,
+    destShippingRates: reduxDestShippingRates,
+  } = useAppSelector((state) => state.multiAddress);
 
   // ✅ Local UI state only (modal controls)
   const [addressModalOpen, setAddressModalOpen] = useState(false);
@@ -569,25 +568,34 @@ const MultiAddressShipping = ({
       return sum + Math.max(item.quantity - allocated, 0);
     }, 0);
   }, [destinations, cart]);
+  // Destination allocated slots → cart items with quantity
+  const getDestCartItems = (dest?: { allocatedItems: string[] }) =>
+    dest?.allocatedItems.reduce((acc: any[], slot) => {
+      const itemId = slot.split("-")[0];
+      const cartItem = cart.find((c: any) => String(c.id) === itemId);
+      if (cartItem) {
+        const existing = acc.find((i) => i.id === cartItem.id);
+        if (existing) existing.quantity += 1;
+        else acc.push({ ...cartItem, quantity: 1 });
+      }
+      return acc;
+    }, []) || [];
+
+  // Destination ke saare items fixed/free shipping wale hon toh wahi rate
+  const getDestProductRate = (dest?: { allocatedItems: string[] }) =>
+    getProductShippingRate(getDestCartItems(dest));
+
   const fetchRatesForDest = async (destId: string, address: AddressData) => {
     if (!address.country || !address.city) return;
+    // Poori cart fixed/free hai toh har destination bhi — API ki zaroorat nahi
+    if (getProductShippingRate(cart)) return;
 
     setDestRatesLoading((prev) => ({ ...prev, [destId]: true }));
 
     try {
       // ✅ Calculate package for this destination's allocated items only
       const dest = destinations.find((d) => d.id === destId);
-      const allocatedCartItems =
-        dest?.allocatedItems.reduce((acc: any[], slot) => {
-          const itemId = slot.split("-")[0];
-          const cartItem = cart.find((c: any) => String(c.id) === itemId);
-          if (cartItem) {
-            const existing = acc.find((i) => i.id === cartItem.id);
-            if (existing) existing.quantity += 1;
-            else acc.push({ ...cartItem, quantity: 1 });
-          }
-          return acc;
-        }, []) || cart;
+      const allocatedCartItems = getDestCartItems(dest);
 
       const pkg = calculatePackage(
         allocatedCartItems.length > 0 ? allocatedCartItems : cart,
@@ -616,12 +624,7 @@ const MultiAddressShipping = ({
       const rates = res?.rates || [];
 
       // ✅ Redux dispatch karo — local setState nahi
-      dispatch(
-        setDestShippingRatesAction({
-          ...destShippingRates,
-          [destId]: rates,
-        }),
-      );
+      dispatch(setDestShippingRate({ destId, rates }));
     } catch (err) {
       console.error("Failed to fetch rates for dest:", destId, err);
       setDestShippingRates((prev) => ({ ...prev, [destId]: [] }));
@@ -672,6 +675,10 @@ const MultiAddressShipping = ({
     openAddressModal(newId);
   };
   const getActiveRates = (destId: string) => {
+    const productRate = getDestProductRate(
+      destinations.find((d) => d.id === destId),
+    );
+    if (productRate) return [productRate];
     const rates = destShippingRates[destId];
     if (rates && rates.length > 0) return rates;
     if (globalShippingRates?.length > 0) return globalShippingRates;
@@ -756,6 +763,49 @@ const MultiAddressShipping = ({
       }
     });
   }, []);
+
+  // Fixed/free shipping destinations: rate redux mein rakho + auto select.
+  // Allocation badal ke product rate na rahe toh purana selection hatao.
+  useEffect(() => {
+    destinations?.forEach((dest) => {
+      if (!dest.address || !dest.allocatedItems.length) return;
+      const productRate = getDestProductRate(dest);
+
+      if (productRate) {
+        const current = reduxDestShippingRates?.[dest.id]?.[0];
+        if (
+          current?.service_type !== productRate.service_type ||
+          current?.total_charge !== productRate.total_charge
+        ) {
+          dispatch(
+            setDestShippingRate({ destId: dest.id, rates: [productRate] }),
+          );
+        }
+        if (dest.selectedShippingMethod !== productRate.service_type) {
+          dispatch(
+            updateDestinationShippingMethod({
+              destId: dest.id,
+              method: productRate.service_type,
+            }),
+          );
+        }
+      } else if (PRODUCT_SHIPPING_TYPES.includes(dest.selectedShippingMethod)) {
+        dispatch(
+          updateDestinationShippingMethod({ destId: dest.id, method: "" }),
+        );
+        dispatch(
+          setDestShippingRate({
+            destId: dest.id,
+            rates: destShippingRates[dest.id] || [],
+          }),
+        );
+        if (!destShippingRates[dest.id]?.length) {
+          fetchRatesForDest(dest.id, dest.address);
+        }
+      }
+    });
+  }, [destinations, cart]);
+
   return (
     <div className="space-y-[13px]">
       {/* Allocation status */}
@@ -980,7 +1030,11 @@ const MultiAddressShipping = ({
                               </span>
                               <span className="text-[13px] font-medium text-[#292929]">
                                 {rate.total_charge === 0
-                                  ? "$0.00"
+                                  ? PRODUCT_SHIPPING_TYPES.includes(
+                                      rate.service_type,
+                                    )
+                                    ? "Free"
+                                    : "$0.00"
                                   : `$${Number(rate.total_charge).toFixed(2)}`}
                               </span>
                             </label>

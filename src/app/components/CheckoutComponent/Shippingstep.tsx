@@ -1,43 +1,38 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import {
   Select,
+  SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectItem,
-  SelectContent,
 } from "@/components/ui/select";
-import {
-  UseFormRegister,
-  FieldErrors,
-  Control,
-  Controller,
-  useWatch,
-  UseFormSetValue,
-  UseFormClearErrors,
-} from "react-hook-form";
+import { countriesWithoutPostalCode } from "@/const/country-level";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { cn } from "@/lib/utils";
+import {
+  setCompletedDestinations,
+  setIsMultiAddress,
+} from "@/redux/slices/multiAddressSlice";
 import {
   addShippingCost,
-  checkoutFormSave,
   fetchShippingRate,
   fetchShippingRates,
-  removeShippingRate,
   resetShippingRates,
+  setShippingRates,
 } from "@/redux/slices/shippingSlice";
 import { RootState } from "@/redux/store";
-import MultiAddressShipping from "./MultiAddressShipping";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  setIsMultiAddress,
-  setCompletedDestinations,
-} from "@/redux/slices/multiAddressSlice";
+  Controller,
+  FieldErrors,
+  UseFormClearErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  useWatch,
+} from "react-hook-form";
+import MultiAddressShipping from "./MultiAddressShipping";
 import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
-import { CHECKOUT_STORAGE_KEY } from "./CheckoutComponent";
-import { fetchAccountAddress } from "@/redux/slices/myaccountSlice";
-import { countriesWithoutPostalCode } from "@/const/country-level";
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
@@ -195,8 +190,6 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const { shippingRates, ratesLoader } = useAppSelector(
     (state) => state.shippingZone,
   );
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitialLoad = useRef(true);
 
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
@@ -275,15 +268,38 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
     () => getProductShippingRate(cart),
     [cart],
   );
+
+  // Fixed/free shipping mode mein rate seedha redux mein set karo (API call nahi)
   useEffect(() => {
+    if (productShippingRate) {
+      dispatch(setShippingRates([productShippingRate]));
+    } else if (
+      shippingRates?.some((r: any) =>
+        PRODUCT_SHIPPING_TYPES.includes(r?.service_type),
+      )
+    ) {
+      dispatch(resetShippingRates());
+    }
+  }, [productShippingRate?.service_type, productShippingRate?.total_charge]);
+
+  useEffect(() => {
+    if (
+      PRODUCT_SHIPPING_TYPES.includes(watchedShippingMethod || "") &&
+      watchedShippingMethod !== productShippingRate?.service_type
+    ) {
+      setValue("shippingMethod", "");
+    }
+  }, [watchedShippingMethod, productShippingRate?.service_type]);
+
+  useEffect(() => {
+    if (productShippingRate) return;
     if (!city?.trim() && !country?.trim() && !zip?.trim() && !state?.trim())
       return;
     if (
-      city?.trim() &&
       country?.trim() &&
-      zip?.trim() &&
       state?.trim() &&
-      cart?.length
+      cart?.length &&
+      (!hasPostalCode || zip?.trim())
     ) {
       const pkg = calculatePackage(cart);
       const timer = setTimeout(() => {
@@ -294,7 +310,9 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               destination: {
                 country_code: country?.trim(),
                 state: state?.trim(),
-                postal_code: zip?.trim(),
+                ...(zip?.trim() && {
+                  postal_code: zip.trim(),
+                }),
                 ...(city?.trim() && { city: city.trim() }),
               },
               package: pkg,
@@ -347,6 +365,8 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         dispatch(fetchShippingRate());
       });
   };
+
+  // Fixed/free shipping ka sirf ek option hai, address complete hote hi auto select
   useEffect(() => {
     if (!productShippingRate || !isShippingComplete || !isActive) return;
     setValue("shippingMethod", productShippingRate.service_type);
@@ -516,7 +536,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                 type="button"
                 className="w-full  border border-[#cac9c9] px-3 py-3 text-left text-sm text-[#545454] bg-white flex justify-between items-center"
                 onClick={() => {
-                  dispatch(resetShippingRates());
+                  if (!productShippingRate) dispatch(resetShippingRates());
                   setIsOpen(!isOpen);
                 }}
               >
@@ -583,6 +603,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         onAddressSelect?.(item);
                         // ✅ form fields update karo
 
+                        if (productShippingRate) return;
                         if (
                           !item?.city?.trim() &&
                           !item?.country?.trim() &&
@@ -982,107 +1003,126 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               </p>
             )}
 
-            {shippingRates?.length > 0 && (
+            {(productShippingRate || shippingRates?.length > 0) && (
               <div className=" border border-black">
-                {ratesLoader
-                  ? // Skeleton
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-3 border rounded p-4"
-                      >
-                        {/* Radio circle */}
-                        <div className="w-4 h-4 mt-1 rounded-full border-2 border-gray-200 flex-shrink-0 animate-pulse" />
-
-                        <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                          {/* Left: service name */}
-                          <div className="flex items-center gap-2">
-                            <div className="h-4 bg-gray-200 rounded animate-pulse w-12" />
-                            <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
-                          </div>
-
-                          {/* Right: price */}
-                          <div className="h-4 bg-gray-200 rounded animate-pulse w-14 flex-shrink-0" />
-                        </div>
+                {productShippingRate ? (
+                  <label
+                    className={`flex items-start gap-3 border rounded p-4 transition-colors ${
+                      isShippingComplete
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed opacity-50"
+                    } ${
+                      watchedShippingMethod == productShippingRate.service_type
+                        ? "border-black  !bg-[#ffffff]"
+                        : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      value={productShippingRate.service_type}
+                      {...register("shippingMethod", {
+                        required: "Please select a shipping method",
+                      })}
+                      onChange={async (e) => {
+                        register("shippingMethod").onChange(e); // keep react-hook-form in sync
+                        await saveShippingMethod(
+                          e.target.value,
+                          productShippingRate,
+                        );
+                      }}
+                      className="mt-1"
+                      disabled={!isShippingComplete}
+                    />
+                    <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
+                        <span>{productShippingRate.display_name}</span>
                       </div>
-                    ))
-                  : shippingRates?.map((rate, i) => {
-                      return (
-                        <label
-                          key={`${rate.method_id}-${rate.service_type}`}
-                          className={`flex items-start gap-3 border rounded p-4 transition-colors ${
-                            isShippingComplete
-                              ? "cursor-pointer"
-                              : "cursor-not-allowed opacity-50"
-                          } ${
-                            watchedShippingMethod == rate.service_type
-                              ? "border-black  !bg-[#ffffff]"
-                              : ""
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            value={rate.service_type}
-                            {...register("shippingMethod", {
-                              required: "Please select a shipping method",
-                              validate: () => {
-                                if (
-                                  !shippingRates ||
-                                  shippingRates.length === 0
-                                ) {
-                                  return "No shipping method is available";
-                                }
+                      <div className="text-base font-bold flex-shrink-0">
+                        {productShippingRate.total_charge === 0
+                          ? "Free"
+                          : `$${Number(productShippingRate.total_charge).toFixed(2)}`}
+                      </div>
+                    </div>
+                  </label>
+                ) : ratesLoader ? (
+                  // Skeleton
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 border rounded p-4"
+                    >
+                      {/* Radio circle */}
+                      <div className="w-4 h-4 mt-1 rounded-full border-2 border-gray-200 flex-shrink-0 animate-pulse" />
 
-                                return true;
-                              },
-                            })}
-                            onChange={async (e) => {
-                              register("shippingMethod").onChange(e); // keep react-hook-form in sync
-                              const selectedRate = shippingRates?.find(
-                                (r: any) => r.service_type === e.target.value,
-                              );
-                              const cost = selectedRate
-                                ? Number(selectedRate.total_charge).toFixed(2)
-                                : "0";
-                              const shippingData: any = {
-                                country: country?.trim(),
-                                city: city?.trim(),
-                                state: state?.trim(),
-                                zip: zip?.trim(),
-                                cartId: cart?.map((item) => item.cartItemId),
-                                rate: {
-                                  service_type: selectedRate?.service_type,
-                                  method_type: selectedRate?.method_type,
-                                  total_charge: cost,
-                                },
-                              };
-                              await dispatch(addShippingCost(shippingData))
-                                .unwrap()
-                                .then(() => {
-                                  dispatch(fetchShippingRate());
-                                });
-                            }}
-                            className="mt-1"
-                            disabled={!isShippingComplete}
-                          />
-                          <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
-                              {rate.is_fedex && <span>FedEx</span>}
-                              <span>
-                                {rate.is_fedex
-                                  ? `(${rate.service_name})`
-                                  : rate.display_name}
-                              </span>
-                            </div>
-                            <div className="text-base font-bold flex-shrink-0">
-                              {rate.total_charge === 0
-                                ? "Free"
-                                : `$${Number(rate.total_charge).toFixed(2)}`}
-                            </div>
+                      <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                        {/* Left: service name */}
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-12" />
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
+                        </div>
+
+                        {/* Right: price */}
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-14 flex-shrink-0" />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  shippingRates?.map((rate, i) => {
+                    return (
+                      <label
+                        key={`${rate.method_id}-${rate.service_type}`}
+                        className={`flex items-start gap-3 border rounded p-4 transition-colors ${
+                          isShippingComplete
+                            ? "cursor-pointer"
+                            : "cursor-not-allowed opacity-50"
+                        } ${
+                          watchedShippingMethod == rate.service_type
+                            ? "border-black  !bg-[#ffffff]"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          value={rate.service_type}
+                          {...register("shippingMethod", {
+                            required: "Please select a shipping method",
+                            validate: () => {
+                              if (
+                                !shippingRates ||
+                                shippingRates.length === 0
+                              ) {
+                                return "No shipping method is available";
+                              }
+
+                              return true;
+                            },
+                          })}
+                          onChange={async (e) => {
+                            register("shippingMethod").onChange(e); // keep react-hook-form in sync
+                            await saveShippingMethod(e.target.value);
+                          }}
+                          className="mt-1"
+                          disabled={!isShippingComplete}
+                        />
+                        <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 text-[#545454] text-[14px] font-normal">
+                            {rate.is_fedex && <span>FedEx</span>}
+                            <span>
+                              {rate.is_fedex
+                                ? `(${rate.service_name})`
+                                : rate.display_name}
+                            </span>
                           </div>
-                        </label>
-                      );
-                    })}
+                          <div className="text-base font-bold flex-shrink-0">
+                            {rate.total_charge === 0
+                              ? "Free"
+                              : `$${Number(rate.total_charge).toFixed(2)}`}
+                          </div>
+                        </div>
+                      </label>
+                    );
+                  })
+                )}
               </div>
             )}
 

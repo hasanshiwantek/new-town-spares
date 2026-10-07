@@ -1,12 +1,12 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { isAvailableForSale } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import { CONTACT_INFO } from "@/const/contact";
@@ -32,6 +32,7 @@ interface Product {
   minPurchaseQuantity: number;
   maxPurchaseQuantity: number;
   purchasabilityStatus: string;
+  currentStock?: number;
   callForPricingPhone?: string;
 }
 
@@ -40,21 +41,20 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
-
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-  const { cartLoading, loading } = useAppSelector(
-    (state: RootState) => state.carts,
-  );
-  const cartLoad = cartLoading || loading;
-
+  const currentStockEqualent = Number(product?.currentStock) === 0;
   const minQty = product.minPurchaseQuantity || 1;
   const maxQty = product.maxPurchaseQuantity;
   const purchasabilityStatus =
     product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
-  const callForPricingPhone = product.callForPricingPhone;
+  const callForPricingPhone = product?.callForPricingPhone;
 
+  const availableForSale = isAvailableForSale(
+    product?.purchasabilityStatus,
+    product?.price,
+  );
+  console.log({ product });
   const [quantity, setQuantity] = useState<number>(minQty);
 
   // safe brand name
@@ -81,6 +81,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const brandSlug =
     typeof product.brand === "object" ? product?.brand?.slug : undefined;
 
+  const availabilityText = currentStockEqualent
+    ? "Out of Stock"
+    : product?.availabilityText
+      ? product?.availabilityText
+      : "In Stock";
+
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseInt(e.target.value, 10);
 
@@ -95,7 +101,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
-      {/* Image */}
       <Link href={productHref}>
         <div className="relative w-full aspect-square">
           <Image
@@ -128,7 +133,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Bottom block — anchored so price/stock/cart align across cards like live */}
         <div className="mt-auto flex flex-col">
           {/* Price Section */}
-          {purchasabilityStatus ? (
+          {availableForSale ? (
             <div className="flex flex-col items-start pb-[11px]">
               {product?.msrp && Number(product.msrp) > 0 ? (
                 <>
@@ -178,11 +183,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* In Stock */}
           <p className="text-[14px] text-[#333333] pt-[11px] mb-[10px]">
-            {product?.availabilityText ? product?.availabilityText : "In Stock"}
+            {availabilityText}
           </p>
 
           {/* Quantity + Add to Cart Row */}
-          {purchasabilityStatus && (
+          {availableForSale && (
             <div className="flex items-center pb-[11px]">
               {/* Quantity Input */}
               <input
@@ -195,7 +200,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
               <button
                 onClick={() => {
-                  if (purchasabilityStatus) {
+                  if (availableForSale) {
                     const cartItem = cart.find(
                       (item: any) => item.id === product.id,
                     );
@@ -209,7 +214,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       );
                       return;
                     }
-                    // dispatch(addToCart(product));
                     // Add only up to the allowed maximum
                     const quantityToAdd = Math.min(minQty, remaining);
 
@@ -228,10 +232,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       });
                   }
                 }}
-                disabled={!purchasabilityStatus}
-                className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
+                disabled={currentStockEqualent}
+                className="flex-1 h-[42px] bg-[#ff482e] text-white text-[14px] font-light transition-colors hover:bg-[#D42020] disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#ff482e]"
               >
-                {"ADD TO CART"}
+                ADD TO CART
               </button>
             </div>
           )}
