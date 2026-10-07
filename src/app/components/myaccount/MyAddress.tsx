@@ -11,6 +11,7 @@ import { RootState } from "@/redux/store";
 import { Country, State } from "country-state-city";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import ConfirmationModal from "../modal/confirmationModal";
 import { addrInputCls, addrSelectCls, FieldLabel } from "./addressFormHelpers";
 
 const MyAddress = () => {
@@ -25,18 +26,19 @@ const MyAddress = () => {
     country: "",
   });
 
-  const { address, loading, error, customerAddresses } = useAppSelector(
+  const { loading, error, customerAddresses } = useAppSelector(
     (state: RootState) => state.myaccount,
   );
 
-  const auth = useAppSelector((state: RootState) => state.auth);
-
+  const [deleteId, setDeleteId] = useState<number | string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
   const countryList = Country.getAllCountries().map((c) => ({
     name: c.name,
     code: c.isoCode,
   }));
+
   const stateList = useMemo(() => {
     if (!editData?.country) return [];
 
@@ -45,15 +47,17 @@ const MyAddress = () => {
       code: s.isoCode,
     }));
   }, [editData?.country]);
-  const handleDelete = async (id: number | string) => {
-    const confirmDelete = confirm(
-      `Are you sure you want to delete address with ID: ${id}?`,
-    );
-    if (confirmDelete) {
-      try {
-        await dispatch(deletecustomeraddress({ id })).unwrap();
-        dispatch(fetchCustomerAddress());
-      } catch (err) {}
+
+  const handleDelete = async () => {
+    if (deleteId == null) return;
+    setDeleting(true);
+    try {
+      await dispatch(deletecustomeraddress({ id: deleteId })).unwrap();
+      dispatch(fetchCustomerAddress());
+    } catch (err) {
+    } finally {
+      setDeleting(false);
+      setDeleteId(null);
     }
   };
 
@@ -437,7 +441,7 @@ const MyAddress = () => {
                       <span className="mx-[5px]">|</span>
 
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => setDeleteId(item.id)}
                         className="underline hover:text-[#FF482E]"
                       >
                         Delete
@@ -463,6 +467,18 @@ const MyAddress = () => {
           )}
         </>
       )}
+<<<<<<< HEAD
+=======
+      <ConfirmationModal
+        open={deleteId != null}
+        onOpenChange={(open) => !open && !deleting && setDeleteId(null)}
+        variant="warning"
+        title="Delete Address?"
+        description="Are you sure you want to delete this address?"
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
+>>>>>>> 779855b987da997126a63e48d3200098b78e5d4b
     </div>
   );
 };

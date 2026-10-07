@@ -1,14 +1,22 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useAppSelector, useAppDispatch } from "@/hooks/useReduxHooks";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   clearRecent,
   fetchRecentProductsByIds,
 } from "@/redux/slices/recentSlice";
+import { useEffect } from "react";
 import ProductCard from "../Home/ProductCard";
 
-const RecentViewedProduct = () => {
+interface RecentViewedProductProps {
+  hideHeading?: boolean;
+  headingClassName?: string;
+}
+
+const RecentViewedProduct = ({
+  hideHeading = false,
+  headingClassName = "text-[25px] leading-[30px] font-normal text-[#333333] text-center w-full my-[26px]",
+}: RecentViewedProductProps) => {
   const dispatch = useAppDispatch();
 
   // Get recent viewed products from Redux
@@ -40,22 +48,16 @@ const RecentViewedProduct = () => {
   }
 
   return (
-    <div className="py-4">
-      <div
-        className="
-    grid
-    grid-cols-1
-    min-[551px]:grid-cols-2
-    min-[801px]:grid-cols-3
-    min-[1261px]:grid-cols-4
-    gap-3
-  "
-      >
+    <>
+      {!hideHeading && products?.length > 0 && (
+        <h2 className={headingClassName}>Recently Viewed</h2>
+      )}
+      <div className="grid grid-cols-1 min-[551px]:grid-cols-2 min-[801px]:grid-cols-3 min-[1261px]:grid-cols-4 gap-3">
         {products?.map((product: any, index: number) => (
           <ProductCard key={index} product={product} />
         ))}
       </div>
-    </div>
+    </>
   );
 };
 

@@ -22,6 +22,28 @@ export const stripePublishableKey =
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
   "pk_test_51TTnoo8vkezGA3pyz8ekc5xIQNyhweCnxiumTB1si5Dejq5YWPGHDJIJPpBHMLw9hYRkbSkOGpdCzPrlW8g59HZ600cueNQymh";
 
+// Several requests can 401 at once; log out only once.
+let isLoggingOut = false;
+
+// Same as the navbar Sign out: logout() + replace to the login page.
+const handleUnauthenticated = async () => {
+  if (typeof window === "undefined" || isLoggingOut) return;
+  isLoggingOut = true;
+
+  // Lazy imports: the store/auth slice import this file (circular otherwise)
+  const [{ store }, { logout }] = await Promise.all([
+    import("@/redux/store"),
+    import("@/redux/slices/authSlice"),
+  ]);
+
+  store.dispatch(logout());
+  // Not in a component, so no router here; replace() keeps history the same.
+  // Skip when already there, or a 401 on the login page would reload forever.
+  if (!window.location.pathname.startsWith("/auth/login")) {
+    window.location.replace("/auth/login");
+  }
+};
+
 const axiosInstance = axios.create({
   baseURL: baseURL,
 });
@@ -51,6 +73,16 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.data?.message) {
+    }
+
+    // Token expired/invalid: only when we actually sent one, so a failed
+    // login (no token yet) doesn't trigger a logout.
+    if (
+      error.response?.status === 401 &&
+      error.config?.headers?.Authorization
+    ) {
+      handleUnauthenticated();
+      return Promise.reject(error);
     }
 
     const errors = error.response?.data.errors;
