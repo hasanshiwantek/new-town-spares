@@ -45,9 +45,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const currentStockEqualent = Number(product?.currentStock) === 0;
   const minQty = product.minPurchaseQuantity || 1;
-  const maxQty = product.maxPurchaseQuantity;
-  const purchasabilityStatus =
-    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
   const callForPricingPhone = product?.callForPricingPhone;
 
   const availableForSale = isAvailableForSale(

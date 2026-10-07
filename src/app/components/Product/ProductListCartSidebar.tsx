@@ -16,7 +16,8 @@ import { errorMessage, successMessage } from "@/utils/message";
 import { removeFromStorage } from "@/utils/storage";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 import ProductPrice from "../productprice/ProductPrice";
 
 export default function ProductListCartSidebar() {
@@ -58,48 +59,60 @@ export default function ProductListCartSidebar() {
         setUpdatingQty(null);
       });
   };
-  const handleManualQtyUpdate = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    id: string,
-    maxPurchaseQuantity?: number,
-  ) => {
+  useEffect(() => {
+    const updated: { [key: string]: number } = {};
+    cart.forEach((item: any) => {
+      updated[item.cartItemId] = item.quantity;
+    });
+    setQuantities(updated);
+  }, [cart]);
+
+  // Commits the edited qty on blur (Enter just blurs the input).
+  const handleQtyCommit = (item: any) => {
+    const id = item.cartItemId;
+    const parsed = Number(quantities[id]);
+    const maxPurchaseQuantity = item.maxPurchaseQuantity;
+
+    const newQty = maxPurchaseQuantity
+      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
+      : parsed > 0
+        ? parsed
+        : 1;
+
+    if (newQty === Number(item.quantity)) {
+      setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      return;
+    }
+
+    setQuantities((prev) => ({ ...prev, [id]: newQty }));
+    setUpdatingQty(id);
+    dispatch(
+      updateCart({
+        id,
+        data: {
+          quantity: newQty,
+        },
+      }),
+    )
+      .unwrap()
+      .then(() => {
+        dispatch(fetchCartList());
+        removeLocalShipping();
+        setUpdatingQty(null);
+      })
+      .catch(() => {
+        setUpdatingQty(null);
+        setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      });
+  };
+
+  const handleQtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-
-      const inputValue = quantities[id];
-      const parsed = Number(inputValue);
-
-      const newQty = maxPurchaseQuantity
-        ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-        : parsed > 0
-          ? parsed
-          : 1;
-      setUpdatingQty(id);
-      dispatch(
-        updateCart({
-          id,
-          data: {
-            quantity: newQty,
-          },
-        }),
-      )
-        .unwrap()
-        .then(() => {
-          dispatch(fetchCartList());
-          removeLocalShipping();
-          setUpdatingQty(null);
-          setQuantities((prev) => ({
-            ...prev,
-            [id]: newQty,
-          }));
-        })
-        .catch(() => {
-          setUpdatingQty(null);
-        });
-
       e.currentTarget.blur();
     }
   };
+
   const qtyInput = (item: any) => (
     <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
       <input
@@ -110,9 +123,8 @@ export default function ProductListCartSidebar() {
             : quantities[item.cartItemId]
         }
         onChange={(e) => handleChange(item.cartItemId, e.target.value)}
-        onKeyDown={(e) =>
-          handleManualQtyUpdate(e, item.cartItemId, item.maxPurchaseQuantity)
-        }
+        onKeyDown={handleQtyKeyDown}
+        onBlur={() => handleQtyCommit(item)}
         className="w-full h-full text-center py-2 outline-none !text-[10px] !font-bold text-[#333333] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
     </div>
@@ -208,25 +220,7 @@ export default function ProductListCartSidebar() {
                 </div>
               );
             })}
-            {loading && updatingQty && (
-              <div className="absolute inset-0 z-30 flex items-center justify-center">
-                {/* Blur layer */}
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
-
-                {/* Loader */}
-                <div className="relative z-40 flex gap-2">
-                  <span className="w-2 h-2 bg-black rounded-full animate-bounce" />
-                  <span
-                    className="w-2 h-2 bg-black rounded-full animate-bounce"
-                    style={{ animationDelay: "0.15s" }}
-                  />
-                  <span
-                    className="w-2 h-2 bg-black rounded-full animate-bounce"
-                    style={{ animationDelay: "0.3s" }}
-                  />
-                </div>
-              </div>
-            )}
+            {(loading || updatingQty) && <CartLoadingOverlay />}
           </div>
         )}
       </div>
@@ -250,7 +244,7 @@ export default function ProductListCartSidebar() {
               onChange={(e) =>
                 setQty(Math.max(1, parseInt(e.target.value, 10) || 1))
               }
-              className="w-full h-full text-gray-800 text-lg bg-transparent text-center outline-none ml-5"
+              className="w-full h-full text-gray-800 text-lg bg-transparent text-center outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               style={{ appearance: "textfield" }}
             />
           </div>

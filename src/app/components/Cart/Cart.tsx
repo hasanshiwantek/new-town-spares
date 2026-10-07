@@ -1,19 +1,18 @@
 "use client";
-import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { RootState } from "@/redux/store";
-import Link from "next/link";
-import CartList from "./CartList";
-import OrderSummary from "./OrderSummary";
-import SaveCartToList from "./SaveCartToList";
-import { useSearchParams } from "next/navigation";
+import { logout } from "@/redux/slices/authSlice";
+import { fetchCartList } from "@/redux/slices/cartsSlice";
 import {
   fetchLoadSavedQuote,
   removeCoupon,
   removeManualDiscount,
 } from "@/redux/slices/couponSlice";
-import { fetchCartList } from "@/redux/slices/cartsSlice";
-import { logout } from "@/redux/slices/authSlice";
+import { RootState } from "@/redux/store";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import CartList from "./CartList";
+import OrderSummary from "./OrderSummary";
 
 const Cart = () => {
   const dispatch = useAppDispatch();
