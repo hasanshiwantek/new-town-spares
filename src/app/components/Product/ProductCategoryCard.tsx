@@ -1,12 +1,12 @@
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { isAvailableForSale } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
@@ -26,19 +26,21 @@ interface Product {
   availabilityText?: string;
   description?: string;
   customFields?: Record<string, string>;
-  purchasabilityStatus?: string;
+  purchasabilityStatus: string;
   minPurchaseQuantity?: number;
   maxPurchaseQuantity?: number;
+  currentStock?: number;
 }
 
 export default function ProductCategoryCard({ product }: { product: Product }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
 
-  const purchasabilityStatus =
-    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const availableForSale = isAvailableForSale(
+    product?.purchasabilityStatus,
+    product?.price,
+  );
   const [quantity, setQuantity] = useState<number>(
     product.minPurchaseQuantity || 1,
   );
@@ -55,15 +57,17 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     }
   };
 
+  const currentStockEqualent = Number(product?.currentStock) === 0;
   const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";
   const brandName = product.brand?.name ?? "";
   const hasOriginalPrice = product?.msrp != null && Number(product.msrp) > 0;
-  // const originalPrice = hasOriginalPrice
-  //   ? Number(product.price) + Number(product.msrp)
-  //   : Number(product.price);
-  // const salePrice = Number(product.price);
   const originalPrice = Number(product.msrp);
   const salePrice = Number(product.price);
+  const availabilityText = currentStockEqualent
+    ? "Out of Stock"
+    : product?.availabilityText
+      ? product?.availabilityText
+      : "In Stock";
 
   return (
     <div
@@ -135,9 +139,9 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
           </p>
           <div className="w-full border-t border-gray-200 my-2" />
           <p className="text-[#333333] text-[14px] w-full text-left">
-            {product?.availabilityText ?? "In Stock"}
+            {availabilityText}
           </p>
-          {purchasabilityStatus && (
+          {availableForSale && (
             <div className="w-full mt-2 flex items-center">
               <input
                 type="number"
@@ -148,7 +152,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
               />
               <button
                 onClick={() => {
-                  if (purchasabilityStatus) {
+                  if (availableForSale) {
                     const cartItem = cart.find(
                       (item: any) => item.id === product.id,
                     );
@@ -181,7 +185,8 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                       });
                   }
                 }}
-                className="flex-1 h-[42px] bg-[#ff482e] hover:bg-[#D42020] text-white text-[14px] font-light transition-colors"
+                disabled={currentStockEqualent}
+                className="flex-1 h-[42px] bg-[#ff482e] text-white text-[14px] font-light transition-colors hover:bg-[#D42020] disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#ff482e]"
               >
                 Add to Cart
               </button>

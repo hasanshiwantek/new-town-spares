@@ -1,11 +1,11 @@
 "use client";
 import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { isAvailableForSale } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
@@ -38,17 +38,24 @@ const ProductRight = ({
   const price = Number(product?.price) || 0;
 
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-  const purchasabilityStatus =
-    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const availableForSale = isAvailableForSale(
+    product?.purchasabilityStatus,
+    product?.price,
+  );
+  const currentStockEqualent = Number(product?.currentStock) === 0;
   const dispatch = useAppDispatch();
-  const router = useRouter();
-  const minQty = product?.minPurchaseQuantity || 1;
   const maxQty = product?.maxPurchaseQuantity;
+  const availabilityText = currentStockEqualent
+    ? "Out of Stock"
+    : product?.availabilityText
+      ? product?.availabilityText
+      : "In Stock";
+
   return (
     <>
       <aside className="product-right w-full mt-3 [grid-area:buy]">
         {/* Top: Price, Stock, Quantity, Add to Cart */}
-        {purchasabilityStatus ? (
+        {availableForSale ? (
           <div className="border border-[#ebebeb] w-full p-7 ">
             <div className="text-[20px] font-semibold text-[#FF482E] mb-[16px]">
               {price > 0 && (
@@ -61,7 +68,7 @@ const ProductRight = ({
               )}
             </div>
             <p className="text-[#333] text-[14px] mt-[8px] font-light">
-              {product?.availabilityText || "In Stock"}
+              {availabilityText}
             </p>
 
             <div className="mt-4 flex flex-col gap-2 items-start">
@@ -94,16 +101,7 @@ const ProductRight = ({
                 pattern="[0-9]*"
               />
             </div>
-
-            {/* 
-          <button
-            type="button"
-            onClick={onAddToCart}
-            className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white text-[14px] transition-colors font-light!"
-          >
-            Add to Cart
-          </button> */}
-            {purchasabilityStatus && (
+            {availableForSale && (
               <button
                 aria-label={`Add ${quantity} ${product?.name} to cart`}
                 onClick={() => {
@@ -137,10 +135,10 @@ const ProductRight = ({
                       successMessage(
                         `${product.name} added to cart (${quantityToAdd})!`,
                       );
-                      // router.push("/cart")
                     });
                 }}
-                className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#4d2017] text-white text-[14px] transition-colors font-light!"
+                disabled={currentStockEqualent}
+                className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#4d2017] text-white text-[14px] transition-colors font-light! disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#F15939]"
               >
                 ADD TO CART
               </button>
