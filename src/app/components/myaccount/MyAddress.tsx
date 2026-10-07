@@ -397,38 +397,45 @@ const MyAddress = () => {
           )}
 
           {!loading && !error && (
-            <ul className="flex flex-wrap -mx-[11px] list-none p-0 m-0">
+            <ul className="flex flex-wrap items-stretch -mx-[11px] list-none p-0 m-0">
               {/* Address List */}
               {customerAddresses?.map((item: any) => (
                 <li
-                  key={item.addressId}
-                  className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]"
+                  key={item.id}
+                  className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px] flex"
                 >
-                  <div className="relative min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
+                  <div className="relative w-full h-full min-h-[215px] bg-white border border-[#ebebeb] px-[21px] pt-[21px] pb-14 text-[15px] font-normal leading-[21px] text-[#333333]">
                     <h5 className="text-[15px] leading-[18px] font-normal text-[#333333] mb-[11px]">
                       {item.first_name} {item.last_name}
                     </h5>
+
                     {item.company_name && <p>{item.company_name}</p>}
-                    <p> {item.address_line_1}</p>
-                    {item.address_line_2 && <p> {item.address_line_2}</p>}
+
+                    <p>{item.address_line_1}</p>
+
+                    {item.address_line_2 && <p>{item.address_line_2}</p>}
+
                     <p>
                       {item.city} {item?.state} {item.zip}
                     </p>
+
                     <p>{item.country}</p>
 
                     {item.phone_number && (
                       <p className="mt-2">Phone: {item.phone_number}</p>
                     )}
 
-                    {/* Edit | Delete — anchored bottom-left like live */}
-                    <div className="mt-4 flex items-center text-[14px] leading-[21px] text-[#333333]">
+                    {/* Edit | Delete */}
+                    <div className="absolute bottom-[21px] left-[21px] flex items-center text-[14px] leading-[21px] text-[#333333]">
                       <button
                         onClick={() => openEditModal(item)}
                         className="underline hover:text-[#FF482E]"
                       >
                         Edit
                       </button>
+
                       <span className="mx-[5px]">|</span>
+
                       <button
                         onClick={() => handleDelete(item.id)}
                         className="underline hover:text-[#FF482E]"
@@ -441,10 +448,10 @@ const MyAddress = () => {
               ))}
 
               {/* New Address tile */}
-              <li className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px]">
+              <li className="w-full min-[551px]:w-[274px] px-[11px] mb-[21px] flex">
                 <Link
                   href="/my-account/addresses/new-address"
-                  className="flex flex-col items-center justify-center min-h-[215px] bg-white border border-[#ebebeb] text-center text-[#333333] hover:text-[#FF482E] transition-colors"
+                  className="flex w-full h-full min-h-[215px] flex-col items-center justify-center bg-white border border-[#ebebeb] text-center text-[#333333] hover:text-[#FF482E] transition-colors"
                 >
                   <span className="text-[50px] leading-[50px]">+</span>
                   <span className="text-[15px] leading-[18px]">
@@ -456,9 +463,6 @@ const MyAddress = () => {
           )}
         </>
       )}
-      {/* -------------------- EDIT MODAL -------------------- */}
-
-      {/* -------------------- END MODAL -------------------- */}
     </div>
   );
 };
