@@ -5,7 +5,6 @@ import { persistReducer, persistStore } from "redux-persist";
 import homeReducer from "./slices/homeSlice";
 import authReducer from "./slices/authSlice";
 import configReducer from "./slices/configSlice";
-// import cartSliceReducer from "./slices/cartSlice";
 import currencyReducer from "./slices/currencySlice";
 import storeFrontReducer from "./slices/storeFrontSlice";
 import myaccountReducer from "./slices/myaccountSlice";
@@ -19,6 +18,7 @@ import multiAddressReducer from "./slices/multiAddressSlice";
 import advanceSearchReducer from "./slices/advanceSearchSlice";
 import orderMessageReducer from "./slices/OrderMessage";
 import cartsSliceReducer from "./slices/cartsSlice";
+import uiReducer from "./slices/uiSlice";
 
 // ✅ only cart persist hoga
 const cartPersistConfig = {
@@ -58,7 +58,7 @@ const rootReducer = combineReducers({
   // cart: persistReducer(cartPersistConfig, cartSliceReducer), // persisted
   recent: persistReducer(recentPersistConfig, recentReducer),
   order: persistReducer(orderPersistConfig, orderReducer),
-  coupon: persistReducer(couponPersistConfig, couponReducer),
+  coupon: couponReducer,
   storeFront: storeFrontReducer,
   myaccount: myaccountReducer,
   shippingZone: shippingZoneReducer,
@@ -68,6 +68,7 @@ const rootReducer = combineReducers({
   scripts: scriptReducer,
   carts: cartsSliceReducer,
   customerMessage: orderMessageReducer,
+  ui: uiReducer,
 });
 
 export const store = configureStore({

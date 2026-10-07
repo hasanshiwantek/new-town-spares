@@ -248,7 +248,7 @@ export default function ProductsClientWrapper({
   if (!products?.length) return <></>;
 
   return (
-    <div className="w-full max-w-[1170px] mx-auto lg:px-6 xl:px-0">
+    <div className="w-full  mx-auto lg:px-6 xl:px-0">
       <div className="py-6">
         <ProductList
           filters={filters}

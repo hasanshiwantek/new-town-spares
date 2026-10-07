@@ -69,7 +69,7 @@ export default function ProductPage({
     <>
       <main
         role="main"
-        className="w-full max-w-[1170px] mx-auto px-4 lg:px-6 xl:px-0"
+        className="w-full mx-auto px-4 lg:px-6 xl:px-0"
       >
         <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
           {/* Left Sidebar - Fixed 235px on desktop */}
@@ -116,7 +116,6 @@ export default function ProductPage({
               <ProductTabs
                 tabs={[
                   { label: "PRODUCTS", count: productCount },
-                  // { label: "NEWS & INFORMATION", count: 0 },
                   {
                     label: searchForm ? "HIDE SEARCH FORM" : "SHOW SEARCH FORM",
                     isDivided: true,
@@ -124,7 +123,7 @@ export default function ProductPage({
                 ]}
                 activeTab={currentTab}
                 onTabChange={(index) => {
-                  if (index == 2) {
+                  if (index == 1) {
                     setSearchForm(!searchForm);
                     return;
                   }

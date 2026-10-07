@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
+import { CONTACT_INFO } from "@/const/contact";
 
 interface Brand {
   id: number;
@@ -32,6 +33,7 @@ interface Product {
   maxPurchaseQuantity: number;
   purchasabilityStatus: string;
   currentStock?: number;
+  callForPricingPhone?: string;
 }
 
 interface ProductCardProps {
@@ -43,6 +45,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const currentStockEqualent = Number(product?.currentStock) === 0;
   const minQty = product.minPurchaseQuantity || 1;
+  const maxQty = product.maxPurchaseQuantity;
+  const purchasabilityStatus =
+    product?.purchasabilityStatus == "available" && Number(product?.price) > 0;
+  const callForPricingPhone = product?.callForPricingPhone;
+
   const availableForSale = isAvailableForSale(
     product?.purchasabilityStatus,
     product?.price,
@@ -163,7 +170,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : (
             <div className="flex flex-col items-start mb-2">
               <Link
-                href="tel:0296516864"
+                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
                 className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
               >
                 CALL FOR PRICE
