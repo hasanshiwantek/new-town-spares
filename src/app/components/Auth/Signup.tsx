@@ -18,7 +18,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-
+import { countriesWithoutPostalCode } from "@/const/country-level";
+import { useAlert } from "@/hooks/useAlert";
+import ReCAPTCHA from "react-google-recaptcha";
+import { sitekey } from "@/lib/axiosInstance";
 interface SignupFormValues {
   firstName: string;
   lastName: string;
@@ -77,6 +80,7 @@ const SignupPage = () => {
     watch,
     reset,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<SignupFormValues>({
     mode: "onBlur",
@@ -90,6 +94,8 @@ const SignupPage = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const { showAlert, Alert } = useAlert();
   const stateList = useMemo(() => {
     if (!watchedCountry) return [];
     return State.getStatesOfCountry(watchedCountry).map((s) => ({
@@ -97,11 +103,15 @@ const SignupPage = () => {
       code: s.isoCode,
     }));
   }, [watchedCountry]);
+  const hasPostalCode = !countriesWithoutPostalCode.includes(watchedCountry);
   const onSubmit = async (data: SignupFormValues) => {
-    //   if (!captchaToken) {
-    //   toast("Please verify the captcha.");
-    //   return;
-    // }
+    if (!captchaToken) {
+      showAlert({
+        title: "Captcha Required",
+        message: "Please verify the captcha.",
+      });
+      return;
+    }
     try {
       const payload = {
         userRole: 2,
@@ -360,7 +370,16 @@ const SignupPage = () => {
               <select
                 id="country"
                 className={`${inputClass} cursor-pointer`}
-                {...register("country", { required: true })}
+                {...register("country", {
+                  required: true,
+                  onChange: (e) => {
+                    const country = e.target.value;
+
+                    if (countriesWithoutPostalCode.includes(country)) {
+                      clearErrors("zip");
+                    }
+                  },
+                })}
               >
                 <option value="">Choose a Country</option>
                 {countryList.map((c) => (
@@ -402,17 +421,37 @@ const SignupPage = () => {
 
           {/* Row 7: Zip (single field row) */}
           <div className="w-full min-[551px]:w-[49.3%]">
-            <FieldLabel htmlFor="zip" required>
+            <FieldLabel htmlFor="zip" required={hasPostalCode}>
               Zip/Postcode
             </FieldLabel>
+
             <Input
               id="zip"
               className={inputClass}
-              {...register("zip", { required: true })}
+              {...register("zip", {
+                validate: (value) => {
+                  if (hasPostalCode && !value) {
+                    return "Zip/Postcode is required";
+                  }
+
+                  return true;
+                },
+              })}
             />
+
             {errors.zip && (
-              <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              <p className="text-[10px] text-red-500 mt-0.5">
+                {errors.zip.message}
+              </p>
             )}
+          </div>
+          <div className="mt-6">
+            <ReCAPTCHA
+              sitekey={sitekey}
+              onChange={(token: any) => {
+                setCaptchaToken(token);
+              }}
+            />
           </div>
 
           {/* Submit */}

@@ -29,14 +29,16 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 }) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const [products, setProducts] = useState<any>([]);
+  const { products } = useAppSelector((state: any) => state.home);
   const productsData = products?.data || [];
+
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(1);
   const [loading, setLoading] = useState(true);
   const [localError, setLocalError] = useState<string | null>(null);
+  const [isSliderActive, setIsSliderActive] = useState(false);
 
   // ── Scroll state ──────────────────────────────────────────────────────────
   const updateScroll = () => {
@@ -82,10 +84,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
     setLocalError(null);
     dispatch(fetchProductsData(endpoint))
       .unwrap()
-      .then((res) => {
-        setProducts(res);
-        setLocalError(null);
-      })
+      .then(() => setLocalError(null))
       .catch((err: any) => setLocalError(err || `No ${title} found`))
       .finally(() => setLoading(false));
   }, [dispatch, endpoint, title]);
@@ -128,7 +127,44 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
       : 0;
     el.scrollTo({ left: i * colWidth, behavior: "smooth" });
   };
+useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!isSliderActive) return;
 
+    if (event.key === "ArrowLeft" && canScrollLeft) {
+      event.preventDefault();
+      scrollLeft();
+    }
+
+    if (event.key === "ArrowRight" && canScrollRight) {
+      event.preventDefault();
+      scrollRight();
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, [isSliderActive, canScrollLeft, canScrollRight]);
+useEffect(() => {
+  const handleOutsideClick = (event: MouseEvent) => {
+    const slider = trackRef.current;
+
+    if (!slider) return;
+
+    if (!slider.parentElement?.contains(event.target as Node)) {
+      setIsSliderActive(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleOutsideClick);
+
+  return () => {
+    document.removeEventListener("mousedown", handleOutsideClick);
+  };
+}, []);
   // ── Dots logic ────────────────────────────────────────────────────────────
   // e.g. 5 cards, 4 visible → 2 dots (position 0 aur 1)
   // e.g. 5 cards, 2 visible → 4 dots
@@ -169,7 +205,9 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
 
           {/* ── Slider ── */}
           {!loading && productsData.length > 0 && (
-            <div className="relative">
+            <div className="relative"   onMouseDown={() => setIsSliderActive(true)}
+>
+              
               {/* Left Arrow */}
               {showUI && (
                 <button
@@ -188,6 +226,7 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
               {/* Grid track */}
               <div
                 ref={trackRef}
+                
                 //             className="grid grid-rows-1 grid-flow-col gap-3
                 // auto-cols-[100%]
                 // sm:auto-cols-[calc(50%-6px)]
