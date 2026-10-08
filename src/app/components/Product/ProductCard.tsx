@@ -19,7 +19,7 @@ interface Product {
   id: number;
   brand: Brand | string;
   sku: string;
-  name: string | { name?: string };
+  name: string;
   price: number | string;
   msrp?: number;
   image?: { path?: string; isPrimary?: number }[];
