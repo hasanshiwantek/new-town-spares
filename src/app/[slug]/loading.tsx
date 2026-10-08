@@ -1,8 +1,10 @@
 import ProductCardSkeleton from "@/app/components/loader/ProductCardSkeleton";
 export default function Loading() {
   return (
-    <article className="my-6">
-      <ProductCardSkeleton />
-    </article>
+    <main role="main">
+      <article>
+        <ProductCardSkeleton />
+      </article>
+    </main>
   );
 }

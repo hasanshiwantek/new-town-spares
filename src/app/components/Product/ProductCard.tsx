@@ -1,5 +1,6 @@
 "use client";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
+import { clampQty, getMinQty } from "@/lib/utils";
 import { addToCart } from "@/redux/slices/cartsSlice";
 import { addRecentView } from "@/redux/slices/recentSlice";
 import { successMessage } from "@/utils/message";
@@ -8,19 +9,50 @@ import ProductLeft from "./ProductLeft";
 import ProductMiddle from "./ProductMiddle";
 import ProductRight from "./ProductRight";
 
-const ProductCard = ({ product }: { product: any }) => {
-  const [quantity, setQuantity] = useState(1);
+interface Brand {
+  id: number;
+  name: string;
+  slug?: string;
+  logo?: string;
+}
+interface Product {
+  id: number;
+  brand: Brand | string;
+  sku: string;
+  name: string | { name?: string };
+  price: number | string;
+  msrp?: number;
+  image?: { path?: string; isPrimary?: number }[];
+  slug: string;
+  productUrl?: string;
+  availabilityText?: string;
+  minPurchaseQuantity: number;
+  maxPurchaseQuantity: number;
+  purchasabilityStatus: string;
+  currentStock?: number;
+  callForPricingPhone?: string;
+  allowPurchase?: boolean;
+}
+
+const ProductCard = ({ product }: { product: Product }) => {
+  const minQty = getMinQty(product);
+  const [quantity, setQuantity] = useState<number | string>(minQty);
+
+  useEffect(() => {
+    setQuantity(minQty);
+  }, [product?.id, minQty]);
   const dispatch = useAppDispatch();
   const addtocart = () => {
     dispatch(addToCart(product));
     successMessage(`${product?.name} added to cart!`);
   };
-  const images =
-    product?.image?.length > 0
-      ? product?.image?.map((img: any) => img?.path)
-      : ["/default-product-image.svg"];
 
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+  // safe image src
+  const imageSrc =
+    product.image?.find((img) => img?.isPrimary === 1)?.path ||
+    product.image?.[0]?.path ||
+    product.image?.[1]?.path ||
+    "/default-product-image.svg";
 
   useEffect(() => {
     if (!product) return;
@@ -33,16 +65,9 @@ const ProductCard = ({ product }: { product: any }) => {
     );
   }, [product?.id]);
 
-  const increment = () => {
-    if (
-      !product.maxPurchaseQuantity ||
-      quantity < product.maxPurchaseQuantity
-    ) {
-      setQuantity(quantity + 1);
-    }
-  };
+  const increment = () => setQuantity(clampQty(Number(quantity) + 1, product));
 
-  const decrement = () => quantity > 1 && setQuantity(quantity - 1);
+  const decrement = () => setQuantity(clampQty(Number(quantity) - 1, product));
 
   return (
     <div className="max-w-full mx-auto">
@@ -56,11 +81,7 @@ const ProductCard = ({ product }: { product: any }) => {
             min-[1261px]:[grid-template-columns:40%_37.4%_20%] min-[1261px]:[grid-template-rows:auto]
             min-[1261px]:[grid-template-areas:'image_info_buy']"
         >
-          <ProductLeft
-            images={images}
-            selectedImage={selectedImage}
-            setSelectedImage={setSelectedImage}
-          />
+          <ProductLeft selectedImage={imageSrc} />
           <ProductMiddle
             product={product}
             quantity={quantity}
@@ -72,7 +93,7 @@ const ProductCard = ({ product }: { product: any }) => {
             product={{
               ...product,
               name: product?.name,
-              image: images[0],
+              image: imageSrc,
               sku: product?.sku,
             }}
             quantity={quantity}
@@ -80,8 +101,9 @@ const ProductCard = ({ product }: { product: any }) => {
             increment={increment}
             decrement={decrement}
             onAddToCart={() => {
-              dispatch(addToCart({ ...product, quantity }));
-              successMessage(`${product?.name} added to cart (${quantity})!`);
+              const qty = clampQty(quantity, product);
+              dispatch(addToCart({ ...product, quantity: qty }));
+              successMessage(`${product?.name} added to cart (${qty})!`);
             }}
           />
         </div>

@@ -5,6 +5,31 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getMinQty(product: any): number {
+  return Math.max(1, Number(product?.minPurchaseQuantity) || 1);
+}
+
+export function clampQty(value: unknown, product: any): number {
+  const min = getMinQty(product);
+  const max = Number(product?.maxPurchaseQuantity) || Infinity;
+  const parsed = parseInt(String(value), 10);
+  const qty = isNaN(parsed) ? min : Math.max(parsed, min);
+  return Math.max(min, Math.min(qty, max));
+}
+
+export function getQtyError(value: unknown, product: any): string | null {
+  const parsed = parseInt(String(value), 10);
+  const min = getMinQty(product);
+  const max = Number(product?.maxPurchaseQuantity) || Infinity;
+  if (isNaN(parsed) || parsed < min) {
+    return `Minimum purchase quantity for this product is ${min}.`;
+  }
+  if (parsed > max) {
+    return `Maximum purchase quantity for this product is ${max}.`;
+  }
+  return null;
+}
+
 export function isAvailableForSale(status: string, price: string | number) {
   const availableForSale = status == "available" && Number(price) > 0;
   return availableForSale;

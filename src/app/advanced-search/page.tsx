@@ -1,38 +1,23 @@
 "use client";
+import { useAppSelector } from "@/hooks/useReduxHooks";
+import { fetchBrands } from "@/lib/api/brand";
+import { fetchCategories } from "@/lib/api/category";
+import { getFromStorage } from "@/utils/storage";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-// import CategoriesSidebar from "../components/Home/CategoriesSidebar";
-// import BrandsSidebar from "../components/Home/BrandsSidebar";
+import AdvancedSearchForm from "../components/advanced-search/AdvancedSearchForm";
 import BrandsSection from "../components/advanced-search/BrandsSection";
 import CategoriesSection from "../components/advanced-search/CategoriesSection";
-import { fetchCategories } from "@/lib/api/category";
-import { fetchBrands } from "@/lib/api/brand";
 import ProductsClientWrapper from "../components/advanced-search/ProductsClientWrapper";
 import ProductTabs from "../components/advanced-search/ProductTabs";
-import AdvancedSearchForm from "../components/advanced-search/AdvancedSearchForm";
-import NoResults from "../components/advanced-search/NoResults";
-import { useAppSelector } from "@/hooks/useReduxHooks";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { getFromStorage } from "@/utils/storage";
+import ProductRecent from "../components/Product/ProductRecent";
 
-export default function ProductPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function ProductPage() {
   const [currentTab, setCurrentTab] = useState(0);
   const [searchForm, setSearchForm] = useState(false);
-  const {
-    loading,
-    products,
-    pagination,
-    categories,
-    brands,
-    error,
-    productCount,
-  } = useAppSelector((state: any) => state?.advanceSearch);
-  const searchParams = useSearchParams();
-  // const query = searchParams.get("q");
+  const { loading, pagination, categories, brands, productCount } =
+    useAppSelector((state: any) => state?.advanceSearch);
+
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState([]);
   const [brand, setBrand] = useState([]);
@@ -44,6 +29,7 @@ export default function ProductPage({
       setQuery(parsed.q || "");
     }
   }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -59,6 +45,11 @@ export default function ProductPage({
     loadData();
   }, []);
 
+  const [hasSearched, setHasSearched] = useState(false);
+  useEffect(() => {
+    if (loading) setHasSearched(true);
+  }, [loading]);
+
   useEffect(() => {
     if (query && searchForm) {
       setSearchForm(false);
@@ -67,13 +58,10 @@ export default function ProductPage({
 
   return (
     <>
-      <main
-        role="main"
-        className="w-full mx-auto px-4 lg:px-6 xl:px-0"
-      >
+      <main role="main" className="w-full mx-auto px-4 lg:px-6 xl:px-0">
         <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
           {/* Left Sidebar - Fixed 235px on desktop */}
-          <aside className="hidden lg:block md:w-[20%] flex-shrink-0">
+          <aside className="hidden lg:block md:w-[20%] shrink-0">
             {/* <CategoriesSidebar />
                         <BrandsSidebar /> */}
           </aside>
@@ -92,23 +80,17 @@ export default function ProductPage({
                   >
                     /
                   </span>
-                  <span
-                    className={`text-[11px] 
-                   !text-[#D42020]
-                    `}
-                    itemProp="name"
-                  >
+                  <span className="text-[11px] text-[#D42020]!" itemProp="name">
                     Search
                   </span>
                 </span>
               </h2>
             </div>
             <div>
-              
-                <h1 className="text-[28px] text-text-secondary">
-                  {productCount || 0} results for {query}
-                </h1>
-        </div>
+              <h1 className="text-[28px] text-text-secondary">
+                {productCount || 0} results for {query}
+              </h1>
+            </div>
             <div>
               <ProductTabs
                 tabs={[
@@ -128,30 +110,30 @@ export default function ProductPage({
                 }}
               />
             </div>
-                        {productCount === 0 && (
-  <div className="w-full border-t border-gray-200">
-    <div className="px-1 py-5">
-      <p className="text-[14px] leading-6 text-text-secondary">
-        Your search for{" "}
-        <span className="font-bold!">"{query}"</span>{" "}
-        did not match any products or information.
-      </p>
+            {productCount === 0 && (
+              <div className="w-full border-t border-gray-200">
+                <div className="px-1 py-5">
+                  <p className="text-[14px] leading-6 text-text-secondary">
+                    Your search for{" "}
+                    <span className="font-bold!">"{query}"</span> did not match
+                    any products or information.
+                  </p>
 
-      <div className="mt-4 border-t border-b border-gray-200 py-4">
-        <p className="mb-2 text-[15px] font-medium text-text-secondary">
-          Suggestions:
-        </p>
+                  <div className="mt-4 border-t border-b border-gray-200 py-4">
+                    <p className="mb-2 text-[15px] font-medium text-text-secondary">
+                      Suggestions:
+                    </p>
 
-        <ul className="space-y-1 text-[14px] leading-6 text-text-secondary">
-          <li>Make sure all words are spelled correctly.</li>
-          <li>Try different keywords.</li>
-          <li>Try more general keywords.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-)}
-    
+                    <ul className="space-y-1 text-[14px] leading-6 text-text-secondary">
+                      <li>Make sure all words are spelled correctly.</li>
+                      <li>Try different keywords.</li>
+                      <li>Try more general keywords.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {searchForm && (
               <div>
                 <AdvancedSearchForm
@@ -194,6 +176,7 @@ export default function ProductPage({
             </div>
           </article>
         </div>
+        <ProductRecent headingClassName="text-[25px] leading-[30px] font-normal text-[#333333] text-center sm:text-start w-full my-[26px]" />
       </main>
     </>
   );
