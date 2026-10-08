@@ -2,10 +2,10 @@
 
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { clampQty, getMinQty, getQtyError } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 import {
   addBySku,
   deleteCart,
@@ -27,7 +27,9 @@ export default function ProductListCartSidebar() {
     [key: string]: number | string;
   }>({});
 
-  const { loading } = useAppSelector((state: RootState) => state.carts);
+  const { loading, cartLoading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { skuInput, setSkuInput, qty, setQty, adding, handleAddBySku } =
@@ -48,14 +50,15 @@ export default function ProductListCartSidebar() {
   const confirmDelete = (item: any) => {
     setUpdatingQty(item.cartItemId);
 
+    // Keep the overlay up until the refreshed cart list lands.
     dispatch(deleteCart({ id: item.cartItemId }))
       .unwrap()
       .then(() => {
-        dispatch(fetchCartList());
         removeLocalShipping();
-        setUpdatingQty(null);
+        return dispatch(fetchCartList());
       })
-      .catch(() => {
+      .catch(() => {})
+      .finally(() => {
         setUpdatingQty(null);
       });
   };
@@ -70,14 +73,9 @@ export default function ProductListCartSidebar() {
   // Commits the edited qty on blur (Enter just blurs the input).
   const handleQtyCommit = (item: any) => {
     const id = item.cartItemId;
-    const parsed = Number(quantities[id]);
-    const maxPurchaseQuantity = item.maxPurchaseQuantity;
-
-    const newQty = maxPurchaseQuantity
-      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-      : parsed > 0
-        ? parsed
-        : 1;
+    const qtyError = getQtyError(quantities[id], item);
+    if (qtyError) errorMessage(qtyError);
+    const newQty = clampQty(quantities[id], item);
 
     if (newQty === Number(item.quantity)) {
       setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
@@ -96,13 +94,15 @@ export default function ProductListCartSidebar() {
     )
       .unwrap()
       .then(() => {
-        dispatch(fetchCartList());
         removeLocalShipping();
-        setUpdatingQty(null);
+        // Keep the overlay up until the refreshed prices land.
+        return dispatch(fetchCartList());
       })
       .catch(() => {
-        setUpdatingQty(null);
         setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      })
+      .finally(() => {
+        setUpdatingQty(null);
       });
   };
 
@@ -117,6 +117,7 @@ export default function ProductListCartSidebar() {
     <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
       <input
         type="number"
+        min={getMinQty(item)}
         value={
           quantities[item.cartItemId] === undefined
             ? item.quantity
@@ -220,13 +221,12 @@ export default function ProductListCartSidebar() {
                 </div>
               );
             })}
-            {(loading || updatingQty) && <CartLoadingOverlay />}
+            {(loading || cartLoading || updatingQty) && <CartLoadingOverlay />}
           </div>
         )}
       </div>
 
-      <div className="space-y-4 bg-white border-b border-gray-200">
-        {/* <label className="text-gray-800 text-sm font-medium block">Add SKU to Cart</label> */}
+      <div className="space-y-4 bg-white">
         <div className="flex gap-0 border border-gray-300 rounded overflow-hidden mt-4.5">
           <input
             type="text"

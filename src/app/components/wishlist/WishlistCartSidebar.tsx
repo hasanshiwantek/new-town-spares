@@ -9,6 +9,11 @@ import {
   updateCart,
   updateQty,
 } from "@/redux/slices/cartsSlice";
+import {
+  clampQty,
+  getMinQty,
+  getQtyError,
+} from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
 import { X } from "lucide-react";
@@ -16,10 +21,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 
 export default function WishlistCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
-  const { loading } = useAppSelector((state: RootState) => state.carts);
+  // loading = add/update/delete request, cartLoading = the cart list refetch
+  // that follows; together they keep the overlay up until new data lands.
+  const { loading, cartLoading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { skuInput, setSkuInput, qty, setQty } = useAddProductBySku();
@@ -71,12 +81,9 @@ export default function WishlistCartSidebar() {
         return rest;
       });
 
-    const parsed = parseInt(String(draft), 10);
-    const max = item.maxPurchaseQuantity;
-    const newQty = Math.min(
-      isNaN(parsed) || parsed < 1 ? 1 : parsed,
-      max || Infinity,
-    );
+    const qtyError = getQtyError(draft, item);
+    if (qtyError) errorMessage(qtyError);
+    const newQty = clampQty(draft, item);
 
     if (newQty === Number(item.quantity)) {
       clearDraft();
@@ -106,6 +113,8 @@ export default function WishlistCartSidebar() {
           </p>
         </div>
       ) : (
+        <div className="relative">
+        {(loading || cartLoading) && <CartLoadingOverlay />}
         <div className="max-h-[390px] overflow-y-auto">
           {cart.map((item: any) => {
             const imageUrl =
@@ -142,7 +151,7 @@ export default function WishlistCartSidebar() {
                   <div className="mt-[7px] flex items-center gap-[7px]">
                     <input
                       type="number"
-                      min={1}
+                      min={getMinQty(item)}
                       value={quantities[item.cartItemId] ?? item.quantity}
                       onFocus={(e) => e.target.select()}
                       onChange={(e) =>
@@ -178,6 +187,7 @@ export default function WishlistCartSidebar() {
               </div>
             );
           })}
+        </div>
         </div>
       )}
 

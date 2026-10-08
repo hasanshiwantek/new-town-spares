@@ -1,12 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { ProductFilterPayload } from "@/types/types";
-import { useParams, usePathname } from "next/navigation";
-import ProductList from "./ProductList";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { advancedSearch } from "@/redux/slices/advanceSearchSlice";
-import { useSearchParams } from "next/navigation";
+import { ProductFilterPayload } from "@/types/types";
 import { getFromStorage } from "@/utils/storage";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import ProductList from "./ProductList";
 
 export default function ProductsClientWrapper({
   categories,
@@ -17,11 +16,11 @@ export default function ProductsClientWrapper({
   initialBrandName,
   initialCategorydescription,
 }: any) {
-  const params = useParams(); // get slug param
-  const pathname = usePathname(); // get current path
+  const params = useParams();
+  const pathname = usePathname();
   const [products, setProducts] = useState<any[]>([]);
   const [pagination, setPagination] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const query = searchParams.get("q");
@@ -245,7 +244,7 @@ export default function ProductsClientWrapper({
     fetchData();
   }, [filters]);
 
-  if (!products?.length) return <></>;
+  if (!isLoading && !products?.length) return <></>;
 
   return (
     <div className="w-full  mx-auto lg:px-6 xl:px-0">

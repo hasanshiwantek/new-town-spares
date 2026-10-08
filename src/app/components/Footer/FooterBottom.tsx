@@ -80,17 +80,8 @@ const FooterBottom = () => {
   useEffect(() => {
     const auth = getPersistedAuth();
     const t = auth?.token || null;
-    if (t) {
-      dispatch(checkAuthToken())
-        .unwrap()
-        .then((res) => {})
-        .catch((err) => {
-          if (err) {
-            dispatch(logout());
-            window.location.href = "/auth/login";
-          }
-        });
-    }
+    // A 401 here is handled by the axios interceptor (logout + redirect once).
+    if (t) dispatch(checkAuthToken());
     setToken(t);
   }, []);
   useEffect(() => {

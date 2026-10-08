@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import Sidebar from "../Filters/Sidebar";
-import ProductList from "./ProductList";
-import Breadcrumb from "./Breadcrumb";
 import { fetchFilteredProducts } from "@/lib/api/products";
 import { ProductFilterPayload } from "@/types/types";
 import { useParams, usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import Sidebar from "../Filters/Sidebar";
+import Breadcrumb from "./Breadcrumb";
+import ProductList from "./ProductList";
 
 export default function ProductsClientWrapper({
   categories,
@@ -20,7 +20,7 @@ export default function ProductsClientWrapper({
   const pathname = usePathname(); // get current path
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Detect if we're on brand or category page
