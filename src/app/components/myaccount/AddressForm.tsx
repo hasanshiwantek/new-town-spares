@@ -13,7 +13,7 @@ import {
 } from "./addressFormHelpers";
 import { Country, State, City } from "country-state-city";
 import { useMemo } from "react";
-
+import { countriesWithoutPostalCode } from "@/const/country-level";
 interface AddressFormValues {
   firstName: string;
   lastName: string;
@@ -33,6 +33,7 @@ const AddressForm = () => {
     watch,
     setValue,
     handleSubmit,
+      clearErrors,
     formState: { errors },
     reset,
   } = useForm<AddressFormValues>();
@@ -54,6 +55,8 @@ const AddressForm = () => {
       code: s.isoCode,
     }));
   }, [selectedCountry]);
+  
+  const hasPostalCode = !countriesWithoutPostalCode.includes(selectedCountry);
   const onSubmit = async (data: AddressFormValues) => {
     try {
       const mergedData = {
@@ -190,8 +193,12 @@ const AddressForm = () => {
               // {...register("country", { required: true, })}
               {...register("country", {
                 required: true,
-                onChange: () => {
+                onChange: (e) => {
+                  const country = e.target.value;
                   setValue("state", "");
+                   if (countriesWithoutPostalCode.includes(country)) {
+                      clearErrors("postcode");
+                    }
                 },
               })}
             >
@@ -232,13 +239,16 @@ const AddressForm = () => {
             <ErrorMsg show={!!errors.state} label="State/Province" />
           </div>
           <div>
-            <FieldLabel htmlFor="postcode" required>
+            <FieldLabel htmlFor="postcode" required={hasPostalCode}>
               Zip/Postcode
             </FieldLabel>
             <input
               id="postcode"
               className={addrInputCls(!!errors.postcode)}
-              {...register("postcode", { required: true })}
+               {...register("postcode", {
+      validate: (value) =>
+        !hasPostalCode || !!value || "Zip/Postcode is required",
+    })}
             />
             <ErrorMsg show={!!errors.postcode} label="Zip/Postcode" />
           </div>
@@ -266,3 +276,4 @@ const AddressForm = () => {
 };
 
 export default AddressForm;
+

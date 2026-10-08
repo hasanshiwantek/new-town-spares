@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ConfirmationModal from "../modal/confirmationModal";
 import { addrInputCls, addrSelectCls, FieldLabel } from "./addressFormHelpers";
+import { countriesWithoutPostalCode } from "@/const/country-level";
 
 const MyAddress = () => {
   const dispatch = useAppDispatch();
@@ -47,7 +48,7 @@ const MyAddress = () => {
       code: s.isoCode,
     }));
   }, [editData?.country]);
-
+const hasPostalCode = !countriesWithoutPostalCode.includes(editData?.country);
   const handleDelete = async () => {
     if (deleteId == null) return;
     setDeleting(true);
@@ -86,7 +87,7 @@ const MyAddress = () => {
       addressLine1: editData.addressLine1 ? "" : "Address Line 1 is required",
       city: editData.city ? "" : "City is required",
       state: editData.state ? "" : "State is required",
-      zip: editData.zip ? "" : "Zip is required",
+       zip: hasPostalCode && !editData.zip ? "Zip is required" : "",
       country: editData.country ? "" : "Country is required",
     };
 
@@ -281,6 +282,7 @@ const MyAddress = () => {
                       ...editData,
                       country: e.target.value,
                       state: "",
+                       ...(countriesWithoutPostalCode.includes(e.target.value) && { zip: "" }),
                     });
                     // setEditData({
                     //   ...editData,
@@ -308,7 +310,7 @@ const MyAddress = () => {
               {/* Zip */}
 
               <div>
-                <FieldLabel htmlFor="edit-zip" required>
+                <FieldLabel htmlFor="edit-zip" required={hasPostalCode}>
                   Zip/Postcode
                 </FieldLabel>
                 <input
