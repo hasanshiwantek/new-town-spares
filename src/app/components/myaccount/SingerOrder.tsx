@@ -16,6 +16,9 @@ interface OrderData {
   status: string;
   totalAmount: string;
   shippingCost: string;
+  manualDiscount?: number;
+  discountAmount?: number;
+  couponCode?: string;
   billingInformation: {
     firstName: string;
     lastName: string;
@@ -66,43 +69,41 @@ interface OrderData {
 const SingleOrder = () => {
   const params = useParams();
   const orderNumber = params?.slug as string;
-  console.log(orderNumber);
-
   const dispatch = useAppDispatch();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
-const handlePrint = async (orderNumber: string) => {
-  try {
-    const response = await axiosInstance.get(
-      `web/orders/customer/invoices/${orderNumber}`,
-      {
-        responseType: "blob",
+  const handlePrint = async (orderNumber: string) => {
+    try {
+      const response = await axiosInstance.get(
+        `web/orders/customer/invoices/${orderNumber}`,
+        {
+          responseType: "blob",
+        },
+      );
+
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const printWindow = window.open(url, "_blank");
+
+      if (!printWindow) {
+        errorMessage("Please allow popups to print the invoice.");
+        return;
       }
-    );
 
-    const blob = new Blob([response.data], {
-      type: "application/pdf",
-    });
-
-    const url = window.URL.createObjectURL(blob);
-
-    const printWindow = window.open(url, "_blank");
-
-    if (!printWindow) {
-      errorMessage("Please allow popups to print the invoice.");
-      return;
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    } catch (error) {
+      console.error("Invoice print error:", error);
+      errorMessage("Unable to print invoice.");
     }
-
-    printWindow.onload = () => {
-      printWindow.print();
-    };
-  } catch (error) {
-    console.error("Invoice print error:", error);
-    errorMessage("Unable to print invoice.");
-  }
-};
+  };
 
   useEffect(() => {
     const loadOrderDetails = async () => {
@@ -163,6 +164,11 @@ const handlePrint = async (orderNumber: string) => {
   //   ) || 0;
 
   const shippingCost = parseFloat(order.shippingCost) || 0;
+  const manualDiscount = Number(order?.manualDiscount) || 0;
+  const coupon = {
+    couponCode: order?.couponCode,
+    discountAmount: Number(order?.discountAmount),
+  };
   const total = parseFloat(order.totalAmount);
 
   // Format date
@@ -182,7 +188,6 @@ const handlePrint = async (orderNumber: string) => {
     );
     return product?.quantity || 1;
   };
-
 
   const blockTypography = "text-[15px] leading-[22.5px] text-[#333333]";
   const blockClass = `${blockTypography} w-full p-[21px] border-b border-[#ebebeb] min-[801px]:w-1/2 min-[1261px]:w-auto min-[1261px]:flex-1 min-[1261px]:border-b-0 min-[1261px]:p-0`;
@@ -349,19 +354,29 @@ const handlePrint = async (orderNumber: string) => {
           <div className={summaryRow}>
             <span>Subtotal:</span>
             <span className="float-right">
-              <ProductPrice
-                price={Number(order?.totalAmount)}
-                inline={true}
-              />
+              <ProductPrice price={Number(order?.totalAmount)} inline={true} />
             </span>
           </div>
+          {manualDiscount > 0 && (
+            <div className={summaryRow}>
+              <span>Discount:</span>
+              <span className="float-right">
+                -<ProductPrice price={manualDiscount} inline={true} />
+              </span>
+            </div>
+          )}
+          {coupon?.couponCode && (
+            <div className={summaryRow}>
+              <span>Coupon Code:({coupon?.couponCode})</span>
+              <span className="float-right">
+                -<ProductPrice price={coupon?.discountAmount} inline={true} />
+              </span>
+            </div>
+          )}
           <div className={summaryRow}>
             <span>Shipping:</span>
             <span className="float-right">
-              <ProductPrice
-                price={shippingCost}
-                inline={true}
-              />
+              <ProductPrice price={shippingCost} inline={true} />
             </span>
           </div>
           <div
@@ -369,14 +384,14 @@ const handlePrint = async (orderNumber: string) => {
           >
             <span>Grand total:</span>
             <span className="float-right">
-              <ProductPrice
-                price={total}
-                inline={true}
-              />
+              <ProductPrice price={total} inline={true} />
             </span>
           </div>
 
-          <button className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]" onClick={() => handlePrint(orderNumber)}>
+          <button
+            className="mt-[5px] w-full bg-white text-[#333333] border border-[#ebebeb] rounded-[4px] h-[39px] text-[14px]"
+            onClick={() => handlePrint(orderNumber)}
+          >
             Print Invoice
           </button>
         </div>

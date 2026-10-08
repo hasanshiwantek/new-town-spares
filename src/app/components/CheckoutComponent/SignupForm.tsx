@@ -73,7 +73,7 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
           const sessionId = getFromStorage("sessionId");
-          const res = await fetch(`${baseURL}web/cart/transfer`, {
+          await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
