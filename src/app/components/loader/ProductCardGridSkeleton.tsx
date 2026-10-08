@@ -1,5 +1,4 @@
 "use client";
-import React from "react";
 
 const Bar = ({ className = "" }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-200 rounded-md ${className}`} />
@@ -44,7 +43,10 @@ const ProductCardGridSkeleton = () => (
         <hr className="border-t border-[#ebebeb]" />
 
         {/* Availability: pt-[11px] mb-[10px], 14/21 */}
-        <Line lineClass="h-[21px] mt-[11px] mb-[10px]" barClass="h-[14px] w-16" />
+        <Line
+          lineClass="h-[21px] mt-[11px] mb-[10px]"
+          barClass="h-[14px] w-16"
+        />
 
         {/* Qty input + Add to Cart: 42px row, pb-[11px] */}
         <div className="flex items-center pb-[11px]">
@@ -70,6 +72,24 @@ export const ProductCardSkeletonRow = ({ count = 5 }: { count?: number }) => (
     {Array.from({ length: count }).map((_, i) => (
       <ProductCardGridSkeleton key={i} />
     ))}
+  </div>
+);
+
+export const ProductCarouselSkeleton = ({ count = 6 }: { count?: number }) => (
+  <div className="overflow-hidden [--n:1] min-[482px]:[--n:2] min-[770px]:[--n:3] min-[1026px]:[--n:4] min-[1442px]:[--n:5] min-[2001px]:[--n:6] [--gap:0px] min-[801px]:[--gap:11px]">
+    <div className="flex pl-px gap-[var(--gap)]">
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="shrink-0"
+          style={{
+            width: "calc((100% - (var(--n) - 1) * var(--gap)) / var(--n))",
+          }}
+        >
+          <ProductCardGridSkeleton />
+        </div>
+      ))}
+    </div>
   </div>
 );
 
