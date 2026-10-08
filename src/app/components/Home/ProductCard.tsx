@@ -31,7 +31,7 @@ interface Product {
   name: string | { name?: string };
   price: number | string;
   msrp?: number;
-  image?: { path?: string }[];
+  image?: { path?: string; isPrimary?: number }[];
   slug: string;
   productUrl?: string;
   availabilityText?: string;
@@ -76,6 +76,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // safe image src
   const imageSrc =
+    product.image?.find((img) => img?.isPrimary === 1)?.path ||
     product.image?.[0]?.path ||
     product.image?.[1]?.path ||
     "/default-product-image.svg";

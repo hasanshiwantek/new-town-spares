@@ -1,9 +1,9 @@
 "use client";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
+import { clampQty, getMinQty } from "@/lib/utils";
 import { addToCart } from "@/redux/slices/cartsSlice";
 import { addRecentView } from "@/redux/slices/recentSlice";
 import { successMessage } from "@/utils/message";
-import { clampQty, getMinQty } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import ProductLeft from "./ProductLeft";
 import ProductMiddle from "./ProductMiddle";
@@ -21,12 +21,13 @@ const ProductCard = ({ product }: { product: any }) => {
     dispatch(addToCart(product));
     successMessage(`${product?.name} added to cart!`);
   };
-  const images =
-    product?.image?.length > 0
-      ? product?.image?.map((img: any) => img?.path)
-      : ["/default-product-image.svg"];
 
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+  // safe image src
+  const imageSrc =
+    product.image?.find((img) => img?.isPrimary === 1)?.path ||
+    product.image?.[0]?.path ||
+    product.image?.[1]?.path ||
+    "/default-product-image.svg";
 
   useEffect(() => {
     if (!product) return;
@@ -55,7 +56,7 @@ const ProductCard = ({ product }: { product: any }) => {
             min-[1261px]:[grid-template-columns:40%_37.4%_20%] min-[1261px]:[grid-template-rows:auto]
             min-[1261px]:[grid-template-areas:'image_info_buy']"
         >
-          <ProductLeft selectedImage={selectedImage} />
+          <ProductLeft selectedImage={imageSrc} />
           <ProductMiddle
             product={product}
             quantity={quantity}
@@ -67,7 +68,7 @@ const ProductCard = ({ product }: { product: any }) => {
             product={{
               ...product,
               name: product?.name,
-              image: images[0],
+              image: imageSrc,
               sku: product?.sku,
             }}
             quantity={quantity}
