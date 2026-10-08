@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import CartList from "./CartList";
+import CartLoadingOverlay from "./CartLoadingOverlay";
 import OrderSummary from "./OrderSummary";
 
 const Cart = () => {
@@ -22,6 +23,9 @@ const Cart = () => {
   const shouldLoadQuote = action === "loadSavedQuote" && !!quoteToken;
   const auth = useAppSelector((state: RootState) => state?.auth);
   const cart = useAppSelector((state: RootState) => state.carts.items);
+  const { loading: cartUpdating, cartLoading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
   const isLoggedIn = Boolean(auth?.isAuthenticated);
 
   useEffect(() => {
@@ -87,8 +91,9 @@ const Cart = () => {
           </div>
 
           {cart?.length > 0 && (
-            <div className="w-full min-[801px]:w-[49.9%] min-[1261px]:w-[30%]">
+            <div className="relative w-full min-[801px]:w-[49.9%] min-[1261px]:w-[30%]">
               <OrderSummary />
+              {(cartUpdating || cartLoading) && <CartLoadingOverlay />}
             </div>
           )}
         </div>

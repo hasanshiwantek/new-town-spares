@@ -1,15 +1,21 @@
 "use client";
 
+import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { isAvailableForSale } from "@/lib/utils";
+import {
+  clampQty,
+  getMinQty,
+  getQtyError,
+  isAvailableForSale,
+} from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
+import { REGEX } from "@/regex/regex";
 import { errorMessage, successMessage } from "@/utils/message";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
-import { CONTACT_INFO } from "@/const/contact";
 
 interface Brand {
   id: number;
@@ -25,7 +31,7 @@ interface Product {
   name: string | { name?: string };
   price: number | string;
   msrp?: number;
-  image?: { path?: string }[];
+  image?: { path?: string; isPrimary?: number }[];
   slug: string;
   productUrl?: string;
   availabilityText?: string;
@@ -34,6 +40,7 @@ interface Product {
   purchasabilityStatus: string;
   currentStock?: number;
   callForPricingPhone?: string;
+  allowPurchase?: boolean;
 }
 
 interface ProductCardProps {
@@ -44,14 +51,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const currentStockEqualent = Number(product?.currentStock) === 0;
-  const minQty = product.minPurchaseQuantity || 1;
+  const allowPurchase = !product?.allowPurchase;
+  const disabledAddToCart = currentStockEqualent || allowPurchase;
+  const minQty = getMinQty(product);
   const callForPricingPhone = product?.callForPricingPhone;
 
   const availableForSale = isAvailableForSale(
     product?.purchasabilityStatus,
     product?.price,
   );
-  const [quantity, setQuantity] = useState<number>(minQty);
+  const [quantity, setQuantity] = useState<number | string>(minQty);
 
   // safe brand name
   const brandName =
@@ -67,6 +76,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // safe image src
   const imageSrc =
+    product.image?.find((img) => img?.isPrimary === 1)?.path ||
     product.image?.[0]?.path ||
     product.image?.[1]?.path ||
     "/default-product-image.svg";
@@ -84,14 +94,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       : "In Stock";
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-
-    setQuantity(val);
-  };
-
-  const handleQuantityBlur = () => {
-    if (quantity < 1 || isNaN(quantity)) {
-      setQuantity(1);
+    const val = e.target.value;
+    if (val === "" || REGEX.DIGITS_ONLY.test(val)) {
+      setQuantity(val === "" ? "" : Number(val));
     }
   };
 
@@ -189,14 +194,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <input
                 type="number"
                 value={quantity}
+                min={minQty}
                 onChange={handleQuantityChange}
-                onBlur={handleQuantityBlur}
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
 
               <button
                 onClick={() => {
                   if (availableForSale) {
+                    const qtyError = getQtyError(quantity, product);
+                    if (qtyError) {
+                      errorMessage(qtyError);
+                      setQuantity(clampQty(quantity, product));
+                      return;
+                    }
                     const cartItem = cart.find(
                       (item: any) => item.id === product.id,
                     );
@@ -209,12 +220,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       );
                       return;
                     }
+                    if (Number(quantity) > remaining) {
+                      errorMessage(
+                        `You can add only ${remaining} more of this product (maximum ${maxQty}).`,
+                      );
+                      return;
+                    }
 
                     dispatch(
                       addCart({
                         data: {
                           productId: product?.id,
-                          quantity: quantity,
+                          quantity: clampQty(quantity, product),
                         },
                       }),
                     )
@@ -225,7 +242,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       });
                   }
                 }}
-                disabled={currentStockEqualent}
+                disabled={disabledAddToCart}
                 className="flex-1 h-[42px] bg-[#ff482e] text-white text-[14px] font-light transition-colors hover:bg-[#D42020] disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#ff482e]"
               >
                 ADD TO CART

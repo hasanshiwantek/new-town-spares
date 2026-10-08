@@ -1,39 +1,23 @@
 "use client";
+import { useAppSelector } from "@/hooks/useReduxHooks";
+import { fetchBrands } from "@/lib/api/brand";
+import { fetchCategories } from "@/lib/api/category";
+import { getFromStorage } from "@/utils/storage";
+import Link from "next/link";
 import { useEffect, useState } from "react";
-// import CategoriesSidebar from "../components/Home/CategoriesSidebar";
-// import BrandsSidebar from "../components/Home/BrandsSidebar";
+import AdvancedSearchForm from "../components/advanced-search/AdvancedSearchForm";
 import BrandsSection from "../components/advanced-search/BrandsSection";
 import CategoriesSection from "../components/advanced-search/CategoriesSection";
-import { fetchCategories } from "@/lib/api/category";
-import { fetchBrands } from "@/lib/api/brand";
 import ProductsClientWrapper from "../components/advanced-search/ProductsClientWrapper";
 import ProductTabs from "../components/advanced-search/ProductTabs";
-import AdvancedSearchForm from "../components/advanced-search/AdvancedSearchForm";
-import NoResults from "../components/advanced-search/NoResults";
-import { useAppSelector } from "@/hooks/useReduxHooks";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { getFromStorage } from "@/utils/storage";
 import ProductRecent from "../components/Product/ProductRecent";
 
-export default function ProductPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default function ProductPage() {
   const [currentTab, setCurrentTab] = useState(0);
   const [searchForm, setSearchForm] = useState(false);
-  const {
-    loading,
-    products,
-    pagination,
-    categories,
-    brands,
-    error,
-    productCount,
-  } = useAppSelector((state: any) => state?.advanceSearch);
-  const searchParams = useSearchParams();
-  // const query = searchParams.get("q");
+  const { loading, pagination, categories, brands, productCount } =
+    useAppSelector((state: any) => state?.advanceSearch);
+
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState([]);
   const [brand, setBrand] = useState([]);
@@ -45,6 +29,7 @@ export default function ProductPage({
       setQuery(parsed.q || "");
     }
   }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -60,6 +45,11 @@ export default function ProductPage({
     loadData();
   }, []);
 
+  const [hasSearched, setHasSearched] = useState(false);
+  useEffect(() => {
+    if (loading) setHasSearched(true);
+  }, [loading]);
+
   useEffect(() => {
     if (query && searchForm) {
       setSearchForm(false);
@@ -71,7 +61,7 @@ export default function ProductPage({
       <main role="main" className="w-full mx-auto px-4 lg:px-6 xl:px-0">
         <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
           {/* Left Sidebar - Fixed 235px on desktop */}
-          <aside className="hidden lg:block md:w-[20%] flex-shrink-0">
+          <aside className="hidden lg:block md:w-[20%] shrink-0">
             {/* <CategoriesSidebar />
                         <BrandsSidebar /> */}
           </aside>
@@ -90,12 +80,7 @@ export default function ProductPage({
                   >
                     /
                   </span>
-                  <span
-                    className={`text-[11px] 
-                   !text-[#D42020]
-                    `}
-                    itemProp="name"
-                  >
+                  <span className="text-[11px] text-[#D42020]!" itemProp="name">
                     Search
                   </span>
                 </span>

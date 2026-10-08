@@ -45,12 +45,9 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
     if (trimmedQuery.length > 1) {
       // Check if results exist in cache
       if (searchCache[trimmedQuery]) {
-        console.log("✅ Data cache se aa raha hai:", trimmedQuery);
-        console.log("Cached Results:", searchCache[trimmedQuery]);
         setResults(searchCache[trimmedQuery]);
         setShowDropdown(true);
       } else {
-        console.log("🔄 API call ho rahi hai:", trimmedQuery);
         // Make API call if not in cache
         dispatch(globalSearch({ query: debouncedQuery }));
         setShowDropdown(true);
