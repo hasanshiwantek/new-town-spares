@@ -5,6 +5,7 @@ import {
   getFromStorage,
   getPersistedAuth,
   getSessionId,
+  removeFromStorage,
 } from "@/utils/storage";
 
 export const baseURL =
@@ -31,12 +32,18 @@ const handleUnauthenticated = async () => {
   isLoggingOut = true;
 
   // Lazy imports: the store/auth slice import this file (circular otherwise)
-  const [{ store }, { logout }] = await Promise.all([
+  const [{ store, persistor }, { logout }] = await Promise.all([
     import("@/redux/store"),
     import("@/redux/slices/authSlice"),
   ]);
 
   store.dispatch(logout());
+  // redux-persist writes lazily; flush before navigating, and drop the legacy
+  // token keys, or the next page load picks the dead token back up and loops.
+  await persistor.flush();
+  removeFromStorage("token");
+  removeFromStorage("tokenExpiry");
+  removeFromStorage("user");
   // Not in a component, so no router here; replace() keeps history the same.
   // Skip when already there, or a 401 on the login page would reload forever.
   if (!window.location.pathname.startsWith("/auth/login")) {

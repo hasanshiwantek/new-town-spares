@@ -3,20 +3,8 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchProductsData } from "@/redux/slices/homeSlice";
 import React, { useEffect, useRef, useState } from "react";
+import { ProductCardSkeletonRow } from "../loader/ProductCardGridSkeleton";
 import ProductCard from "./ProductCard";
-
-// Skeleton loader
-const ProductSkeleton = () => (
-  <div className="bg-[#f2f2f2] rounded shadow animate-pulse flex flex-col h-full">
-    <div className="w-full h-72 mb-2 bg-gray-300 rounded" />
-    <div className="px-3 pb-3 flex flex-col flex-1">
-      <div className="h-4 bg-gray-300 mb-2 w-1/3 rounded" />
-      <div className="h-4 bg-gray-300 mb-2 w-1/2 rounded" />
-      <div className="h-4 bg-gray-300 mb-2 w-full rounded" />
-      <div className="mt-auto h-8 bg-gray-300 rounded" />
-    </div>
-  </div>
-);
 
 interface FeaturedProductsProps {
   endpoint: string;
@@ -175,26 +163,17 @@ useEffect(() => {
 
   return (
     <div className="bg-transparent">
-      {/* ── Title ── */}
       <h2 className="text-[25px] leading-[30px] font-normal text-[#333333] text-center w-full my-[26px]">
         {title}
       </h2>
 
-      {/* ── Error ── */}
       {localError && (
         <div className="text-red-500 text-center py-4">{localError}</div>
       )}
 
       {!localError && (
         <>
-          {/* ── Skeleton ── */}
-          {loading && (
-            <div className="grid grid-cols-1 min-[551px]:grid-cols-2 min-[801px]:grid-cols-3 min-[1261px]:grid-cols-4 gap-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <ProductSkeleton key={i} />
-              ))}
-            </div>
-          )}
+          {loading && <ProductCardSkeletonRow />}
 
           {/* ── Empty ── */}
           {!loading && productsData.length === 0 && (
@@ -226,14 +205,6 @@ useEffect(() => {
               {/* Grid track */}
               <div
                 ref={trackRef}
-                
-                //             className="grid grid-rows-1 grid-flow-col gap-3
-                // auto-cols-[100%]
-                // sm:auto-cols-[calc(50%-6px)]
-                // md:auto-cols-[calc(33.333%-8px)]
-                // lg:auto-cols-[calc(25%-9px)]
-                // 2xl:auto-cols-[calc(20%-10px)]
-                // overflow-x-auto scroll-smooth scrollbar-hide "
                 className="grid grid-rows-1 grid-flow-col gap-3
     auto-cols-[100%]
     min-[551px]:auto-cols-[calc(50%-6px)]
@@ -243,7 +214,7 @@ useEffect(() => {
     overflow-x-auto scroll-smooth
     [&::-webkit-scrollbar]:hidden
     [-ms-overflow-style:none]
-    [scrollbar-width:none]"
+    scrollbar-none"
               >
                 {productsData.slice(0, 5).map((product: any) => (
                   <ProductCard key={product.id} product={product} />

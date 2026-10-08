@@ -3,12 +3,16 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   clearAllCart,
+  deleteCart,
   fetchCartList,
-  removeFromCart,
   updateCart,
-  updateQty,
 } from "@/redux/slices/cartsSlice";
-import { deleteCart } from "@/redux/slices/cartsSlice";
+import {
+  clampQty,
+  getMinQty,
+  getQtyError,
+} from "@/lib/utils";
+import { errorMessage } from "@/utils/message";
 import { RootState } from "@/redux/store";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -16,15 +20,20 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import CartLoadingOverlay from "./CartLoadingOverlay";
-import { removeFromStorage } from "@/utils/storage";
-import { removeShippingRate, resetShippingRates } from "@/redux/slices/shippingSlice";
+
+import {
+  removeShippingRate,
+  resetShippingRates,
+} from "@/redux/slices/shippingSlice";
 const CartList = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts.items);
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
   }>({});
-  const { loading } = useAppSelector((state: RootState) => state.carts);
+  const { loading, cartLoading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
   const [updatingQty, setUpdatingQty] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<any | null>(null);
@@ -45,11 +54,12 @@ const CartList = () => {
     if (itemToDelete) {
       setUpdatingQty(itemToDelete.cartItemId);
       setIsDialogOpen(false);
+      
       dispatch(deleteCart({ id: itemToDelete?.cartItemId }))
         .unwrap()
         .then(() => {
-          dispatch(fetchCartList());
           removeLocalShipping();
+          return dispatch(fetchCartList());
         })
         .finally(() => {
           setItemToDelete(null);
@@ -65,17 +75,11 @@ const CartList = () => {
     setQuantities(updatedQuantities);
   }, [cart]);
 
-  // Commits the edited qty on blur (Enter just blurs the input).
   const handleQtyCommit = (item: any) => {
     const id = item.cartItemId;
-    const parsed = Number(quantities[id]);
-    const maxPurchaseQuantity = item.maxPurchaseQuantity;
-
-    const newQty = maxPurchaseQuantity
-      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-      : parsed > 0
-        ? parsed
-        : 1;
+    const qtyError = getQtyError(quantities[id], item);
+    if (qtyError) errorMessage(qtyError);
+    const newQty = clampQty(quantities[id], item);
 
     if (newQty === Number(item.quantity)) {
       setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
@@ -94,13 +98,14 @@ const CartList = () => {
     )
       .unwrap()
       .then(() => {
-        dispatch(fetchCartList());
         removeLocalShipping();
-        setUpdatingQty(null);
+        return dispatch(fetchCartList());
       })
       .catch(() => {
-        setUpdatingQty(null);
         setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      })
+      .finally(() => {
+        setUpdatingQty(null);
       });
   };
 
@@ -118,6 +123,7 @@ const CartList = () => {
     <div className="w-[50px] h-[40px] border border-[#ebebeb] overflow-hidden bg-white shrink-0">
       <input
         type="number"
+        min={getMinQty(item)}
         value={
           quantities[item.cartItemId] === undefined
             ? item.quantity
@@ -271,7 +277,7 @@ const CartList = () => {
               </div>
             </div>
           ))}
-          {(loading || updatingQty) && <CartLoadingOverlay />}
+          {(loading || cartLoading || updatingQty) && <CartLoadingOverlay />}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center w-full">

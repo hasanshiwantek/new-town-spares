@@ -2,12 +2,14 @@
 
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { contactRequests } from "@/redux/slices/contactSlice";
-import { Divide } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CONTACT_INFO } from "@/const/contact";
+import { errorMessage } from "@/utils/message";
+import { sitekey } from "@/lib/axiosInstance";
 type ContactFormData = {
   full_name: string;
   phone_number: string;
@@ -41,8 +43,9 @@ const ContactUs = () => {
   } = useForm<ContactFormData>();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state: any) => state.contact);
-  const { user, isAuthenticated } = useAppSelector((state: any) => state.auth);
+  const { user } = useAppSelector((state: any) => state.auth);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -59,6 +62,10 @@ const ContactUs = () => {
     }
   }, [user, setValue]);
   const onSubmit = (data: ContactFormData) => {
+    if (!captchaToken) {
+      errorMessage("Please verify the captcha.");
+      return;
+    }
     // You can also log it in a more formatted way
     dispatch(contactRequests(data))
       .unwrap()
@@ -246,7 +253,14 @@ const ContactUs = () => {
                       className="w-full px-[14px] py-[10.5px] border border-[#ebebeb] rounded-[4px] bg-white text-[14px]! leading-[21px] text-[#333333] focus:outline-none focus:border-[#FF482E]"
                     ></textarea>
                   </div>
-
+                  <div className="mt-6">
+                    <ReCAPTCHA
+                      sitekey={sitekey}
+                      onChange={(token: any) => {
+                        setCaptchaToken(token);
+                      }}
+                    />
+                  </div>
                   <div className="mt-[28px] min-[551px]:text-right">
                     <button
                       type="submit"

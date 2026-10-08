@@ -1,29 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import ProductCategoryCard from "../Product/ProductCategoryCard";
-// import SortingBar from "../Product/SortingBar";
-import ProductSkeleton from "../loader/ProductSkeleton";
-// import Pagination from "@/components/ui/pagination";
-import dynamic from "next/dynamic";
-import ProductCard from "../../components/Home/ProductCard";
-import Pagination from "./Pagination";
-import SortingBar from "./SortingBar";
-import ProductListCartSidebar from "../Product/ProductListCartSidebar";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { setProductView } from "@/redux/slices/uiSlice";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect } from "react";
+import ProductCard from "../../components/Home/ProductCard";
 import CategoryPagination from "../Product/CategoryPagination";
+import ProductCategoryCard from "../Product/ProductCategoryCard";
+import ProductListCartSidebar from "../Product/ProductListCartSidebar";
+import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
+import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
+import SortingBar from "./SortingBar";
 
-// Dynamically import motion.div and AnimatePresence (client only)
-const MotionDiv = dynamic(
-  () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false },
-);
-
-const AnimatePresence = dynamic(
-  () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false },
-);
+const MotionDiv = motion.div;
 
 interface ProductListProps {
   filters: any;
@@ -44,14 +33,12 @@ export default function ProductList({
   isLoading = false,
   error = null,
   filterMeta,
-  initialCategorydescription,
 }: ProductListProps) {
   const dispatch = useAppDispatch();
   const view = useAppSelector((state) => state.ui.productView);
   const setView = (next: "list" | "grid") => {
     dispatch(setProductView(next));
   };
-  const [page, setPage] = useState(1);
   const total = pagination?.total || 0;
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
@@ -87,25 +74,27 @@ export default function ProductList({
         </div>
       )}
 
-      {/* Loading State */}
       {isLoading && !error && (
-        <MotionDiv
-          key="loading"
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`mt-4 ${
-            view === "grid"
-              ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-              : "space-y-4"
-          }`}
-        >
-          {Array.from({ length: 6 }).map((_, idx) => (
-            <ProductSkeleton key={idx} view={view} />
-          ))}
-        </MotionDiv>
+        <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full items-start">
+          <div
+            className={`w-full min-w-0 flex-1 ${
+              view === "grid"
+                ? "grid grid-cols-1 min-[551px]:grid-cols-2 min-[1441px]:grid-cols-3 min-[2000px]:grid-cols-4 gap-3"
+                : "space-y-4"
+            }`}
+          >
+            {Array.from({
+              length: Math.min(filters?.pageSize || 12, 12),
+            }).map((_, idx) =>
+              view === "grid" ? (
+                <ProductCardGridSkeleton key={idx} />
+              ) : (
+                <ProductListCardSkeleton key={idx} />
+              ),
+            )}
+          </div>
+          <ProductListCartSidebar />
+        </div>
       )}
 
       {/* Product Cards */}

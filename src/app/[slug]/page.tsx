@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Suspense } from "react";
 import ProductRecent from "../components/Product/ProductRecent";
+import RecentViewedProduct from "../components/myaccount/RecentViewedPoduct";
 
 const DynamicWebPage = dynamic(
   () => import("../components/Product/DynamicWebPage"),
