@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../Filters/Sidebar";
 import Breadcrumb from "./Breadcrumb";
 import ProductList from "./ProductList";
+import ProductRecent from "./ProductRecent";
 
 export default function ProductsClientWrapper({
   categories,
@@ -124,40 +125,43 @@ export default function ProductsClientWrapper({
   ]);
 
   return (
-    <div className="flex flex-col min-[801px]:flex-row gap-2 py-4 w-full">
-      {/* Sidebar: Filters */}
-      <aside className="min-w-[270px] bg-white rounded hidden min-[801px]:block">
-        <Sidebar
-          categories={categories}
-          brands={brands}
-          filters={filters}
-          setFilters={setFilters}
-          products={products}
-          filterMeta={filterMeta}
-          setFilterMeta={setFilterMeta}
-          isBrandPage={isBrandPage}
-          isCategoryPage={isCategoryPage}
-        />
-      </aside>
+    <>
+      <div className="flex flex-col min-[801px]:flex-row gap-2 py-4 w-full">
+        {/* Sidebar: Filters */}
+        <aside className="min-w-[270px] bg-white rounded hidden min-[801px]:block">
+          <Sidebar
+            categories={categories}
+            brands={brands}
+            filters={filters}
+            setFilters={setFilters}
+            products={products}
+            filterMeta={filterMeta}
+            setFilterMeta={setFilterMeta}
+            isBrandPage={isBrandPage}
+            isCategoryPage={isCategoryPage}
+          />
+        </aside>
 
-      {/* Product Listing */}
-      <main className="w-full min-w-0">
-        {(isCategoryPage || isBrandPage) && (
-          <div className="mb-4 px-4 md:px-0">
-            <Breadcrumb items={breadcrumbItems} />
-          </div>
-        )}
-        <ProductList
-          filters={filters}
-          setFilters={setFilters}
-          products={products}
-          pagination={pagination}
-          isLoading={isLoading}
-          error={error}
-          filterMeta={filterMeta}
-          initialCategorydescription={initialCategorydescription}
-        />
-      </main>
-    </div>
+        {/* Product Listing */}
+        <main className="w-full min-w-0">
+          {(isCategoryPage || isBrandPage) && (
+            <div className="mb-4 px-4 md:px-0">
+              <Breadcrumb items={breadcrumbItems} />
+            </div>
+          )}
+          <ProductList
+            filters={filters}
+            setFilters={setFilters}
+            products={products}
+            pagination={pagination}
+            isLoading={isLoading}
+            error={error}
+            filterMeta={filterMeta}
+            initialCategorydescription={initialCategorydescription}
+          />
+        </main>
+      </div>
+      <ProductRecent headingClassName="text-[25px] leading-[30px] font-normal text-[#333333] text-center sm:text-start w-full my-[26px]" />
+    </>
   );
 }

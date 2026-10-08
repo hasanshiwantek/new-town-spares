@@ -13,6 +13,7 @@ import CategoryPagination from "./CategoryPagination";
 import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortingBar from "./SortingBar";
+import ProductRecent from "./ProductRecent";
 
 const MotionDiv = motion.div;
 interface ProductListProps {
@@ -240,7 +241,6 @@ export default function ProductList({
           />
         )}
       </div>
-      <RecentViewedProduct headingClassName="mb-5 text-[22px]! font-medium" />
     </section>
   );
 }
