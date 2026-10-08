@@ -2,10 +2,20 @@
 import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import { fetchCategories } from "@/lib/api/category";
+import { clampQty, getMinQty, getQtyError } from "@/lib/utils";
 import { logout } from "@/redux/slices/authSlice";
-import { updateCart } from "@/redux/slices/cartsSlice";
+import {
+  addBySku,
+  deleteCart,
+  fetchCartList,
+  updateCart,
+} from "@/redux/slices/cartsSlice";
 import { fetchCurrencies } from "@/redux/slices/currencySlice";
+import { fetchLogos } from "@/redux/slices/homeSlice";
 import { RootState } from "@/redux/store";
+import { errorMessage, successMessage } from "@/utils/message";
+import { removeFromStorage } from "@/utils/storage";
 import { ChevronRight, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,19 +27,12 @@ import {
   FaShoppingCart,
   FaUser,
 } from "react-icons/fa";
-import GlobalSearchBar from "./GlobalSearchBar";
-import MobileSearchBar from "./MobileSearchBar";
-
-// ✅ Optimized imports (Next Image optimized assets)
-import { fetchCategories } from "@/lib/api/category";
-import { addBySku, deleteCart, fetchCartList } from "@/redux/slices/cartsSlice";
-import { fetchLogos } from "@/redux/slices/homeSlice";
-import { errorMessage, successMessage } from "@/utils/message";
-import { removeFromStorage } from "@/utils/storage";
 import usaFlag from "../../../../public/usa-logo.png";
+import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 import ConfirmationModal from "../modal/confirmationModal";
 import ProductPrice from "../productprice/ProductPrice";
-import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
+import GlobalSearchBar from "./GlobalSearchBar";
+import MobileSearchBar from "./MobileSearchBar";
 
 const Navbar: React.FC = () => {
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -48,7 +51,9 @@ const Navbar: React.FC = () => {
   const { currencies, status, selectedCurrency } = useAppSelector(
     (state: RootState) => state.currency,
   );
-  const { loading } = useAppSelector((state: RootState) => state.carts);
+  const { loading, cartLoading } = useAppSelector(
+    (state: RootState) => state.carts,
+  );
   const [categories, setCategories] = useState<any[]>([]);
 
   const [open, setOpen] = useState(false);
@@ -112,17 +117,11 @@ const Navbar: React.FC = () => {
     dispatch(fetchLogos());
   }, [dispatch]);
 
-  // Commits the edited qty on blur (Enter just blurs the input).
   const handleQtyCommit = (item: any) => {
     const id = item.cartItemId;
-    const parsed = Number(quantities[id]);
-    const maxPurchaseQuantity = item.maxPurchaseQuantity;
-
-    const newQty = maxPurchaseQuantity
-      ? Math.min(parsed > 0 ? parsed : 1, maxPurchaseQuantity)
-      : parsed > 0
-        ? parsed
-        : 1;
+    const qtyError = getQtyError(quantities[id], item);
+    if (qtyError) errorMessage(qtyError);
+    const newQty = clampQty(quantities[id], item);
 
     if (newQty === Number(item.quantity)) {
       setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
@@ -141,13 +140,14 @@ const Navbar: React.FC = () => {
     )
       .unwrap()
       .then(() => {
-        dispatch(fetchCartList());
         removeLocalShipping();
-        setUpdatingQty(null);
+        return dispatch(fetchCartList());
       })
       .catch(() => {
-        setUpdatingQty(null);
         setQuantities((prev) => ({ ...prev, [id]: item.quantity }));
+      })
+      .finally(() => {
+        setUpdatingQty(null);
       });
   };
 
@@ -163,6 +163,7 @@ const Navbar: React.FC = () => {
     <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
       <input
         type="number"
+        min={getMinQty(item)}
         value={
           quantities[item.cartItemId] === undefined
             ? item.quantity
@@ -516,7 +517,9 @@ const Navbar: React.FC = () => {
                             </div>
                           );
                         })}
-                        {(loading || updatingQty) && <CartLoadingOverlay />}
+                        {(loading || updatingQty || cartLoading) && (
+                          <CartLoadingOverlay />
+                        )}
                       </div>
                     )}
 

@@ -1,26 +1,33 @@
 "use client";
 import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { isAvailableForSale } from "@/lib/utils";
+import {
+  clampQty,
+  getMinQty,
+  getQtyError,
+  isAvailableForSale,
+} from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
+import { REGEX } from "@/regex/regex";
 import { errorMessage, successMessage } from "@/utils/message";
 import Link from "next/link";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
 interface ProductRightProps {
-  product?: {
-    name?: string;
-    image?: string;
-    sku?: string;
-    price?: number;
+  product: {
+    name: string;
+    image: string;
+    sku: string;
+    price: string | number;
     availabilityText?: string;
     maxPurchaseQuantity?: number;
-
+    allowPurchase?: boolean;
     [key: string]: any;
   };
-  quantity?: number;
+  quantity: number | string;
+  setQuantity: (value: number | "") => void;
   increment?: () => void;
   decrement?: () => void;
   onAddToCart?: () => void;
@@ -30,27 +37,27 @@ const ProductRight = ({
   product,
   quantity,
   setQuantity,
-  increment,
-  decrement,
-  onAddToCart,
-}: any) => {
+}: ProductRightProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const price = Number(product?.price) || 0;
 
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const availableForSale = isAvailableForSale(
     product?.purchasabilityStatus,
-    product?.price,
+    product?.price!,
   );
   const currentStockEqualent = Number(product?.currentStock) === 0;
   const dispatch = useAppDispatch();
   const maxQty = product?.maxPurchaseQuantity;
+  const minQty = getMinQty(product);
   const callForPricingPhone = product?.callForPricingPhone;
   const availabilityText = currentStockEqualent
     ? "Out of Stock"
     : product?.availabilityText
       ? product?.availabilityText
       : "In Stock";
+  const allowPurchase = !product?.allowPurchase;
+  const disabledAddToCart = currentStockEqualent || allowPurchase;
 
   return (
     <>
@@ -78,22 +85,13 @@ const ProductRight = ({
               </label>
               <input
                 type="number"
-                min={1}
-                max={product?.maxPurchaseQuantity || 10}
+                min={minQty}
+                max={maxQty || undefined}
                 value={quantity}
                 onChange={(e) => {
                   const val = e.target.value;
-                  // Empty allow karo typing ke liye
-                  if (val === "") {
-                    setQuantity("");
-                    return;
-                  }
-                  const num = Number(val);
-                  // Sirf valid number allow karo
-                  if (!isNaN(num) && num > 0) {
-                    // Max se zyada mat jane do
-                    if (maxQty && num > maxQty) return;
-                    setQuantity(num);
+                  if (val === "" || REGEX.DIGITS_ONLY.test(val)) {
+                    setQuantity(val === "" ? "" : Number(val));
                   }
                 }}
                 className="font-bold! w-[50px] h-[40px] text-center text-[14px] border border-[#ebebeb] rounded bg-white text-[#000000] focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -106,22 +104,35 @@ const ProductRight = ({
               <button
                 aria-label={`Add ${quantity} ${product?.name} to cart`}
                 onClick={() => {
+                  const qtyError = getQtyError(quantity, product);
+                  if (qtyError) {
+                    errorMessage(qtyError);
+                    setQuantity(clampQty(quantity, product));
+                    return;
+                  }
                   const existingItem = cart.find(
-                    (item: any) => item.id === product.id,
+                    (item: any) => item.id === product?.id,
                   );
                   const currentQty = existingItem ? existingItem.quantity : 0;
+                  const desiredQty = clampQty(quantity, product);
                   const remainingQty = product?.maxPurchaseQuantity
                     ? product.maxPurchaseQuantity - currentQty
-                    : quantity;
+                    : desiredQty;
 
                   if (remainingQty <= 0) {
                     errorMessage(
-                      `Cannot add more than ${product?.maxPurchaseQuantity} units of ${product.name} to cart.`,
+                      `Cannot add more than ${product?.maxPurchaseQuantity} units of ${product?.name} to cart.`,
                     );
                     return;
                   }
 
-                  const quantityToAdd = Math.min(quantity, remainingQty);
+                  if (desiredQty > remainingQty) {
+                    errorMessage(
+                      `You can add only ${remainingQty} more of ${product?.name} (maximum ${product?.maxPurchaseQuantity}).`,
+                    );
+                    return;
+                  }
+                  const quantityToAdd = desiredQty;
                   dispatch(
                     addCart({
                       data: {
@@ -134,11 +145,11 @@ const ProductRight = ({
                     .then(() => {
                       dispatch(fetchCartList());
                       successMessage(
-                        `${product.name} added to cart (${quantityToAdd})!`,
+                        `${product?.name} added to cart (${quantityToAdd})!`,
                       );
                     });
                 }}
-                disabled={currentStockEqualent}
+                disabled={disabledAddToCart}
                 className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#4d2017] text-white text-[14px] transition-colors font-light! disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#F15939]"
               >
                 ADD TO CART
@@ -210,9 +221,9 @@ const ProductRight = ({
         product={
           product
             ? {
-                name: product.name ?? "",
-                image: product.image,
-                sku: product.sku ?? "",
+                name: product?.name ?? "",
+                image: product?.image,
+                sku: product?.sku ?? "",
               }
             : undefined
         }

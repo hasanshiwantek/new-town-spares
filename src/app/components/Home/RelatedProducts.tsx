@@ -1,19 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { ProductCardSkeletonRow } from "../loader/ProductCardGridSkeleton";
 import ProductCard from "./ProductCard";
-
-const ProductSkeleton = () => (
-  <div className="bg-[#f2f2f2] rounded shadow animate-pulse flex flex-col h-full">
-    <div className="w-full h-72 mb-2 bg-gray-300 rounded" />
-    <div className="px-3 pb-3 flex flex-col flex-1">
-      <div className="h-4 bg-gray-300 mb-2 w-1/3 rounded" />
-      <div className="h-4 bg-gray-300 mb-2 w-1/2 rounded" />
-      <div className="h-4 bg-gray-300 mb-2 w-full rounded" />
-      <div className="mt-auto h-8 bg-gray-300 rounded" />
-    </div>
-  </div>
-);
 
 type RelatedProductItem = {
   id?: string | number;
@@ -115,13 +104,7 @@ const RelatedProducts = ({ products = [] }: { products?: RelatedProductItem[] })
         Related Products
       </h2>
 
-      {loading && (
-        <div className="grid grid-cols-1 min-[551px]:grid-cols-2 min-[801px]:grid-cols-3 min-[1261px]:grid-cols-4 gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <ProductSkeleton key={i} />
-          ))}
-        </div>
-      )}
+      {loading && <ProductCardSkeletonRow />}
 
       {!loading && productsData.length === 0 && (
         <div className="py-12 text-center text-gray-500 text-sm">

@@ -1,16 +1,22 @@
 "use client";
 
+import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { isAvailableForSale } from "@/lib/utils";
+import {
+  clampQty,
+  getMinQty,
+  getQtyError,
+  isAvailableForSale,
+} from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
+import { REGEX } from "@/regex/regex";
 import { errorMessage, successMessage } from "@/utils/message";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
-import { CONTACT_INFO } from "@/const/contact";
 interface Product {
   id: number;
   name: string;
@@ -32,6 +38,7 @@ interface Product {
   maxPurchaseQuantity?: number;
   currentStock?: number;
   callForPricingPhone?: string;
+  allowPurchase?: boolean;
 }
 
 export default function ProductCategoryCard({ product }: { product: Product }) {
@@ -43,23 +50,19 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     product?.purchasabilityStatus,
     product?.price,
   );
-  const [quantity, setQuantity] = useState<number>(
-    product.minPurchaseQuantity || 1,
-  );
+  const minQty = getMinQty(product);
+  const [quantity, setQuantity] = useState<number | string>(minQty);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-
-    setQuantity(val);
-  };
-
-  const handleQuantityBlur = () => {
-    if (quantity < 1 || isNaN(quantity)) {
-      setQuantity(1);
+    const val = e.target.value;
+    if (val === "" || REGEX.DIGITS_ONLY.test(val)) {
+      setQuantity(val === "" ? "" : Number(val));
     }
   };
 
   const currentStockEqualent = Number(product?.currentStock) === 0;
+  const allowPurchase = !product?.allowPurchase;
+  const disabledAddToCart = currentStockEqualent || allowPurchase;
   const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";
   const brandName = product.brand?.name ?? "";
   const hasOriginalPrice = product?.msrp != null && Number(product.msrp) > 0;
@@ -114,43 +117,60 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       {/* Pricing & CTA (Right) */}
       <div className="flex flex-col items-center sm:items-end justify-center gap-2 w-full shrink-0">
         <div className="flex flex-col items-start w-full max-w-[200px]">
-          {hasOriginalPrice && (
-            <p className="text-[#333333] text-[14px] inline">
-              Price:{" "}
-              <ProductPrice
-                price={originalPrice}
-                inline
-                className="text-[#333333] !text-[14px]"
-              />
-            </p>
+          {availableForSale ? (
+            <>
+              {hasOriginalPrice && (
+                <p className="text-[#333333] text-[14px] inline">
+                  Price:{" "}
+                  <ProductPrice
+                    price={originalPrice}
+                    inline
+                    className="text-[#333333] !text-[14px]"
+                  />
+                </p>
+              )}
+              <p className="text-[#FD5430]">
+                <ProductPrice
+                  price={salePrice}
+                  inline
+                  className="text-[#FD5430] !font-normal !text-[20px]"
+                />
+              </p>
+            </>
+          ) : (
+            // Call-for-price products: no prices, the CTA takes their place.
+            <Link
+              href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
+              className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
+            >
+              CALL FOR PRICE
+            </Link>
           )}
-          <p className="text-[#FD5430]">
-            <ProductPrice
-              price={salePrice}
-              inline
-              className="text-[#FD5430] !font-normal !text-[20px]"
-            />
-          </p>
           <div className="w-full border-t border-gray-200 my-2" />
           <p className="text-[#333333] text-[14px] w-full text-left mb-2">
             {availabilityText}
           </p>
-          {availableForSale ? (
+          {availableForSale && (
             <div className="w-full flex items-center">
               <input
                 type="number"
                 value={quantity}
+                min={minQty}
                 onChange={handleQuantityChange}
-                onBlur={handleQuantityBlur}
                 className="w-12 h-[42px] border border-[#ebebeb] bg-white text-center text-[14px] text-[#333333] focus:outline-none focus:border-[#ff482e] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <button
                 onClick={() => {
                   if (availableForSale) {
+                    const qtyError = getQtyError(quantity, product);
+                    if (qtyError) {
+                      errorMessage(qtyError);
+                      setQuantity(clampQty(quantity, product));
+                      return;
+                    }
                     const cartItem = cart.find(
                       (item: any) => item.id === product.id,
                     );
-                    const minQty = product.minPurchaseQuantity || 1;
                     const maxQty = product.maxPurchaseQuantity;
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
@@ -160,14 +180,19 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                       );
                       return;
                     }
-                    // Add only up to the allowed maximum
-                    const quantityToAdd = Math.min(minQty, remaining);
+
+                    if (Number(quantity) > remaining) {
+                      errorMessage(
+                        `You can add only ${remaining} more of this product (maximum ${maxQty}).`,
+                      );
+                      return;
+                    }
 
                     dispatch(
                       addCart({
                         data: {
                           productId: product?.id,
-                          quantity: quantity,
+                          quantity: clampQty(quantity, product),
                         },
                       }),
                     )
@@ -179,20 +204,11 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                       });
                   }
                 }}
-                disabled={currentStockEqualent}
+                disabled={disabledAddToCart}
                 className="flex-1 h-[42px] bg-[#ff482e] text-white text-[14px] font-light transition-colors hover:bg-[#D42020] disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#ff482e]"
               >
                 Add to Cart
               </button>
-            </div>
-          ) : (
-            <div className="flex flex-col items-start">
-              <Link
-                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
-                className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
-              >
-                CALL FOR PRICE
-              </Link>
             </div>
           )}
         </div>
