@@ -9,7 +9,32 @@ import ProductLeft from "./ProductLeft";
 import ProductMiddle from "./ProductMiddle";
 import ProductRight from "./ProductRight";
 
-const ProductCard = ({ product }: { product: any }) => {
+interface Brand {
+  id: number;
+  name: string;
+  slug?: string;
+  logo?: string;
+}
+interface Product {
+  id: number;
+  brand: Brand | string;
+  sku: string;
+  name: string | { name?: string };
+  price: number | string;
+  msrp?: number;
+  image?: { path?: string; isPrimary?: number }[];
+  slug: string;
+  productUrl?: string;
+  availabilityText?: string;
+  minPurchaseQuantity: number;
+  maxPurchaseQuantity: number;
+  purchasabilityStatus: string;
+  currentStock?: number;
+  callForPricingPhone?: string;
+  allowPurchase?: boolean;
+}
+
+const ProductCard = ({ product }: { product: Product }) => {
   const minQty = getMinQty(product);
   const [quantity, setQuantity] = useState<number | string>(minQty);
 
