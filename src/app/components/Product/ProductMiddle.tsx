@@ -6,19 +6,16 @@ import { fetchReviews, fetchStats } from "@/redux/slices/homeSlice";
 import { fetchProductReviews } from "@/redux/slices/storeFrontSlice";
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import AddReviewModal from "../modal/AddReviewModal";
 import ProductPrice from "../productprice/ProductPrice";
+
 const ProductMiddle = ({ product }: any) => {
   const dispatch = useAppDispatch();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const originalPrice = Number(product?.price) || 0;
   const currentPrice = Number(product?.retailPrice) || 0;
   const hasBothPrices = originalPrice > 0 && currentPrice > 0;
-  // const savings =
-  //   hasBothPrices && originalPrice > currentPrice
-  //     ? originalPrice - currentPrice
-  //     : 0;
   const savings =
     product?.msrp && product?.price ? product.msrp - product.price : 0;
   const callForPricingPhone = product.callForPricingPhone;
@@ -27,23 +24,17 @@ const ProductMiddle = ({ product }: any) => {
     product?.price,
   );
 
-  const handleSeeMore = useCallback(() => {
-    // Always go to all reviews page (not single)
-    window.open(
-      "https://www.trustpilot.com/review/newtownspares.com",
-      "_blank",
-    );
-  }, []);
-
   useEffect(() => {
     dispatch(fetchReviews());
     dispatch(fetchStats());
   }, []);
+
   useEffect(() => {
     if (!product?.id) return;
 
     dispatch(fetchProductReviews(product.id));
   }, [product?.id, dispatch]);
+
   return (
     <section className=" product-middle  flex flex-col h-full w-full [grid-area:info]">
       <div>

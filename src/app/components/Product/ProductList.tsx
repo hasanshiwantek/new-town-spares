@@ -2,28 +2,19 @@
 
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { decode } from "html-entities";
-import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../Home/ProductCard";
-import ProductSkeleton from "../loader/ProductSkeleton";
+import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
+import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
 import RecentViewedProduct from "../myaccount/RecentViewedPoduct";
 import CategoryPagination from "./CategoryPagination";
 import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortingBar from "./SortingBar";
 
-// Dynamically import motion.div and AnimatePresence (client only)
-const MotionDiv = dynamic(
-  () => import("framer-motion").then((mod) => mod.motion.div),
-  { ssr: false },
-);
-
-const AnimatePresence = dynamic(
-  () => import("framer-motion").then((mod) => mod.AnimatePresence),
-  { ssr: false },
-);
-
+const MotionDiv = motion.div;
 interface ProductListProps {
   filters: any;
   setFilters: any;
@@ -110,9 +101,11 @@ export default function ProductList({
             filterMeta?.categoryName ||
             filterMeta?.brandName ||
             "Product Category"}
-          <span className="ml-[7px] text-[13px] leading-[19.5px]">
-            (Showing {products?.length || 0} of {total || 0})
-          </span>
+          {!isLoading && (
+            <span className="ml-[7px] text-[13px] leading-[19.5px]">
+              (Showing {products?.length || 0} of {total || 0})
+            </span>
+          )}
         </h1>
         <div className="mt-4">
           {initialCategorydescription && (
@@ -149,26 +142,27 @@ export default function ProductList({
           No products found. Try adjusting your filters.
         </div>
       )}
-
-      {/* Loading State */}
       {isLoading && !error && (
-        <MotionDiv
-          key="loading"
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className={`mt-4 ${
-            view === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-              : "space-y-4"
-          }`}
-        >
-          {Array.from({ length: 6 }).map((_, idx) => (
-            <ProductSkeleton key={idx} view={view} />
-          ))}
-        </MotionDiv>
+        <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full items-start">
+          <div
+            className={`w-full min-w-0 flex-1 ${
+              view === "grid"
+                ? "grid grid-cols-1 min-[551px]:grid-cols-2 min-[1441px]:grid-cols-3 min-[2000px]:grid-cols-4 gap-3"
+                : "space-y-4"
+            }`}
+          >
+            {Array.from({
+              length: Math.min(filters?.pageSize || 10, 12),
+            }).map((_, idx) =>
+              view === "grid" ? (
+                <ProductCardGridSkeleton key={idx} />
+              ) : (
+                <ProductListCardSkeleton key={idx} />
+              ),
+            )}
+          </div>
+          <ProductListCartSidebar />
+        </div>
       )}
 
       {/* Product Cards + Cart Sidebar */}
