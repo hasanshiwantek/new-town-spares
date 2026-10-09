@@ -88,10 +88,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Info Wrapper */}
       <div className="flex flex-col flex-1">
         <p className="text-[14px] leading-[21px] text-[#333333] mb-2">
-<<<<<<< HEAD
-          <span className="font-bold ">{brandName}</span>{" "}
-          <span className="text-[13px]">SKU: {product.sku}</span>
-=======
           <Link
             href={brandUrl || "#"}
             className="font-bold hover:text-[#D42020]"
@@ -99,7 +95,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {brandName}
           </Link>{" "}
           <span className="text-[13px]">SKU: {sku}</span>
->>>>>>> 4e9a9c56d1fd53c205dd793600962f4c45abca89
         </p>
 
         <Link href={productUrl}>
