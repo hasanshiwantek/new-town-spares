@@ -124,8 +124,7 @@ const BillingStep: React.FC<BillingStepProps> = ({
     billingInfo?.country &&
     (!countriesWithoutPostalCode.includes(billingInfo.country)
       ? billingInfo?.zip
-      : true) &&
-    billingInfo?.state
+      : true)
   ) {
     // Show completed state with billing info and edit button
     return (
