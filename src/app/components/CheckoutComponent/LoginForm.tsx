@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import SignupForm from "./SignupForm";
 import AccountSignInLinkModal from "../modal/AccountSignInLinkModal";
+import { Button } from "@/components/ui/button";
 
 interface SigninFormValues {
   email: string;
@@ -141,13 +142,13 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
             )}
           </div>
           <div className="mt-3 text-[13px] flex items-center justify-between w-full">
-            <button
+            <Button
               type="button"
               onClick={() => setSignInLinkOpen(true)}
-              className="text-[var(--color-text-secondary)] hover:text-[var(--primary-color)] cursor-pointer transition-colors duration-200 bg-transparent border-0 p-0 text-[14px]"
+              className="cursor-pointer  border-0 bg-transparent p-0 text-[14px] text-text-secondary transition-colors duration-200 "
             >
               Send me a sign-in link instead
-            </button>
+            </Button>
 
             <p className="text-[#545454]">
               Don’t have an account?
@@ -196,8 +197,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
       <AccountSignInLinkModal
         isOpen={signInLinkOpen}
         onClose={() => setSignInLinkOpen(false)}
-        onSend={async (email) => {
-        }}
+        onSend={async (email) => {}}
       />
     </div>
   );
