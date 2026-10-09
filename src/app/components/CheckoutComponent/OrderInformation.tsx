@@ -9,6 +9,7 @@ import LoadTrustpilotScript from "./TrustpilotWidget";
 import OrderInformationSummary from "./OrderInformationSummary";
 import { orderDetailById } from "@/redux/slices/OrderMessage";
 import { CONTACT_INFO } from "@/const/contact";
+import OrderConfirmationSkeleton from "./OrderConfirmationSkeleton";
 // Inner component that uses Stripe hooks
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
@@ -30,7 +31,9 @@ const CheckoutForm = () => {
         quantity: product.quantity || 1,
       }))
     : [];
-
+const loading = useAppSelector(
+  (state: RootState) => state.customerMessage.loading
+);
   // ADD COUPON STATE FROM REDUX
   const [promoCode, setPromoCode] = useState("");
 
@@ -76,17 +79,21 @@ const CheckoutForm = () => {
   }, [orderId]);
 
   return (
-    <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
+  <div className="min-h-screen py-10 md:px-[6%] xl:px-0 2xl:px-0 w-full max-w-[1170px] mx-auto px-4 lg:px-0">
+    {loading ? (
+      <OrderConfirmationSkeleton />
+    ) : (
       <form>
         <div className="flex justify-center mb-8">
           <LoadTrustpilotScript />
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start ">
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
           {/* LEFT SIDE */}
           <div className="lg:col-span-2 mt-[18px] roboto-font">
             <div className="mt-[1px]">
               <h2 className="text-4xl font-normal text-[#545454] mb-8">
-                Thank You {orderCustomer?.billingAddress?.name}!{" "}
+                Thank You {orderCustomer?.billingAddress?.name}!
               </h2>
 
               <h6 className="text-lg font-medium mb-6 text-[#545454]">
@@ -98,14 +105,13 @@ const CheckoutForm = () => {
 
               <p className="text-[#545454] leading-7 mb-8">
                 An email will be sent containing information about your
-                purchase. If you have any questions about your purchase, email
-                us at{" "}
+                purchase. If you have any questions about your purchase,
+                email us at{" "}
                 <span className="font-semibold text-[#fd5430]">
                   orders@newtownspares.com
                 </span>{" "}
                 or call us at{" "}
-                <span className="font-semibold text-[#fd5430]!">
-                  {/* +44 123 456 7890 */}
+                <span className="font-semibold text-[#fd5430]">
                   <a href={CONTACT_INFO.phone.href}>
                     {CONTACT_INFO.phone.display}
                   </a>
@@ -144,8 +150,9 @@ const CheckoutForm = () => {
           </div>
         </div>
       </form>
-    </div>
-  );
+    )}
+  </div>
+);
 };
 
 // Main component with Stripe Elements provider
