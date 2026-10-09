@@ -1,7 +1,9 @@
 "use client";
 
+import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
+import { cn } from "@/lib/utils";
 import {
   fetchCurrencies,
   setSelectedCurrency,
@@ -13,7 +15,6 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
-import { CONTACT_INFO } from "@/const/contact";
 
 interface Category {
   id: number;
@@ -269,14 +270,14 @@ const LinkHeader = () => {
               aria-label="currency"
               aria-expanded={open}
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-1 text-confirmation hover:opacity-80"
+              className={cn("flex items-center gap-1 hover:text-confirmation", {
+                "text-confirmation": open,
+              })}
             >
               <span className="text-sm sm:text-base md:text-lg lg:text-xl">
                 {selectedCurrency}
               </span>
-              <FaChevronDown
-                className={`text-[10px] transition-transform ${open ? "rotate-180" : ""}`}
-              />
+              <FaChevronDown className="text-[10px] transition-transform" />
             </button>
 
             {open && (
