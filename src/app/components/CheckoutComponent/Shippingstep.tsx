@@ -710,7 +710,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       htmlFor="firstName"
                       className="text-[13px] font-medium mb-2 text-[#333333]"
                     >
-                      First Name
+                      First Name <span className="text-red-500">*</span>
                     </label>
                     <Input
                       id="firstName"
@@ -734,7 +734,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       htmlFor="lastName"
                       className="text-[13px] font-medium mb-2 text-[#333333]"
                     >
-                      Last Name
+                      Last Name <span className="text-red-500">*</span>
                     </label>
                     <Input
                       id="lastName"
@@ -789,7 +789,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     htmlFor="address1"
                     className="text-[13px] font-medium mb-2 text-[#333333]"
                   >
-                    Address Line 1
+                    Address Line 1 <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="address1"
@@ -828,7 +828,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     htmlFor="city"
                     className="text-[13px] font-medium mb-2 text-[#333333]"
                   >
-                    City
+                    City <span className="text-red-500">*</span>
                   </label>
                   <Input
                     id="city"
@@ -850,7 +850,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     htmlFor="country"
                     className="text-[13px] font-medium mb-2 text-[#333333]"
                   >
-                    Country
+                    Country <span className="text-red-500">*</span>
                   </label>
                   <Controller
                     name="country"
@@ -899,7 +899,9 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       className="text-[13px] font-medium mb-2 text-[#333333] flex items-baseline"
                     >
                       <span className="">State/Province</span>
-                      {!stateList.length && (
+                      {stateList.length > 0 ? (
+                        <span className="text-red-500 ml-1">*</span>
+                      ) : (
                         <span className="shrink-0">(Optional)</span>
                       )}
                     </label>
@@ -951,7 +953,12 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       htmlFor="zip"
                       className="mb-2 flex items-baseline justify-between gap-2 text-[13px] text-[#333333]"
                     >
-                      <span>Postal Code</span>
+                      <span>
+                        Postal Code{" "}
+                        {hasPostalCode && (
+                          <span className="text-red-500">*</span>
+                        )}
+                      </span>
                       {!hasPostalCode && (
                         <span className="shrink-0 text-gray-400">
                           (Optional)
@@ -1036,7 +1043,9 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               </p>
             )}
 
-            {(productShippingRate || shippingRates?.length > 0) && (
+            {(productShippingRate ||
+              ratesLoader ||
+              shippingRates?.length > 0) && (
               <div className="border border-[#e5e5e5] rounded-[4px] overflow-hidden divide-y divide-[#ebebeb]">
                 {productShippingRate ? (
                   <label

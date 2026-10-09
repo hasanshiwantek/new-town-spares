@@ -1,9 +1,9 @@
 "use client";
 import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { isAvailableForSale } from "@/lib/utils";
 import { fetchReviews, fetchStats } from "@/redux/slices/homeSlice";
 import { fetchProductReviews } from "@/redux/slices/storeFrontSlice";
+import { getProductInfo } from "@/utils/product";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -13,16 +13,21 @@ import ProductPrice from "../productprice/ProductPrice";
 const ProductMiddle = ({ product }: any) => {
   const dispatch = useAppDispatch();
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const originalPrice = Number(product?.price) || 0;
-  const currentPrice = Number(product?.retailPrice) || 0;
-  const hasBothPrices = originalPrice > 0 && currentPrice > 0;
-  const savings =
-    product?.msrp && product?.price ? product.msrp - product.price : 0;
-  const callForPricingPhone = product.callForPricingPhone;
-  const availableForSale = isAvailableForSale(
-    product?.purchasabilityStatus,
-    product?.price,
-  );
+  const {
+    id,
+    productName,
+    sku,
+    hasBrand,
+    brandName,
+    imageSrc,
+    price,
+    msrp,
+    retailPrice,
+    savings,
+    callForPricingTel,
+    availableForSale,
+  } = getProductInfo(product);
+  const hasBothPrices = price > 0 && retailPrice > 0;
 
   useEffect(() => {
     dispatch(fetchReviews());
@@ -30,10 +35,10 @@ const ProductMiddle = ({ product }: any) => {
   }, []);
 
   useEffect(() => {
-    if (!product?.id) return;
+    if (!id) return;
 
-    dispatch(fetchProductReviews(product.id));
-  }, [product?.id, dispatch]);
+    dispatch(fetchProductReviews(id));
+  }, [id, dispatch]);
 
   return (
     <section className=" product-middle  flex flex-col h-full w-full [grid-area:info]">
@@ -41,14 +46,14 @@ const ProductMiddle = ({ product }: any) => {
         <div className="flex flex-col gap-1">
           {/* <h6 className="h6-regular">{product?.brand?.name}</h6> */}
           <h1 className="font-light text-[20px] leading-[24px] tracking-[0.0075em] text-[#333333]">
-            {product?.name || "N/A"}
+            {productName}
           </h1>
 
           <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
-            Brand: <span>{product?.brand?.name || "N/A"}</span>
+            Brand: <span>{hasBrand ? brandName : "N/A"}</span>
           </p>
           <p className="text-[14px] leading-[21px] text-[#333333]">
-            SKU: <span>{product?.sku || "N/A"}</span>
+            SKU: <span>{sku || "N/A"}</span>
           </p>
 
           {/* Rating & Reviews */}
@@ -74,23 +79,23 @@ const ProductMiddle = ({ product }: any) => {
                 {hasBothPrices ? (
                   <span className=" text-[#333333]">
                     <ProductPrice
-                      price={product?.msrp}
+                      price={msrp}
                       inline={true}
                       className="text-[15px]! text-[#333333]"
                     />
                   </span>
                 ) : (
                   <ProductPrice
-                    price={product?.msrp}
+                    price={msrp}
                     inline={true}
                     className="text-[15px]! text-[#333333]"
                   />
                 )}
               </p>
               <h2 className="text-[20px] text-[#FF482E]">
-                {Number(product.price) > 0 && (
+                {price > 0 && (
                   <ProductPrice
-                    price={Number(product.price)}
+                    price={price}
                     inline={true}
                     textColor="#FF482E"
                     className="text-[20px]!"
@@ -112,7 +117,7 @@ const ProductMiddle = ({ product }: any) => {
           ) : (
             <div className="flex flex-col items-start">
               <Link
-                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
+                href={callForPricingTel}
                 className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
               >
                 CALL FOR PRICE
@@ -326,16 +331,7 @@ const ProductMiddle = ({ product }: any) => {
         <AddReviewModal
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
-          product={
-            product
-              ? {
-                  name: product.name ?? "",
-                  image: product?.image?.[0]?.path,
-                  sku: product?.sku ?? "",
-                  id: product.id,
-                }
-              : undefined
-          }
+          product={{ name: productName, image: imageSrc, sku, id }}
         />
       )}
     </section>

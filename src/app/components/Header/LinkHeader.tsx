@@ -1,7 +1,9 @@
 "use client";
 
+import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
+import { cn } from "@/lib/utils";
 import {
   fetchCurrencies,
   setSelectedCurrency,
@@ -13,7 +15,6 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
-import { CONTACT_INFO } from "@/const/contact";
 
 interface Category {
   id: number;
@@ -123,6 +124,25 @@ const DropdownColumn = ({
   );
 };
 
+const CURRENCY_NAME_OVERRIDES: Record<string, string> = {
+  USD: "US Dollars",
+  GBP: "British Pound",
+};
+
+const currencyNames =
+  typeof Intl !== "undefined" && "DisplayNames" in Intl
+    ? new Intl.DisplayNames(["en"], { type: "currency" })
+    : null;
+
+const getCurrencyName = (code: string) => {
+  if (CURRENCY_NAME_OVERRIDES[code]) return CURRENCY_NAME_OVERRIDES[code];
+  try {
+    return currencyNames?.of(code) ?? code;
+  } catch {
+    return code;
+  }
+};
+
 const LinkHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -202,7 +222,7 @@ const LinkHeader = () => {
 
           {/* Mega Menu */}
           {isOpen && (
-            <div className="absolute left-0 top-10 flex bg-white shadow-xl border z-50">
+            <div className="absolute left-0 top-14 flex bg-white shadow-xl border z-50">
               <DropdownColumn
                 setIsOpen={setIsOpen}
                 heading=""
@@ -248,46 +268,50 @@ const LinkHeader = () => {
           <div className="flex flex-col leading-tight relative">
             <button
               aria-label="currency"
+              aria-expanded={open}
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-1 text-xs sm:text-sm md:text-base lg:text-lg hover:text-blue-300"
+              className={cn("flex items-center gap-1 hover:text-confirmation", {
+                "text-confirmation": open,
+              })}
             >
               <span className="text-sm sm:text-base md:text-lg lg:text-xl">
                 {selectedCurrency}
               </span>
-              <FaChevronDown className="text-xs" />
+              <FaChevronDown className="text-[10px] transition-transform" />
             </button>
 
             {open && (
-  <div className="absolute top-14 mt-1 bg-white shadow-lg rounded-md max-h-64 overflow-y-auto w-44 z-10">
-    {currencies?.map((c) => (
-      <div
-        key={c?.code}
-        className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 cursor-pointer"
-        onClick={() => {
-          dispatch(setSelectedCurrency(c?.code));
-          setOpen(false);
-        }}
-      >
-        {/* Currency Flag */}
-        <span
-          className={`currency-flag currency-flag-${c?.code?.toLowerCase()} w-5! h-4! shrink-0`}
-        />
-
-        {/* Currency Code + Rate */}
-        <span className="text-sm whitespace-nowrap">
-          {c?.code} - {c?.rate?.toFixed(2)}
-        </span>
-      </div>
-    ))}
-  </div>
-)}
+              <div className="absolute right-0 top-full mt-3 z-20 bg-white border border-[#ebebeb] rounded shadow-[0_2px_12px_rgba(0,0,0,0.12)] py-2 min-w-[160px] max-h-72 overflow-y-auto">
+                {currencies?.map((c) => {
+                  const isSelected = c?.code === selectedCurrency;
+                  return (
+                    <button
+                      type="button"
+                      key={c?.code}
+                      className="w-full flex items-center gap-2 px-4 py-[6px] text-left text-[15px] text-[#333] cursor-pointer whitespace-nowrap"
+                      onClick={() => {
+                        dispatch(setSelectedCurrency(c?.code));
+                        setOpen(false);
+                      }}
+                    >
+                      <span
+                        className={`currency-flag currency-flag-${c?.code?.toLowerCase()} w-[21px]! h-[14px]! shrink-0`}
+                      />
+                      <span
+                        className={`underline underline-offset-2 hover:text-[#FF482E] ${isSelected ? "font-semibold" : "font-normal"}`}
+                      >
+                        {getCurrencyName(c?.code)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <TfiHeadphoneAlt className=" w-8 h-8" />
             <span className="text-sm sm:text-base md:text-lg lg:text-xl">
-              <a href={CONTACT_INFO.phone.href}>
-    {CONTACT_INFO.phone.display}
-  </a>
+              <a href={CONTACT_INFO.phone.href}>{CONTACT_INFO.phone.display}</a>
             </span>
           </div>
         </div>

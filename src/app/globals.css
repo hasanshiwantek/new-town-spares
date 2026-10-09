@@ -3,10 +3,15 @@
 @import "currency-flags/dist/currency-flags.css";
 @custom-variant dark (&:is(.dark *));
 
+/* Currencies without a flag (e.g. FOK) get a plain placeholder instead of the library's spinner-like fallback image */
+.currency-flag {
+  background-image: none;
+  background-color: #e5e5e5;
+}
+
 body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   pointer-events: auto !important;
 }
-
 
 @theme inline {
   --font-poppins: "Poppins", sans-serif;
@@ -48,11 +53,11 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-    --color-confirmation: var(--confirmation-color);
+  --color-confirmation: var(--confirmation-color);
   --color-confirmation-hover: var(--confirmation-hover);
-    --color-confirmation-text: var(--confirmation-text);
-    --color-text-primary: var(--color-text-primary);
-    --color-text-secondary: var(--color-text-secondary);
+  --color-confirmation-text: var(--confirmation-text);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
 
   /* ✅ Add your Figma-based breakpoints here */
   --breakpoint-xs: 375px;
@@ -108,11 +113,11 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-   --confirmation-color: #FF482E;
+  --confirmation-color: #ff482e;
   --confirmation-hover: #b81a1a;
-   --confirmation-text: #2d2d2d;
-   --color-text-primary: #545454;
-   --color-text-secondary: #333333;
+  --confirmation-text: #2d2d2d;
+  --color-text-primary: #545454;
+  --color-text-secondary: #333333;
 }
 
 body {

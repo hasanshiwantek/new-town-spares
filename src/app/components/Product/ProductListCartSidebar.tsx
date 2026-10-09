@@ -2,7 +2,7 @@
 
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { clampQty, getMinQty, getQtyError } from "@/lib/utils";
+import { clampQty, getQtyError } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import {
   updateCart,
 } from "@/redux/slices/cartsSlice";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getProductInfo } from "@/utils/product";
 import { removeFromStorage } from "@/utils/storage";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -117,7 +118,7 @@ export default function ProductListCartSidebar() {
     <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
       <input
         type="number"
-        min={getMinQty(item)}
+        min={getProductInfo(item).minQty}
         value={
           quantities[item.cartItemId] === undefined
             ? item.quantity
@@ -170,12 +171,8 @@ export default function ProductListCartSidebar() {
         {cart.length > 0 && (
           <div className=" relative max-h-[420px] overflow-y-auto">
             {cart.map((item) => {
-              const imageUrl =
-                item?.image?.[0]?.path ||
-                item?.image?.path ||
-                item?.image ||
-                "/default-product-image.svg";
-              const itemPrice = Number(item?.price || 0);
+              const { productName, sku, imageSrc, price } =
+                getProductInfo(item);
               return (
                 <div
                   key={item.id}
@@ -183,8 +180,8 @@ export default function ProductListCartSidebar() {
                 >
                   <div className="shrink-0">
                     <Image
-                      src={imageUrl}
-                      alt={item?.name ?? ""}
+                      src={imageSrc}
+                      alt={productName}
                       width={56}
                       height={56}
                       className="object-contain w-18 h-18"
@@ -193,10 +190,10 @@ export default function ProductListCartSidebar() {
 
                   <div className="flex-1 min-w-0">
                     <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
-                      {item?.name ?? "—"}
+                      {productName}
                     </p>
                     <p className="text-[#333333] text-[14px] mt-1">
-                      {item?.sku ?? ""}
+                      {sku}
                     </p>
 
                     <div className="mt-2 flex items-center gap-2">
@@ -205,7 +202,7 @@ export default function ProductListCartSidebar() {
                       </div>
                       <span className="text-[#333333]">×</span>
                       <span className="text-[#FD5430] text-[14px]">
-                        <ProductPrice price={itemPrice} inline={true} />
+                        <ProductPrice price={price} inline={true} />
                       </span>
                       <div className="flex-1" />
                       <button

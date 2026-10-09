@@ -1,9 +1,10 @@
 "use client";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { clampQty, getMinQty } from "@/lib/utils";
+import { clampQty } from "@/lib/utils";
 import { addToCart } from "@/redux/slices/cartsSlice";
 import { addRecentView } from "@/redux/slices/recentSlice";
 import { successMessage } from "@/utils/message";
+import { getProductInfo } from "@/utils/product";
 import { useEffect, useState } from "react";
 import ProductLeft from "./ProductLeft";
 import ProductMiddle from "./ProductMiddle";
@@ -17,7 +18,7 @@ interface Brand {
 }
 interface Product {
   id: number;
-  brand: Brand | string;
+  brand: Brand;
   sku: string;
   name: string;
   price: number | string;
@@ -35,35 +36,28 @@ interface Product {
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
-  const minQty = getMinQty(product);
+  const { id, sku, productName, imageSrc, minQty } = getProductInfo(product);
   const [quantity, setQuantity] = useState<number | string>(minQty);
 
   useEffect(() => {
     setQuantity(minQty);
-  }, [product?.id, minQty]);
+  }, [id, minQty]);
   const dispatch = useAppDispatch();
   const addtocart = () => {
     dispatch(addToCart(product));
-    successMessage(`${product?.name} added to cart!`);
+    successMessage(`${productName} added to cart!`);
   };
 
-  // safe image src
-  const imageSrc =
-    product.image?.find((img) => img?.isPrimary === 1)?.path ||
-    product.image?.[0]?.path ||
-    product.image?.[1]?.path ||
-    "/default-product-image.svg";
-
   useEffect(() => {
-    if (!product) return;
+    if (!id) return;
 
     dispatch(
       addRecentView({
-        id: product.id,
-        sku: product.sku,
+        id: Number(id),
+        sku,
       }),
     );
-  }, [product?.id]);
+  }, [id, sku, dispatch]);
 
   const increment = () => setQuantity(clampQty(Number(quantity) + 1, product));
 
@@ -90,12 +84,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             addtocart={addtocart}
           />
           <ProductRight
-            product={{
-              ...product,
-              name: product?.name,
-              image: imageSrc,
-              sku: product?.sku,
-            }}
+            product={product}
             quantity={quantity}
             setQuantity={setQuantity}
             increment={increment}
@@ -103,7 +92,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             onAddToCart={() => {
               const qty = clampQty(quantity, product);
               dispatch(addToCart({ ...product, quantity: qty }));
-              successMessage(`${product?.name} added to cart (${qty})!`);
+              successMessage(`${productName} added to cart (${qty})!`);
             }}
           />
         </div>
