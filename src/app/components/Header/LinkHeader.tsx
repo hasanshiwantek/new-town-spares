@@ -258,36 +258,34 @@ const LinkHeader = () => {
             </button>
 
             {open && (
-  <div className="absolute top-14 mt-1 bg-white shadow-lg rounded-md max-h-64 overflow-y-auto w-44 z-10">
-    {currencies?.map((c) => (
-      <div
-        key={c?.code}
-        className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 cursor-pointer"
-        onClick={() => {
-          dispatch(setSelectedCurrency(c?.code));
-          setOpen(false);
-        }}
-      >
-        {/* Currency Flag */}
-        <span
-          className={`currency-flag currency-flag-${c?.code?.toLowerCase()} w-5! h-4! shrink-0`}
-        />
+              <div className="absolute top-14 mt-1 bg-white shadow-lg rounded-md max-h-64 overflow-y-auto w-44 z-10">
+                {currencies?.map((c) => (
+                  <div
+                    key={c?.code}
+                    className="flex items-center gap-2 px-3 py-2 text-black hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      dispatch(setSelectedCurrency(c?.code));
+                      setOpen(false);
+                    }}
+                  >
+                    {/* Currency Flag */}
+                    <span
+                      className={`currency-flag currency-flag-${c?.code?.toLowerCase()} w-5! h-4! shrink-0`}
+                    />
 
-        {/* Currency Code + Rate */}
-        <span className="text-sm whitespace-nowrap">
-          {c?.code} - {c?.rate?.toFixed(2)}
-        </span>
-      </div>
-    ))}
-  </div>
-)}
+                    {/* Currency Code + Rate */}
+                    <span className="text-sm whitespace-nowrap">
+                      {c?.code} - {c?.rate?.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <TfiHeadphoneAlt className=" w-8 h-8" />
             <span className="text-sm sm:text-base md:text-lg lg:text-xl">
-              <a href={CONTACT_INFO.phone.href}>
-    {CONTACT_INFO.phone.display}
-  </a>
+              <a href={CONTACT_INFO.phone.href}>{CONTACT_INFO.phone.display}</a>
             </span>
           </div>
         </div>

@@ -1,23 +1,23 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
+import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 
-import homeReducer from "./slices/homeSlice";
-import authReducer from "./slices/authSlice";
-import configReducer from "./slices/configSlice";
-import currencyReducer from "./slices/currencySlice";
-import storeFrontReducer from "./slices/storeFrontSlice";
-import myaccountReducer from "./slices/myaccountSlice";
-import recentReducer from "./slices/recentSlice";
-import orderReducer from "./slices/orderslice";
-import couponReducer from "./slices/couponSlice";
-import shippingZoneReducer from "./slices/shippingSlice";
-import scriptReducer from "./slices/scriptSlice";
-import contactReducer from "./slices/contactSlice";
-import multiAddressReducer from "./slices/multiAddressSlice";
 import advanceSearchReducer from "./slices/advanceSearchSlice";
-import orderMessageReducer from "./slices/OrderMessage";
+import authReducer from "./slices/authSlice";
 import cartsSliceReducer from "./slices/cartsSlice";
+import configReducer from "./slices/configSlice";
+import contactReducer from "./slices/contactSlice";
+import couponReducer from "./slices/couponSlice";
+import currencyReducer from "./slices/currencySlice";
+import homeReducer from "./slices/homeSlice";
+import multiAddressReducer from "./slices/multiAddressSlice";
+import myaccountReducer from "./slices/myaccountSlice";
+import orderMessageReducer from "./slices/OrderMessage";
+import orderReducer from "./slices/orderslice";
+import recentReducer from "./slices/recentSlice";
+import scriptReducer from "./slices/scriptSlice";
+import shippingZoneReducer from "./slices/shippingSlice";
+import storeFrontReducer from "./slices/storeFrontSlice";
 import uiReducer from "./slices/uiSlice";
 
 // ✅ only cart persist hoga
@@ -50,9 +50,16 @@ const couponPersistConfig = {
   storage,
 };
 
+// ✅ only selected currency persisted
+const currencyPersistConfig = {
+  key: "currency",
+  storage,
+  whitelist: ["selectedCurrency"],
+};
+
 const rootReducer = combineReducers({
   home: homeReducer,
-  currency: currencyReducer,
+  currency: persistReducer(currencyPersistConfig, currencyReducer),
   auth: persistReducer(authPersistConfig, authReducer), // persisted
   config: configReducer,
   // cart: persistReducer(cartPersistConfig, cartSliceReducer), // persisted
