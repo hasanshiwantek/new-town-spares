@@ -1,31 +1,18 @@
 "use client";
 import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import {
-  clampQty,
-  getMinQty,
-  getQtyError,
-  isAvailableForSale,
-} from "@/lib/utils";
+import { clampQty, getQtyError } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { REGEX } from "@/regex/regex";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getProductInfo, ProductInfoSource } from "@/utils/product";
 import Link from "next/link";
 import { useState } from "react";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
 interface ProductRightProps {
-  product: {
-    name: string;
-    image: string;
-    sku: string;
-    price: string | number;
-    availabilityText?: string;
-    maxPurchaseQuantity?: number;
-    allowPurchase?: boolean;
-    [key: string]: any;
-  };
+  product: ProductInfoSource;
   quantity: number | string;
   setQuantity: (value: number | "") => void;
   increment?: () => void;
@@ -39,25 +26,21 @@ const ProductRight = ({
   setQuantity,
 }: ProductRightProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const price = Number(product?.price) || 0;
-
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-  const availableForSale = isAvailableForSale(
-    product?.purchasabilityStatus,
-    product?.price!,
-  );
-  const currentStockEqualent = Number(product?.currentStock) === 0;
   const dispatch = useAppDispatch();
-  const maxQty = product?.maxPurchaseQuantity;
-  const minQty = getMinQty(product);
-  const callForPricingPhone = product?.callForPricingPhone;
-  const availabilityText = currentStockEqualent
-    ? "Out of Stock"
-    : product?.availabilityText
-      ? product?.availabilityText
-      : "In Stock";
-  const allowPurchase = !product?.allowPurchase;
-  const disabledAddToCart = currentStockEqualent || allowPurchase;
+  const {
+    id,
+    productName,
+    sku,
+    imageSrc,
+    price,
+    callForPricingTel,
+    availableForSale,
+    disabledAddToCart,
+    stockStatusText,
+    minQty,
+    maxQty,
+  } = getProductInfo(product);
 
   return (
     <>
@@ -76,7 +59,7 @@ const ProductRight = ({
               )}
             </div>
             <p className="text-[#333] text-[14px] mt-[8px] font-light">
-              {availabilityText}
+              {stockStatusText}
             </p>
 
             <div className="mt-4 flex flex-col gap-2 items-start">
@@ -102,7 +85,7 @@ const ProductRight = ({
             </div>
             {availableForSale && (
               <button
-                aria-label={`Add ${quantity} ${product?.name} to cart`}
+                aria-label={`Add ${quantity} ${productName} to cart`}
                 onClick={() => {
                   const qtyError = getQtyError(quantity, product);
                   if (qtyError) {
@@ -111,24 +94,24 @@ const ProductRight = ({
                     return;
                   }
                   const existingItem = cart.find(
-                    (item: any) => item.id === product?.id,
+                    (item: any) => item.id === id,
                   );
                   const currentQty = existingItem ? existingItem.quantity : 0;
                   const desiredQty = clampQty(quantity, product);
-                  const remainingQty = product?.maxPurchaseQuantity
-                    ? product.maxPurchaseQuantity - currentQty
+                  const remainingQty = maxQty
+                    ? maxQty - currentQty
                     : desiredQty;
 
                   if (remainingQty <= 0) {
                     errorMessage(
-                      `Cannot add more than ${product?.maxPurchaseQuantity} units of ${product?.name} to cart.`,
+                      `Cannot add more than ${maxQty} units of ${productName} to cart.`,
                     );
                     return;
                   }
 
                   if (desiredQty > remainingQty) {
                     errorMessage(
-                      `You can add only ${remainingQty} more of ${product?.name} (maximum ${product?.maxPurchaseQuantity}).`,
+                      `You can add only ${remainingQty} more of ${productName} (maximum ${maxQty}).`,
                     );
                     return;
                   }
@@ -136,7 +119,7 @@ const ProductRight = ({
                   dispatch(
                     addCart({
                       data: {
-                        productId: product?.id,
+                        productId: id,
                         quantity: quantityToAdd,
                       },
                     }),
@@ -145,7 +128,7 @@ const ProductRight = ({
                     .then(() => {
                       dispatch(fetchCartList());
                       successMessage(
-                        `${product?.name} added to cart (${quantityToAdd})!`,
+                        `${productName} added to cart (${quantityToAdd})!`,
                       );
                     });
                 }}
@@ -159,7 +142,7 @@ const ProductRight = ({
         ) : (
           <div className="border border-gray-300 rounded-lg w-full p-7 ">
             <Link
-              href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
+              href={callForPricingTel}
               className="w-full block text-center py-3 bg-[#F15939] hover:bg-[#e04d2e] text-white font-semibold text-[15px] transition-colors"
             >
               CALL FOR PRICE
@@ -218,15 +201,7 @@ const ProductRight = ({
       <BulkInquiryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={
-          product
-            ? {
-                name: product?.name ?? "",
-                image: product?.image,
-                sku: product?.sku ?? "",
-              }
-            : undefined
-        }
+        product={{ name: productName, image: imageSrc, sku }}
       />
     </>
   );

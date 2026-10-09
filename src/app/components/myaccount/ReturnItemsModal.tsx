@@ -3,6 +3,7 @@ import { useAlert } from "@/hooks/useAlert";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
 import { fetchOrderDetails } from "@/redux/slices/cartsSlice";
+import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 interface ReturnItemsModalProps {
@@ -10,6 +11,7 @@ interface ReturnItemsModalProps {
   onClose: () => void;
   orderId: any;
   isSubmit?: boolean;
+  onSuccess?: () => void;
 }
 
 interface OrderData {
@@ -70,6 +72,7 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
   onClose,
   orderId,
   isSubmit,
+  onSuccess,
 }) => {
   const [returnReason, setReturnReason] = useState("");
   const [returnAction, setReturnAction] = useState("");
@@ -83,7 +86,8 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-    const { showAlert, Alert } = useAlert();
+  const { showAlert, Alert } = useAlert();
+
   useEffect(() => {
     const loadOrderDetails = async () => {
       if (!orderId) {
@@ -104,10 +108,10 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
         const res = await dispatch(
           fetchOrderDetails({ orderId: orderId })
         ).unwrap();
-        
+
         if (res?.order?.length > 0) {
           setOrder(res.order[0]);
-          
+
           // Initialize selected quantities
           const initialQuantities: { [key: number]: number } = {};
           res.order[0].shippingDestinations[0]?.products?.forEach(
@@ -121,7 +125,6 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
         }
       } catch (err) {
         setError("Failed to load order details");
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -155,93 +158,88 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
     e.preventDefault();
 
     if (!returnReason) {
-     showAlert({ title: "Return Reason Required", message: "Please select a return reason before submitting." });
-     
+      showAlert({
+        title: "Return Reason Required",
+        message: "Please select a return reason.",
+      });
       return;
     }
     setSubmitting(true);
     try {
       const returnData = {
         orderId: order?.id,
-        reason:returnReason,
+        reason: returnReason,
         returnAction,
         comments,
-        isSubmit:true,
+        isSubmit: true,
       };
 
-      console.log("Return Request Data:", returnData);
+      await axiosInstance.post("web/orders/return-order", returnData);
 
-      const response = await axiosInstance.post("web/orders/return-order", 
-         returnData
-      );
-
-
-        console.log("Return Request Response:", response.data);
+      onSuccess?.();
       onClose();
     } catch (err) {
-      console.error("Submission error:", err);
-      showAlert({ title: "Submission Failed", message: "Failed to submit return request. Please try again." });
+      showAlert({
+        title: "Return Request Failed",
+        message: "Failed to submit return request. Please try again.",
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
+  // Matches the account form styling (AccountForm.tsx)
+  const inputClass =
+    "w-full h-[42px] text-[14px] border border-[#ebebeb] rounded-[4px] bg-white text-[#333333] px-[14px] outline-none focus:border-[#999999] disabled:bg-[#f5f5f5] disabled:cursor-not-allowed";
+  const labelClass =
+    "flex items-center justify-between text-[14px] font-light text-[#333333] mb-[7px]";
+  const primaryBtnClass =
+    "h-[39px] px-[32px] rounded-[4px] bg-[#FF482E] text-white text-[14px] font-light hover:bg-[#e63e26] transition disabled:opacity-50 disabled:cursor-not-allowed";
+  const RequiredTag = () => (
+    <span className="text-[10px] font-light uppercase tracking-[0.5px] text-[#333333]">
+      Required
+    </span>
+  );
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white w-full max-w-5xl rounded-xl shadow-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-white w-full max-w-[800px] rounded-[4px] shadow-lg max-h-[90vh] overflow-y-auto text-[#333333]">
         {/* Header */}
-        <div className="flex justify-between items-center px-4 md:px-6 py-4 border-b sticky top-0 bg-white z-10">
-          <h2 className="text-xl md:text-2xl font-bold">
+        <div className="flex justify-between items-center px-[21px] py-[14px] border-b border-[#ebebeb] sticky top-0 bg-white z-10">
+          <h2 className="text-[20px] leading-[28px] font-normal">
             Return Items
-            {order?.orderNumber && ` – #${order.orderNumber}`}
+            {order?.orderNumber && ` – Order #${order.orderNumber}`}
           </h2>
           <button
             onClick={onClose}
             disabled={submitting}
-            className="text-2xl text-gray-500 hover:text-black disabled:opacity-50"
+            aria-label="Close"
+            className="text-[#757575] hover:text-[#FF482E] transition disabled:opacity-50"
           >
-            ✕
+            <X size={20} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-4 md:p-6">
+        <div className="p-[21px]">
           {/* Loading State */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
-              <p className="text-gray-600">Loading order details...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#ebebeb] border-t-[#FF482E] mb-4"></div>
+              <p className="text-[14px] font-light">Loading order details...</p>
             </div>
           )}
 
           {/* Already Returned State */}
           {!loading && isSubmit && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
-                <svg
-                  className="h-10 w-10 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
-              </div>
-              <p className="text-yellow-800 text-xl font-semibold mb-2">
+            <div className="border border-[#ebebeb] p-[28px] text-center">
+              <p className="text-[16px] leading-[24px] mb-[7px]">
                 Return Already Submitted
               </p>
-              <p className="text-gray-700 mb-6">
+              <p className="text-[14px] font-light mb-[21px]">
                 You have already submitted a return request for this order.
               </p>
-              <button
-                onClick={onClose}
-                className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition font-semibold"
-              >
+              <button onClick={onClose} className={primaryBtnClass}>
                 Close
               </button>
             </div>
@@ -249,15 +247,12 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
 
           {/* Error State */}
           {error && !loading && !isSubmit && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-              <p className="text-red-600 text-lg font-medium mb-2">
+            <div className="border border-[#ebebeb] p-[28px] text-center">
+              <p className="text-[16px] leading-[24px] text-[#FF482E] mb-[7px]">
                 Error Loading Order
               </p>
-              <p className="text-gray-700 mb-4">{error}</p>
-              <button
-                onClick={onClose}
-                className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-              >
+              <p className="text-[14px] font-light mb-[21px]">{error}</p>
+              <button onClick={onClose} className={primaryBtnClass}>
                 Close
               </button>
             </div>
@@ -266,91 +261,96 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
           {/* Content */}
           {!loading && !error && !isSubmit && order && (
             <>
-              {/* Table Header */}
-              <div className="hidden md:grid grid-cols-12 gap-4 pb-2 border-b border-gray-300 mb-6">
-                <div className="col-span-6 text-lg font-semibold">Item</div>
-                <div className="col-span-3 text-lg font-semibold text-center">
-                  Price
+              {/* Items — table at >=801, label/value rows below */}
+              <div className="border border-[#ebebeb]">
+                <div className="hidden min-[801px]:grid grid-cols-12 border-b border-[#ebebeb] bg-[#f5f5f5] text-[13px] leading-[15.6px]">
+                  <div className="col-span-7 p-[11px]">Item</div>
+                  <div className="col-span-2 p-[11px] text-center">Price</div>
+                  <div className="col-span-3 p-[11px] text-right">
+                    Qty To Return
+                  </div>
                 </div>
-                <div className="col-span-3 text-lg font-semibold text-end">
-                  Qty To Return
-                </div>
+
+                {order?.shippingDestinations[0]?.products?.map(
+                  (item: any, index: number, arr: any[]) => {
+                    const product = order.products.find(
+                      (p: any) => p.id === item.productId
+                    );
+
+                    if (!product) return null;
+
+                    return (
+                      <div
+                        key={item.productId}
+                        className={`grid grid-cols-1 min-[801px]:grid-cols-12 items-center text-[14px] leading-[21px] ${index !== arr.length - 1 ? "border-b border-[#ebebeb]" : ""}`}
+                      >
+                        <div className="min-[801px]:col-span-7 p-[11px] flex justify-between gap-4 min-[801px]:block min-w-0">
+                          <span className="min-[801px]:hidden text-[13px] shrink-0">
+                            Item
+                          </span>
+                          <span className="text-right min-[801px]:text-left break-words">
+                            <span className="font-medium">{product.sku}</span> |{" "}
+                            {product.name}
+                          </span>
+                        </div>
+
+                        <div className="min-[801px]:col-span-2 p-[11px] pt-0 min-[801px]:pt-[11px] flex justify-between min-[801px]:block min-[801px]:text-center">
+                          <span className="min-[801px]:hidden text-[13px]">
+                            Price
+                          </span>
+                          <span>${Number(item.price).toFixed(2)}</span>
+                        </div>
+
+                        <div className="min-[801px]:col-span-3 p-[11px] pt-0 min-[801px]:pt-[11px] flex justify-between items-center min-[801px]:justify-end">
+                          <span className="min-[801px]:hidden text-[13px]">
+                            Qty To Return
+                          </span>
+                          <select
+                            value={selectedQuantities[item.productId] || 0}
+                            onChange={(e) =>
+                              handleQuantityChange(
+                                item.productId,
+                                Number(e.target.value)
+                              )
+                            }
+                            disabled={submitting}
+                            className={`${inputClass} !w-[80px] !h-[36px] !px-[10px]`}
+                          >
+                            {Array.from(
+                              { length: item.quantity + 1 },
+                              (_, i) => i
+                            ).map((num) => (
+                              <option key={num} value={num}>
+                                {num}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
               </div>
 
-              {/* Items */}
-              {order?.shippingDestinations[0]?.products?.map((item: any) => {
-                const product = order.products.find(
-                  (p: any) => p.id === item.productId
-                );
-
-                if (!product) return null;
-
-                return (
-                  <div
-                    key={item.productId}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center pb-4 md:pb-2 border-b border-gray-300 mb-4 md:mb-6"
-                  >
-                    {/* Mobile Label */}
-                    <div className="md:hidden font-semibold text-gray-700 text-sm">
-                      Item
-                    </div>
-                    <div className="col-span-1 md:col-span-6 text-base md:text-lg">
-                      <span className="font-medium">{product.sku}</span> |{" "}
-                      {product.name}
-                    </div>
-
-                    {/* Mobile Label */}
-                    <div className="md:hidden font-semibold text-gray-700 text-sm mt-2">
-                      Price
-                    </div>
-                    <div className="col-span-1 md:col-span-3 text-base md:text-lg text-left md:text-center">
-                      ${Number(item.price).toFixed(2)}
-                    </div>
-
-                    {/* Mobile Label */}
-                    <div className="md:hidden font-semibold text-gray-700 text-sm mt-2">
-                      Quantity to Return
-                    </div>
-                    <div className="col-span-1 md:col-span-3 text-base md:text-lg text-left md:text-end">
-                      <select
-                        value={selectedQuantities[item.productId] || 0}
-                        onChange={(e) =>
-                          handleQuantityChange(
-                            item.productId,
-                            Number(e.target.value)
-                          )
-                        }
-                        disabled={submitting}
-                        className="w-full md:w-24 border px-3 py-2 rounded bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      >
-                        {Array.from(
-                          { length: item.quantity + 1 },
-                          (_, i) => i
-                        ).map((num) => (
-                          <option key={num} value={num}>
-                            {num}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                );
-              })}
-
               {/* Return Form */}
-              <form onSubmit={handleSubmit} className="mt-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                  <div className="space-y-6">
+              <form onSubmit={handleSubmit} className="mt-[28px]">
+                <div className="grid grid-cols-1 min-[551px]:grid-cols-2 gap-x-[21px] gap-y-[28px]">
+                  <div className="space-y-[28px]">
                     <div>
-                      <label className="block font-medium text-lg md:text-xl mb-2">
-                        Return Reason <span className="text-red-600">*</span>
+                      <label htmlFor="returnReason" className={labelClass}>
+                        <span>
+                          Return Reason{" "}
+                          <span className="text-red-500">*</span>
+                        </span>
+                        <RequiredTag />
                       </label>
                       <select
+                        id="returnReason"
                         required
                         value={returnReason}
                         onChange={(e) => setReturnReason(e.target.value)}
                         disabled={submitting}
-                        className="w-full border px-4 py-3 md:py-4 rounded bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className={inputClass}
                       >
                         <option value="">Select reason</option>
                         <option>Received Wrong Product</option>
@@ -361,14 +361,15 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block font-medium text-lg md:text-xl mb-2">
+                      <label htmlFor="returnAction" className={labelClass}>
                         Return Action
                       </label>
                       <select
+                        id="returnAction"
                         value={returnAction}
                         onChange={(e) => setReturnAction(e.target.value)}
                         disabled={submitting}
-                        className="w-full border px-4 py-3 md:py-4 rounded bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className={inputClass}
                       >
                         <option value="">Select action</option>
                         <option>Repair</option>
@@ -379,26 +380,27 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-medium text-lg md:text-xl mb-2">
+                    <label htmlFor="returnComments" className={labelClass}>
                       Comments
                     </label>
                     <textarea
+                      id="returnComments"
                       value={comments}
                       onChange={(e) => setComments(e.target.value)}
                       disabled={submitting}
-                      className="w-full h-[140px] md:h-[185px] border px-4 py-3 md:py-4 rounded bg-white resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      className={`${inputClass} !h-[154px] py-[10px] resize-none`}
                       placeholder="Write your comments..."
                     />
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="mt-6 md:mt-8 flex flex-col-reverse md:flex-row justify-end gap-3 md:gap-4">
+                <div className="mt-[28px] flex flex-col-reverse min-[551px]:flex-row justify-end gap-[11px]">
                   <button
                     type="button"
                     onClick={onClose}
                     disabled={submitting}
-                    className="w-full md:w-auto px-6 py-3 md:py-4 border rounded font-bold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-[39px] px-[32px] rounded-[4px] border border-[#333333] text-[#333333] text-[14px] font-light hover:border-[#FF482E] hover:text-[#FF482E] transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Cancel
                   </button>
@@ -406,15 +408,15 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full md:w-auto btn-primary !px-6 md:!px-8 !py-3 md:!py-5 font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className={`${primaryBtnClass} flex items-center justify-center gap-2`}
                   >
                     {submitting ? (
                       <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>SUBMITTING...</span>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/40 border-t-white"></div>
+                        <span>Submitting...</span>
                       </>
                     ) : (
-                      "SUBMIT RETURN REQUEST"
+                      "Submit Return Request"
                     )}
                   </button>
                 </div>
@@ -423,6 +425,7 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
           )}
         </div>
       </div>
+      <Alert />
     </div>
   );
 };

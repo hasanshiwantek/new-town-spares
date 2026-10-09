@@ -8,12 +8,10 @@ import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../Home/ProductCard";
 import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
 import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
-import RecentViewedProduct from "../myaccount/RecentViewedPoduct";
 import CategoryPagination from "./CategoryPagination";
 import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortingBar from "./SortingBar";
-import ProductRecent from "./ProductRecent";
 
 const MotionDiv = motion.div;
 interface ProductListProps {

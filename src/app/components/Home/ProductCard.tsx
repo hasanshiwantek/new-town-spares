@@ -1,17 +1,12 @@
 "use client";
 
-import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import {
-  clampQty,
-  getMinQty,
-  getQtyError,
-  isAvailableForSale,
-} from "@/lib/utils";
+import { clampQty, getQtyError } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { REGEX } from "@/regex/regex";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getProductInfo } from "@/utils/product";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -26,9 +21,9 @@ interface Brand {
 
 interface Product {
   id: number;
-  brand: Brand | string;
+  brand: Brand;
   sku: string;
-  name: string | { name?: string };
+  name: string;
   price: number | string;
   msrp?: number;
   image?: { path?: string; isPrimary?: number }[];
@@ -50,48 +45,25 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-  const currentStockEqualent = Number(product?.currentStock) === 0;
-  const allowPurchase = !product?.allowPurchase;
-  const disabledAddToCart = currentStockEqualent || allowPurchase;
-  const minQty = getMinQty(product);
-  const callForPricingPhone = product?.callForPricingPhone;
-
-  const availableForSale = isAvailableForSale(
-    product?.purchasabilityStatus,
-    product?.price,
-  );
+  const {
+    id,
+    productName,
+    sku,
+    productUrl,
+    brandName,
+    brandUrl,
+    imageSrc,
+    price,
+    msrp,
+    hasMsrp,
+    callForPricingTel,
+    availableForSale,
+    disabledAddToCart,
+    stockStatusText,
+    minQty,
+    maxQty,
+  } = getProductInfo(product);
   const [quantity, setQuantity] = useState<number | string>(minQty);
-
-  // safe brand name
-  const brandName =
-    typeof product.brand === "string"
-      ? product.brand
-      : product.brand?.name || "Unknown Brand";
-
-  // safe product name
-  const productName =
-    typeof product.name === "string"
-      ? product.name
-      : product.name?.name || "Unnamed Product";
-
-  // safe image src
-  const imageSrc =
-    product.image?.find((img) => img?.isPrimary === 1)?.path ||
-    product.image?.[0]?.path ||
-    product.image?.[1]?.path ||
-    "/default-product-image.svg";
-
-  const productHref =
-    product?.productUrl || (product?.slug ? `/${product.slug}` : "#");
-
-  const brandSlug =
-    typeof product.brand === "object" ? product?.brand?.slug : undefined;
-
-  const availabilityText = currentStockEqualent
-    ? "Out of Stock"
-    : product?.availabilityText
-      ? product?.availabilityText
-      : "In Stock";
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -102,7 +74,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <div className="bg-[#FFFFFF] border transition flex flex-col h-full p-[21px]">
-      <Link href={productHref}>
+      <Link href={productUrl}>
         <div className="relative w-full aspect-square">
           <Image
             src={imageSrc}
@@ -117,15 +89,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="flex flex-col flex-1">
         <p className="text-[14px] leading-[21px] text-[#333333] mb-2">
           <Link
-            href={`/brand/${brandSlug || ""}`}
+            href={brandUrl || "#"}
             className="font-bold hover:text-[#D42020]"
           >
             {brandName}
           </Link>{" "}
-          <span className="text-[13px]">SKU: {product.sku}</span>
+          <span className="text-[13px]">SKU: {sku}</span>
         </p>
 
-        <Link href={productHref}>
+        <Link href={productUrl}>
           <p className="text-[#212529] text-[15px] leading-[18px] font-normal mb-[7px] line-clamp-4 hover:text-[#D42020]">
             {productName}
           </p>
@@ -136,13 +108,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Price Section */}
           {availableForSale ? (
             <div className="flex flex-col items-start pb-[11px]">
-              {product?.msrp && Number(product.msrp) > 0 ? (
+              {hasMsrp ? (
                 <>
                   <span className="text-[#333333] text-[14px] leading-[21px]">
                     Price:{" "}
                     <span>
                       <ProductPrice
-                        price={product.msrp}
+                        price={msrp}
                         inline={true}
                         className="text-[15px]! text-[#333333]"
                       />
@@ -150,7 +122,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   </span>
                   <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
                     <ProductPrice
-                      price={Number(product.price)}
+                      price={price}
                       inline={true}
                       className="text-[20px]!"
                       textColor="#FF482E"
@@ -160,7 +132,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               ) : (
                 <span className="text-[20px] leading-[20px] font-light text-[#ff482e]">
                   <ProductPrice
-                    price={Number(product.price)}
+                    price={price}
                     inline={true}
                     className="text-[20px]!"
                     textColor="#FF482E"
@@ -171,7 +143,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : (
             <div className="flex flex-col items-start mb-2">
               <Link
-                href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
+                href={callForPricingTel}
                 className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
               >
                 CALL FOR PRICE
@@ -184,7 +156,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* In Stock */}
           <p className="text-[14px] text-[#333333] pt-[11px] mb-[10px]">
-            {availabilityText}
+            {stockStatusText}
           </p>
 
           {/* Quantity + Add to Cart Row */}
@@ -209,9 +181,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                       return;
                     }
                     const cartItem = cart.find(
-                      (item: any) => item.id === product.id,
+                      (item: any) => item.id === id,
                     );
-                    const maxQty = product.maxPurchaseQuantity;
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
                     if (remaining <= 0) {
@@ -230,14 +201,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                     dispatch(
                       addCart({
                         data: {
-                          productId: product?.id,
+                          productId: id,
                           quantity: clampQty(quantity, product),
                         },
                       }),
                     )
                       .unwrap()
                       .then(() => {
-                        successMessage(`${product.name} added to cart!`);
+                        successMessage(`${productName} added to cart!`);
                         dispatch(fetchCartList());
                       });
                   }
