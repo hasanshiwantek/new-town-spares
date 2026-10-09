@@ -19,6 +19,7 @@ const ProductMiddle = ({ product }: any) => {
     sku,
     hasBrand,
     brandName,
+    brandUrl,
     imageSrc,
     price,
     msrp,
@@ -50,7 +51,7 @@ const ProductMiddle = ({ product }: any) => {
           </h1>
 
           <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
-            Brand: <span>{hasBrand ? brandName : "N/A"}</span>
+            Brand: <Link href={brandUrl || "#"}>{hasBrand ? brandName : "N/A"}</Link>
           </p>
           <p className="text-[14px] leading-[21px] text-[#333333]">
             SKU: <span>{sku || "N/A"}</span>
