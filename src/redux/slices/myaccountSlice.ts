@@ -35,7 +35,7 @@ export const fetchAccountOrders = createAsyncThunk(
   "account/fetchAccountOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("dashboard/customers/my-orders");
+      const response = await axiosInstance.get("dashboard/customers/my-orders?isDraft=false");
       return response.data; 
     } catch (error: any) {
       return rejectWithValue(   error.response?.data?.message  || error.message);

@@ -13,6 +13,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import SignupForm from "./SignupForm";
+import AccountSignInLinkModal from "../modal/AccountSignInLinkModal";
 
 interface SigninFormValues {
   email: string;
@@ -32,7 +33,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
   } = useForm<SigninFormValues>();
 
   const dispatch = useAppDispatch();
-  const router = useRouter();
+  const [signInLinkOpen, setSignInLinkOpen] = useState(false);
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -140,14 +141,13 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
             )}
           </div>
           <div className="mt-3 text-[13px] flex items-center justify-between w-full">
-            <Link
-              href="/auth/forgot-password"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#333333] "
+            <button
+              type="button"
+              onClick={() => setSignInLinkOpen(true)}
+              className="text-[var(--color-text-secondary)] hover:text-[var(--primary-color)] cursor-pointer transition-colors duration-200 bg-transparent border-0 p-0 text-[14px]"
             >
               Send me a sign-in link instead
-            </Link>
+            </button>
 
             <p className="text-[#545454]">
               Don’t have an account?
@@ -193,6 +193,12 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
           <SignupForm onCancel={() => setShowSignup(false)} />
         </div>
       )}
+      <AccountSignInLinkModal
+        isOpen={signInLinkOpen}
+        onClose={() => setSignInLinkOpen(false)}
+        onSend={async (email) => {
+        }}
+      />
     </div>
   );
 };
