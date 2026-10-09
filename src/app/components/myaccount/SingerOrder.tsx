@@ -365,14 +365,20 @@ const SingleOrder = () => {
               </span>
             </div>
           )}
-          {coupon?.couponCode && (
-            <div className={summaryRow}>
-              <span>Coupon Code:({coupon?.couponCode})</span>
-              <span className="float-right">
-                -<ProductPrice price={coupon?.discountAmount} inline={true} />
-              </span>
-            </div>
-          )}
+       {coupon?.couponCode && (
+  <div className={`${summaryRow} relative`}>
+  <span className="pr-[70px]">
+    Coupon Code:
+    <span className="text-[10px]">
+      ({coupon?.couponCode})
+    </span>
+  </span>
+
+  <span className="absolute right-0 top-0">
+    -<ProductPrice price={coupon?.discountAmount} inline={true} />
+  </span>
+</div>
+)}
           <div className={summaryRow}>
             <span>Shipping:</span>
             <span className="float-right">
