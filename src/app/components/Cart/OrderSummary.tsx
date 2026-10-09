@@ -512,7 +512,7 @@ const OrderSummary = () => {
                         });
                     }}
                     disabled={shippingCostLoading}
-                    className="w-full md:w-[55%] text-[18px] btn-primary"
+                    className="w-full md:w-[68%] text-[18px] btn-primary"
                     // className="w-full md:w-[65%] p-2 border-b border-black  bg-[#D42020] text-white text-[14px] font-bold"
                   >
                     {shippingCostLoading
