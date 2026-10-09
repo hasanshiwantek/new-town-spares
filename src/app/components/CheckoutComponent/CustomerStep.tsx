@@ -133,12 +133,6 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
               {!isLoggedIn && (
                 <div className="text-[13px] text-[#333333]">
                   Already have an account?{" "}
-                  {/* <Link
-                href="/auth/login"
-                className="hover:text-[var(--primary-color)]"
-              >
-                Sign in now
-              </Link> */}
                   <button
                     type="button"
                     onClick={() => setShowLogin(true)}
@@ -156,8 +150,6 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
             </div>
           )
           }
-
-          {/* Apple Pay Button */}
 
           {/* Apple Pay Button */}
           <button
