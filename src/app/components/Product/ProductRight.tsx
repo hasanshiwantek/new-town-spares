@@ -5,10 +5,11 @@ import { clampQty, getQtyError } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { REGEX } from "@/regex/regex";
-import { errorMessage, successMessage } from "@/utils/message";
+import { errorMessage } from "@/utils/message";
 import { getProductInfo, ProductInfoSource } from "@/utils/product";
 import Link from "next/link";
 import { useState } from "react";
+import AddToCartModal from "../modal/AddToCartModal";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
 interface ProductRightProps {
@@ -26,6 +27,8 @@ const ProductRight = ({
   setQuantity,
 }: ProductRightProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const dispatch = useAppDispatch();
   const {
@@ -33,6 +36,8 @@ const ProductRight = ({
     productName,
     sku,
     imageSrc,
+    hasBrand,
+    brandName,
     price,
     callForPricingTel,
     availableForSale,
@@ -116,6 +121,8 @@ const ProductRight = ({
                     return;
                   }
                   const quantityToAdd = desiredQty;
+                  setIsCartModalOpen(true);
+                  setIsAdding(true);
                   dispatch(
                     addCart({
                       data: {
@@ -125,14 +132,14 @@ const ProductRight = ({
                     }),
                   )
                     .unwrap()
-                    .then(() => {
-                      dispatch(fetchCartList());
-                      successMessage(
-                        `${productName} added to cart (${quantityToAdd})!`,
-                      );
-                    });
+                    .then(() => dispatch(fetchCartList()))
+                    .catch((err) => {
+                      setIsCartModalOpen(false);
+                      errorMessage(err || "Failed to add to cart");
+                    })
+                    .finally(() => setIsAdding(false));
                 }}
-                disabled={disabledAddToCart}
+                disabled={disabledAddToCart || isAdding}
                 className="w-full mt-8 py-3 bg-[#F15939] hover:bg-[#4d2017] text-white text-[14px] transition-colors font-light! disabled:opacity-50 disabled:cursor-not-allowed! disabled:hover:bg-[#F15939]"
               >
                 ADD TO CART
@@ -202,6 +209,19 @@ const ProductRight = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         product={{ name: productName, image: imageSrc, sku }}
+      />
+
+      <AddToCartModal
+        isOpen={isCartModalOpen}
+        onClose={() => setIsCartModalOpen(false)}
+        loading={isAdding}
+        product={{
+          id,
+          name: productName,
+          image: imageSrc,
+          brand: hasBrand ? brandName : undefined,
+          price,
+        }}
       />
     </>
   );
