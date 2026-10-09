@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { baseURL, storeId } from "@/lib/axiosInstance";
-import { loginUser } from "@/redux/slices/authSlice";
+import { loginUser, sendMagicLink } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
 import { getFromStorage } from "@/utils/storage";
@@ -142,13 +142,12 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
             )}
           </div>
           <div className="mt-3 text-[13px] flex items-center justify-between w-full">
-            <Button
-              type="button"
+            <span
               onClick={() => setSignInLinkOpen(true)}
               className="cursor-pointer  border-0 bg-transparent p-0 text-[14px] text-text-secondary transition-colors duration-200 "
             >
               Send me a sign-in link instead
-            </Button>
+            </span>
 
             <p className="text-[#545454]">
               Don’t have an account?
@@ -197,7 +196,9 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
       <AccountSignInLinkModal
         isOpen={signInLinkOpen}
         onClose={() => setSignInLinkOpen(false)}
-        onSend={async (email) => {}}
+        onSend={async (email) => {
+          await dispatch(sendMagicLink({ email })).unwrap();
+        }}
       />
     </div>
   );

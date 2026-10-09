@@ -6,6 +6,7 @@ import {
   checkAuthToken,
   customerProfile,
   logout,
+  verifyMagicLink,
 } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
@@ -20,10 +21,10 @@ import {
   getPersistedAuth,
   setInStorage,
 } from "@/utils/storage";
-import { successMessage } from "@/utils/message";
+import { errorMessage, successMessage } from "@/utils/message";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 interface Category {
   id: number;
   name: string;
@@ -35,8 +36,10 @@ const poppinsFont = "Poppins, sans-serif";
 const FooterBottom = () => {
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
+  const verifiedToken = useRef<string | null>(null);
   const router = useRouter();
   const paramsToken = searchParams.get("token");
+  const paramsActiontoken = searchParams.get("actiontoken");
   const [categories, setCategories] = useState<Category[]>([]);
   const [email, setEmail] = useState("");
   const auth = useAppSelector((state: RootState) => state?.auth);
@@ -57,8 +60,8 @@ const FooterBottom = () => {
     router.push(url);
   };
   const handleLogout = () => {
-  setShowLogoutModal(true);
-};
+    setShowLogoutModal(true);
+  };
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -114,6 +117,27 @@ const FooterBottom = () => {
     };
     login();
   }, [paramsToken, dispatch, router]);
+  useEffect(() => {
+    if (!paramsActiontoken) return;
+    if (verifiedToken.current === paramsActiontoken) return;
+    verifiedToken.current = paramsActiontoken;
+
+    let cancelled = false;
+
+    dispatch(verifyMagicLink({ token: paramsActiontoken }))
+      .unwrap()
+      .then(() => {
+        window.location.href = "/checkout";
+      })
+      .catch((msg) => {
+        verifiedToken.current = null;
+        if (!cancelled) errorMessage(msg || "Magic link is invalid or expired");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paramsActiontoken, dispatch, router]);
   return (
     <React.Fragment>
       <div className="w-full">
@@ -146,7 +170,7 @@ const FooterBottom = () => {
                       });
                   }
                 }}
-              className="w-full max-w-[400px] mx-auto lg:mx-0 flex flex-col lg:flex-row items-center mt-4 lg:mt-0"
+                className="w-full max-w-[400px] mx-auto lg:mx-0 flex flex-col lg:flex-row items-center mt-4 lg:mt-0"
               >
                 <input
                   type="email"
@@ -363,19 +387,19 @@ const FooterBottom = () => {
             </p>
           </div>
         </footer>
-             <ConfirmationModal
-  open={showLogoutModal}
-  onOpenChange={setShowLogoutModal}
-  variant="warning"
-  title="Confirm Logout?"
-  description="Are you sure you want to logout?"
-  onConfirm={() => {
-    dispatch(logout());
-    successMessage("Logged out successfully!");
-    setShowLogoutModal(false);
-    router.replace("/auth/login");
-  }}
-/>
+        <ConfirmationModal
+          open={showLogoutModal}
+          onOpenChange={setShowLogoutModal}
+          variant="warning"
+          title="Confirm Logout?"
+          description="Are you sure you want to logout?"
+          onConfirm={() => {
+            dispatch(logout());
+            successMessage("Logged out successfully!");
+            setShowLogoutModal(false);
+            router.replace("/auth/login");
+          }}
+        />
       </div>
     </React.Fragment>
   );
