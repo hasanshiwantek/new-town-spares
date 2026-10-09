@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { decode } from "html-entities";
+import { getProductInfo } from "@/utils/product";
 
 const ProductOverview = ({ product }: { product: any }) => {
+  const { brandUrl } = getProductInfo(product);
 
 
   const customFields = product?.customFields?.filter(
@@ -74,8 +76,8 @@ const ProductOverview = ({ product }: { product: any }) => {
                         <dt>{item.name}</dt>
 
                         <dd>
-                          {item.name === "Brand" && product?.brand?.name ? (
-                            <Link href={`/brand/${product.brand.slug}`}>
+                          {item.name === "Brand" && brandUrl ? (
+                            <Link href={brandUrl}>
                               {item.value}
                             </Link>
                           ) : (

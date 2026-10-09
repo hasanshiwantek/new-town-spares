@@ -3,7 +3,7 @@ import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
-import { clampQty, getMinQty, getQtyError } from "@/lib/utils";
+import { clampQty, getQtyError } from "@/lib/utils";
 import { logout } from "@/redux/slices/authSlice";
 import {
   addBySku,
@@ -15,6 +15,7 @@ import { fetchCurrencies } from "@/redux/slices/currencySlice";
 import { fetchLogos } from "@/redux/slices/homeSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getProductInfo } from "@/utils/product";
 import { removeFromStorage } from "@/utils/storage";
 import { ChevronRight, Menu, X } from "lucide-react";
 import Image from "next/image";
@@ -163,7 +164,7 @@ const Navbar: React.FC = () => {
     <div className="w-[35px] h-8 border border-[#ebebeb] overflow-hidden bg-white shrink-0">
       <input
         type="number"
-        min={getMinQty(item)}
+        min={getProductInfo(item).minQty}
         value={
           quantities[item.cartItemId] === undefined
             ? item.quantity
@@ -462,12 +463,8 @@ const Navbar: React.FC = () => {
                     {cart.length > 0 && (
                       <div className="relative max-h-[420px] overflow-y-auto">
                         {cart.map((item) => {
-                          const imageUrl =
-                            item?.image?.[0]?.path ||
-                            item?.image?.path ||
-                            item?.image ||
-                            "/default-product-image.svg";
-                          const itemPrice = Number(item?.price || 0);
+                          const { productName, sku, imageSrc, price } =
+                            getProductInfo(item);
                           return (
                             <div
                               key={item.id}
@@ -475,8 +472,8 @@ const Navbar: React.FC = () => {
                             >
                               <div className="shrink-0">
                                 <Image
-                                  src={imageUrl}
-                                  alt={item?.name ?? ""}
+                                  src={imageSrc}
+                                  alt={productName}
                                   width={56}
                                   height={56}
                                   className="object-contain w-18 h-18"
@@ -485,10 +482,10 @@ const Navbar: React.FC = () => {
 
                               <div className="flex-1 min-w-0">
                                 <p className="text-[#333333] text-[14px] leading-snug line-clamp-2">
-                                  {item?.name ?? "—"}
+                                  {productName}
                                 </p>
                                 <p className="text-[#333333] text-[14px] mt-1">
-                                  {item?.sku ?? ""}
+                                  {sku}
                                 </p>
 
                                 <div className="mt-2 flex items-center gap-2">
@@ -498,7 +495,7 @@ const Navbar: React.FC = () => {
                                   <span className="text-[#333333]">×</span>
                                   <span className="text-[#FD5430] text-[14px]">
                                     <ProductPrice
-                                      price={itemPrice}
+                                      price={price}
                                       // price={originalPrice}
                                       inline={true}
                                     />

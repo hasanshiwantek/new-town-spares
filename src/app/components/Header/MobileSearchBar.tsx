@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { globalSearch } from "@/redux/slices/homeSlice";
+import { getProductInfo, ProductInfoSource } from "@/utils/product";
 
 // Simple debounce helper
 const useDebounce = (value: string, delay = 500) => {
@@ -15,6 +16,42 @@ const useDebounce = (value: string, delay = 500) => {
   return debouncedValue;
 };
 
+const MobileSearchResultItem = ({
+  item,
+  onSelect,
+}: {
+  item: ProductInfoSource;
+  onSelect: (url: string) => void;
+}) => {
+  const { productName, sku, brandName, categoryUrl, price, costPrice } =
+    getProductInfo(item);
+  const displayPrice = price || costPrice;
+
+  return (
+    <div
+      onClick={() => onSelect(categoryUrl)}
+      className="
+            flex items-start gap-4 p-4 border-b border-gray/50
+            hover:bg-[var(--primary-color)] hover:text-white
+            transition-colors cursor-pointer
+          "
+    >
+      {/* Product Info */}
+      <div className="flex flex-col flex-grow overflow-hidden">
+        <p className="text-sm font-semibold truncate">
+          {brandName} | <span>SKU: {sku || "N/A"}</span>
+        </p>
+        <p className="text-[12px] font-medium leading-tight line-clamp-2">
+          {productName}
+        </p>
+        <p className="text-sm font-semibold mt-1">
+          ${displayPrice.toFixed(2)}
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const MobileSearchBar: React.FC = () => {
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -23,7 +60,7 @@ const MobileSearchBar: React.FC = () => {
 
   const { searchData, loading } = useAppSelector((state: any) => state.home);
 
-  const [results, setResults] = useState<any[]>([]);
+  const results: ProductInfoSource[] = searchData?.data ?? [];
   const containerRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounce(query, 500);
@@ -34,28 +71,9 @@ const MobileSearchBar: React.FC = () => {
       dispatch(globalSearch({ query: debouncedQuery }));
       setShowDropdown(true);
     } else {
-      setResults([]);
       setShowDropdown(false);
     }
   }, [debouncedQuery, dispatch]);
-
-  // Map API results into category URLs
-  useEffect(() => {
-    if (searchData?.data?.length) {
-      const mapped = searchData.data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        slug: item.categories?.[0]?.slug || item.slug,
-        brand: item.brand?.name || "N/A",
-        sku: item.sku || "N/A",
-        price: item.price || item.costPrice || "0.00",
-        url: `/category/${item.categories?.[0]?.slug || item.slug}`,
-      }));
-      setResults(mapped);
-    } else {
-      setResults([]);
-    }
-  }, [searchData]);
 
   // Show dropdown when results are loaded successfully
   useEffect(() => {
@@ -111,30 +129,12 @@ const MobileSearchBar: React.FC = () => {
           )}
 
           {!loading &&
-            results.map((item: any) => (
-              <div
+            results.map((item) => (
+              <MobileSearchResultItem
                 key={item.id}
-                onClick={() => handleSelect(item.url)}
-                className="
-            flex items-start gap-4 p-4 border-b border-gray/50
-            hover:bg-[var(--primary-color)] hover:text-white
-            transition-colors cursor-pointer
-          "
-              >
-                {/* Product Info */}
-                <div className="flex flex-col flex-grow overflow-hidden">
-                  <p className="text-sm font-semibold truncate">
-                    {item?.brand || "Brand"} |{" "}
-                    <span>SKU: {item?.sku || "N/A"}</span>
-                  </p>
-                  <p className="text-[12px] font-medium leading-tight line-clamp-2">
-                    {item?.name}
-                  </p>
-                  <p className="text-sm font-semibold mt-1">
-                    {item?.price ? `$${item?.price}` : "$0.00"}
-                  </p>
-                </div>
-              </div>
+                item={item}
+                onSelect={handleSelect}
+              />
             ))}
         </div>
       )}

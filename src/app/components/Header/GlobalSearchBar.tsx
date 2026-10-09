@@ -1,7 +1,7 @@
 "use client";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { isAvailableForSale } from "@/lib/utils";
 import { globalSearch } from "@/redux/slices/homeSlice";
+import { getProductInfo, ProductInfoSource } from "@/utils/product";
 import { setInStorage } from "@/utils/storage";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -19,6 +19,48 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
+const SearchResultItem = ({
+  item,
+  onSelect,
+}: {
+  item: ProductInfoSource;
+  onSelect: (url: string) => void;
+}) => {
+  const { productName, sku, productUrl, brandName, images, price, availableForSale } =
+    getProductInfo(item);
+  const displayPrice = availableForSale ? price : 0;
+
+  return (
+    <div
+      onClick={() => onSelect(productUrl)}
+      className="flex items-center px-4 py-2.5 border-b border-gray-200 last:border-b-0 hover:bg-(--primary-color) hover:**:text-white transition-colors cursor-pointer"
+      style={{ zIndex: 300 }}
+    >
+      {/* Product Info */}
+      <div className="flex items-center gap-4 min-w-0 w-full">
+        <div className="w-9 shrink-0 flex items-center justify-center">
+          {images[0] && (
+            <Image
+              src={images[0]}
+              alt={productName}
+              width={36}
+              height={36}
+              className="object-contain"
+            />
+          )}
+        </div>
+        <div className="text-[13px] leading-[19.5px] font-normal flex flex-col grow min-w-0">
+          <p className="truncate">
+            {brandName} | <span>SKU: {sku || "N/A"}</span>
+          </p>
+          <p className="line-clamp-2">{productName}</p>
+          <p className="text-[#FF482E]">${displayPrice.toFixed(2)}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
   const [query, setQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -27,10 +69,12 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
 
   const { searchData, loading } = useAppSelector((state: any) => state.home);
 
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ProductInfoSource[]>([]);
 
   // Cache state object for storing search results
-  const [searchCache, setSearchCache] = useState<{ [key: string]: any[] }>({});
+  const [searchCache, setSearchCache] = useState<{
+    [key: string]: ProductInfoSource[];
+  }>({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -59,22 +103,10 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
     }
   }, [debouncedQuery, dispatch]);
 
-  // Map API results into category URLs and store in cache
+  // Store API results in cache
   useEffect(() => {
     if (searchData?.data) {
-      const mapped = searchData.data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        slug: item.categories?.[0]?.slug || item.slug,
-        brand: item.brand?.name || "N/A",
-        sku: item.sku || "N/A",
-        price: isAvailableForSale(item.purchasabilityStatus, item.price)
-          ? item.price
-          : "0.00",
-        url: `/category/${item.categories?.[0]?.slug || item.slug}`,
-        productUrl: `${item?.productUrl}`,
-        imageUrl: item?.image[0]?.path,
-      }));
+      const mapped: ProductInfoSource[] = searchData.data;
 
       setResults(mapped);
 
@@ -229,38 +261,12 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
           )}
 
           {!loading &&
-            results.map((item: any) => (
-              <div
+            results.map((item) => (
+              <SearchResultItem
                 key={item.id}
-                onClick={() => handleSelect(item.productUrl)}
-                className="flex items-center px-4 py-2.5 border-b border-gray-200 last:border-b-0 hover:bg-(--primary-color) hover:**:text-white transition-colors cursor-pointer"
-                style={{ zIndex: 300 }}
-              >
-                {/* Product Info */}
-                <div className="flex items-center gap-4 min-w-0 w-full">
-                  <div className="w-9 shrink-0 flex items-center justify-center">
-                    {item?.imageUrl && (
-                      <Image
-                        src={item.imageUrl}
-                        alt={item?.name || "product image"}
-                        width={36}
-                        height={36}
-                        className="object-contain"
-                      />
-                    )}
-                  </div>
-                  <div className="text-[13px] leading-[19.5px] font-normal flex flex-col grow min-w-0">
-                    <p className="truncate">
-                      {item?.brand || "Brand"} |{" "}
-                      <span>SKU: {item?.sku || "N/A"}</span>
-                    </p>
-                    <p className="line-clamp-2">{item?.name}</p>
-                    <p className="text-[#FF482E]">
-                      {item?.price ? `$${item?.price}` : "$0.00"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                item={item}
+                onSelect={handleSelect}
+              />
             ))}
         </div>
       )}
