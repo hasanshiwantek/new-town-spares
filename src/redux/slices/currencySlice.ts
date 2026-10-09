@@ -18,16 +18,21 @@ const initialState: CurrencyState = {
   status: "idle",
 };
 
+// Only these currencies are offered in the store (in dropdown order)
+export const SUPPORTED_CURRENCIES = ["USD", "GBP"];
+
 // Fetch currencies from open.er-api.com
 export const fetchCurrencies = createAsyncThunk(
   "currency/fetchCurrencies",
   async () => {
     const res = await axios.get("https://open.er-api.com/v6/latest/USD");
     const rates = res.data.rates;
-    return Object.keys(rates).map((code) => ({
-      code,
-      rate: rates[code],
-    }));
+    return SUPPORTED_CURRENCIES.filter((code) => rates[code] != null).map(
+      (code) => ({
+        code,
+        rate: rates[code],
+      }),
+    );
   }
 );
 
@@ -36,6 +41,7 @@ const currencySlice = createSlice({
   initialState,
   reducers: {
     setSelectedCurrency(state, action: PayloadAction<string>) {
+      if (!SUPPORTED_CURRENCIES.includes(action.payload)) return;
       state.selectedCurrency = action.payload;
     },
   },
@@ -47,6 +53,10 @@ const currencySlice = createSlice({
       .addCase(fetchCurrencies.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.currencies = action.payload;
+        // reset a previously saved currency that is no longer offered
+        if (!SUPPORTED_CURRENCIES.includes(state.selectedCurrency)) {
+          state.selectedCurrency = "USD";
+        }
       })
       .addCase(fetchCurrencies.rejected, (state) => {
         state.status = "failed";
