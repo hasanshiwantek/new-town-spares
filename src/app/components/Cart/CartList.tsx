@@ -20,6 +20,7 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import CartLoadingOverlay from "./CartLoadingOverlay";
+import CartListSkeleton from "./CartListSkeleton";
 
 import {
   removeShippingRate,
@@ -117,6 +118,7 @@ const CartList = () => {
   };
 
   const isEmpty = !cart?.length;
+  const isInitialLoading = loading || cartLoading;
 
   // Shared qty <input> so mobile + desktop stay identical in behaviour.
   const qtyInput = (item: any) => (
@@ -151,7 +153,7 @@ const CartList = () => {
   );
 
   return (
-    <div
+    <div 
       className={
         isEmpty
           ? "w-full border border-[#D6D6D6] 2xl:w-full p-7 flex items-center min-h-[259px]"
@@ -168,129 +170,151 @@ const CartList = () => {
         </div>
       )}
 
-      {cart?.length > 0 ? (
-        <div className="relative">
-          {cart.map((item, idx) => (
-            <div key={item?.id}>
-              <div
-                className={
-                  idx === cart.length - 1 ? "" : "border-b border-[#ebebeb]"
-                }
-              >
-                <div className="min-[801px]:hidden py-4">
-                  <Image
-                    width={98}
-                    height={105}
-                    src={item.image?.[0]?.path || ""}
-                    alt={item.name}
-                    className="float-left w-[112px] min-[551px]:w-[167px] h-auto object-contain mr-5"
-                  />
-                  <p className="text-[14px] text-[#959595]">
-                    {item.brand?.name || "—"}
-                  </p>
-                  <Link href={`${item?.productUrl || "#"}`}>
-                    <p className="text-[15px] leading-[18px] text-[#333333] break-words">
-                      {item.name}
-                    </p>
-                  </Link>
+{isInitialLoading ? (
+  <CartListSkeleton />
+) : cart?.length > 0 ? (
+  <div className="relative">
+    {cart.map((item, idx) => (
+      <div key={item?.id}>
+        <div
+          className={
+            idx === cart.length - 1 ? "" : "border-b border-[#ebebeb]"
+          }
+        >
+          {/* Mobile Layout */}
+          <div className="min-[801px]:hidden py-4">
+            <Image
+              width={98}
+              height={105}
+              src={item.image?.[0]?.path || ""}
+              alt={item.name}
+              className="float-left w-[112px] min-[551px]:w-[167px] h-auto object-contain mr-5"
+            />
 
-                  <div className="clear-both pt-4">
-                    <div className="flex items-center gap-3 py-1">
-                      <span className="min-w-[90px] text-[14px] font-bold text-[#333333]">
-                        SKU
-                      </span>
-                      <span className="text-[14px] text-[#333333]">
-                        {item.sku || "N/A"}
-                      </span>
-                    </div>
+            <p className="text-[14px] text-[#959595]">
+              {item.brand?.name || "—"}
+            </p>
 
-                    <div className="grid grid-cols-1 min-[551px]:grid-cols-3 gap-y-1">
-                      <div className="flex items-center gap-3 py-1">
-                        <span className="min-w-[90px] min-[551px]:min-w-0 text-[14px] font-bold text-[#333333]">
-                          Price
-                        </span>
-                        <span className="text-[14px] text-[#333333]">
-                          <ProductPrice price={item.price} inline={true} />
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 py-1">
-                        <span className="min-w-[90px] min-[551px]:min-w-0 text-[14px] font-bold text-[#333333]">
-                          Quantity
-                        </span>
-                        {qtyInput(item)}
-                      </div>
-                      <div className="flex items-center gap-3 py-1">
-                        <span className="min-w-[90px] min-[551px]:min-w-0 text-[14px] font-bold text-[#333333]">
-                          Total
-                        </span>
-                        <strong className="text-[14px] font-bold text-[#333333]">
-                          <ProductPrice
-                            price={Number(item?.price * item?.quantity)}
-                            inline={true}
-                          />
-                        </strong>
-                        {removeButton(item)}
-                      </div>
-                    </div>
-                  </div>
+            <Link href={`${item?.productUrl || "#"}`}>
+              <p className="text-[15px] leading-[18px] text-[#333333] break-words">
+                {item.name}
+              </p>
+            </Link>
+
+            <div className="clear-both pt-4">
+              <div className="flex items-center gap-3 py-1">
+                <span className="min-w-[90px] text-[14px] font-bold text-[#333333]">
+                  SKU
+                </span>
+                <span className="text-[14px] text-[#333333]">
+                  {item.sku || "N/A"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 min-[551px]:grid-cols-3 gap-y-1">
+                <div className="flex items-center gap-3 py-1">
+                  <span className="min-w-[90px] min-[551px]:min-w-0 text-[14px] font-bold text-[#333333]">
+                    Price
+                  </span>
+                  <span className="text-[14px] text-[#333333]">
+                    <ProductPrice price={item.price} inline={true} />
+                  </span>
                 </div>
 
-                <div className="hidden min-[801px]:grid grid-cols-[1fr_12%_15%_15%_15%] items-center pt-[11px] pb-[21px]">
-                  <div className="flex items-center gap-[21px] pr-[21px] min-w-0">
-                    <Image
-                      width={98}
-                      height={105}
-                      src={item.image?.[0]?.path || ""}
-                      alt={item.name}
-                      className="w-[21%] h-auto shrink-0 object-contain"
+                <div className="flex items-center gap-3 py-1">
+                  <span className="min-w-[90px] min-[551px]:min-w-0 text-[14px] font-bold text-[#333333]">
+                    Quantity
+                  </span>
+                  {qtyInput(item)}
+                </div>
+
+                <div className="flex items-center gap-3 py-1">
+                  <span className="min-w-[90px] min-[551px]:min-w-0 text-[14px] font-bold text-[#333333]">
+                    Total
+                  </span>
+
+                  <strong className="text-[14px] font-bold text-[#333333]">
+                    <ProductPrice
+                      price={Number(item?.price * item?.quantity)}
+                      inline={true}
                     />
-                    <div className="min-w-0">
-                      <p className="text-[14px] leading-[21px] text-[#959595]">
-                        {item.brand?.name || "—"}
-                      </p>
-                      <Link href={`${item?.productUrl || "#"}`}>
-                        <p className="text-[15px] leading-[18px] text-[#333333] break-words">
-                          {item.name}
-                        </p>
-                      </Link>
-                    </div>
-                  </div>
+                  </strong>
 
-                  <p className="text-[14px] text-[#333333]">
-                    {item.sku || "N/A"}
-                  </p>
-                  <p className="text-[14px] text-[#333333] text-right pr-[11px]">
-                    <ProductPrice price={Number(item.price)} inline={true} />
-                  </p>
-                  <div className="flex justify-center">{qtyInput(item)}</div>
-
-                  <div className="flex items-center justify-end gap-[14px]">
-                    <strong className="text-[14px] font-bold text-[#333333]">
-                      <ProductPrice
-                        price={Number(item.price * item.quantity)}
-                        inline={true}
-                      />
-                    </strong>
-                    {removeButton(item)}
-                  </div>
+                  {removeButton(item)}
                 </div>
               </div>
             </div>
-          ))}
-          {(loading || cartLoading || updatingQty) && <CartLoadingOverlay />}
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden min-[801px]:grid grid-cols-[1fr_12%_15%_15%_15%] items-center pt-[11px] pb-[21px]">
+            <div className="flex items-center gap-[21px] pr-[21px] min-w-0">
+              <Image
+                width={98}
+                height={105}
+                src={item.image?.[0]?.path || ""}
+                alt={item.name}
+                className="w-[21%] h-auto shrink-0 object-contain"
+              />
+
+              <div className="min-w-0">
+                <p className="text-[14px] leading-[21px] text-[#959595]">
+                  {item.brand?.name || "—"}
+                </p>
+
+                <Link href={`${item?.productUrl || "#"}`}>
+                  <p className="text-[15px] leading-[18px] text-[#333333] break-words">
+                    {item.name}
+                  </p>
+                </Link>
+              </div>
+            </div>
+
+            <p className="text-[14px] text-[#333333]">
+              {item.sku || "N/A"}
+            </p>
+
+            <p className="text-[14px] text-[#333333] text-right pr-[11px]">
+              <ProductPrice price={Number(item.price)} inline={true} />
+            </p>
+
+            <div className="flex justify-center">
+              {qtyInput(item)}
+            </div>
+
+            <div className="flex items-center justify-end gap-[14px]">
+              <strong className="text-[14px] font-bold text-[#333333]">
+                <ProductPrice
+                  price={Number(item.price * item.quantity)}
+                  inline={true}
+                />
+              </strong>
+
+              {removeButton(item)}
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center text-center w-full">
-          <p className="font-normal text-[22px] text-[#333333] leading-none mb-[11px]">
-            Your cart is empty
-          </p>
-          <Link href="/products">
-            <button className="h-[40px] px-4 md:px-12 rounded-md bg-[#FF4F2F] hover:bg-[#F15939] transition text-white text-[14px] font-light">
-              Click here to continue shopping
-            </button>
-          </Link>
-        </div>
-      )}
+      </div>
+    ))}
+
+    {(loading || cartLoading || updatingQty) && (
+      <CartLoadingOverlay />
+    )}
+  </div>
+) : (
+  <div className="flex flex-col items-center justify-center text-center w-full">
+    <p className="font-normal text-[22px] text-[#333333] leading-none mb-[11px]">
+      Your cart is empty
+    </p>
+
+    <Link href="/products">
+      <button className="h-[40px] px-4 md:px-12 rounded-md bg-[#FF4F2F] hover:bg-[#F15939] transition text-white text-[14px] font-light">
+        Click here to continue shopping
+      </button>
+    </Link>
+  </div>
+)}
+```
 
       {!isEmpty && (
         <div className="flex justify-end items-center">
