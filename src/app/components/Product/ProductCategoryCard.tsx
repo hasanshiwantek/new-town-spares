@@ -1,17 +1,12 @@
 "use client";
 
-import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import {
-  clampQty,
-  getMinQty,
-  getQtyError,
-  isAvailableForSale,
-} from "@/lib/utils";
+import { clampQty, getQtyError } from "@/lib/utils";
 import { addCart, fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { REGEX } from "@/regex/regex";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getProductInfo } from "@/utils/product";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -45,12 +40,24 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
-  const callForPricingPhone = product?.callForPricingPhone;
-  const availableForSale = isAvailableForSale(
-    product?.purchasabilityStatus,
-    product?.price,
-  );
-  const minQty = getMinQty(product);
+  const {
+    id,
+    productName,
+    sku,
+    productUrl,
+    hasBrand,
+    brandName,
+    imageSrc,
+    price,
+    msrp,
+    hasMsrp,
+    callForPricingTel,
+    availableForSale,
+    disabledAddToCart,
+    stockStatusText,
+    minQty,
+    maxQty,
+  } = getProductInfo(product);
   const [quantity, setQuantity] = useState<number | string>(minQty);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,31 +67,18 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
     }
   };
 
-  const currentStockEqualent = Number(product?.currentStock) === 0;
-  const allowPurchase = !product?.allowPurchase;
-  const disabledAddToCart = currentStockEqualent || allowPurchase;
-  const imageUrl = product.image?.[0]?.path || "/default-product-image.svg";
-  const brandName = product.brand?.name ?? "";
-  const hasOriginalPrice = product?.msrp != null && Number(product.msrp) > 0;
-  const originalPrice = Number(product.msrp);
-  const salePrice = Number(product.price);
-  const availabilityText = currentStockEqualent
-    ? "Out of Stock"
-    : product?.availabilityText
-      ? product?.availabilityText
-      : "In Stock";
 
   return (
     <div className="bg-white shadow-[0_0_1px_0_rgba(51,51,51,0.5)] grid gap-4 items-start w-full transition-all duration-300 grid-cols-1 sm:grid-cols-[150px_minmax(0,1fr)_180px] p-[21px]">
       {/* Product Image (Left) */}
       <div className="flex items-center justify-center shrink-0 mx-auto w-full max-w-[150px] aspect-square">
         <Link
-          href={`${product?.productUrl}`}
+          href={productUrl}
           className="flex items-center justify-center w-full h-full"
         >
           <Image
-            src={imageUrl}
-            alt={product?.name ?? ""}
+            src={imageSrc}
+            alt={productName}
             width={150}
             height={150}
             className="object-contain w-full h-full"
@@ -95,21 +89,21 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       {/* Product Details (Center) */}
       <div className="flex flex-col justify-center gap-1 text-left w-full min-w-0 sm:mt-6">
         <div className="flex flex-wrap items-baseline gap-1">
-          {brandName && (
+          {hasBrand && (
             <span className="font-bold text-[#333333] text-[14px]">
               {brandName}
             </span>
           )}
           <span className="text-[#333333] text-[13px]">
-            SKU: {product?.sku ?? "—"}
+            SKU: {sku || "—"}
           </span>
         </div>
         <Link
-          href={`${product?.productUrl}`}
+          href={productUrl}
           className="cursor-pointer group mt-1"
         >
           <p className="text-[#333333] text-[15px] leading-snug line-clamp-3 group-hover:text-[#FD5430] transition-colors">
-            {product?.name ?? "—"}
+            {productName}
           </p>
         </Link>
       </div>
@@ -119,11 +113,11 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
         <div className="flex flex-col items-start w-full max-w-[200px]">
           {availableForSale ? (
             <>
-              {hasOriginalPrice && (
+              {hasMsrp && (
                 <p className="text-[#333333] text-[14px] inline">
                   Price:{" "}
                   <ProductPrice
-                    price={originalPrice}
+                    price={msrp}
                     inline
                     className="text-[#333333] !text-[14px]"
                   />
@@ -131,7 +125,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
               )}
               <p className="text-[#FD5430]">
                 <ProductPrice
-                  price={salePrice}
+                  price={price}
                   inline
                   className="text-[#FD5430] !font-normal !text-[20px]"
                 />
@@ -140,7 +134,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
           ) : (
             // Call-for-price products: no prices, the CTA takes their place.
             <Link
-              href={`tel:${callForPricingPhone?.trim() || CONTACT_INFO.phone.number}`}
+              href={callForPricingTel}
               className=" py-[6px] px-[20px] bg-[#F15939] hover:bg-[#e04d2e] text-white font-light text-[18px] tracking-wide transition-colors"
             >
               CALL FOR PRICE
@@ -148,7 +142,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
           )}
           <div className="w-full border-t border-gray-200 my-2" />
           <p className="text-[#333333] text-[14px] w-full text-left mb-2">
-            {availabilityText}
+            {stockStatusText}
           </p>
           {availableForSale && (
             <div className="w-full flex items-center">
@@ -169,9 +163,8 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                       return;
                     }
                     const cartItem = cart.find(
-                      (item: any) => item.id === product.id,
+                      (item: any) => item.id === id,
                     );
-                    const maxQty = product.maxPurchaseQuantity;
                     const currentQty = cartItem?.quantity || 0;
                     const remaining = maxQty ? maxQty - currentQty : Infinity;
                     if (remaining <= 0) {
@@ -191,14 +184,14 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
                     dispatch(
                       addCart({
                         data: {
-                          productId: product?.id,
+                          productId: id,
                           quantity: clampQty(quantity, product),
                         },
                       }),
                     )
                       .unwrap()
                       .then(() => {
-                        successMessage(`${product.name} added to cart!`);
+                        successMessage(`${productName} added to cart!`);
                         dispatch(fetchCartList());
                         // router.push("/cart");
                       });
@@ -217,15 +210,7 @@ export default function ProductCategoryCard({ product }: { product: Product }) {
       <BulkInquiryModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={
-          product
-            ? {
-                name: product.name,
-                image: product.image?.[0]?.path,
-                sku: product.sku ?? "",
-              }
-            : undefined
-        }
+        product={{ name: productName, image: imageSrc, sku }}
       />
     </div>
   );

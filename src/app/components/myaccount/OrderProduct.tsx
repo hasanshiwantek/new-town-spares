@@ -5,9 +5,9 @@ import { RootState } from "@/redux/store";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import ProductPrice from "../productprice/ProductPrice";
 import AccountEmptyState from "./AccountEmptyState";
 import ReturnItemsModal from "./ReturnItemsModal"; // Import modal
-import ProductPrice from "../productprice/ProductPrice";
 
 const OrderProduct = () => {
   const dispatch = useAppDispatch();
@@ -101,11 +101,14 @@ const OrderProduct = () => {
                     <span className={labelClass}>Order Placed</span>
                     <span className={valueClass}>
                       {item?.created_at
-                        ? new Date(item.created_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
+                        ? new Date(item.created_at).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )
                         : "-"}
                     </span>
                   </div>
@@ -151,6 +154,14 @@ const OrderProduct = () => {
                       >
                         Invoice
                       </button>
+                      {item?.status === "Completed" && (
+                        <button
+                          onClick={(e) => handleReturnClick(e, item)}
+                          className="border-l border-[#ebebeb] pl-[5px] ml-[3px] hover:text-[#FF482E]"
+                        >
+                          Return Items?
+                        </button>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -198,6 +209,7 @@ const OrderProduct = () => {
           onClose={handleCloseModal}
           orderId={selectedOrder?.order_number || null}
           isSubmit={selectedOrder?.returnRequest?.isSubmit}
+          onSuccess={() => dispatch(fetchAccountOrders())}
         />
       )}
     </>

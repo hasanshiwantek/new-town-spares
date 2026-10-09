@@ -9,13 +9,10 @@ import {
   updateCart,
   updateQty,
 } from "@/redux/slices/cartsSlice";
-import {
-  clampQty,
-  getMinQty,
-  getQtyError,
-} from "@/lib/utils";
+import { clampQty, getQtyError } from "@/lib/utils";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getProductInfo } from "@/utils/product";
 import { X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -117,21 +114,17 @@ export default function WishlistCartSidebar() {
         {(loading || cartLoading) && <CartLoadingOverlay />}
         <div className="max-h-[390px] overflow-y-auto">
           {cart.map((item: any) => {
-            const imageUrl =
-              item?.image?.[0]?.path ||
-              item?.image?.path ||
-              item?.image ||
-              "/default-product-image.svg";
-            const itemPrice = Number(item?.price || 0);
+            const { productName, sku, productUrl, imageSrc, price, minQty } =
+              getProductInfo(item);
             return (
               <div key={item.id} className="py-[14px] flex gap-[14px]">
                 <Link
-                  href={item?.productUrl || "#"}
+                  href={productUrl}
                   className="shrink-0 relative w-[54px] h-[45px] block"
                 >
                   <Image
-                    src={imageUrl}
-                    alt={item?.name ?? ""}
+                    src={imageSrc}
+                    alt={productName}
                     width={54}
                     height={45}
                     className="object-contain w-[54px] h-[45px]"
@@ -139,19 +132,19 @@ export default function WishlistCartSidebar() {
                 </Link>
 
                 <div className="flex-1 min-w-0">
-                  <Link href={item?.productUrl || "#"}>
+                  <Link href={productUrl}>
                     <p className="text-[#333333] text-[14px] leading-[16.8px] line-clamp-2 hover:text-[#ff482e]">
-                      {item?.name ?? "—"}
+                      {productName}
                     </p>
                   </Link>
                   <p className="text-[#333333] text-[14px] leading-[21px] mt-[4px]">
-                    {item?.sku ?? ""}
+                    {sku}
                   </p>
 
                   <div className="mt-[7px] flex items-center gap-[7px]">
                     <input
                       type="number"
-                      min={getMinQty(item)}
+                      min={minQty}
                       value={quantities[item.cartItemId] ?? item.quantity}
                       onFocus={(e) => e.target.select()}
                       onChange={(e) =>
@@ -171,7 +164,7 @@ export default function WishlistCartSidebar() {
                       ×
                     </span>
                     <span className="text-[#ff482e] text-[14px] leading-[21px]">
-                      ${itemPrice.toFixed(2)}
+                      ${price.toFixed(2)}
                     </span>
                     <div className="flex-1" />
                     <button
