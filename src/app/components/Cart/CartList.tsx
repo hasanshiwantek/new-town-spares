@@ -11,6 +11,7 @@ import {
   clampQty,
   getMinQty,
   getQtyError,
+  replaceNullWithPlaceholder,
 } from "@/lib/utils";
 import { errorMessage } from "@/utils/message";
 import { RootState } from "@/redux/store";
@@ -192,12 +193,12 @@ const CartList = () => {
             />
 
             <p className="text-[14px] text-[#959595]">
-              {item.brand?.name || "—"}
+              {replaceNullWithPlaceholder(item.brand?.name, "—")}
             </p>
 
             <Link href={`${item?.productUrl || "#"}`}>
               <p className="text-[15px] leading-[18px] text-[#333333] break-words">
-                {item.name}
+                {replaceNullWithPlaceholder(item.name, "N/A")}
               </p>
             </Link>
 
@@ -207,7 +208,7 @@ const CartList = () => {
                   SKU
                 </span>
                 <span className="text-[14px] text-[#333333]">
-                  {item.sku || "N/A"}
+                 {replaceNullWithPlaceholder(item.sku, "N/A")}
                 </span>
               </div>
 
@@ -259,19 +260,19 @@ const CartList = () => {
 
               <div className="min-w-0">
                 <p className="text-[14px] leading-[21px] text-[#959595]">
-                  {item.brand?.name || "—"}
+                {replaceNullWithPlaceholder(item.brand?.name, "—")}
                 </p>
 
                 <Link href={`${item?.productUrl || "#"}`}>
                   <p className="text-[15px] leading-[18px] text-[#333333] break-words">
-                    {item.name}
+                    {replaceNullWithPlaceholder(item.name, "N/A")}
                   </p>
                 </Link>
               </div>
             </div>
 
             <p className="text-[14px] text-[#333333]">
-              {item.sku || "N/A"}
+              {replaceNullWithPlaceholder(item.sku, "N/A")}
             </p>
 
             <p className="text-[14px] text-[#333333] text-right pr-[11px]">
