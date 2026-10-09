@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import React, { useState } from "react";
+import ChargeCurrencyNote from "../productprice/ChargeCurrencyNote";
 import ProductPrice from "../productprice/ProductPrice";
 
 interface OrderSummaryProps {
@@ -240,6 +241,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
             <ProductPrice price={finalTotal} inline={true} />
           </span>
         </div>
+        <ChargeCurrencyNote usdTotal={finalTotal} />
       </div>
     </div>
   );

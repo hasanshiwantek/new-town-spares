@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import {
   Dialog,
   DialogContent,
@@ -533,6 +534,7 @@ const MultiAddressShipping = ({
   onContinue,
 }: any) => {
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
 
   // ✅ Redux state
   const {
@@ -1034,8 +1036,8 @@ const MultiAddressShipping = ({
                                       rate.service_type,
                                     )
                                     ? "Free"
-                                    : "$0.00"
-                                  : `$${Number(rate.total_charge).toFixed(2)}`}
+                                    : formatPrice(0)
+                                  : formatPrice(rate.total_charge)}
                               </span>
                             </label>
                           ))}

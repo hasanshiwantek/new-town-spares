@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -29,6 +30,7 @@ export default function WishlistCartSidebar() {
   );
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const { skuInput, setSkuInput, qty, setQty } = useAddProductBySku();
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
@@ -164,7 +166,7 @@ export default function WishlistCartSidebar() {
                       ×
                     </span>
                     <span className="text-[#ff482e] text-[14px] leading-[21px]">
-                      ${price.toFixed(2)}
+                      {formatPrice(price)}
                     </span>
                     <div className="flex-1" />
                     <button
@@ -223,11 +225,11 @@ export default function WishlistCartSidebar() {
         </div>
         <div className="flex justify-between py-[7px]">
           <span>Subtotal:</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
         <div className="flex justify-between py-[7px]">
           <span>Grand total:</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>{formatPrice(subtotal)}</span>
         </div>
       </div>
 

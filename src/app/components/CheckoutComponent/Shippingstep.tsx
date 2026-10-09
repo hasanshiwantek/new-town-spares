@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -44,8 +45,6 @@ const rateRowCls = (selected: boolean, enabled: boolean) =>
 const rateRadioCls =
   "appearance-none shrink-0 w-[24px] h-[24px] rounded-full border border-[#d9d9d9] bg-white checked:border-2 checked:border-[#FF482E] checked:bg-[#FF482E] checked:shadow-[inset_0_0_0_4px_#fff]";
   
-const formatRatePrice = (charge: number | string) =>
-  `$${Number(charge || 0).toFixed(2)}`;
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
@@ -205,6 +204,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   );
 
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
   const shippingCostLoading = useAppSelector(
@@ -451,7 +451,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <div className="mt-1">
                       <p className="text-xs text-gray-600">{rateLabel}</p>
                       <p className="text-xs text-gray-600 ml-2">
-                        {ratePrice === 0 ? "$0.00" : `$${ratePrice.toFixed(2)}`}
+                        {formatPrice(ratePrice)}
                       </p>
                     </div>
                   )} */}
@@ -501,7 +501,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               <span className="ml-3">
                 {Number(selectedRate.total_charge) === 0
                   ? "Free"
-                  : `$${Number(selectedRate.total_charge).toFixed(2)}`}
+                  : formatPrice(selectedRate.total_charge)}
               </span>
             </p>
           )}
@@ -1081,7 +1081,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         {productShippingRate.display_name}
                       </span>
                       <span className="text-[15px] text-[#333333] shrink-0">
-                        {formatRatePrice(productShippingRate.total_charge)}
+                        {formatPrice(productShippingRate.total_charge)}
                       </span>
                     </div>
                   </label>
@@ -1154,7 +1154,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             </p>
                           </div>
                           <span className="text-[15px] text-[#333333] shrink-0">
-                            {formatRatePrice(rate.total_charge)}
+                            {formatPrice(rate.total_charge)}
                           </span>
                         </div>
                       </label>

@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { globalSearch } from "@/redux/slices/homeSlice";
 import { getProductInfo, ProductInfoSource } from "@/utils/product";
@@ -29,6 +30,7 @@ const SearchResultItem = ({
   const { productName, sku, productUrl, brandName, images, price, availableForSale } =
     getProductInfo(item);
   const displayPrice = availableForSale ? price : 0;
+  const formatPrice = useFormatPrice();
 
   return (
     <div
@@ -54,7 +56,7 @@ const SearchResultItem = ({
             {brandName} | <span>SKU: {sku || "N/A"}</span>
           </p>
           <p className="line-clamp-2">{productName}</p>
-          <p className="text-[#FF482E]">${displayPrice.toFixed(2)}</p>
+          <p className="text-[#FF482E]">{formatPrice(displayPrice)}</p>
         </div>
       </div>
     </div>

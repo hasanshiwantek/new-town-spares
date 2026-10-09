@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import React, { useState, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ const MobileSearchResultItem = ({
   const { productName, sku, brandName, categoryUrl, price, costPrice } =
     getProductInfo(item);
   const displayPrice = price || costPrice;
+  const formatPrice = useFormatPrice();
 
   return (
     <div
@@ -45,7 +47,7 @@ const MobileSearchResultItem = ({
           {productName}
         </p>
         <p className="text-sm font-semibold mt-1">
-          ${displayPrice.toFixed(2)}
+          {formatPrice(displayPrice)}
         </p>
       </div>
     </div>

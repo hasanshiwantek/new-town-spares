@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { clearLastOrder } from "@/redux/slices/orderslice";
@@ -9,6 +10,7 @@ import Image from "next/image";
 export default function OrderSuccessPage() {
   const order = useAppSelector((state) => state.order.lastOrder);
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const [localOrder] = useState(order); // ✅ copy to local state
 
   if (!localOrder) {
@@ -142,27 +144,27 @@ export default function OrderSuccessPage() {
                   <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-gray-900">${item.price.toFixed(2)}</p>
+                  <p className="font-semibold text-gray-900">{formatPrice(item.price)}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="space-y-3 border-t border-gray-200 pt-6">
-            <div className="flex justify-between text-gray-600"><span>Sub Total</span><span>${orderData.subTotal.toFixed(2)}</span></div>
-            <div className="flex justify-between text-gray-600"><span>Shipping</span><span>${orderData.shipping.toFixed(2)}</span></div>
-            <div className="flex justify-between text-gray-600"><span>Tax</span><span>${orderData.tax.toFixed(2)}</span></div>
+            <div className="flex justify-between text-gray-600"><span>Sub Total</span><span>{formatPrice(orderData.subTotal)}</span></div>
+            <div className="flex justify-between text-gray-600"><span>Shipping</span><span>{formatPrice(orderData.shipping)}</span></div>
+            <div className="flex justify-between text-gray-600"><span>Tax</span><span>{formatPrice(orderData.tax)}</span></div>
           </div>
 
           <div className="flex justify-between text-xl font-bold text-gray-900 border-t-2 border-gray-300 pt-4">
             <span>Order Total</span>
-            <span>${orderData?.discountAmount ? (orderData.discountAmount).toFixed(2) : orderData.total.toFixed(2)}</span>
+            <span>{formatPrice(orderData?.discountAmount ? orderData.discountAmount : orderData.total)}</span>
           </div>
         {orderData?.discountAmount > 0 && (
           <div className="flex justify-between text-xl font-bold text-gray-900 border-t-2 border-gray-300 pt-4">
             <span>Total Discount</span>
             <span>
-              -${(Number(orderData.subTotal) -Number(orderData.discountAmount)).toFixed(2)}
+              -{formatPrice(Number(orderData.subTotal) - Number(orderData.discountAmount))}
             </span>
           </div>
         )}

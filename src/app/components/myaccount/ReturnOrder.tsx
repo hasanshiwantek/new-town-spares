@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
@@ -7,6 +8,7 @@ import AccountEmptyState from "./AccountEmptyState";
 
 const ReturnOrder = () => {
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,13 +118,13 @@ const ReturnOrder = () => {
               {/* </Link> */}
               <p className="text-sm md:text-[14px]">
                 {order?.product?.length || 0} product
-                {order?.product?.length > 1 ? "s" : ""} totaling $
-                {(
+                {order?.product?.length > 1 ? "s" : ""} totaling{" "}
+                {formatPrice(
                   order?.product?.reduce(
                     (total: any, item: any) => total + Number(item?.price || 0),
                     0,
-                  ) || 0
-                ).toFixed(2)}
+                  ) || 0,
+                )}
               </p>
 
               {/* Return Info */}

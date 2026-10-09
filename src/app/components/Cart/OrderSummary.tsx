@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
@@ -36,6 +37,7 @@ import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const router = useRouter();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const {
@@ -453,7 +455,7 @@ const OrderSummary = () => {
                             <div className=" font-bold flex-shrink-0">
                               {rate.total_charge === 0
                                 ? "Free"
-                                : `$${Number(rate.total_charge).toFixed(2)}`}
+                                : formatPrice(rate.total_charge)}
                             </div>
                           </div>
                         </label>

@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAlert } from "@/hooks/useAlert";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
@@ -82,6 +83,7 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
   }>({});
 
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -298,7 +300,7 @@ const ReturnItemsModal: React.FC<ReturnItemsModalProps> = ({
                           <span className="min-[801px]:hidden text-[13px]">
                             Price
                           </span>
-                          <span>${Number(item.price).toFixed(2)}</span>
+                          <span>{formatPrice(item.price)}</span>
                         </div>
 
                         <div className="min-[801px]:col-span-3 p-[11px] pt-0 min-[801px]:pt-[11px] flex justify-between items-center min-[801px]:justify-end">

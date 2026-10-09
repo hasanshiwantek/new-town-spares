@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { errorMessage, successMessage } from "@/utils/message";
 import { Files } from "lucide-react";
 import Image from "next/image";
@@ -94,37 +95,41 @@ const PriceAndActions = ({
 }: {
   item: WishlistItem;
   align: "left" | "right";
-}) => (
-  <div
-    className={`flex h-full flex-col ${
-      align === "right" ? "text-left min-[801px]:text-right" : "text-left"
-    }`}
-  >
-    <div className="pb-[11px]">
-      <div className="text-[14px] leading-[21px] text-[#333333]">
-        Price: ${item.wasPrice.toFixed(2)}
-      </div>
-      <span className="block text-[20px] leading-[20px] font-light text-[#ff482e]">
-        ${item.nowPrice.toFixed(2)}
-      </span>
-    </div>
+}) => {
+  const formatPrice = useFormatPrice();
 
-    <div className="border-t-[0.667px] border-[#ebebeb] pt-[22px]">
-      <Link
-        href={item.href}
-        className="block w-full text-center bg-[#ff482e] hover:bg-[#e63e26] text-white text-[14px] leading-[14px] font-light py-[14px] px-[11px] rounded-[4px] mb-[11px] transition-colors"
-      >
-        Choose Options
-      </Link>
-      <button
-        type="button"
-        className="block w-full text-center bg-white hover:!border-[#F15939] text-[#333333] text-[14px] leading-[14px] font-light py-[14px] px-[32px] border-[0.667px] border-[#ebebeb] rounded-[4px] transition-colors"
-      >
-        Remove Item
-      </button>
+  return (
+    <div
+      className={`flex h-full flex-col ${
+        align === "right" ? "text-left min-[801px]:text-right" : "text-left"
+      }`}
+    >
+      <div className="pb-[11px]">
+        <div className="text-[14px] leading-[21px] text-[#333333]">
+          Price: {formatPrice(item.wasPrice)}
+        </div>
+        <span className="block text-[20px] leading-[20px] font-light text-[#ff482e]">
+          {formatPrice(item.nowPrice)}
+        </span>
+      </div>
+
+      <div className="border-t-[0.667px] border-[#ebebeb] pt-[22px]">
+        <Link
+          href={item.href}
+          className="block w-full text-center bg-[#ff482e] hover:bg-[#e63e26] text-white text-[14px] leading-[14px] font-light py-[14px] px-[11px] rounded-[4px] mb-[11px] transition-colors"
+        >
+          Choose Options
+        </Link>
+        <button
+          type="button"
+          className="block w-full text-center bg-white hover:!border-[#F15939] text-[#333333] text-[14px] leading-[14px] font-light py-[14px] px-[32px] border-[0.667px] border-[#ebebeb] rounded-[4px] transition-colors"
+        >
+          Remove Item
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const WishlistRow = ({ item }: { item: WishlistItem }) => (
   <article

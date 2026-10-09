@@ -1,15 +1,15 @@
 "use client";
 
+import { useFormatPrice } from "@/hooks/useFormatPrice";
+import { useAppDispatch } from "@/hooks/useReduxHooks";
+import axiosInstance from "@/lib/axiosInstance";
+import { fetchOrderDetails } from "@/redux/slices/cartsSlice";
+import { errorMessage } from "@/utils/message";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { fetchOrderDetails } from "@/redux/slices/cartsSlice";
-import { useReactToPrint } from "react-to-print";
-import { Invoice } from "./helpers/OrderDetails";
 import ProductPrice from "../productprice/ProductPrice";
-import { errorMessage } from "@/utils/message";
-import axiosInstance from "@/lib/axiosInstance";
+import { Invoice } from "./helpers/OrderDetails";
 interface OrderData {
   id: number;
   orderNumber: string;
@@ -70,6 +70,7 @@ const SingleOrder = () => {
   const params = useParams();
   const orderNumber = params?.slug as string;
   const dispatch = useAppDispatch();
+  const formatPrice = useFormatPrice();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -221,7 +222,7 @@ const SingleOrder = () => {
             </div>
             <div className="clear-both">
               <dt className="float-left mr-[5px]">Order total:</dt>
-              <dd className="m-0">${total.toFixed(2)}</dd>
+              <dd className="m-0">{formatPrice(total)}</dd>
             </div>
           </dl>
         </section>
@@ -365,20 +366,18 @@ const SingleOrder = () => {
               </span>
             </div>
           )}
-       {coupon?.couponCode && (
-  <div className={`${summaryRow} relative`}>
-  <span className="pr-[70px]">
-    Coupon Code:
-    <span className="text-[10px]">
-      ({coupon?.couponCode})
-    </span>
-  </span>
+          {coupon?.couponCode && (
+            <div className={`${summaryRow} relative`}>
+              <span className="pr-[70px]">
+                Coupon Code:
+                <span className="text-[10px]">({coupon?.couponCode})</span>
+              </span>
 
-  <span className="absolute right-0 top-0">
-    -<ProductPrice price={coupon?.discountAmount} inline={true} />
-  </span>
-</div>
-)}
+              <span className="absolute right-0 top-0">
+                -<ProductPrice price={coupon?.discountAmount} inline={true} />
+              </span>
+            </div>
+          )}
           <div className={summaryRow}>
             <span>Shipping:</span>
             <span className="float-right">
