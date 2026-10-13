@@ -14,7 +14,7 @@ import { getFromStorage } from "@/utils/storage";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 interface SigninFormValues {
   email: string;
@@ -83,6 +83,14 @@ const SigninPage = () => {
       console.error("🚨 Unexpected error during onSubmit:", err);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(fetchCartList());
+    }, 1000);
+
+    return () => clearTimeout(timer); // cleanup
+  }, []);
 
   return (
     <section className="w-full mt-[9px] mb-20">
