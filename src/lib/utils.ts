@@ -37,7 +37,7 @@ export function isAvailableForSale(status: string, price: string | number) {
 
 export const replaceNullWithPlaceholder = (
   value: any,
-  fallback: string = "N/A",
+  fallback: string | number = "N/A",
 ) => {
   if (isEmpty(value)) {
     return fallback;

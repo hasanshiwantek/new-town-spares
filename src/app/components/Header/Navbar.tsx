@@ -405,6 +405,9 @@ const Navbar: React.FC = () => {
                       <Link href="/my-account/orders">Orders</Link>
                     </li>
                     <li>
+                      <Link href="/my-account/returns">Returns</Link>
+                    </li>
+                    <li>
                       <Link href="/my-account/messages">Messages</Link>
                     </li>
                     <li>
