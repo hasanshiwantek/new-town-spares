@@ -4,7 +4,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { decode } from "html-entities";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import ProductCard from "../Home/ProductCard";
 import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
 import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
@@ -12,6 +12,8 @@ import CategoryPagination from "./CategoryPagination";
 import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortingBar from "./SortingBar";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useProductView } from "@/hooks/useProductView";
 
 const MotionDiv = motion.div;
 interface ProductListProps {
@@ -35,7 +37,11 @@ export default function ProductList({
   filterMeta,
   initialCategorydescription,
 }: ProductListProps) {
-  const [view, setView] = useState<"list" | "grid">("grid");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const total = pagination?.total || 0;
+  const { view, setView } = useProductView();
+
   const decodedHtml = decode(
     (initialCategorydescription || "")
       .replace(/<pre[^>]*>/gi, "")
@@ -79,7 +85,7 @@ export default function ProductList({
       target.appendChild(blogFaqs.cloneNode(true));
     }
   }, [decodedHtml]);
-  const total = pagination?.total || 0;
+
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });

@@ -62,7 +62,6 @@ const rootReducer = combineReducers({
   currency: persistReducer(currencyPersistConfig, currencyReducer),
   auth: persistReducer(authPersistConfig, authReducer), // persisted
   config: configReducer,
-  // cart: persistReducer(cartPersistConfig, cartSliceReducer), // persisted
   recent: persistReducer(recentPersistConfig, recentReducer),
   order: persistReducer(orderPersistConfig, orderReducer),
   coupon: couponReducer,
