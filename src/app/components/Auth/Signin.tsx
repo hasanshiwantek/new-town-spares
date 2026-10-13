@@ -10,7 +10,7 @@ import { loginUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
+import { getFromStorage, getSessionId } from "@/utils/storage";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,7 +44,7 @@ const SigninPage = () => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getFromStorage("sessionId");
+          const sessionId = getSessionId();
           await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
@@ -57,15 +57,15 @@ const SigninPage = () => {
 
           reset();
           if (shouldLoadQuote || quoteToken) {
-            window.location.href = `/cart?action=loadSavedQuote&quoteToken=${quoteToken}`;
+            // window.location.href = `/cart?action=loadSavedQuote&quoteToken=${quoteToken}`;
           } else {
             await dispatch(fetchCartList())
               .unwrap()
               .then((res) => {
                 if (res?.data?.length > 0) {
-                  router.push("/cart");
+                  // router.push("/cart");
                 } else {
-                  router.push("/my-account/orders");
+                  // router.push("/my-account/orders");
                 }
               });
           }
