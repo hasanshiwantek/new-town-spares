@@ -57,15 +57,15 @@ const SigninPage = () => {
 
           reset();
           if (shouldLoadQuote || quoteToken) {
-            // window.location.href = `/cart?action=loadSavedQuote&quoteToken=${quoteToken}`;
+            window.location.href = `/cart?action=loadSavedQuote&quoteToken=${quoteToken}`;
           } else {
             await dispatch(fetchCartList())
               .unwrap()
               .then((res) => {
                 if (res?.data?.length > 0) {
-                  // router.push("/cart");
+                  router.push("/cart");
                 } else {
-                  // router.push("/my-account/orders");
+                  router.push("/my-account/orders");
                 }
               });
           }
