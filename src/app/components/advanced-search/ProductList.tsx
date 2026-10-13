@@ -10,6 +10,7 @@ import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
 import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
 import SortingBar from "./SortingBar";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useProductView } from "@/hooks/useProductView";
 
 const MotionDiv = motion.div;
 
@@ -33,41 +34,9 @@ export default function ProductList({
   error = null,
   filterMeta,
 }: ProductListProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [view, setView] = useState<"list" | "grid">("grid");
+  const { view, setView } = useProductView();
   const total = pagination?.total || 0;
 
-  const setViewState = useCallback(
-    (next: "list" | "grid") => {
-      setView(next);
-
-      const params = new URLSearchParams(searchParams.toString());
-
-      params.delete("grid-active");
-      params.delete("list-active");
-
-      const query = params.toString();
-      const viewFlag = `${next}-active`;
-
-      const url = `${window.location.pathname}${
-        query ? `?${query}&${viewFlag}` : `?${viewFlag}`
-      }`;
-
-      router.replace(url, { scroll: false });
-    },
-    [router, searchParams],
-  );
-  useEffect(() => {
-    const isGrid = searchParams.has("grid-active");
-    const isList = searchParams.has("list-active");
-
-    if (isGrid && !isList) {
-      setView("grid");
-    } else if (isList && !isGrid) {
-      setView("list");
-    }
-  }, [searchParams]);
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -82,7 +51,7 @@ export default function ProductList({
       <SortingBar
         total={total || 0}
         view={view}
-        setView={setViewState}
+        setView={setView}
         filters={filters}
         setFilters={setFilters}
         filterMeta={filterMeta}
