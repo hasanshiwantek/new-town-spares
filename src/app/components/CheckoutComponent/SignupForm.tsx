@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { baseURL, storeId } from "@/lib/axiosInstance";
 import { registerUser } from "@/redux/slices/authSlice";
-import { getFromStorage } from "@/utils/storage";
+import { getFromStorage, getSessionId } from "@/utils/storage";
 import { useState } from "react";
 
 interface SignupFormProps {
@@ -72,7 +72,7 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
       if (registerUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getFromStorage("sessionId");
+          const sessionId =  getSessionId();
           await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
