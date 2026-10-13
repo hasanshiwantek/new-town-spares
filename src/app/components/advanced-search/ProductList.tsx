@@ -1,9 +1,7 @@
 "use client";
 
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { setProductView } from "@/redux/slices/uiSlice";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ProductCard from "../../components/Home/ProductCard";
 import CategoryPagination from "../Product/CategoryPagination";
 import ProductCategoryCard from "../Product/ProductCategoryCard";
@@ -11,6 +9,8 @@ import ProductListCartSidebar from "../Product/ProductListCartSidebar";
 import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
 import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
 import SortingBar from "./SortingBar";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useProductView } from "@/hooks/useProductView";
 
 const MotionDiv = motion.div;
 
@@ -34,12 +34,9 @@ export default function ProductList({
   error = null,
   filterMeta,
 }: ProductListProps) {
-  const dispatch = useAppDispatch();
-  const view = useAppSelector((state) => state.ui.productView);
-  const setView = (next: "list" | "grid") => {
-    dispatch(setProductView(next));
-  };
+  const { view, setView } = useProductView();
   const total = pagination?.total || 0;
+
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });

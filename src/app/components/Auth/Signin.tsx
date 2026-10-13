@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusMessage } from "@/components/common/statusMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -102,7 +103,12 @@ const SigninPage = () => {
         <h1 className="text-[28px] leading-[34px] text-[#333333] text-center mt-[26.25px] mb-[26.25px]">
           Sign in
         </h1>
-
+        {shouldLoadQuote && (
+          <StatusMessage
+            message="To purchase items in the cart, you'll need to sign in to your account prior to proceeding."
+            variant="error"
+          />
+        )}
         {/* Two Cards */}
         <div className="flex flex-col min-[801px]:flex-row gap-[22px] min-[801px]:max-h-[333px] mb-5">
           {/* Left Card - New Customer */}

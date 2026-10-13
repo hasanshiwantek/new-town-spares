@@ -19,12 +19,14 @@ import ConfirmationModal from "../modal/confirmationModal";
 import {
   getFromStorage,
   getPersistedAuth,
+  getSessionId,
   setInStorage,
 } from "@/utils/storage";
 import { errorMessage, successMessage } from "@/utils/message";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import { transferCart } from "@/utils/transferCart";
 interface Category {
   id: number;
   name: string;
@@ -126,8 +128,27 @@ const FooterBottom = () => {
 
     dispatch(verifyMagicLink({ token: paramsActiontoken }))
       .unwrap()
-      .then(() => {
-        window.location.href = "/checkout";
+      .then((res) => {
+        const token = res?.token;
+        const fetchCartListInner = async () => {
+          try {
+            await transferCart({ token });
+            await dispatch(fetchCartList())
+              .unwrap()
+              .then((res) => {
+                if (res?.data?.length > 0) {
+                  router.push("/checkout");
+                } else {
+                  router.push("/my-account/orders");
+                }
+              });
+          } catch (error) {
+            console.error("Cart transfer failed:", error);
+          }
+        };
+        if (token) {
+          fetchCartListInner();
+        }
       })
       .catch((msg) => {
         verifiedToken.current = null;
