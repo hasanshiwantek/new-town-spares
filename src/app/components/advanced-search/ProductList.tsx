@@ -1,9 +1,7 @@
 "use client";
 
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { setProductView } from "@/redux/slices/uiSlice";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ProductCard from "../../components/Home/ProductCard";
 import CategoryPagination from "../Product/CategoryPagination";
 import ProductCategoryCard from "../Product/ProductCategoryCard";
@@ -11,6 +9,7 @@ import ProductListCartSidebar from "../Product/ProductListCartSidebar";
 import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
 import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
 import SortingBar from "./SortingBar";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const MotionDiv = motion.div;
 
@@ -34,12 +33,41 @@ export default function ProductList({
   error = null,
   filterMeta,
 }: ProductListProps) {
-  const dispatch = useAppDispatch();
-  const view = useAppSelector((state) => state.ui.productView);
-  const setView = (next: "list" | "grid") => {
-    dispatch(setProductView(next));
-  };
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [view, setView] = useState<"list" | "grid">("grid");
   const total = pagination?.total || 0;
+
+  const setViewState = useCallback(
+    (next: "list" | "grid") => {
+      setView(next);
+
+      const params = new URLSearchParams(searchParams.toString());
+
+      params.delete("grid-active");
+      params.delete("list-active");
+
+      const query = params.toString();
+      const viewFlag = `${next}-active`;
+
+      const url = `${window.location.pathname}${
+        query ? `?${query}&${viewFlag}` : `?${viewFlag}`
+      }`;
+
+      router.replace(url, { scroll: false });
+    },
+    [router, searchParams],
+  );
+  useEffect(() => {
+    const isGrid = searchParams.has("grid-active");
+    const isList = searchParams.has("list-active");
+
+    if (isGrid && !isList) {
+      setView("grid");
+    } else if (isList && !isGrid) {
+      setView("list");
+    }
+  }, [searchParams]);
   // ✅ Scroll to top when filters.page changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -54,7 +82,7 @@ export default function ProductList({
       <SortingBar
         total={total || 0}
         view={view}
-        setView={setView}
+        setView={setViewState}
         filters={filters}
         setFilters={setFilters}
         filterMeta={filterMeta}
