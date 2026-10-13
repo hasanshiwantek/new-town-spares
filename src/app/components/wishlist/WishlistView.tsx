@@ -80,6 +80,7 @@ const WISHLIST = {
 
 const TABS = [
   { name: "Orders", href: "/my-account/orders" },
+  { name: "Returns", href: "/my-account/returns" },
   { name: "Messages (0)", href: "/my-account/messages" },
   { name: "Addresses", href: "/my-account/addresses" },
   { name: "Recently Viewed", href: "/my-account/recently-viewed" },
