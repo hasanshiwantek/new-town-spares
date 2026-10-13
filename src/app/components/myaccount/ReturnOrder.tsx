@@ -2,6 +2,7 @@
 import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
+import { getReturnOrderInfo, ReturnOrderSource } from "@/utils/order";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountEmptyState from "./AccountEmptyState";
@@ -19,7 +20,7 @@ const ReturnOrder = () => {
         setLoading(true);
         setError(null);
         const res = await axiosInstance.get(
-          "dashboard/orders/get-return-order",
+          "dashboard/orders/customer-return-requests",
         );
 
         if (res?.data?.data && res.data.data.length > 0) {
@@ -41,21 +42,39 @@ const ReturnOrder = () => {
   // Loading State
   if (loading) {
     return (
-      <div className="flex flex-col gap-4 p-4">
-        {[...Array(2)].map((_, idx) => (
+      <div className="flex flex-col gap-4 max-w-[800px] mx-auto">
+        {[...Array(3)].map((_, idx) => (
           <div
             key={idx}
-            className="border rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 w-full bg-white animate-pulse"
+            className="border border-[#ebebeb] rounded-lg p-4 flex flex-col sm:flex-row gap-4 w-full bg-white animate-pulse"
           >
-            <div className="flex flex-col md:flex-row items-center md:items-center gap-4 md:w-[65%] w-full">
-              <div className="w-full max-w-[128px] h-32 bg-gray-300 rounded-md flex-shrink-0"></div>
-              <div className="flex flex-col justify-center w-full gap-2">
-                <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-                <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-                <div className="h-4 bg-gray-300 rounded w-1/2 mt-2"></div>
+            {/* Image */}
+            <div className="w-24 h-24 bg-gray-300 rounded-md shrink-0 self-center sm:self-start"></div>
+
+            <div className="flex-1 min-w-0">
+              {/* Header: Order # + summary / status */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-2 flex-1">
+                  <div className="h-5 bg-gray-300 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                </div>
+                <div className="h-7 w-20 bg-gray-300 rounded shrink-0"></div>
+              </div>
+
+              {/* Requested / Action / Reason / Comments */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3 mt-3 pt-3 border-t border-[#ebebeb]">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex flex-col gap-1">
+                    <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                  </div>
+                ))}
+                <div className="flex flex-col gap-1 sm:col-span-3">
+                  <div className="h-3 bg-gray-300 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                </div>
               </div>
             </div>
-            <div className="md:w-[30%] w-full h-10 bg-gray-300 rounded"></div>
           </div>
         ))}
       </div>
@@ -65,7 +84,7 @@ const ReturnOrder = () => {
   // Error State
   if (error) {
     return (
-      <div className="p-4">
+      <div className="max-w-[800px] mx-auto">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
           <p className="text-red-600 text-lg font-medium">{error}</p>
           <button
@@ -87,89 +106,84 @@ const ReturnOrder = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {orders?.map((order: any) => (
-        <div
-          key={order?.id}
-          className="border rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 w-full bg-white"
-        >
-          {/* Left Side: Product Info */}
-          <div className="flex flex-col md:flex-row items-center md:items-center gap-4 md:w-[65%] w-full">
+    <div className="flex flex-col gap-4 max-w-[800px] mx-auto">
+      {orders?.map((order: ReturnOrderSource, idx: number) => {
+        const {
+          id,
+          orderNumber,
+          status,
+          productLabel,
+          formattedTotal,
+          imageSrc,
+          imageAlt,
+          requestedDate,
+          returnAction,
+          reason,
+          comments,
+        } = getReturnOrderInfo(order);
+
+        const labelClass = "text-[12px] leading-[16px] text-[#757575]";
+        const valueClass =
+          "text-[14px] leading-[21px] text-[#333333] break-words";
+
+        return (
+          <div
+            key={id ?? idx}
+            className="border border-[#ebebeb] rounded-lg p-4 flex flex-col sm:flex-row gap-4 w-full bg-white"
+          >
             {/* Product Image */}
-            <div className="w-full max-w-[128px] h-32 relative flex-shrink-0">
+            <div className="w-24 h-24 relative shrink-0 self-center sm:self-start">
               <Image
-                src={
-                  order?.product?.[1]?.image?.[0]?.path ||
-                  order?.product?.[0]?.images?.[0]?.path ||
-                  "/default-product-image.svg"
-                }
-                alt={order?.product?.[0]?.name || "Product Image"}
+                src={imageSrc}
+                alt={imageAlt}
                 fill
-                className="object-contain border rounded-md"
+                sizes="96px"
+                className="object-contain border border-[#ebebeb] rounded-md"
               />
             </div>
 
-            {/* Product Details */}
-            <div className="flex flex-col items-center md:items-start justify-center w-full">
-              {/* <Link href={`/my-account/orders/${order?.orderNumber || ""}`}> */}
-              <p className="mb-1 text-xl text-red-600 hover:text-red-700 transition-colors duration-200">
-                Order #{order?.orderNumber || "N/A"}
-              </p>
-              {/* </Link> */}
-              <p className="text-sm md:text-[14px]">
-                {order?.product?.length || 0} product
-                {order?.product?.length > 1 ? "s" : ""} totaling{" "}
-                {formatPrice(
-                  order?.product?.reduce(
-                    (total: any, item: any) => total + Number(item?.price || 0),
-                    0,
-                  ) || 0,
-                )}
-              </p>
+            <div className="flex-1 min-w-0">
+              {/* Header: Order # + summary / status */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[18px] leading-[24px] text-red-600">
+                    Order #{orderNumber}
+                  </p>
+                  <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
+                    {productLabel} totaling {formatPrice(formattedTotal)}
+                  </p>
+                </div>
+                <span className="shrink-0 bg-[#BFBFBF] text-white font-bold text-[13px] leading-[15px] px-3 py-[6px] rounded">
+                  {status}
+                </span>
+              </div>
 
               {/* Return Info */}
-              <div className="flex text-center md:text-left flex-wrap gap-6 md:gap-2 mt-2 w-full">
-                {/* 1st Field */}
-                <div className="flex flex-col gap-1 w-full md:w-[25%]">
-                  <span className="text-[12px]">Return Requested:</span>
-                  <span className="text-xl">
-                    {order?.createdAt
-                      ? new Date(order.createdAt).toLocaleDateString()
-                      : "-"}
-                  </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-3 mt-3 pt-3 border-t border-[#ebebeb]">
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className={labelClass}>Return Requested</span>
+                  <span className={valueClass}>{requestedDate}</span>
                 </div>
 
-                {/* 2nd Field */}
-                <div className="flex flex-col gap-1 w-full md:w-[25%]">
-                  <span className="text-[12px]">Return Action:</span>
-                  <span className="text-xl">{order?.returnAction || "-"}</span>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className={labelClass}>Return Action</span>
+                  <span className={valueClass}>{returnAction}</span>
                 </div>
 
-                {/* 3rd Field */}
-                <div className="flex flex-col gap-1 w-full md:w-[45%]">
-                  <span className="text-[12px]">Return Reason:</span>
-                  <span className="text-xl">{order?.reason || "-"}</span>
+                <div className="flex flex-col gap-1 min-w-0">
+                  <span className={labelClass}>Return Reason</span>
+                  <span className={valueClass}>{reason}</span>
                 </div>
 
-                {/* 4th Field – New row */}
-                <div className="flex flex-col gap-1 w-full">
-                  <span className="text-[12px]">Your Comments:</span>
-                  <span className="text-xl">
-                    {order?.comments || "No comments"}
-                  </span>
+                <div className="flex flex-col gap-1 min-w-0 sm:col-span-3">
+                  <span className={labelClass}>Your Comments</span>
+                  <span className={valueClass}>{comments}</span>
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Right Side: Status Button */}
-          <div className="md:w-[30%] w-full flex md:justify-end justify-center mt-2 md:mt-0">
-            <button className="bg-[#BFBFBF] text-white font-bold border border-[#BFBFBF] px-4 py-2 rounded hover:bg-white hover:text-[#F15939] transition w-auto text-center text-sm md:text-base">
-              {order?.status || "Pending"}
-            </button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
