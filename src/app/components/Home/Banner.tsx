@@ -10,7 +10,7 @@ import { getSessionId } from "@/utils/storage";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-
+import { useRouter } from "next/navigation";
 interface SigninFormValues {
   email: string;
   password: string;
@@ -19,6 +19,8 @@ interface SigninFormValues {
 const Banner = () => {
   const auth = useAppSelector((state: RootState) => state?.auth);
   const isLoggedIn = Boolean(auth?.isAuthenticated);
+  const router = useRouter();
+  
   const dispatch = useAppDispatch();
   const { loginloading } = useAppSelector((state: RootState) => state?.auth);
   const {
@@ -67,11 +69,12 @@ const Banner = () => {
       >
         {/* Left Image Section */}
         <div
-          className={`relative w-full aspect-[2/1] ${
+          className={`relative w-full aspect-[2/1] cursor-pointer ${
             isLoggedIn
               ? "min-[801px]:aspect-[1133/400] min-[801px]:w-full"
               : "min-[801px]:aspect-auto min-[801px]:h-[417px] min-[1640px]:h-[400px] min-[801px]:w-[63.7%] min-[1025px]:w-[74.6%]"
           }`}
+          onClick={() => router.push("/category/pc-servers")}
         >
           <Image
             src="/server-banner.jpg"
