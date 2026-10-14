@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import {
   CardNumberElement,
@@ -8,6 +7,7 @@ import {
   CardCvcElement,
 } from "@stripe/react-stripe-js";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { useAppSelector } from "@/hooks/useReduxHooks";
 
 interface PaymentStepProps {
   register: UseFormRegister<any>;
@@ -38,6 +38,7 @@ interface PaymentStepProps {
   isCompleted: boolean;
   onEdit?: () => void;
   paymentMethodLabel?: string;
+  ratesLoader: boolean;
 }
 
 const PaymentStep: React.FC<PaymentStepProps> = ({
@@ -56,9 +57,12 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   isCompleted,
   onEdit,
   paymentMethodLabel,
+  ratesLoader,
 }) => {
   const stripeCardMethods = ["credit_card"];
-
+  const stateShippingZone = useAppSelector((state) => state.shippingZone);
+  const disabled =
+    isProcessing || !stripe || stateShippingZone?.loading || ratesLoader;
   if (isCompleted && !isActive) {
     // Show completed state with payment method and edit button
     return (
@@ -96,7 +100,9 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
               onChange={() => handlePaymentSelection("credit_card")}
               className="accent-[#FF482E] scale-[2]"
             />
-            <span className="text-[15px] font-bold text-[#333333]">Credit Card</span>
+            <span className="text-[15px] font-bold text-[#333333]">
+              Credit Card
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <Image
@@ -273,7 +279,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
 
       <button
         type="submit"
-        disabled={isProcessing || !stripe}
+        disabled={disabled}
         className="h-[54px] w-full bg-[#FD5430] text-[18px] text-white rounded-sm"
       >
         {isProcessing ? "Processing..." : "PLACE YOUR ORDER"}
