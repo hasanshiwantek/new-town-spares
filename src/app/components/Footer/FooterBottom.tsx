@@ -96,7 +96,7 @@ const FooterBottom = () => {
   }, []);
 
   useEffect(() => {
-    const existingSession = getFromStorage("sessionId");
+    const existingSession =  getSessionId();
     if (existingSession) {
       dispatch(visitorSession({ sessionId: existingSession }));
     } else {

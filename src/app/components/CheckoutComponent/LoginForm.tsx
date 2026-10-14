@@ -6,7 +6,7 @@ import { baseURL, storeId } from "@/lib/axiosInstance";
 import { loginUser, sendMagicLink } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
+import { getFromStorage, getSessionId } from "@/utils/storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -48,7 +48,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getFromStorage("sessionId");
+          const sessionId =  getSessionId();
           const res = await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
