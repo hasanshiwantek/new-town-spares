@@ -8,6 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countriesWithoutPostalCode } from "@/const/country-level";
+import { PRODUCT_SHIPPING_TYPES, useFormatRate } from "@/hooks/useFormatPrice";
+import { rateCurrency } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { cn } from "@/lib/utils";
 import {
@@ -19,6 +21,7 @@ import {
   fetchShippingRate,
   fetchShippingRates,
   resetShippingRates,
+  setRatesLoading,
   setShippingRates,
 } from "@/redux/slices/shippingSlice";
 import { RootState } from "@/redux/store";
@@ -37,15 +40,14 @@ import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
 const rateRowCls = (selected: boolean, enabled: boolean) =>
   cn(
     "flex items-center gap-4 px-5 py-[14px] transition-colors",
-    enabled ? "cursor-pointer hover:bg-[#ebebeb]" : "cursor-not-allowed opacity-50",
+    enabled
+      ? "cursor-pointer hover:bg-[#ebebeb]"
+      : "cursor-not-allowed opacity-50",
     selected && "bg-[#ebebeb]",
   );
 
 const rateRadioCls =
   "appearance-none shrink-0 w-[24px] h-[24px] rounded-full border border-[#d9d9d9] bg-white checked:border-2 checked:border-[#FF482E] checked:bg-[#FF482E] checked:shadow-[inset_0_0_0_4px_#fff]";
-  
-const formatRatePrice = (charge: number | string) =>
-  `$${Number(charge || 0).toFixed(2)}`;
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
@@ -133,19 +135,21 @@ export function calculatePackage(products: any[]) {
     package_value: orderTotal,
   };
 }
-export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];
-export function getSavedShippingCost(
+
+// The shipping rate saved on the cart, or null if none applies any more
+// (e.g. a saved fixed-shipping rate after the cart changed).
+export function getSavedShippingRate(
   shippingDetail: any,
   productShippingRate: { service_type: string } | null,
 ) {
   const rate = shippingDetail?.rate;
-  if (!rate) return 0;
+  if (!rate) return null;
   if (
     PRODUCT_SHIPPING_TYPES.includes(rate.service_type) &&
     rate.service_type !== productShippingRate?.service_type
   )
-    return 0;
-  return Number(rate.total_charge) || 0;
+    return null;
+  return rate;
 }
 
 const hasFixedShipping = (p: any) => Number(p?.fixedShippingCost) > 0.0;
@@ -170,6 +174,7 @@ export function getProductShippingRate(products: any[]) {
       method_type: "fixed_shipping",
       display_name: "Fixed Shipping",
       total_charge: Number(total.toFixed(2)),
+      currency: "USD", // product fixedShippingCost is in the store currency
       is_fedex: false,
     };
   }
@@ -180,6 +185,7 @@ export function getProductShippingRate(products: any[]) {
     method_type: "free_shipping",
     display_name: "Free Shipping",
     total_charge: 0,
+    currency: "USD",
     is_fedex: false,
   };
 }
@@ -205,6 +211,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   );
 
   const dispatch = useAppDispatch();
+  const formatRate = useFormatRate();
+  const selectedCurrency = useAppSelector(
+    (state: RootState) => state.currency.selectedCurrency,
+  );
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
   const shippingCostLoading = useAppSelector(
@@ -315,7 +325,12 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
       (!hasPostalCode || zip?.trim())
     ) {
       const pkg = calculatePackage(cart);
+      // Loader on now, not after the debounce — otherwise nothing seems to
+      // happen until the new rates suddenly appear
+      dispatch(setRatesLoading(true));
+      let fired = false;
       const timer = setTimeout(() => {
+        fired = true;
         dispatch(resetShippingRates());
         dispatch(
           fetchShippingRates({
@@ -334,9 +349,16 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         );
       }, 600);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        // Debounce cancelled before the request went out (the next run turns
+        // the loader back on if it schedules another quote)
+        if (!fired) dispatch(setRatesLoading(false));
+      };
     }
-  }, [city, country, zip, state]);
+    // Re-quote when the currency changes too: carrier rates are quoted in the
+    // selected currency, so old quotes would be in the previous one
+  }, [city, country, zip, state, selectedCurrency]);
   // useEffect(() => {
   //   if (!auth?.isAuthenticated || !userAddresses?.length) {
   //     setAddressMode("new");
@@ -370,6 +392,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         service_type: selectedRate?.service_type,
         method_type: selectedRate?.method_type,
         total_charge: cost,
+        currency: rateCurrency(selectedRate, selectedCurrency),
       },
     };
     await dispatch(addShippingCost(shippingData))
@@ -378,6 +401,25 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         dispatch(fetchShippingRate());
       });
   };
+
+  // After a re-quote (currency switch, address edit), keep the shopper's chosen
+  // method and save it again at its new price, so the rate saved on the cart
+  // is always in the current currency and matches the list.
+  const savedRate = useAppSelector(
+    (state: RootState) => (state.shippingZone as any)?.shippingDetail?.rate,
+  );
+  useEffect(() => {
+    if (productShippingRate || !watchedShippingMethod) return;
+    const rate = shippingRates?.find(
+      (r: any) => r.service_type === watchedShippingMethod,
+    );
+    if (!rate) return;
+    const sameAsSaved =
+      savedRate?.service_type === rate.service_type &&
+      Number(savedRate?.total_charge) === Number(rate.total_charge);
+    if (sameAsSaved) return;
+    saveShippingMethod(watchedShippingMethod, rate).catch(() => {});
+  }, [shippingRates]);
 
   // Fixed/free shipping ka sirf ek option hai, address complete hote hi auto select
   useEffect(() => {
@@ -414,7 +456,6 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   ? `${rate.service_name}`
                   : rate.display_name
                 : dest.selectedShippingMethod || "";
-              const ratePrice = rate ? Number(rate.total_charge) : 0;
               return (
                 <div key={dest.id} className="space-y-1">
                   <p className="font-bold text-gray-800 text-base">
@@ -451,7 +492,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <div className="mt-1">
                       <p className="text-xs text-gray-600">{rateLabel}</p>
                       <p className="text-xs text-gray-600 ml-2">
-                        {ratePrice === 0 ? "$0.00" : `$${ratePrice.toFixed(2)}`}
+                        {formatRate(rate ?? { total_charge: 0, currency: "USD" })}
                       </p>
                     </div>
                   )} */}
@@ -493,7 +534,13 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             {shippingInfo?.city}, {shippingInfo?.state} {shippingInfo?.zip}{" "}
             {shippingInfo?.country ? ` / ${shippingInfo.country}` : ""}{" "}
           </p>
-          {selectedRate && (
+          {(ratesLoader || shippingCostLoading) && !productShippingRate ? (
+            // Collapsed step: re-quoting (e.g. after a currency switch)
+            <p className="mt-3 pt-3 border-t border-[#e5e5e5] text-[13px] text-[#545454] flex items-center gap-2">
+              <span className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-[#FF482E] animate-spin" />
+              Updating shipping rates…
+            </p>
+          ) : selectedRate && (
             <p className="mt-3 pt-3 border-t border-[#e5e5e5] text-[13px] text-[#545454]">
               {selectedRate.is_fedex
                 ? `FedEx (${selectedRate.service_name})`
@@ -501,7 +548,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               <span className="ml-3">
                 {Number(selectedRate.total_charge) === 0
                   ? "Free"
-                  : `$${Number(selectedRate.total_charge).toFixed(2)}`}
+                  : formatRate(selectedRate)}
               </span>
             </p>
           )}
@@ -715,7 +762,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <Input
                       id="firstName"
                       type="text"
-                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                         errors.firstName ? "border-red-500" : ""
                       }`}
                       {...register("firstName", {
@@ -739,7 +786,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <Input
                       id="lastName"
                       type="text"
-                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                         errors.lastName ? "border-red-500" : ""
                       }`}
                       {...register("lastName", {
@@ -764,7 +811,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="company"
                     type="text"
-                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    className="w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb]"
                     {...register("company")}
                   />
                 </div>
@@ -779,7 +826,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="phone"
                     type="text"
-                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    className="w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb]"
                     {...register("phone")}
                   />
                 </div>
@@ -794,7 +841,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="address1"
                     type="text"
-                    className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                    className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                       errors.address1 ? "border-red-500" : ""
                     }`}
                     {...register("address1", {
@@ -818,7 +865,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="address2"
                     type="text"
-                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    className="w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb]"
                     {...register("address2")}
                   />
                 </div>
@@ -833,7 +880,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="city"
                     type="text"
-                    className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.city ? "border-red-500" : ""}`}
+                    className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${errors.city ? "border-red-500" : ""}`}
                     {...register("city", {
                       required: "City is required",
                     })}
@@ -869,7 +916,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         value={field.value}
                       >
                         <SelectTrigger
-                          className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                          className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                             errors.country ? "border-red-500" : ""
                           }`}
                         >
@@ -920,7 +967,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             value={field.value}
                           >
                             <SelectTrigger
-                              className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                              className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                                 errors.state ? "border-red-500" : ""
                               }`}
                             >
@@ -940,7 +987,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       <Input
                         id="state"
                         type="text"
-                        className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                        className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                           errors.state ? "border-red-500" : ""
                         }`}
                         {...register("state")}
@@ -968,7 +1015,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <Input
                       id="zip"
                       type="text"
-                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                         errors.zip ? "border-red-500" : ""
                       }`}
                       {...register("zip", {
@@ -1081,7 +1128,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         {productShippingRate.display_name}
                       </span>
                       <span className="text-[15px] text-[#333333] shrink-0">
-                        {formatRatePrice(productShippingRate.total_charge)}
+                        {formatRate(productShippingRate)}
                       </span>
                     </div>
                   </label>
@@ -1093,7 +1140,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       className="flex items-center gap-4 px-5 py-[14px]"
                     >
                       {/* Radio circle */}
-                      <div className="w-[24px] h-[24px] rounded-full border border-gray-200 flex-shrink-0 animate-pulse" />
+                      <div className="w-[24px] h-[24px] rounded-full border border-gray-200 shrink-0 animate-pulse" />
 
                       <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
                         {/* Left: service name */}
@@ -1103,7 +1150,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         </div>
 
                         {/* Right: price */}
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-14 flex-shrink-0" />
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-14 shrink-0" />
                       </div>
                     </div>
                   ))
@@ -1154,7 +1201,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             </p>
                           </div>
                           <span className="text-[15px] text-[#333333] shrink-0">
-                            {formatRatePrice(rate.total_charge)}
+                            {formatRate(rate)}
                           </span>
                         </div>
                       </label>
@@ -1182,7 +1229,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             <textarea
               id="orderComment"
               rows={4}
-              className="w-full border border-[#ebebeb] rounded-[4px] p-3 !text-[13px] resize-none max-h-[45px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-300 focus-visible:border-orange-500"
+              className="w-full border border-[#ebebeb] rounded-[4px] p-3 text-[13px]! resize-none max-h-[45px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-300 focus-visible:border-orange-500"
               {...register("orderComment")}
               placeholder="Add any special instructions..."
             />

@@ -1,4 +1,5 @@
 "use client";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
 import { getReturnOrderInfo, ReturnOrderSource } from "@/utils/order";
@@ -8,7 +9,8 @@ import AccountEmptyState from "./AccountEmptyState";
 
 const ReturnOrder = () => {
   const dispatch = useAppDispatch();
-  const [orders, setOrders] = useState<ReturnOrderSource[]>([]);
+  const formatPrice = useFormatPrice();
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -148,7 +150,7 @@ const ReturnOrder = () => {
                     Order #{orderNumber}
                   </p>
                   <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
-                    {productLabel} totaling {formattedTotal}
+                    {productLabel} totaling {formatPrice(formattedTotal)}
                   </p>
                 </div>
                 <span className="shrink-0 bg-[#BFBFBF] text-white font-bold text-[13px] leading-[15px] px-3 py-[6px] rounded">

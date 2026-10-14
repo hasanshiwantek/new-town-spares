@@ -84,9 +84,9 @@ const loading = useAppSelector(
       <OrderConfirmationSkeleton />
     ) : (
       <form>
-        <div className="flex justify-center mb-8">
+        {/* <div className="flex justify-center mb-8">
           <LoadTrustpilotScript />
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
           {/* LEFT SIDE */}

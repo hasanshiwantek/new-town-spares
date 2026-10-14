@@ -13,12 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PRODUCT_SHIPPING_TYPES, useFormatRate } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   addDestination as addDestinationAction,
   removeDestination as removeDestinationAction,
   setCompletedDestinations,
   setDestinations,
+  setDestRatesLoading,
   setDestShippingRate,
   setOrderComment,
   toggleShowItems,
@@ -28,13 +30,9 @@ import {
 import { fetchShippingRates } from "@/redux/slices/shippingSlice";
 import { City, Country, State } from "country-state-city";
 import { CheckCircle2, ChevronDown, ChevronUp, Info, X } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { HiPencil } from "react-icons/hi2";
-import {
-  calculatePackage,
-  getProductShippingRate,
-  PRODUCT_SHIPPING_TYPES,
-} from "./Shippingstep";
+import { calculatePackage, getProductShippingRate } from "./Shippingstep";
 
 interface CartItem {
   id: string | number;
@@ -49,6 +47,7 @@ interface ShippingRate {
   service_name: string;
   display_name: string;
   total_charge: number;
+  currency?: string; // API rates: quoted currency; frontend-built: "USD"
   is_fedex: boolean;
 }
 interface AddressData {
@@ -533,6 +532,7 @@ const MultiAddressShipping = ({
   onContinue,
 }: any) => {
   const dispatch = useAppDispatch();
+  const formatRate = useFormatRate();
 
   // ✅ Redux state
   const {
@@ -550,9 +550,11 @@ const MultiAddressShipping = ({
   const [destShippingRates, setDestShippingRates] = useState<
     Record<string, any[]>
   >({});
-  const [destRatesLoading, setDestRatesLoading] = useState<
-    Record<string, boolean>
-  >({});
+  // In redux (not local state) so checkout can show a loader and block
+  // payment while any destination is being re-quoted
+  const destRatesLoading = useAppSelector(
+    (state) => state.multiAddress.destRatesLoading,
+  );
 
   const unallocatedCount = useMemo(() => {
     const allocatedPerItem: Record<string, Set<string>> = {};
@@ -590,7 +592,7 @@ const MultiAddressShipping = ({
     // Poori cart fixed/free hai toh har destination bhi — API ki zaroorat nahi
     if (getProductShippingRate(cart)) return;
 
-    setDestRatesLoading((prev) => ({ ...prev, [destId]: true }));
+    dispatch(setDestRatesLoading({ destId, loading: true }));
 
     try {
       // ✅ Calculate package for this destination's allocated items only
@@ -629,7 +631,7 @@ const MultiAddressShipping = ({
       console.error("Failed to fetch rates for dest:", destId, err);
       setDestShippingRates((prev) => ({ ...prev, [destId]: [] }));
     } finally {
-      setDestRatesLoading((prev) => ({ ...prev, [destId]: false }));
+      dispatch(setDestRatesLoading({ destId, loading: false }));
     }
   };
   const canContinue = useMemo(
@@ -737,6 +739,7 @@ const MultiAddressShipping = ({
       display_name:
         "Ship on my own/company shipping account (mention shipping account on order comments)",
       total_charge: 0,
+      currency: "USD",
       is_fedex: false,
     },
     {
@@ -745,6 +748,7 @@ const MultiAddressShipping = ({
       service_name: "",
       display_name: "Flat Rate for under 10 LBS*",
       total_charge: 10,
+      currency: "USD",
       is_fedex: false,
     },
   ];
@@ -763,6 +767,20 @@ const MultiAddressShipping = ({
       }
     });
   }, []);
+
+  // Currency switched: carrier quotes are in the previous currency, so
+  // re-quote every destination (skips the first render — handled above)
+  const selectedCurrency = useAppSelector(
+    (state) => state.currency.selectedCurrency,
+  );
+  const quotedCurrencyRef = useRef(selectedCurrency);
+  useEffect(() => {
+    if (quotedCurrencyRef.current === selectedCurrency) return;
+    quotedCurrencyRef.current = selectedCurrency;
+    destinations.forEach((dest) => {
+      if (dest.address) fetchRatesForDest(dest.id, dest.address);
+    });
+  }, [selectedCurrency]);
 
   // Fixed/free shipping destinations: rate redux mein rakho + auto select.
   // Allocation badal ke product rate na rahe toh purana selection hatao.
@@ -980,7 +998,7 @@ const MultiAddressShipping = ({
                                                             checked={dest.selectedShippingMethod === rate.service_type}
                                                             onChange={() => dispatch(updateDestinationShippingMethod({ destId: dest.id, method: rate.service_type }))}
                                                             className="accent-blue-600" />
-                                                        <span>{rate.display_name} — {rate.total_charge === 0 ? "$0.00" : `$${Number(rate.total_charge).toFixed(2)}`}</span>
+                                                        <span>{rate.display_name} — {formatRate(rate)}</span>
                                                     </label>
                                                 ))}
                                             </div> */}
@@ -1034,8 +1052,8 @@ const MultiAddressShipping = ({
                                       rate.service_type,
                                     )
                                     ? "Free"
-                                    : "$0.00"
-                                  : `$${Number(rate.total_charge).toFixed(2)}`}
+                                    : formatRate(rate)
+                                  : formatRate(rate)}
                               </span>
                             </label>
                           ))}

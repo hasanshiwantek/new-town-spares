@@ -20,6 +20,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 import ProductPrice from "../productprice/ProductPrice";
+import { useOrderTotals } from "@/hooks/useFormatPrice";
+import { formatMoney } from "@/lib/money";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -137,6 +139,13 @@ export default function ProductListCartSidebar() {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+  // Subtotal = sum of the unit prices shown × qty (same as cart/checkout)
+  const { display: cartTotals } = useOrderTotals({ cart, shippingRates: [] });
+  const subtotalText = cartTotals ? (
+    formatMoney(cartTotals.subtotal)
+  ) : (
+    <ProductPrice price={subtotal} inline={true} />
+  );
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) {
       return;
@@ -155,7 +164,7 @@ export default function ProductListCartSidebar() {
   };
 
   return (
-    <div className="hidden xl:block w-full max-w-[28%] border border-gray-200 overflow-hidden shrink-0 p-4.5 sticky top-4 self-start max-h-screen overflow-y-auto">
+   <div className="hidden xl:block w-full max-w-[28%] border border-gray-200 shrink-0 p-4.5 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-hidden">
       <h2 className="text-[#333333] text-2xl lg:text-[22px] text-center pb-4 border-b border-gray-200">
         Your Cart
       </h2>
@@ -264,14 +273,14 @@ export default function ProductListCartSidebar() {
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Subtotal:</span>
           <span>
-            <ProductPrice price={subtotal} inline={true} />
+            {subtotalText}
           </span>
         </div>
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Grand total:</span>
           <span>
             {" "}
-            <ProductPrice price={subtotal} inline={true} />
+            {subtotalText}
           </span>
         </div>
       </div>
