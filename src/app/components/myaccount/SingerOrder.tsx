@@ -221,7 +221,9 @@ const SingleOrder = () => {
             </div>
             <div className="clear-both">
               <dt className="float-left mr-[5px]">Order total:</dt>
-              <dd className="m-0">${total.toFixed(2)}</dd>
+              <dd className="m-0">
+                <ProductPrice price={total} inline={true} />
+              </dd>
             </div>
           </dl>
         </section>
@@ -275,14 +277,6 @@ const SingleOrder = () => {
           className={`${blockClass} hidden min-[801px]:block`}
           aria-hidden="true"
         />
-
-        {/* Actions */}
-        <section className={actionsBlockClass}>
-          <h6 className={blockHeading}>Actions</h6>
-          <button className="mt-[11px] w-full bg-[#FF482E] text-white border border-[#FF482E] rounded-[4px] h-[39px] px-[32px] text-[14px] font-light">
-            Reorder
-          </button>
-        </section>
       </div>
 
       {/* Items list (left, ~80%) + Order Summary (right, 250px); stacks <801 */}
@@ -365,20 +359,18 @@ const SingleOrder = () => {
               </span>
             </div>
           )}
-       {coupon?.couponCode && (
-  <div className={`${summaryRow} relative`}>
-  <span className="pr-[70px]">
-    Coupon Code:
-    <span className="text-[10px]">
-      ({coupon?.couponCode})
-    </span>
-  </span>
+          {coupon?.couponCode && (
+            <div className={`${summaryRow} relative`}>
+              <span className="pr-[70px]">
+                Coupon Code:
+                <span className="text-[10px]">({coupon?.couponCode})</span>
+              </span>
 
-  <span className="absolute right-0 top-0">
-    -<ProductPrice price={coupon?.discountAmount} inline={true} />
-  </span>
-</div>
-)}
+              <span className="absolute right-0 top-0">
+                -<ProductPrice price={coupon?.discountAmount} inline={true} />
+              </span>
+            </div>
+          )}
           <div className={summaryRow}>
             <span>Shipping:</span>
             <span className="float-right">
