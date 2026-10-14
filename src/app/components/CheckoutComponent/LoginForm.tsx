@@ -144,7 +144,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
           <div className="mt-3 text-[13px] flex items-center justify-between w-full">
             <span
               onClick={() => setSignInLinkOpen(true)}
-              className="cursor-pointer  border-0 bg-transparent p-0 text-[14px] text-text-secondary transition-colors duration-200 "
+              className="cursor-pointer  border-0 bg-transparent p-0 text-[14px] text-text-secondary transition-colors duration-200 hover:text-[#F15B3A]"
             >
               Send me a sign-in link instead
             </span>

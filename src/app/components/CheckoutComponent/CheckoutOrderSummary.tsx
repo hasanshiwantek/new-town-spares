@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ProductPrice from "../productprice/ProductPrice";
+import { useAppSelector } from "@/hooks/useReduxHooks";
 
 interface OrderSummaryProps {
   cart: any[];
@@ -19,6 +20,7 @@ interface OrderSummaryProps {
   setPromoCode: (code: string) => void;
   onApplyCoupon: () => void;
   onRemoveCoupon: () => void;
+  ratesLoader?:boolean
 }
 
 const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
@@ -36,9 +38,11 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   setPromoCode,
   onApplyCoupon,
   onRemoveCoupon,
+  ratesLoader
 }) => {
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [discountOpen, setDiscountOpen] = useState(false);
+  const { loading } = useAppSelector((state) => state.shippingZone);
   return (
     <div className="bg-white border border-[#ebebeb] rounded-[4px] h-fit sticky top-9">
       <div className="flex items-center justify-between p-[19.5px] border-b border-[#ebebeb]">
@@ -215,13 +219,20 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
         ) : null}
         <div className="flex justify-between text-[#333333]">
           <span>Shipping</span>
-          <span>
-            {shipping === 0 ? (
-              "Free"
-            ) : (
-              <ProductPrice price={shipping} inline={true} />
-            )}
-          </span>
+
+          {loading || ratesLoader ? (
+            <span className="text-[14px] inline-block cursor-pointer italic ">
+              <div className="h-6 w-6 rounded-full border-[3px] border-gray-300 border-t-orange-500 animate-spin" />
+            </span>
+          ) : (
+            <span>
+              {shipping === 0 ? (
+                "Free"
+              ) : (
+                <ProductPrice price={shipping} inline={true} />
+              )}
+            </span>
+          )}
         </div>
         <div className="flex justify-between text-[#333333]">
           <span>Tax</span>
