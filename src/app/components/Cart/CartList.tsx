@@ -1,5 +1,6 @@
 "use client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useFormatLine } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   clearAllCart,
@@ -30,6 +31,8 @@ import {
 const CartList = () => {
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state: RootState) => state.carts.items);
+  // Line totals rounded the same way as the order summary (unit price × qty)
+  const formatLine = useFormatLine();
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
   }>({});
@@ -235,10 +238,7 @@ const CartList = () => {
                   </span>
 
                   <strong className="text-[14px] font-bold text-[#333333]">
-                    <ProductPrice
-                      price={Number(item?.price * item?.quantity)}
-                      inline={true}
-                    />
+                    {formatLine(item?.price, item?.quantity)}
                   </strong>
 
                   {removeButton(item)}
@@ -285,10 +285,7 @@ const CartList = () => {
 
             <div className="flex items-center justify-end gap-[14px]">
               <strong className="text-[14px] font-bold text-[#333333]">
-                <ProductPrice
-                  price={Number(item.price * item.quantity)}
-                  inline={true}
-                />
+                {formatLine(item.price, item.quantity)}
               </strong>
 
               {removeButton(item)}
@@ -315,7 +312,7 @@ const CartList = () => {
     </Link>
   </div>
 )}
-```
+
 
       {!isEmpty && (
         <div className="flex justify-end items-center">

@@ -1,5 +1,4 @@
 // lib/axiosInstance.ts
-import axios from "axios";
 import { errorMessage } from "@/utils/message";
 import {
   getFromStorage,
@@ -7,6 +6,7 @@ import {
   getSessionId,
   removeFromStorage,
 } from "@/utils/storage";
+import axios from "axios";
 
 export const baseURL =
   process.env.NEXT_PUBLIC_API_URL || "https://backend.sparemicro.com/api/";
@@ -22,6 +22,8 @@ export const secretkey =
 export const stripePublishableKey =
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
   "pk_test_51TTnoo8vkezGA3pyz8ekc5xIQNyhweCnxiumTB1si5Dejq5YWPGHDJIJPpBHMLw9hYRkbSkOGpdCzPrlW8g59HZ600cueNQymh";
+export const chargeInSelectedCurrency =
+  process.env.NEXT_PUBLIC_CHARGE_IN_SELECTED_CURRENCY || true;
 
 // Several requests can 401 at once; log out only once.
 let isLoggingOut = false;

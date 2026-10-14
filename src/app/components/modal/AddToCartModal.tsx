@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 import ProductPrice from "../productprice/ProductPrice";
+import { useOrderTotals } from "@/hooks/useFormatPrice";
+import { formatMoney } from "@/lib/money";
 
 interface AddToCartModalProps {
   isOpen: boolean;
@@ -40,6 +42,8 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
     [cart],
   );
   const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  // Subtotal = sum of the unit prices shown × qty (same as cart/checkout)
+  const { display: cartTotals } = useOrderTotals({ cart, shippingRates: [] });
   const productQtyInCart =
     cart.find((item) => item.id === product.id)?.quantity ?? 0;
 
@@ -101,12 +105,18 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
             <div className="mt-3">
               <p className="text-[14px] text-[#333]">Order subtotal</p>
               <p className="text-[20px] font-semibold">
-                <ProductPrice
-                  price={subtotal}
-                  inline
-                  textColor="#FF482E"
-                  className="!text-[20px]"
-                />
+                {cartTotals ? (
+                  <span className="text-[#FF482E] !text-[20px]">
+                    {formatMoney(cartTotals.subtotal)}
+                  </span>
+                ) : (
+                  <ProductPrice
+                    price={subtotal}
+                    inline
+                    textColor="#FF482E"
+                    className="!text-[20px]"
+                  />
+                )}
               </p>
             </div>
 

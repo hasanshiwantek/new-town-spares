@@ -7,6 +7,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  useFormatRate,
+  useMoney,
+  useOrderTotals,
+  type OrderTotals,
+} from "@/hooks/useFormatPrice";
+import { formatMoney, Money, rateCurrency } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
@@ -19,6 +26,7 @@ import {
   fetchShippingRate,
   fetchShippingRates,
   getCheckoutForm,
+  removeShippingRate,
   resetShippingRates,
   setShippingRates,
 } from "@/redux/slices/shippingSlice";
@@ -26,16 +34,27 @@ import { RootState } from "@/redux/store";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { Country, State } from "country-state-city";
 import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   calculatePackage,
   getProductShippingRate,
-  getSavedShippingCost,
+  getSavedShippingRate,
 } from "../CheckoutComponent/Shippingstep";
 import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
+  const formatRate = useFormatRate();
+  const { toUsd: moneyToUsd, ofRate } = useMoney();
+  const selectedCurrency = useAppSelector(
+    (state: RootState) => state.currency.selectedCurrency,
+  );
   const router = useRouter();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const {
@@ -87,20 +106,105 @@ const OrderSummary = () => {
     () => getProductShippingRate(cart),
     [cart],
   );
-  const shipping = useMemo(() => {
-    if (productShippingRate) return productShippingRate.total_charge;
-    return getSavedShippingCost(shippingDetail, productShippingRate);
-  }, [cart, shippingDetail, productShippingRate]);
+  // The saved (API) rate, if one still applies; it carries its own currency
+  const savedShippingRate = getSavedShippingRate(
+    shippingDetail,
+    productShippingRate,
+  );
+  const selectedShippingRates = useMemo(
+    () =>
+      productShippingRate
+        ? [productShippingRate]
+        : savedShippingRate
+          ? [savedShippingRate]
+          : [],
+    [productShippingRate, savedShippingRate],
+  );
+  // Shipping in USD — only for the coupon check, which works in USD
+  const shipping = useMemo(
+    () =>
+      selectedShippingRates.reduce((s, r) => s + moneyToUsd(ofRate(r)), 0),
+    [selectedShippingRates, moneyToUsd, ofRate],
+  );
 
   const totalItems = cart?.reduce((sum, i) => sum + (i?.quantity || 0), 0);
   // Total before discount
   const totalBeforeDiscount = subtotal + shipping;
-  const shippingCost = getSavedShippingCost(
-    shippingDetail,
-    productShippingRate,
-  );
+  const shippingCost = Number(savedShippingRate?.total_charge) || 0;
   // Final total after discount
   const finalTotal = Math.max(totalBeforeDiscount - discountTotal, 0);
+
+  // Summary in the display currency, in whole minor units: every line and
+  // the grand total add up exactly (null while exchange rates load)
+  const { display: totals } = useOrderTotals({
+    cart,
+    manualDiscountUsd: Number(manualDiscount) || 0,
+    couponDiscountUsd: Number(discountAmount) || 0,
+    shippingRates: selectedShippingRates,
+  });
+  // Currency switched: the saved carrier rate was quoted in the previous
+  // currency. Re-quote it for the saved address and save the same method at
+  // its new price (or clear it if that method isn't offered any more).
+  const [requoting, setRequoting] = useState(false);
+  const quotedCurrencyRef = useRef(selectedCurrency);
+  useEffect(() => {
+    if (quotedCurrencyRef.current === selectedCurrency) return;
+    quotedCurrencyRef.current = selectedCurrency;
+    const saved = savedShippingRate;
+    if (productShippingRate || !saved || !shippingDetail?.country) return;
+
+    const requote = async () => {
+      setRequoting(true);
+      try {
+        const res: any = await dispatch(
+          fetchShippingRates({
+            data: {
+              destination: {
+                country_code: shippingDetail.country,
+                state: shippingDetail.state || "",
+                postal_code: shippingDetail.zip || "",
+                ...(shippingDetail.city && { city: shippingDetail.city }),
+              },
+            },
+          }),
+        ).unwrap();
+        const rates: any[] = res?.data?.rates?.rates || [];
+        const match = rates.find((r) => r.service_type === saved.service_type);
+        if (match) {
+          const payload: any = {
+            country: shippingDetail.country,
+            city: shippingDetail.city,
+            state: shippingDetail.state,
+            zip: shippingDetail.zip,
+            cartId: cartItems.map((item) => item.cartItemId),
+            rate: {
+              service_type: match.service_type,
+              method_type: match.method_type,
+              total_charge: Number(match.total_charge).toFixed(2),
+              currency: rateCurrency(match, selectedCurrency),
+            },
+          };
+          await dispatch(addShippingCost(payload)).unwrap();
+        } else {
+          await dispatch(removeShippingRate()).unwrap();
+        }
+      } catch {
+        // Couldn't re-quote: drop the stale rate so it isn't misread
+        await dispatch(removeShippingRate()).catch(() => {});
+      } finally {
+        await dispatch(fetchShippingRate());
+        setRequoting(false);
+      }
+    };
+    requote();
+  }, [selectedCurrency]);
+
+  const amount = (pick: (t: OrderTotals) => Money, usd: number) =>
+    totals ? (
+      formatMoney(pick(totals))
+    ) : (
+      <ProductPrice price={usd} inline={true} />
+    );
   const { shippingRates, ratesLoader } = useAppSelector(
     (state) => state.shippingZone,
   );
@@ -240,7 +344,7 @@ const OrderSummary = () => {
             Subtotal:
           </span>
           <span className="text-[14px] text-[#333333]">
-            <ProductPrice price={subtotal} inline={true} />
+            {amount((t) => t.subtotal, subtotal)}
           </span>
         </div>
 
@@ -256,7 +360,7 @@ const OrderSummary = () => {
               </span>
             )}
           </span>
-          {shippingCostLoading || loadingDetectCountry ? (
+          {shippingCostLoading || loadingDetectCountry || requoting ? (
             <span
               className={
                 showShipping
@@ -278,10 +382,7 @@ const OrderSummary = () => {
               {productShippingRate.total_charge === 0 ? (
                 "Free"
               ) : (
-                <ProductPrice
-                  price={productShippingRate.total_charge}
-                  inline={true}
-                />
+                formatRate(productShippingRate)
               )}
             </button>
           ) : shippingCost ? (
@@ -295,7 +396,7 @@ const OrderSummary = () => {
               onClick={() => setShowShipping(!showShipping)}
             >
               {!showShipping ? (
-                <ProductPrice price={shippingCost} inline={true} />
+                formatRate(savedShippingRate)
               ) : (
                 ""
               )}
@@ -453,7 +554,7 @@ const OrderSummary = () => {
                             <div className=" font-bold flex-shrink-0">
                               {rate.total_charge === 0
                                 ? "Free"
-                                : `$${Number(rate.total_charge).toFixed(2)}`}
+                                : formatRate(rate)}
                             </div>
                           </div>
                         </label>
@@ -485,6 +586,10 @@ const OrderSummary = () => {
                           service_type: selectedRate?.service_type,
                           method_type: selectedRate?.method_type,
                           total_charge: cost,
+                          currency: rateCurrency(
+                            selectedRate,
+                            selectedCurrency,
+                          ),
                         },
                       };
                       await dispatch(addShippingCost(shippingPayload))
@@ -534,7 +639,7 @@ const OrderSummary = () => {
                 Manual Discount:
               </span>
               <span className="text-[14px] font-medium">
-                -<ProductPrice price={manualDiscount} inline={true} />
+                -{amount((t) => t.manualDiscount, manualDiscount)}
               </span>
             </div>
           </>
@@ -550,7 +655,7 @@ const OrderSummary = () => {
           {/* If coupon already applied, show it here */}
           {appliedCoupon ? (
             <span className="text-[14px] font-medium">
-              -<ProductPrice price={discountAmount} inline={true} />
+              -{amount((t) => t.couponDiscount, discountAmount)}
             </span>
           ) : (
             <span
@@ -612,13 +717,22 @@ const OrderSummary = () => {
             Grand total:
           </span>
           <span className="text-[25px] leading-none text-[#333333] font-bold">
-            <ProductPrice price={finalTotal} inline={true} />
+            {requoting || shippingCostLoading ? (
+              // Shipping is being re-quoted: total isn't final yet
+              <span
+                role="status"
+                aria-label="Updating total"
+                className="inline-block h-6 w-6 align-middle rounded-full border-[3px] border-gray-300 border-t-orange-500 animate-spin"
+              />
+            ) : (
+              amount((t) => t.total, finalTotal)
+            )}
           </span>
         </div>
 
         <button
           type="button"
-          disabled={shippingCostLoading || loadingDetectCountry}
+          disabled={shippingCostLoading || loadingDetectCountry || requoting}
           onClick={handleProceedToCheckout}
           className="w-full h-[39px] bg-[#FF482E] hover:bg-[#e04f33] text-[14px] font-light text-white rounded-[4px] mt-2 transition"
         >

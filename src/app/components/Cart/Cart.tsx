@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import CartList from "./CartList";
 import CartLoadingOverlay from "./CartLoadingOverlay";
 import OrderSummary from "./OrderSummary";
+import SaveCartToList from "./SaveCartToList";
 
 const Cart = () => {
   const dispatch = useAppDispatch();
@@ -77,7 +78,7 @@ const Cart = () => {
           >
             <CartList />
             {isLoggedIn ? (
-              <>{/* cart?.length > 0 && <SaveCartToList /> */}</>
+              <> {cart?.length > 0 && <SaveCartToList /> }</>
             ) : (
               <div className="flex justify-center sm:justify-end mt-[21px]">
                 <Link
