@@ -1,5 +1,8 @@
 "use client";
-import { useFormatPrice } from "@/hooks/useFormatPrice";
+import {
+  useFormatConvertedPrice,
+  useFormatPrice,
+} from "@/hooks/useFormatPrice";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +37,7 @@ import { HiPencil } from "react-icons/hi2";
 import {
   calculatePackage,
   getProductShippingRate,
+  isApiShippingRate,
   PRODUCT_SHIPPING_TYPES,
 } from "./Shippingstep";
 
@@ -535,6 +539,11 @@ const MultiAddressShipping = ({
 }: any) => {
   const dispatch = useAppDispatch();
   const formatPrice = useFormatPrice();
+  const formatConvertedPrice = useFormatConvertedPrice();
+  const formatRatePrice = (rate: ShippingRate) =>
+    isApiShippingRate(rate)
+      ? formatConvertedPrice(rate.total_charge)
+      : formatPrice(rate.total_charge);
 
   // ✅ Redux state
   const {
@@ -982,7 +991,7 @@ const MultiAddressShipping = ({
                                                             checked={dest.selectedShippingMethod === rate.service_type}
                                                             onChange={() => dispatch(updateDestinationShippingMethod({ destId: dest.id, method: rate.service_type }))}
                                                             className="accent-blue-600" />
-                                                        <span>{rate.display_name} — {rate.total_charge === 0 ? "$0.00" : `$${Number(rate.total_charge).toFixed(2)}`}</span>
+                                                        <span>{rate.display_name} — {rate.total_charge === 0 ? formatPrice(0) : formatRatePrice(rate)}</span>
                                                     </label>
                                                 ))}
                                             </div> */}
@@ -1037,7 +1046,7 @@ const MultiAddressShipping = ({
                                     )
                                     ? "Free"
                                     : formatPrice(0)
-                                  : formatPrice(rate.total_charge)}
+                                  : formatRatePrice(rate)}
                               </span>
                             </label>
                           ))}

@@ -8,7 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countriesWithoutPostalCode } from "@/const/country-level";
-import { useFormatPrice } from "@/hooks/useFormatPrice";
+import {
+  isApiShippingRate,
+  PRODUCT_SHIPPING_TYPES,
+  useFormatConvertedPrice,
+  useFormatPrice,
+} from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { cn } from "@/lib/utils";
 import {
@@ -23,7 +28,6 @@ import {
   setShippingRates,
 } from "@/redux/slices/shippingSlice";
 import { RootState } from "@/redux/store";
-import { getCurrencySymbol } from "@/utils/currency";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Controller,
@@ -134,7 +138,7 @@ export function calculatePackage(products: any[]) {
     package_value: orderTotal,
   };
 }
-export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];
+
 export function getSavedShippingCost(
   shippingDetail: any,
   productShippingRate: { service_type: string } | null,
@@ -204,16 +208,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const { shippingRates, ratesLoader } = useAppSelector(
     (state) => state.shippingZone,
   );
-  const { selectedCurrency, currencies } = useAppSelector(
-    (state: RootState) => state.currency,
-  );
-  const currencySymbol = getCurrencySymbol(selectedCurrency);
-  // API rates come back already converted; product-level fixed rates are in base currency
-  const currencyRate =
-    currencies.find((c) => c.code === selectedCurrency)?.rate || 1;
 
   const dispatch = useAppDispatch();
   const formatPrice = useFormatPrice();
+  const formatRatePrice = useFormatConvertedPrice();
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
   const shippingCostLoading = useAppSelector(
@@ -460,7 +458,9 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <div className="mt-1">
                       <p className="text-xs text-gray-600">{rateLabel}</p>
                       <p className="text-xs text-gray-600 ml-2">
-                        {formatPrice(ratePrice)}
+                        {isApiShippingRate(rate)
+                          ? formatRatePrice(ratePrice)
+                          : formatPrice(ratePrice)}
                       </p>
                     </div>
                   )} */}
@@ -510,7 +510,9 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               <span className="ml-3">
                 {Number(selectedRate.total_charge) === 0
                   ? "Free"
-                  : formatPrice(selectedRate.total_charge)}
+                  : isApiShippingRate(selectedRate)
+                    ? formatRatePrice(selectedRate.total_charge)
+                    : formatPrice(selectedRate.total_charge)}
               </span>
             </p>
           )}
@@ -1163,7 +1165,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             </p>
                           </div>
                           <span className="text-[15px] text-[#333333] shrink-0">
-                            {formatPrice(rate.total_charge)}
+                            {formatRatePrice(rate.total_charge)}
                           </span>
                         </div>
                       </label>

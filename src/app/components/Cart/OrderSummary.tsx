@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useFormatPrice } from "@/hooks/useFormatPrice";
+import { useFormatConvertedPrice, useToUsd } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
@@ -37,7 +37,8 @@ import ProductPrice from "../productprice/ProductPrice";
 
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
-  const formatPrice = useFormatPrice();
+  const formatRatePrice = useFormatConvertedPrice();
+  const toUsd = useToUsd();
   const router = useRouter();
   const cart = useAppSelector((state: RootState) => state.carts?.items);
   const {
@@ -91,8 +92,9 @@ const OrderSummary = () => {
   );
   const shipping = useMemo(() => {
     if (productShippingRate) return productShippingRate.total_charge;
-    return getSavedShippingCost(shippingDetail, productShippingRate);
-  }, [cart, shippingDetail, productShippingRate]);
+    // API rates are in the selected currency; totals are summed in USD
+    return toUsd(getSavedShippingCost(shippingDetail, productShippingRate));
+  }, [cart, shippingDetail, productShippingRate, toUsd]);
 
   const totalItems = cart?.reduce((sum, i) => sum + (i?.quantity || 0), 0);
   // Total before discount
@@ -297,7 +299,7 @@ const OrderSummary = () => {
               onClick={() => setShowShipping(!showShipping)}
             >
               {!showShipping ? (
-                <ProductPrice price={shippingCost} inline={true} />
+                formatRatePrice(shippingCost)
               ) : (
                 ""
               )}
@@ -455,7 +457,7 @@ const OrderSummary = () => {
                             <div className=" font-bold flex-shrink-0">
                               {rate.total_charge === 0
                                 ? "Free"
-                                : formatPrice(rate.total_charge)}
+                                : formatRatePrice(rate.total_charge)}
                             </div>
                           </div>
                         </label>
