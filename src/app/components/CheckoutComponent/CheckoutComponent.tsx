@@ -184,7 +184,7 @@ const CheckoutForm = () => {
     completedDestinations,
     destinations,
     destShippingRates,
-    destRatesLoading,
+    destRatesLoading
   } = useAppSelector((state) => state.multiAddress);
   const stripe = useStripe();
   const elements = useElements();
@@ -382,7 +382,9 @@ const CheckoutForm = () => {
 
         if (!rate) {
           if (dest.selectedShippingMethod === "flat")
-            return [{ service_type: "flat", total_charge: 10, currency: "USD" }];
+            return [
+              { service_type: "flat", total_charge: 10, currency: "USD" },
+            ];
           return [];
         }
 
@@ -446,8 +448,7 @@ const CheckoutForm = () => {
   // Exactly the total the summary shows (same rounded lines), in Stripe's
   // minor units of the charge currency
   const chargeTotalMinor =
-    orderTotals.charge?.total.minor ??
-    toChargeMinor(money(finalTotal, "USD"));
+    orderTotals.charge?.total.minor ?? toChargeMinor(money(finalTotal, "USD"));
 
   // ADD COUPON HANDLERS
   const handleApplyCoupon = async () => {
@@ -1039,7 +1040,9 @@ const CheckoutForm = () => {
     handlePaymentSelection(method);
 
     if (shippingUpdating) {
-      errorMessage("Shipping rates are updating. Please try again in a moment.");
+      errorMessage(
+        "Shipping rates are updating. Please try again in a moment.",
+      );
       return;
     }
 
@@ -1077,7 +1080,9 @@ const CheckoutForm = () => {
 
     // The total doesn't include shipping until the new quote is in
     if (shippingUpdating) {
-      errorMessage("Shipping rates are updating. Please try again in a moment.");
+      errorMessage(
+        "Shipping rates are updating. Please try again in a moment.",
+      );
       return;
     }
 
@@ -1778,7 +1783,6 @@ const CheckoutForm = () => {
                           ? "Google Pay"
                           : "Credit Card"
                   }
-                      ratesLoader={ratesLoader}
                 />
               </div>
             )}
@@ -1803,7 +1807,6 @@ const CheckoutForm = () => {
               setPromoCode={setPromoCode}
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
-              ratesLoader={ratesLoader}
             />
           ) : (
             <CheckoutMultipleOrderSummary
