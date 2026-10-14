@@ -8,6 +8,39 @@ import Breadcrumb from "./Breadcrumb";
 import ProductList from "./ProductList";
 import ProductRecent from "./ProductRecent";
 
+const findCategoryPath = (
+  categories: any[],
+  targetId: number,
+  path: any[] = []
+): any[] | null => {
+  for (const cat of categories ?? []) {
+    const currentPath = [
+      ...path,
+      {
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+      },
+    ];
+
+    if (Number(cat.id) === Number(targetId)) {
+      return currentPath;
+    }
+
+    if (cat.subcategories?.length) {
+      const found = findCategoryPath(
+        cat.subcategories,
+        targetId,
+        currentPath
+      );
+
+      if (found) return found;
+    }
+  }
+
+  return null;
+};
+
 export default function ProductsClientWrapper({
   categories,
   brands,
@@ -100,29 +133,51 @@ export default function ProductsClientWrapper({
     fetchData();
   }, [filters]);
   // Generate breadcrumb items based on page type
-  const breadcrumbItems = React.useMemo(() => {
-    const items = [{ name: "Home", href: "/" }];
 
-    if (isCategoryPage && filterMeta.categoryName) {
+const breadcrumbItems = React.useMemo(() => {
+  const items: { name: string; href: string }[] = [
+    { name: "Home", href: "/" },
+  ];
+
+  if (isCategoryPage && initialCategoryId) {
+    const categoryPath = findCategoryPath(
+      categories,
+      Number(filters.categoryIds?.[0] ?? initialCategoryId)
+    );
+
+    if (categoryPath?.length) {
+      categoryPath.forEach((cat, index) => {
+        items.push({
+          name: cat.name,
+          href: `/category/${cat.slug}`,
+        });
+      });
+    } else if (filterMeta.categoryName) {
+      // Fallback if the category tree doesn't contain the category
       items.push({
         name: filterMeta.categoryName,
         href: `/category/${params?.slug || ""}`,
       });
-    } else if (isBrandPage && filterMeta.brandName) {
-      items.push({
-        name: filterMeta.brandName,
-        href: `/brand/${params?.slug || ""}`,
-      });
     }
+  } else if (isBrandPage && filterMeta.brandName) {
+    items.push({
+      name: filterMeta.brandName,
+      href: `/brand/${params?.slug || ""}`,
+    });
+  }
 
-    return items;
-  }, [
-    isCategoryPage,
-    isBrandPage,
-    filterMeta.categoryName,
-    filterMeta.brandName,
-    params?.slug,
-  ]);
+  return items;
+}, [
+  categories,
+  filters.categoryIds,
+  initialCategoryId,
+  isCategoryPage,
+  isBrandPage,
+  filterMeta.categoryName,
+  filterMeta.brandName,
+  params?.slug,
+]);
+
 
   return (
     <>

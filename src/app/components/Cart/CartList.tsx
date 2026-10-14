@@ -315,7 +315,7 @@ const CartList = () => {
     </Link>
   </div>
 )}
-```
+
 
       {!isEmpty && (
         <div className="flex justify-end items-center">
