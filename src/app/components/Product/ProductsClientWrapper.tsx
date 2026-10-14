@@ -7,39 +7,9 @@ import Sidebar from "../Filters/Sidebar";
 import Breadcrumb from "./Breadcrumb";
 import ProductList from "./ProductList";
 import ProductRecent from "./ProductRecent";
+import { findCategoryPath } from "@/lib/utils";
 
-const findCategoryPath = (
-  categories: any[],
-  targetId: number,
-  path: any[] = []
-): any[] | null => {
-  for (const cat of categories ?? []) {
-    const currentPath = [
-      ...path,
-      {
-        id: cat.id,
-        name: cat.name,
-        slug: cat.slug,
-      },
-    ];
 
-    if (Number(cat.id) === Number(targetId)) {
-      return currentPath;
-    }
-
-    if (cat.subcategories?.length) {
-      const found = findCategoryPath(
-        cat.subcategories,
-        targetId,
-        currentPath
-      );
-
-      if (found) return found;
-    }
-  }
-
-  return null;
-};
 
 export default function ProductsClientWrapper({
   categories,
