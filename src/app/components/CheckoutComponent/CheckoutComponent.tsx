@@ -9,10 +9,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  isApiShippingRate,
   useChargeCurrency,
-  useToUsd,
+  useMoney,
+  useOrderTotals,
 } from "@/hooks/useFormatPrice";
+import { money } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import axiosInstance, {
   baseURL,
@@ -72,7 +73,7 @@ import PaymentStep from "./Paymentstep";
 import ShippingStep, {
   calculatePackage,
   getProductShippingRate,
-  getSavedShippingCost,
+  getSavedShippingRate,
 } from "./Shippingstep";
 
 export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
@@ -183,6 +184,7 @@ const CheckoutForm = () => {
     completedDestinations,
     destinations,
     destShippingRates,
+    destRatesLoading,
   } = useAppSelector((state) => state.multiAddress);
   const stripe = useStripe();
   const elements = useElements();
@@ -250,21 +252,25 @@ const CheckoutForm = () => {
   const watchedBillingSame = watch("billingSame");
   const stripeCardMethods = ["credit_card"];
   const walletMethods = ["google_pay", "apple_pay"];
-  const { shippingRates } = useAppSelector((state) => state.shippingZone);
-  const { selectedCurrency } = useAppSelector((state) => state.currency);
-  const toUsd = useToUsd();
   const {
-    currency: chargeCurrency,
-    fromUsd: toChargeAmount,
-    fromSelected: selectedToChargeAmount,
-  } = useChargeCurrency();
-  // API rates are in the selected currency; frontend-built rates are already USD
+    shippingRates,
+    ratesLoader,
+    loading: shippingSaving,
+  } = useAppSelector((state) => state.shippingZone);
+  // Shipping is being re-quoted or re-saved (address edit, currency switch):
+  // the shipping line and total aren't final yet
+  // (multi-address: any current destination still being re-quoted)
+  const shippingUpdating = isMultiAddress
+    ? destinations.some((d) => destRatesLoading?.[d.id])
+    : ratesLoader || shippingSaving;
+  const { selectedCurrency } = useAppSelector((state) => state.currency);
+  const { toUsd: moneyToUsd, ofRate } = useMoney();
+  const { currency: chargeCurrency, toChargeMinor } = useChargeCurrency();
+  // A rate in USD for the backend fields that are USD (each rate carries its
+  // own currency: API rates the quoted one, frontend-built rates USD)
   const rateToUsd = useCallback(
-    (rate: any) =>
-      isApiShippingRate(rate)
-        ? toUsd(rate.total_charge)
-        : Number(rate?.total_charge || 0),
-    [toUsd],
+    (rate: any) => moneyToUsd(ofRate(rate)),
+    [moneyToUsd, ofRate],
   );
   const stateList = useMemo(() => {
     if (!watchedCountry) return [];
@@ -358,10 +364,12 @@ const CheckoutForm = () => {
     }
   }, [shippingDetail]);
 
-  const shipping = useMemo(() => {
+  // The shipping rate(s) the order will be charged for — one per destination
+  // in multi-address mode. Each rate keeps its own currency.
+  const selectedShippingRates = useMemo((): any[] => {
     if (isMultiAddress) {
-      return destinations.reduce((sum, dest) => {
-        if (!dest.selectedShippingMethod) return sum;
+      return destinations.flatMap((dest) => {
+        if (!dest.selectedShippingMethod) return [];
 
         // ✅ Per-dest rates check karo
         const destRates = destShippingRates[dest.id] || [];
@@ -373,33 +381,30 @@ const CheckoutForm = () => {
         );
 
         if (!rate) {
-          if (dest.selectedShippingMethod === "flat") return sum + 10;
-          if (dest.selectedShippingMethod === "own") return sum + 0;
-          return sum;
+          if (dest.selectedShippingMethod === "flat")
+            return [{ service_type: "flat", total_charge: 10, currency: "USD" }];
+          return [];
         }
 
-        return sum + rateToUsd(rate);
-      }, 0);
+        return [rate];
+      });
     }
 
     // Fixed/free shipping products — cart se hi rate nikalo
     const productShippingRate = getProductShippingRate(cart);
-    if (productShippingRate) return productShippingRate.total_charge;
+    if (productShippingRate) return [productShippingRate];
 
+    const savedRate = getSavedShippingRate(shippingDetail, productShippingRate);
     // Single address — existing logic
     if (watchedShippingMethod) {
-      if (!shippingRates?.length) return 0;
+      if (!shippingRates?.length) return [];
       const selected = shippingRates.find(
         (rate: any) => rate.service_type === watchedShippingMethod,
       );
-      return selected
-        ? rateToUsd(selected)
-        : toUsd(getSavedShippingCost(shippingDetail, productShippingRate));
+      if (selected) return [selected];
     }
-    return toUsd(getSavedShippingCost(shippingDetail, productShippingRate));
+    return savedRate ? [savedRate] : [];
   }, [
-    toUsd,
-    rateToUsd,
     isMultiAddress,
     destinations,
     destShippingRates,
@@ -409,6 +414,22 @@ const CheckoutForm = () => {
     shippingDetail,
   ]);
   const tax = 0;
+
+  // Shipping in USD — only for the backend fields that are USD (order payload,
+  // coupon check). The summary and the charge use `orderTotals` below.
+  const shipping = useMemo(
+    () => selectedShippingRates.reduce((sum, r) => sum + rateToUsd(r), 0),
+    [selectedShippingRates, rateToUsd],
+  );
+
+  // Summary + charge, worked out in whole minor units in one currency
+  const orderTotals = useOrderTotals({
+    cart,
+    manualDiscountUsd: Number(manualDiscount) || 0,
+    couponDiscountUsd: Number(discountAmount) || 0,
+    shippingRates: selectedShippingRates,
+    taxUsd: tax,
+  });
 
   // Total before discount
   const totalBeforeDiscount = useMemo(
@@ -421,6 +442,12 @@ const CheckoutForm = () => {
     () => Math.max(totalBeforeDiscount - discountTotal, 0),
     [totalBeforeDiscount, discountTotal],
   );
+
+  // Exactly the total the summary shows (same rounded lines), in Stripe's
+  // minor units of the charge currency
+  const chargeTotalMinor =
+    orderTotals.charge?.total.minor ??
+    toChargeMinor(money(finalTotal, "USD"));
 
   // ADD COUPON HANDLERS
   const handleApplyCoupon = async () => {
@@ -531,7 +558,7 @@ const CheckoutForm = () => {
       currency: chargeCurrency.toLowerCase(),
       total: {
         label: "Order Total",
-        amount: Math.max(0, toChargeAmount(finalTotal)),
+        amount: Math.max(0, chargeTotalMinor),
       },
     });
     pr.on("shippingaddresschange", async (event) => {
@@ -579,7 +606,7 @@ const CheckoutForm = () => {
             id: String(rate.method_id),
             label: rate.display_name,
             detail: rate.display_name,
-            amount: selectedToChargeAmount(Number(rate.total_charge)),
+            amount: toChargeMinor(ofRate(rate)),
           })),
         });
       } catch (err) {
@@ -597,7 +624,7 @@ const CheckoutForm = () => {
 
         total: {
           label: "Order Total",
-          amount: toChargeAmount(finalTotal) + shippingCost,
+          amount: chargeTotalMinor + shippingCost,
         },
       });
     });
@@ -627,8 +654,9 @@ const CheckoutForm = () => {
     finalTotal,
     selectedCurrency,
     chargeCurrency,
-    toChargeAmount,
-    selectedToChargeAmount,
+    chargeTotalMinor,
+    toChargeMinor,
+    ofRate,
   ]); // DEPENDENCY: finalTotal instead of total
   const getDeviceType = () => {
     if (typeof window === "undefined") return "New Town Spares (Desktop)";
@@ -790,8 +818,8 @@ const CheckoutForm = () => {
     async (paymentMethodId: string) => {
       const stripePayload = {
         payment_method_id: paymentMethodId,
-        // Minor units (cents/pence) of `currency`; whole units for zero-decimal currencies
-        amount: toChargeAmount(finalTotal),
+        // Minor units (cents/pence) of `currency` — the exact total shown
+        amount: chargeTotalMinor,
         currency: chargeCurrency,
         products: cart.map((item) => ({
           product_id: item.id,
@@ -805,7 +833,7 @@ const CheckoutForm = () => {
       );
       return response.data?.payment_intent_id || null;
     },
-    [cart, finalTotal, chargeCurrency, toChargeAmount], // ADD finalTotal as dependency
+    [cart, chargeCurrency, chargeTotalMinor],
   );
 
   useEffect(() => {
@@ -1010,6 +1038,11 @@ const CheckoutForm = () => {
   const handleWalletClick = (method: string) => {
     handlePaymentSelection(method);
 
+    if (shippingUpdating) {
+      errorMessage("Shipping rates are updating. Please try again in a moment.");
+      return;
+    }
+
     if (!paymentRequest) {
       const methodName = method === "apple_pay" ? "Apple Pay" : "Google Pay";
       errorMessage(
@@ -1041,6 +1074,12 @@ const CheckoutForm = () => {
       selectedPaymentMethod,
     );
     const isWalletMethod = walletMethods.includes(selectedPaymentMethod);
+
+    // The total doesn't include shipping until the new quote is in
+    if (shippingUpdating) {
+      errorMessage("Shipping rates are updating. Please try again in a moment.");
+      return;
+    }
 
     if (requiresStripeCard) {
       if (
@@ -1747,6 +1786,8 @@ const CheckoutForm = () => {
           {/* RIGHT SECTION - Order Summary */}
           {!isMultiAddress ? (
             <CheckoutOrderSummary
+              totals={orderTotals.display}
+              shippingUpdating={shippingUpdating}
               cart={cart}
               subtotal={subtotal}
               shipping={shipping}
@@ -1764,6 +1805,8 @@ const CheckoutForm = () => {
             />
           ) : (
             <CheckoutMultipleOrderSummary
+              totals={orderTotals.display}
+              shippingUpdating={shippingUpdating}
               cart={cart}
               subtotal={subtotal}
               shipping={shipping}

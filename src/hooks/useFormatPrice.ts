@@ -1,172 +1,25 @@
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import { chargeInSelectedCurrency } from "@/lib/axiosInstance";
+import {
+  Money,
+  RateLookup,
+  add,
+  atLeastZero,
+  convert,
+  currencySymbols,
+  formatMoney,
+  money,
+  rateMoney,
+  subtract,
+  sum,
+  times,
+  toMajor,
+  zero,
+} from "@/lib/money";
 import { RootState } from "@/redux/store";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
-export const currencySymbols: Record<string, string> = {
-  AED: "د.إ",
-  AFN: "؋",
-  ALL: "L",
-  AMD: "֏",
-  ANG: "ƒ",
-  AOA: "Kz",
-  ARS: "$",
-  AUD: "A$",
-  AWG: "ƒ",
-  AZN: "₼",
-  BAM: "KM",
-  BBD: "B$",
-  BDT: "৳",
-  BGN: "лв",
-  BHD: ".د.ب",
-  BIF: "FBu",
-  BMD: "BD$",
-  BND: "B$",
-  BOB: "Bs.",
-  BRL: "R$",
-  BSD: "B$",
-  BTN: "Nu.",
-  BWP: "P",
-  BYN: "Br",
-  BZD: "BZ$",
-  CAD: "C$",
-  CDF: "FC",
-  CHF: "CHF",
-  CLP: "$",
-  CNY: "¥",
-  COP: "$",
-  CRC: "₡",
-  CUP: "$",
-  CVE: "$",
-  CZK: "Kč",
-  DJF: "Fdj",
-  DKK: "kr",
-  DOP: "RD$",
-  DZD: "دج",
-  EGP: "£",
-  ERN: "Nfk",
-  ETB: "Br",
-  EUR: "€",
-  FJD: "FJ$",
-  FKP: "£",
-  FOK: "kr",
-  GBP: "£",
-  GEL: "₾",
-  GGP: "£",
-  GHS: "GH₵",
-  GIP: "£",
-  GMD: "D",
-  GNF: "FG",
-  GTQ: "Q",
-  GYD: "$",
-  HKD: "HK$",
-  HNL: "L",
-  HRK: "kn",
-  HTG: "G",
-  HUF: "Ft",
-  IDR: "Rp",
-  ILS: "₪",
-  IMP: "£",
-  INR: "₹",
-  IQD: "ع.د",
-  IRR: "﷼",
-  ISK: "kr",
-  JEP: "£",
-  JMD: "J$",
-  JOD: "د.ا",
-  JPY: "¥",
-  KES: "KSh",
-  KGS: "лв",
-  KHR: "៛",
-  KID: "A$",
-  KMF: "CF",
-  KRW: "₩",
-  KWD: "د.ك",
-  KYD: "CI$",
-  KZT: "₸",
-  LAK: "₭",
-  LBP: "ل.ل",
-  LKR: "Rs",
-  LRD: "L$",
-  LSL: "L",
-  LYD: "ل.د",
-  MAD: "د.م.",
-  MDL: "L",
-  MGA: "Ar",
-  MKD: "ден",
-  MMK: "K",
-  MNT: "₮",
-  MOP: "MOP$",
-  MRU: "UM",
-  MUR: "₨",
-  MVR: "Rf",
-  MWK: "MK",
-  MXN: "$",
-  MYR: "RM",
-  MZN: "MT",
-  NAD: "N$",
-  NGN: "₦",
-  NIO: "C$",
-  NOK: "kr",
-  NPR: "₨",
-  NZD: "NZ$",
-  OMR: "ر.ع.",
-  PAB: "B/.",
-  PEN: "S/.",
-  PGK: "K",
-  PHP: "₱",
-  PKR: "₨",
-  PLN: "zł",
-  PYG: "₲",
-  QAR: "﷼",
-  RON: "lei",
-  RSD: "дин",
-  RUB: "₽",
-  RWF: "FRw",
-  SAR: "﷼",
-  SBD: "$",
-  SCR: "₨",
-  SDG: "£",
-  SEK: "kr",
-  SGD: "S$",
-  SHP: "£",
-  SLE: "Le",
-  SLL: "Le",
-  SOS: "Sh.So.",
-  SRD: "$",
-  SSP: "£",
-  STN: "Db",
-  SYP: "£",
-  SZL: "E",
-  THB: "฿",
-  TJS: "ЅМ",
-  TMT: "m",
-  TND: "د.ت",
-  TOP: "T$",
-  TRY: "₺",
-  TTD: "TT$",
-  TVD: "A$",
-  TWD: "NT$",
-  TZS: "Sh",
-  UAH: "₴",
-  UGX: "Sh",
-  USD: "$",
-  UYU: "$U",
-  UZS: "so'm",
-  VES: "Bs.S",
-  VND: "₫",
-  VUV: "VT",
-  WST: "T",
-  XAF: "FCFA",
-  XCD: "EC$",
-  XDR: "SDR",
-  XOF: "CFA",
-  XPF: "₣",
-  YER: "﷼",
-  ZAR: "R",
-  ZMW: "ZK",
-  ZWL: "Z$",
-};
+export { currencySymbols };
 
 // Selected currency and its USD → currency rate. `ready` is false while the
 // rates are loading or if they failed to load: callers must never treat a
@@ -184,108 +37,202 @@ export function useCurrencyRate() {
   return { code: selectedCurrency, rate: ready ? rate : null, ready };
 }
 
-// All prices in the app (products, shipping rates, orders) are stored in USD.
-// Returns a formatter that converts a USD amount to the selected currency.
-// Until the rate is known, prices are shown in USD rather than mislabelled.
+// Money in the shopper's display currency. Until the selected currency's rate
+// has loaded, everything is shown in USD rather than mislabelled.
+export function useMoney() {
+  const { code, ready } = useCurrencyRate();
+  const { currencies } = useAppSelector((state: RootState) => state.currency);
+  const display = ready ? code : "USD";
+
+  const usdRate: RateLookup = useCallback(
+    (c: string) =>
+      c === "USD" ? 1 : (currencies.find((x) => x.code === c)?.rate ?? null),
+    [currencies],
+  );
+
+  // Any Money → display currency (null if a rate is missing)
+  const toDisplay = useCallback(
+    (m: Money) => convert(m, display, usdRate),
+    [display, usdRate],
+  );
+
+  // A shipping rate as Money in its own currency. Untagged (older saved)
+  // rates were quoted in the selected currency.
+  const ofRate = useCallback((rate: any) => rateMoney(rate, code), [code]);
+
+  // Any Money → USD major units, for the backend fields that are USD
+  const toUsd = useCallback(
+    (m: Money) => {
+      const usd = convert(m, "USD", usdRate);
+      return usd ? toMajor(usd) : 0;
+    },
+    [usdRate],
+  );
+
+  return { display, ready, usdRate, toDisplay, ofRate, toUsd };
+}
+
+// All product/order prices in the app are stored in USD.
+// Returns a formatter that converts a USD amount to the display currency.
 export function useFormatPrice() {
-  const { code, rate: selectedRate, ready } = useCurrencyRate();
-  const rate = ready ? (selectedRate as number) : 1;
-  const symbol = ready ? currencySymbols[code] || code : currencySymbols.USD;
+  const { toDisplay } = useMoney();
 
   return useCallback(
     (usdAmount: number | string | null | undefined) =>
-      `${symbol}${(Number(usdAmount || 0) * rate).toFixed(2)}`,
-    [symbol, rate],
+      formatMoney(
+        toDisplay(money(usdAmount, "USD")) ?? money(usdAmount, "USD"),
+      ),
+    [toDisplay],
   );
 }
 
-// Stripe takes these currencies in whole units, not cents.
-// https://docs.stripe.com/currencies#zero-decimal
-const ZERO_DECIMAL_CURRENCIES = [
-  "BIF",
-  "CLP",
-  "DJF",
-  "GNF",
-  "JPY",
-  "KMF",
-  "KRW",
-  "MGA",
-  "PYG",
-  "RWF",
-  "UGX",
-  "VND",
-  "VUV",
-  "XAF",
-  "XOF",
-  "XPF",
-];
+// Formats a cart line (USD unit price × qty) rounded the same way as the order
+// totals: the unit price is converted once, then multiplied.
+export function useFormatLine() {
+  const { toDisplay } = useMoney();
 
-export const toMinorUnits = (amount: number, currency: string) =>
-  Math.round(
-    amount *
-      (ZERO_DECIMAL_CURRENCIES.includes(currency.toUpperCase()) ? 1 : 100),
+  return useCallback(
+    (unitUsd: number | string | null | undefined, qty: number) => {
+      const unitPrice = money(unitUsd, "USD");
+      return formatMoney(times(toDisplay(unitPrice) ?? unitPrice, qty || 1));
+    },
+    [toDisplay],
+  );
+}
+
+// Formats a shipping rate in the display currency, whatever currency it was
+// quoted in (API rates: selected currency; frontend-built rates: USD).
+export function useFormatRate() {
+  const { toDisplay, ofRate } = useMoney();
+
+  return useCallback(
+    (rate: any) => {
+      const m = ofRate(rate);
+      return formatMoney(toDisplay(m) ?? m);
+    },
+    [toDisplay, ofRate],
+  );
+}
+
+export type OrderTotals = {
+  currency: string;
+  lines: Money[]; // one per cart line, in cart order
+  subtotal: Money;
+  manualDiscount: Money;
+  couponDiscount: Money;
+  discount: Money;
+  shipping: Money;
+  tax: Money;
+  total: Money;
+};
+
+type OrderTotalsInput = {
+  cart: { price?: unknown; quantity?: unknown }[];
+  manualDiscountUsd?: number;
+  couponDiscountUsd?: number;
+  shippingRates: any[]; // the selected rate(s); several for multi-address
+  taxUsd?: number;
+};
+
+// Builds the order summary in one currency, in whole minor units. Each line is
+// converted and rounded once, and every subtotal/total is the sum of those
+// same rounded lines, so the summary always adds up and matches the charge.
+const buildTotals = (
+  input: OrderTotalsInput,
+  currency: string,
+  to: (m: Money) => Money | null,
+  ofRate: (rate: any) => Money,
+): OrderTotals | null => {
+  const conv = (m: Money) => to(m);
+  const lines: Money[] = [];
+  for (const item of input.cart) {
+    // Convert the unit price, then × qty — matches the unit price shown
+    const unitPrice = conv(money(Number(item.price) || 0, "USD"));
+    if (!unitPrice) return null;
+    lines.push(times(unitPrice, Number(item.quantity) || 1));
+  }
+  const manual = conv(money(input.manualDiscountUsd, "USD"));
+  const coupon = conv(money(input.couponDiscountUsd, "USD"));
+  const tax = conv(money(input.taxUsd, "USD"));
+  const shippingParts = input.shippingRates.map((r) => conv(ofRate(r)));
+  if (!manual || !coupon || !tax || shippingParts.some((p) => !p)) return null;
+
+  const subtotal = sum(currency, lines);
+  const discount = add(manual, coupon);
+  const shipping = sum(currency, shippingParts as Money[]);
+  const total = atLeastZero(
+    add(add(subtract(subtotal, discount), shipping), tax),
   );
 
-// Currency Stripe charges in, plus converters to Stripe's minor-unit amounts.
+  return {
+    currency,
+    lines,
+    subtotal,
+    manualDiscount: manual,
+    couponDiscount: coupon,
+    discount,
+    shipping,
+    tax,
+    total,
+  };
+};
+
+// Order totals for display, plus the same totals in the currency Stripe
+// charges in (identical when charging in the selected currency).
+// `display` / `charge` are null while a needed exchange rate is missing.
+export function useOrderTotals(input: OrderTotalsInput) {
+  const { display, usdRate, ofRate } = useMoney();
+  const { currency: chargeCurrency } = useChargeCurrency();
+
+  return useMemo(() => {
+    const build = (currency: string) =>
+      buildTotals(
+        input,
+        currency,
+        (m) => convert(m, currency, usdRate),
+        ofRate,
+      );
+    const displayTotals = build(display);
+    const chargeTotals =
+      chargeCurrency === display ? displayTotals : build(chargeCurrency);
+    return { display: displayTotals, charge: chargeTotals };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    display,
+    chargeCurrency,
+    usdRate,
+    ofRate,
+    input.cart,
+    input.manualDiscountUsd,
+    input.couponDiscountUsd,
+    input.taxUsd,
+    input.shippingRates,
+  ]);
+}
+
+// Currency Stripe charges in, and converters to Stripe's minor-unit amounts.
 // `ready` is false until the selected currency's rate has loaded — payments
-// must be blocked until then (the amounts below would be wrong).
+// must be blocked until then (the amounts would be wrong).
 export function useChargeCurrency() {
-  const { code: selectedCurrency, rate: selectedRate, ready } =
-    useCurrencyRate();
-  const rate = selectedRate ?? 1;
+  const { code: selectedCurrency, ready } = useCurrencyRate();
+  const { currencies } = useAppSelector((state: RootState) => state.currency);
   const currency = chargeInSelectedCurrency ? selectedCurrency : "USD";
 
-  // From a USD amount (subtotal, finalTotal)
-  const fromUsd = useCallback(
-    (usdAmount: number) =>
-      toMinorUnits(
-        chargeInSelectedCurrency ? usdAmount * rate : usdAmount,
-        currency,
-      ),
-    [currency, rate],
+  const usdRate: RateLookup = useCallback(
+    (c: string) =>
+      c === "USD" ? 1 : (currencies.find((x) => x.code === c)?.rate ?? null),
+    [currencies],
   );
 
-  // From an amount already in the selected currency (shipping API rates)
-  const fromSelected = useCallback(
-    (amount: number) =>
-      toMinorUnits(chargeInSelectedCurrency ? amount : amount / rate, currency),
-    [currency, rate],
+  // Any Money → minor units of the charge currency (0 if a rate is missing)
+  const toChargeMinor = useCallback(
+    (m: Money) => convert(m, currency, usdRate)?.minor ?? 0,
+    [currency, usdRate],
   );
 
-  return { currency, fromUsd, fromSelected, ready };
+  return { currency, ready, toChargeMinor };
 }
 
-// Converts an amount the backend returned in the selected currency back to USD,
-// so it can be summed with other USD amounts (subtotal, totals).
-// Before the rate loads this is only approximate; payment is blocked meanwhile.
-export function useToUsd() {
-  const { rate: selectedRate } = useCurrencyRate();
-  const rate = selectedRate ?? 1;
-
-  return useCallback(
-    (amount: number | string | null | undefined) => Number(amount || 0) / rate,
-    [rate],
-  );
-}
-
-// For amounts the backend already returns in the selected currency
-// (e.g. shipping rates) — adds the symbol without converting.
-export function useFormatConvertedPrice() {
-  const { selectedCurrency } = useAppSelector(
-    (state: RootState) => state.currency,
-  );
-  const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
-
-  return useCallback(
-    (amount: number | string | null | undefined) =>
-      `${symbol}${Number(amount || 0).toFixed(2)}`,
-    [symbol],
-  );
-}
+export { formatMoney, zero };
 
 export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];
-// Rates built on the frontend (USD) vs. rates from the shipping API, which
-// already come back in the selected currency.
-const LOCAL_SHIPPING_TYPES = [...PRODUCT_SHIPPING_TYPES, "own", "flat"];
-export const isApiShippingRate = (rate: any) =>
-  !!rate && !LOCAL_SHIPPING_TYPES.includes(rate.service_type);

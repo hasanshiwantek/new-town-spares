@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormatPrice } from "@/hooks/useFormatPrice";
+import { useFormatPrice, useOrderTotals } from "@/hooks/useFormatPrice";
+import { formatMoney } from "@/lib/money";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -41,6 +42,11 @@ export default function WishlistCartSidebar() {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
+  // Subtotal = sum of the unit prices shown × qty (same as cart/checkout)
+  const { display: cartTotals } = useOrderTotals({ cart, shippingRates: [] });
+  const subtotalText = cartTotals
+    ? formatMoney(cartTotals.subtotal)
+    : formatPrice(subtotal);
 
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) return;
@@ -225,11 +231,11 @@ export default function WishlistCartSidebar() {
         </div>
         <div className="flex justify-between py-[7px]">
           <span>Subtotal:</span>
-          <span>{formatPrice(subtotal)}</span>
+          <span>{subtotalText}</span>
         </div>
         <div className="flex justify-between py-[7px]">
           <span>Grand total:</span>
-          <span>{formatPrice(subtotal)}</span>
+          <span>{subtotalText}</span>
         </div>
       </div>
 

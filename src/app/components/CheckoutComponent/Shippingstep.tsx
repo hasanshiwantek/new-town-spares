@@ -8,12 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countriesWithoutPostalCode } from "@/const/country-level";
-import {
-  isApiShippingRate,
-  PRODUCT_SHIPPING_TYPES,
-  useFormatConvertedPrice,
-  useFormatPrice,
-} from "@/hooks/useFormatPrice";
+import { PRODUCT_SHIPPING_TYPES, useFormatRate } from "@/hooks/useFormatPrice";
+import { rateCurrency } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { cn } from "@/lib/utils";
 import {
@@ -25,6 +21,7 @@ import {
   fetchShippingRate,
   fetchShippingRates,
   resetShippingRates,
+  setRatesLoading,
   setShippingRates,
 } from "@/redux/slices/shippingSlice";
 import { RootState } from "@/redux/store";
@@ -139,18 +136,20 @@ export function calculatePackage(products: any[]) {
   };
 }
 
-export function getSavedShippingCost(
+// The shipping rate saved on the cart, or null if none applies any more
+// (e.g. a saved fixed-shipping rate after the cart changed).
+export function getSavedShippingRate(
   shippingDetail: any,
   productShippingRate: { service_type: string } | null,
 ) {
   const rate = shippingDetail?.rate;
-  if (!rate) return 0;
+  if (!rate) return null;
   if (
     PRODUCT_SHIPPING_TYPES.includes(rate.service_type) &&
     rate.service_type !== productShippingRate?.service_type
   )
-    return 0;
-  return Number(rate.total_charge) || 0;
+    return null;
+  return rate;
 }
 
 const hasFixedShipping = (p: any) => Number(p?.fixedShippingCost) > 0.0;
@@ -175,6 +174,7 @@ export function getProductShippingRate(products: any[]) {
       method_type: "fixed_shipping",
       display_name: "Fixed Shipping",
       total_charge: Number(total.toFixed(2)),
+      currency: "USD", // product fixedShippingCost is in the store currency
       is_fedex: false,
     };
   }
@@ -185,6 +185,7 @@ export function getProductShippingRate(products: any[]) {
     method_type: "free_shipping",
     display_name: "Free Shipping",
     total_charge: 0,
+    currency: "USD",
     is_fedex: false,
   };
 }
@@ -210,8 +211,10 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   );
 
   const dispatch = useAppDispatch();
-  const formatPrice = useFormatPrice();
-  const formatRatePrice = useFormatConvertedPrice();
+  const formatRate = useFormatRate();
+  const selectedCurrency = useAppSelector(
+    (state: RootState) => state.currency.selectedCurrency,
+  );
   const cart = useAppSelector((state: RootState) => state?.carts?.items);
   const auth = useAppSelector((state: RootState) => state?.auth);
   const shippingCostLoading = useAppSelector(
@@ -322,7 +325,12 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
       (!hasPostalCode || zip?.trim())
     ) {
       const pkg = calculatePackage(cart);
+      // Loader on now, not after the debounce — otherwise nothing seems to
+      // happen until the new rates suddenly appear
+      dispatch(setRatesLoading(true));
+      let fired = false;
       const timer = setTimeout(() => {
+        fired = true;
         dispatch(resetShippingRates());
         dispatch(
           fetchShippingRates({
@@ -341,9 +349,16 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         );
       }, 600);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        // Debounce cancelled before the request went out (the next run turns
+        // the loader back on if it schedules another quote)
+        if (!fired) dispatch(setRatesLoading(false));
+      };
     }
-  }, [city, country, zip, state]);
+    // Re-quote when the currency changes too: carrier rates are quoted in the
+    // selected currency, so old quotes would be in the previous one
+  }, [city, country, zip, state, selectedCurrency]);
   // useEffect(() => {
   //   if (!auth?.isAuthenticated || !userAddresses?.length) {
   //     setAddressMode("new");
@@ -377,6 +392,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         service_type: selectedRate?.service_type,
         method_type: selectedRate?.method_type,
         total_charge: cost,
+        currency: rateCurrency(selectedRate, selectedCurrency),
       },
     };
     await dispatch(addShippingCost(shippingData))
@@ -385,6 +401,25 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
         dispatch(fetchShippingRate());
       });
   };
+
+  // After a re-quote (currency switch, address edit), keep the shopper's chosen
+  // method and save it again at its new price, so the rate saved on the cart
+  // is always in the current currency and matches the list.
+  const savedRate = useAppSelector(
+    (state: RootState) => (state.shippingZone as any)?.shippingDetail?.rate,
+  );
+  useEffect(() => {
+    if (productShippingRate || !watchedShippingMethod) return;
+    const rate = shippingRates?.find(
+      (r: any) => r.service_type === watchedShippingMethod,
+    );
+    if (!rate) return;
+    const sameAsSaved =
+      savedRate?.service_type === rate.service_type &&
+      Number(savedRate?.total_charge) === Number(rate.total_charge);
+    if (sameAsSaved) return;
+    saveShippingMethod(watchedShippingMethod, rate).catch(() => {});
+  }, [shippingRates]);
 
   // Fixed/free shipping ka sirf ek option hai, address complete hote hi auto select
   useEffect(() => {
@@ -421,7 +456,6 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   ? `${rate.service_name}`
                   : rate.display_name
                 : dest.selectedShippingMethod || "";
-              const ratePrice = rate ? Number(rate.total_charge) : 0;
               return (
                 <div key={dest.id} className="space-y-1">
                   <p className="font-bold text-gray-800 text-base">
@@ -458,9 +492,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <div className="mt-1">
                       <p className="text-xs text-gray-600">{rateLabel}</p>
                       <p className="text-xs text-gray-600 ml-2">
-                        {isApiShippingRate(rate)
-                          ? formatRatePrice(ratePrice)
-                          : formatPrice(ratePrice)}
+                        {formatRate(rate ?? { total_charge: 0, currency: "USD" })}
                       </p>
                     </div>
                   )} */}
@@ -502,7 +534,13 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             {shippingInfo?.city}, {shippingInfo?.state} {shippingInfo?.zip}{" "}
             {shippingInfo?.country ? ` / ${shippingInfo.country}` : ""}{" "}
           </p>
-          {selectedRate && (
+          {(ratesLoader || shippingCostLoading) && !productShippingRate ? (
+            // Collapsed step: re-quoting (e.g. after a currency switch)
+            <p className="mt-3 pt-3 border-t border-[#e5e5e5] text-[13px] text-[#545454] flex items-center gap-2">
+              <span className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-[#FF482E] animate-spin" />
+              Updating shipping rates…
+            </p>
+          ) : selectedRate && (
             <p className="mt-3 pt-3 border-t border-[#e5e5e5] text-[13px] text-[#545454]">
               {selectedRate.is_fedex
                 ? `FedEx (${selectedRate.service_name})`
@@ -510,9 +548,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
               <span className="ml-3">
                 {Number(selectedRate.total_charge) === 0
                   ? "Free"
-                  : isApiShippingRate(selectedRate)
-                    ? formatRatePrice(selectedRate.total_charge)
-                    : formatPrice(selectedRate.total_charge)}
+                  : formatRate(selectedRate)}
               </span>
             </p>
           )}
@@ -1092,7 +1128,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         {productShippingRate.display_name}
                       </span>
                       <span className="text-[15px] text-[#333333] shrink-0">
-                        {formatPrice(productShippingRate.total_charge)}
+                        {formatRate(productShippingRate)}
                       </span>
                     </div>
                   </label>
@@ -1165,7 +1201,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             </p>
                           </div>
                           <span className="text-[15px] text-[#333333] shrink-0">
-                            {formatRatePrice(rate.total_charge)}
+                            {formatRate(rate)}
                           </span>
                         </div>
                       </label>
