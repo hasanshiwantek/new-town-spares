@@ -69,3 +69,35 @@ export function isEmpty(val: unknown): boolean {
 
   return false;
 }
+export const findCategoryPath = (
+  categories: any[],
+  targetId: number,
+  path: any[] = []
+): any[] | null => {
+  for (const cat of categories ?? []) {
+    const currentPath = [
+      ...path,
+      {
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+      },
+    ];
+
+    if (Number(cat.id) === Number(targetId)) {
+      return currentPath;
+    }
+
+    if (cat.subcategories?.length) {
+      const found = findCategoryPath(
+        cat.subcategories,
+        targetId,
+        currentPath
+      );
+
+      if (found) return found;
+    }
+  }
+
+  return null;
+};

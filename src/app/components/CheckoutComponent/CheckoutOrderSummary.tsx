@@ -1,11 +1,12 @@
 "use client";
+import type { OrderTotals } from "@/hooks/useFormatPrice";
+import { useAppSelector } from "@/hooks/useReduxHooks";
+import { formatMoney, Money } from "@/lib/money";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import ChargeCurrencyNote from "../productprice/ChargeCurrencyNote";
 import ProductPrice from "../productprice/ProductPrice";
-import type { OrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney, Money } from "@/lib/money";
 
 interface OrderSummaryProps {
   // Summary in the display currency; null until exchange rates are known
@@ -26,6 +27,7 @@ interface OrderSummaryProps {
   setPromoCode: (code: string) => void;
   onApplyCoupon: () => void;
   onRemoveCoupon: () => void;
+  ratesLoader?: boolean;
 }
 
 const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
@@ -45,6 +47,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   setPromoCode,
   onApplyCoupon,
   onRemoveCoupon,
+  ratesLoader,
 }) => {
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [discountOpen, setDiscountOpen] = useState(false);
@@ -56,6 +59,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
     ) : (
       <ProductPrice price={usd} inline={true} />
     );
+
   const spinner = (
     <span
       role="status"
@@ -63,6 +67,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       className="inline-block h-4 w-4 align-middle rounded-full border-2 border-gray-300 border-t-[#FF482E] animate-spin"
     />
   );
+
   return (
     <div className="bg-white border border-[#ebebeb] rounded-[4px] h-fit sticky top-9">
       <div className="flex items-center justify-between p-[19.5px] border-b border-[#ebebeb]">
@@ -157,10 +162,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-3 text-[13px] pt-[19.5px] px-[19.5px]">
         <div className="flex justify-between text-[#333333]">
           <span>Subtotal</span>
-          <span>
-            {" "}
-            {amount((t) => t.subtotal, subtotal)}
-          </span>
+          <span> {amount((t) => t.subtotal, subtotal)}</span>
         </div>
         {(appliedCoupon && discountAmount > 0) || manualDiscount > 0 ? (
           <div className="mt-2 overflow-hidden transition-all duration-300 ease-in-out">
@@ -249,9 +251,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
         </div>
         <div className="flex justify-between text-[#333333]">
           <span>Tax</span>
-          <span>
-            {amount((t) => t.tax, tax)}
-          </span>
+          <span>{amount((t) => t.tax, tax)}</span>
         </div>
       </div>
 

@@ -1778,6 +1778,7 @@ const CheckoutForm = () => {
                           ? "Google Pay"
                           : "Credit Card"
                   }
+                      ratesLoader={ratesLoader}
                 />
               </div>
             )}
@@ -1802,6 +1803,7 @@ const CheckoutForm = () => {
               setPromoCode={setPromoCode}
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
+              ratesLoader={ratesLoader}
             />
           ) : (
             <CheckoutMultipleOrderSummary
