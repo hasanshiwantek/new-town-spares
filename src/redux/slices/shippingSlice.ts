@@ -5,9 +5,12 @@ export const fetchShippingRates = createAsyncThunk(
   "shippingZone/fetchShippingRates",
   async ({ data }: { data: any }, thunkAPI) => {
     const { destination } = data;
+    const state = thunkAPI.getState() as any;
+    const currency = state?.currency?.selectedCurrency || "USD";
     try {
       const res = await axiosInstance.post(`web/checkout/get-shipping-rates`, {
         destination,
+        currency,
       });
       return res.data;
     } catch (err: any) {

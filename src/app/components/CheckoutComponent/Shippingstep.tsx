@@ -1,5 +1,4 @@
 "use client";
-import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countriesWithoutPostalCode } from "@/const/country-level";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { cn } from "@/lib/utils";
 import {
@@ -23,6 +23,7 @@ import {
   setShippingRates,
 } from "@/redux/slices/shippingSlice";
 import { RootState } from "@/redux/store";
+import { getCurrencySymbol } from "@/utils/currency";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Controller,
@@ -38,13 +39,14 @@ import ShipToSingleAddressModal from "./ShipToSingleAddressModal";
 const rateRowCls = (selected: boolean, enabled: boolean) =>
   cn(
     "flex items-center gap-4 px-5 py-[14px] transition-colors",
-    enabled ? "cursor-pointer hover:bg-[#ebebeb]" : "cursor-not-allowed opacity-50",
+    enabled
+      ? "cursor-pointer hover:bg-[#ebebeb]"
+      : "cursor-not-allowed opacity-50",
     selected && "bg-[#ebebeb]",
   );
 
 const rateRadioCls =
   "appearance-none shrink-0 w-[24px] h-[24px] rounded-full border border-[#d9d9d9] bg-white checked:border-2 checked:border-[#FF482E] checked:bg-[#FF482E] checked:shadow-[inset_0_0_0_4px_#fff]";
-  
 
 interface ShippingStepProps {
   register: UseFormRegister<any>;
@@ -202,6 +204,13 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const { shippingRates, ratesLoader } = useAppSelector(
     (state) => state.shippingZone,
   );
+  const { selectedCurrency, currencies } = useAppSelector(
+    (state: RootState) => state.currency,
+  );
+  const currencySymbol = getCurrencySymbol(selectedCurrency);
+  // API rates come back already converted; product-level fixed rates are in base currency
+  const currencyRate =
+    currencies.find((c) => c.code === selectedCurrency)?.rate || 1;
 
   const dispatch = useAppDispatch();
   const formatPrice = useFormatPrice();
@@ -715,7 +724,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <Input
                       id="firstName"
                       type="text"
-                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                         errors.firstName ? "border-red-500" : ""
                       }`}
                       {...register("firstName", {
@@ -739,7 +748,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <Input
                       id="lastName"
                       type="text"
-                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                         errors.lastName ? "border-red-500" : ""
                       }`}
                       {...register("lastName", {
@@ -764,7 +773,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="company"
                     type="text"
-                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    className="w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb]"
                     {...register("company")}
                   />
                 </div>
@@ -779,7 +788,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="phone"
                     type="text"
-                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    className="w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb]"
                     {...register("phone")}
                   />
                 </div>
@@ -794,7 +803,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="address1"
                     type="text"
-                    className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                    className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                       errors.address1 ? "border-red-500" : ""
                     }`}
                     {...register("address1", {
@@ -818,7 +827,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="address2"
                     type="text"
-                    className="w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb]"
+                    className="w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb]"
                     {...register("address2")}
                   />
                 </div>
@@ -833,7 +842,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                   <Input
                     id="city"
                     type="text"
-                    className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${errors.city ? "border-red-500" : ""}`}
+                    className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${errors.city ? "border-red-500" : ""}`}
                     {...register("city", {
                       required: "City is required",
                     })}
@@ -869,7 +878,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         value={field.value}
                       >
                         <SelectTrigger
-                          className={`w-full !max-w-full h-[45px] !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                          className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                             errors.country ? "border-red-500" : ""
                           }`}
                         >
@@ -920,7 +929,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                             value={field.value}
                           >
                             <SelectTrigger
-                              className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                              className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                                 errors.state ? "border-red-500" : ""
                               }`}
                             >
@@ -940,7 +949,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       <Input
                         id="state"
                         type="text"
-                        className={`w-full !max-w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                        className={`w-full max-w-full! h-[45px] text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                           errors.state ? "border-red-500" : ""
                         }`}
                         {...register("state")}
@@ -968,7 +977,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                     <Input
                       id="zip"
                       type="text"
-                      className={`w-full h-[45px] !max-w-full !text-[13px] bg-white rounded-[4px] border-[#ebebeb] ${
+                      className={`w-full h-[45px] max-w-full! text-[13px]! bg-white rounded-[4px] border-[#ebebeb] ${
                         errors.zip ? "border-red-500" : ""
                       }`}
                       {...register("zip", {
@@ -1093,7 +1102,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                       className="flex items-center gap-4 px-5 py-[14px]"
                     >
                       {/* Radio circle */}
-                      <div className="w-[24px] h-[24px] rounded-full border border-gray-200 flex-shrink-0 animate-pulse" />
+                      <div className="w-[24px] h-[24px] rounded-full border border-gray-200 shrink-0 animate-pulse" />
 
                       <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
                         {/* Left: service name */}
@@ -1103,7 +1112,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
                         </div>
 
                         {/* Right: price */}
-                        <div className="h-4 bg-gray-200 rounded animate-pulse w-14 flex-shrink-0" />
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-14 shrink-0" />
                       </div>
                     </div>
                   ))
@@ -1182,7 +1191,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
             <textarea
               id="orderComment"
               rows={4}
-              className="w-full border border-[#ebebeb] rounded-[4px] p-3 !text-[13px] resize-none max-h-[45px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-300 focus-visible:border-orange-500"
+              className="w-full border border-[#ebebeb] rounded-[4px] p-3 text-[13px]! resize-none max-h-[45px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-orange-300 focus-visible:border-orange-500"
               {...register("orderComment")}
               placeholder="Add any special instructions..."
             />

@@ -246,6 +246,7 @@ const CheckoutForm = () => {
   const stripeCardMethods = ["credit_card"];
   const walletMethods = ["google_pay", "apple_pay"];
   const { shippingRates } = useAppSelector((state) => state.shippingZone);
+  const { selectedCurrency } = useAppSelector((state) => state.currency);
   const stateList = useMemo(() => {
     if (!watchedCountry) return [];
     return State.getStatesOfCountry(watchedCountry).map((s) => ({
@@ -535,6 +536,7 @@ const CheckoutForm = () => {
                 item_count: calculatePackage(cart).item_count,
                 package_value: finalTotal,
               },
+              currency: selectedCurrency,
             }),
           },
         );
@@ -598,7 +600,7 @@ const CheckoutForm = () => {
     return () => {
       isMounted = false;
     };
-  }, [stripe, cart, finalTotal]); // DEPENDENCY: finalTotal instead of total
+  }, [stripe, cart, finalTotal, selectedCurrency]); // DEPENDENCY: finalTotal instead of total
   const getDeviceType = () => {
     if (typeof window === "undefined") return "New Town Spares (Desktop)";
 
