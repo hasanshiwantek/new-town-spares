@@ -3,16 +3,18 @@
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { baseURL, storeId } from "@/lib/axiosInstance";
-import { loginUser } from "@/redux/slices/authSlice";
+import { loginUser, sendMagicLink } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
+import { getFromStorage, getSessionId } from "@/utils/storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import SignupForm from "./SignupForm";
+import AccountSignInLinkModal from "../modal/AccountSignInLinkModal";
+import { Button } from "@/components/ui/button";
 
 interface SigninFormValues {
   email: string;
@@ -32,7 +34,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
   } = useForm<SigninFormValues>();
 
   const dispatch = useAppDispatch();
-  const router = useRouter();
+  const [signInLinkOpen, setSignInLinkOpen] = useState(false);
   const [state, setState] = useState({
     email: "",
     password: "",
@@ -46,7 +48,7 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getFromStorage("sessionId");
+          const sessionId =  getSessionId();
           const res = await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
@@ -140,14 +142,12 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
             )}
           </div>
           <div className="mt-3 text-[13px] flex items-center justify-between w-full">
-            <Link
-              href="/auth/forgot-password"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#333333] "
+            <span
+              onClick={() => setSignInLinkOpen(true)}
+              className="cursor-pointer  border-0 bg-transparent p-0 text-[14px] text-text-secondary transition-colors duration-200 "
             >
               Send me a sign-in link instead
-            </Link>
+            </span>
 
             <p className="text-[#545454]">
               Don’t have an account?
@@ -193,6 +193,13 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
           <SignupForm onCancel={() => setShowSignup(false)} />
         </div>
       )}
+      <AccountSignInLinkModal
+        isOpen={signInLinkOpen}
+        onClose={() => setSignInLinkOpen(false)}
+        onSend={async (email) => {
+          await dispatch(sendMagicLink({ email })).unwrap();
+        }}
+      />
     </div>
   );
 };

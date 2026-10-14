@@ -22,13 +22,19 @@ export interface RegisterPayload {
   state?: string;
   zip?: string;
 }
-
+interface SendMagicLinkPayload {
+  email: string;
+}
+interface VerifyMagicLinkPayload {
+  token: string;
+}
 interface AuthState {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   user: any;
   token: string | null;
   expireAt?: string | null;
   loginloading: boolean;
+  loading: boolean;
   registerLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
@@ -44,6 +50,7 @@ const initialState: AuthState = {
   error: null,
   isAuthenticated: false,
   stores: [],
+  loading: false,
 };
 
 // Login thunk
@@ -118,6 +125,34 @@ export const checkAuthToken = createAsyncThunk(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Failed to check token",
+      );
+    }
+  },
+);
+
+export const sendMagicLink = createAsyncThunk(
+  "auth/sendMagicLink",
+  async (payload: SendMagicLinkPayload, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post("auth/send-magic-link", payload);
+      return res.data;
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to send magic link",
+      );
+    }
+  },
+);
+
+export const verifyMagicLink = createAsyncThunk(
+  "auth/verifyMagicLink",
+  async (payload: VerifyMagicLinkPayload, thunkAPI) => {
+    try {
+      const res = await axiosInstance.post("auth/verify-magic-link", payload);
+      return res.data;
+    } catch (err: any) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Magic link is invalid or expired",
       );
     }
   },
@@ -197,6 +232,45 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.registerLoading = false;
+        state.error = action.payload as string;
+      })
+
+      // Send Magic Link
+      .addCase(sendMagicLink.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendMagicLink.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendMagicLink.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(verifyMagicLink.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(verifyMagicLink.fulfilled, (state, action) => {
+        const { customer, token, expireAt, store, permissions } =
+          action.payload;
+
+        state.user = customer;
+        state.token = token;
+        state.expireAt = expireAt;
+        state.isAuthenticated = true;
+        state.error = null;
+        // if (store?.id) {
+        //   state.stores = [{ storeId: store.id, name: store.name }];
+        // }
+        if (token) {
+          setInStorage("token", token);
+          setInStorage("tokenExpiry", expireAt);
+          setInStorage("user", customer);
+        }
+      })
+      .addCase(verifyMagicLink.rejected, (state, action) => {
+        state.isAuthenticated = false;
         state.error = action.payload as string;
       });
   },

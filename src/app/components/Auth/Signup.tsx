@@ -11,7 +11,7 @@ import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
+import { getFromStorage, getSessionId } from "@/utils/storage";
 import { Country, State } from "country-state-city";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -120,7 +120,7 @@ const SignupPage = () => {
       const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
         const token = result.payload.token;
-        const sessionId = getFromStorage("sessionId");
+        const sessionId =  getSessionId();
 
         await fetch(`${baseURL}web/cart/transfer`, {
           method: "POST",

@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusMessage } from "@/components/common/statusMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,11 +10,11 @@ import { loginUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
+import { getFromStorage, getSessionId } from "@/utils/storage";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 interface SigninFormValues {
   email: string;
@@ -43,7 +44,7 @@ const SigninPage = () => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getFromStorage("sessionId");
+          const sessionId = getSessionId();
           await fetch(`${baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
@@ -83,6 +84,14 @@ const SigninPage = () => {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch(fetchCartList());
+    }, 1000);
+
+    return () => clearTimeout(timer); // cleanup
+  }, []);
+
   return (
     <section className="w-full mt-[9px] mb-20">
       {/* Breadcrumb (live hides it below 551px) */}
@@ -102,7 +111,12 @@ const SigninPage = () => {
         <h1 className="text-[28px] leading-[34px] text-[#333333] text-center mt-[26.25px] mb-[26.25px]">
           Sign in
         </h1>
-
+        {shouldLoadQuote && (
+          <StatusMessage
+            message="To purchase items in the cart, you'll need to sign in to your account prior to proceeding."
+            variant="error"
+          />
+        )}
         {/* Two Cards */}
         <div className="flex flex-col min-[801px]:flex-row gap-[22px] min-[801px]:max-h-[333px] mb-5">
           {/* Left Card - New Customer */}

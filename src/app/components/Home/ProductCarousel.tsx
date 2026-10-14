@@ -168,7 +168,7 @@ const ProductCarousel = ({ children }: { children: React.ReactNode }) => {
       <div ref={listRef} className="overflow-hidden">
         {/* .slick-track */}
         <div
-          className="flex pl-px touch-pan-y select-none"
+          className={`flex pl-px touch-pan-y select-none ${showNav ? "" : "justify-center"}`}
           style={{
             transform: `translateX(calc(${-offset} * (${SLIDE_W} + var(--gap)) + ${dragX}px))`,
             transition: dragging ? "none" : `transform ${SPEED}ms ease`,
