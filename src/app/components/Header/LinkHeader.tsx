@@ -265,7 +265,7 @@ const LinkHeader = () => {
           className="relative hidden lg:flex items-center gap-1 sm:gap-6"
           ref={currencyRef}
         >
-          <div className="flex flex-col leading-tight relative">
+          {/* <div className="flex flex-col leading-tight relative">
             <button
               aria-label="currency"
               aria-expanded={open}
@@ -307,7 +307,7 @@ const LinkHeader = () => {
                 })}
               </div>
             )}
-          </div>
+          </div> */}
           <div className="flex items-center gap-2">
             <TfiHeadphoneAlt className=" w-8 h-8" />
             <span className="text-sm sm:text-base md:text-lg lg:text-xl">
