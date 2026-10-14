@@ -5,9 +5,12 @@ export const fetchShippingRates = createAsyncThunk(
   "shippingZone/fetchShippingRates",
   async ({ data }: { data: any }, thunkAPI) => {
     const { destination } = data;
+    const state = thunkAPI.getState() as any;
+    const currency = state?.currency?.selectedCurrency || "USD";
     try {
       const res = await axiosInstance.post(`web/checkout/get-shipping-rates`, {
         destination,
+        currency,
       });
       return res.data;
     } catch (err: any) {
@@ -114,6 +117,11 @@ const shippingZoneSlice = createSlice({
       state.ratesLoader = false;
       state.error = null;
     },
+    // Show the rates loader as soon as a re-quote is scheduled (address typing
+    // is debounced), not only once the request starts
+    setRatesLoading: (state, action: { payload: boolean }) => {
+      state.ratesLoader = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
@@ -170,7 +178,7 @@ const shippingZoneSlice = createSlice({
       });
   },
 });
-export const { resetShippingRates, setShippingRates } =
+export const { resetShippingRates, setShippingRates, setRatesLoading } =
   shippingZoneSlice.actions;
 
 export default shippingZoneSlice.reducer;

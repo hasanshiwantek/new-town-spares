@@ -27,6 +27,9 @@ interface MultiAddressState {
   completedDestinations: Destination[];
   orderComment: string;
   destShippingRates: Record<string, any[]>;
+  // Destinations whose rates are being (re-)quoted — checkout shows a loader
+  // and blocks payment until they're in
+  destRatesLoading: Record<string, boolean>;
 }
 
 const initialState: MultiAddressState = {
@@ -43,6 +46,7 @@ const initialState: MultiAddressState = {
   completedDestinations: [],
   orderComment: "",
   destShippingRates: {},
+  destRatesLoading: {},
 };
 
 const multiAddressSlice = createSlice({
@@ -62,6 +66,7 @@ const multiAddressSlice = createSlice({
       state.destinations = state.destinations.filter(
         (d) => d.id !== action.payload,
       );
+      delete state.destRatesLoading[action.payload];
     },
     updateDestinationAddress: (
       state,
@@ -110,6 +115,14 @@ const multiAddressSlice = createSlice({
         [action.payload.destId]: action.payload.rates,
       };
     },
+    setDestRatesLoading: (
+      state,
+      action: PayloadAction<{ destId: string; loading: boolean }>,
+    ) => {
+      const { destId, loading } = action.payload;
+      if (loading) state.destRatesLoading[destId] = true;
+      else delete state.destRatesLoading[destId];
+    },
     clearMultiAddressProgress: (state) => {
       state.destinations = [
         {
@@ -123,6 +136,7 @@ const multiAddressSlice = createSlice({
       state.completedDestinations = [];
       state.orderComment = "";
       state.destShippingRates = {};
+      state.destRatesLoading = {};
       // isMultiAddress preserve karo
     },
   },
@@ -141,6 +155,7 @@ export const {
   resetMultiAddress,
   setDestShippingRatesAction,
   setDestShippingRate,
+  setDestRatesLoading,
   clearMultiAddressProgress,
 } = multiAddressSlice.actions;
 
