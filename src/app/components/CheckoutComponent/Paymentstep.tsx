@@ -58,10 +58,7 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   paymentMethodLabel,
 }) => {
   const stripeCardMethods = ["credit_card"];
-  const { loading, ratesLoader } = useAppSelector(
-    (state) => state.shippingZone,
-  );
-  const disabled = isProcessing || !stripe || loading || ratesLoader;
+  const disabled = isProcessing || !stripe 
   if (isCompleted && !isActive) {
     // Show completed state with payment method and edit button
     return (
