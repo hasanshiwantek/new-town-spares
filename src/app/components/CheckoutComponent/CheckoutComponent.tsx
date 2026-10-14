@@ -245,7 +245,7 @@ const CheckoutForm = () => {
   const watchedBillingSame = watch("billingSame");
   const stripeCardMethods = ["credit_card"];
   const walletMethods = ["google_pay", "apple_pay"];
-  const { shippingRates,ratesLoader  } = useAppSelector((state) => state.shippingZone);
+  const { shippingRates } = useAppSelector((state) => state.shippingZone);
   const stateList = useMemo(() => {
     if (!watchedCountry) return [];
     return State.getStatesOfCountry(watchedCountry).map((s) => ({
@@ -1555,7 +1555,6 @@ const CheckoutForm = () => {
     }
   }, [auth?.isAuthenticated]);
 
-
   return (
     <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
       {paymentRequest && (
@@ -1705,7 +1704,6 @@ const CheckoutForm = () => {
                           ? "Google Pay"
                           : "Credit Card"
                   }
-                      ratesLoader={ratesLoader}
                 />
               </div>
             )}
@@ -1728,7 +1726,6 @@ const CheckoutForm = () => {
               setPromoCode={setPromoCode}
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
-              ratesLoader={ratesLoader}
             />
           ) : (
             <CheckoutMultipleOrderSummary

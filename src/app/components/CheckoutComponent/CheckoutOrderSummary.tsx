@@ -20,7 +20,6 @@ interface OrderSummaryProps {
   setPromoCode: (code: string) => void;
   onApplyCoupon: () => void;
   onRemoveCoupon: () => void;
-  ratesLoader?:boolean
 }
 
 const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
@@ -38,11 +37,12 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   setPromoCode,
   onApplyCoupon,
   onRemoveCoupon,
-  ratesLoader
 }) => {
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [discountOpen, setDiscountOpen] = useState(false);
-  const { loading } = useAppSelector((state) => state.shippingZone);
+  const { loading, ratesLoader } = useAppSelector(
+    (state) => state.shippingZone,
+  );
   return (
     <div className="bg-white border border-[#ebebeb] rounded-[4px] h-fit sticky top-9">
       <div className="flex items-center justify-between p-[19.5px] border-b border-[#ebebeb]">

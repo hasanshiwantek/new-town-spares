@@ -38,7 +38,6 @@ interface PaymentStepProps {
   isCompleted: boolean;
   onEdit?: () => void;
   paymentMethodLabel?: string;
-  ratesLoader: boolean;
 }
 
 const PaymentStep: React.FC<PaymentStepProps> = ({
@@ -57,12 +56,12 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   isCompleted,
   onEdit,
   paymentMethodLabel,
-  ratesLoader,
 }) => {
   const stripeCardMethods = ["credit_card"];
-  const stateShippingZone = useAppSelector((state) => state.shippingZone);
-  const disabled =
-    isProcessing || !stripe || stateShippingZone?.loading || ratesLoader;
+  const { loading, ratesLoader } = useAppSelector(
+    (state) => state.shippingZone,
+  );
+  const disabled = isProcessing || !stripe || loading || ratesLoader;
   if (isCompleted && !isActive) {
     // Show completed state with payment method and edit button
     return (
