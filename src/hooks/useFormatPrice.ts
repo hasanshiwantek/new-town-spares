@@ -168,14 +168,29 @@ export const currencySymbols: Record<string, string> = {
   ZWL: "Z$",
 };
 
-// All prices in the app (products, shipping rates, orders) are stored in USD.
-// Returns a formatter that converts a USD amount to the selected currency.
-export function useFormatPrice() {
+// Selected currency and its USD → currency rate. `ready` is false while the
+// rates are loading or if they failed to load: callers must never treat a
+// missing rate as 1, or GBP amounts are shown/charged at USD values.
+export function useCurrencyRate() {
   const { selectedCurrency, currencies } = useAppSelector(
     (state: RootState) => state.currency,
   );
-  const rate = currencies.find((c) => c.code === selectedCurrency)?.rate || 1;
-  const symbol = currencySymbols[selectedCurrency] || selectedCurrency;
+  const rate =
+    selectedCurrency === "USD"
+      ? 1
+      : currencies.find((c) => c.code === selectedCurrency)?.rate;
+  const ready = typeof rate === "number" && rate > 0;
+
+  return { code: selectedCurrency, rate: ready ? rate : null, ready };
+}
+
+// All prices in the app (products, shipping rates, orders) are stored in USD.
+// Returns a formatter that converts a USD amount to the selected currency.
+// Until the rate is known, prices are shown in USD rather than mislabelled.
+export function useFormatPrice() {
+  const { code, rate: selectedRate, ready } = useCurrencyRate();
+  const rate = ready ? (selectedRate as number) : 1;
+  const symbol = ready ? currencySymbols[code] || code : currencySymbols.USD;
 
   return useCallback(
     (usdAmount: number | string | null | undefined) =>
@@ -212,11 +227,12 @@ export const toMinorUnits = (amount: number, currency: string) =>
   );
 
 // Currency Stripe charges in, plus converters to Stripe's minor-unit amounts.
+// `ready` is false until the selected currency's rate has loaded — payments
+// must be blocked until then (the amounts below would be wrong).
 export function useChargeCurrency() {
-  const { selectedCurrency, currencies } = useAppSelector(
-    (state: RootState) => state.currency,
-  );
-  const rate = currencies.find((c) => c.code === selectedCurrency)?.rate || 1;
+  const { code: selectedCurrency, rate: selectedRate, ready } =
+    useCurrencyRate();
+  const rate = selectedRate ?? 1;
   const currency = chargeInSelectedCurrency ? selectedCurrency : "USD";
 
   // From a USD amount (subtotal, finalTotal)
@@ -236,16 +252,15 @@ export function useChargeCurrency() {
     [currency, rate],
   );
 
-  return { currency, fromUsd, fromSelected };
+  return { currency, fromUsd, fromSelected, ready };
 }
 
 // Converts an amount the backend returned in the selected currency back to USD,
 // so it can be summed with other USD amounts (subtotal, totals).
+// Before the rate loads this is only approximate; payment is blocked meanwhile.
 export function useToUsd() {
-  const { selectedCurrency, currencies } = useAppSelector(
-    (state: RootState) => state.currency,
-  );
-  const rate = currencies.find((c) => c.code === selectedCurrency)?.rate || 1;
+  const { rate: selectedRate } = useCurrencyRate();
+  const rate = selectedRate ?? 1;
 
   return useCallback(
     (amount: number | string | null | undefined) => Number(amount || 0) / rate,

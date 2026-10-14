@@ -21,11 +21,12 @@ const initialState: CurrencyState = {
 // Only these currencies are offered in the store (in dropdown order)
 export const SUPPORTED_CURRENCIES = ["USD", "GBP"];
 
-// Fetch currencies from open.er-api.com
+// Fetch currencies via our own API route, which caches the open.er-api.com
+// rates server-side for 3 hours (src/app/api/currency-rates/route.ts)
 export const fetchCurrencies = createAsyncThunk(
   "currency/fetchCurrencies",
   async () => {
-    const res = await axios.get("https://open.er-api.com/v6/latest/USD");
+    const res = await axios.get("/api/currency-rates");
     const rates = res.data.rates;
     return SUPPORTED_CURRENCIES.filter((code) => rates[code] != null).map(
       (code) => ({
@@ -33,7 +34,14 @@ export const fetchCurrencies = createAsyncThunk(
         rate: rates[code],
       }),
     );
-  }
+  },
+  {
+    // Several header components dispatch this on mount; only the first runs
+    condition: (_, { getState }) => {
+      const { status } = (getState() as { currency: CurrencyState }).currency;
+      return status !== "loading" && status !== "succeeded";
+    },
+  },
 );
 
 const currencySlice = createSlice({

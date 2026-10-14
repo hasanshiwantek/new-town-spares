@@ -1,5 +1,4 @@
 "use client";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,12 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useChargeCurrency, useToUsd } from "@/hooks/useFormatPrice";
+import {
+  isApiShippingRate,
+  useChargeCurrency,
+  useToUsd,
+} from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import axiosInstance, {
   baseURL,
   stripePublishableKey,
 } from "@/lib/axiosInstance";
+import { cn } from "@/lib/utils";
 import {
   clearCart,
   decreaseQty,
@@ -69,7 +73,6 @@ import ShippingStep, {
   calculatePackage,
   getProductShippingRate,
   getSavedShippingCost,
-  isApiShippingRate,
 } from "./Shippingstep";
 
 export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
@@ -1586,7 +1589,6 @@ const CheckoutForm = () => {
       dispatch(fetchCustomerAddress());
     }
   }, [auth?.isAuthenticated]);
-
 
   return (
     <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
