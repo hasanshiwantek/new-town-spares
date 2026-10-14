@@ -276,14 +276,6 @@ const SingleOrder = () => {
           className={`${blockClass} hidden min-[801px]:block`}
           aria-hidden="true"
         />
-
-        {/* Actions */}
-        <section className={actionsBlockClass}>
-          <h6 className={blockHeading}>Actions</h6>
-          <button className="mt-[11px] w-full bg-[#FF482E] text-white border border-[#FF482E] rounded-[4px] h-[39px] px-[32px] text-[14px] font-light">
-            Reorder
-          </button>
-        </section>
       </div>
 
       {/* Items list (left, ~80%) + Order Summary (right, 250px); stacks <801 */}

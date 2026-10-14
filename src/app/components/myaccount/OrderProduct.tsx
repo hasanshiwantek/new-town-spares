@@ -8,6 +8,8 @@ import React, { useEffect, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import AccountEmptyState from "./AccountEmptyState";
 import ReturnItemsModal from "./ReturnItemsModal"; // Import modal
+import axiosInstance from "@/lib/axiosInstance";
+import { errorMessage } from "@/utils/message";
 
 const OrderProduct = () => {
   const dispatch = useAppDispatch();
@@ -32,6 +34,36 @@ const OrderProduct = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedOrder(null);
+  };
+  const handlePrint = async (orderNumber: string) => {
+    try {
+      const response = await axiosInstance.get(
+        `web/orders/customer/invoices/${orderNumber}`,
+        {
+          responseType: "blob",
+        },
+      );
+
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const printWindow = window.open(url, "_blank");
+
+      if (!printWindow) {
+        errorMessage("Please allow popups to print the invoice.");
+        return;
+      }
+
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    } catch (error) {
+      console.error("Invoice print error:", error);
+      errorMessage("Unable to print invoice.");
+    }
   };
 
   // Skeleton Loader
@@ -89,7 +121,7 @@ const OrderProduct = () => {
           const valueClass = "block text-[14px] leading-[21px] text-[#333333]";
 
           return (
-            <li key={item.id} className="mb-[21px]">
+            <li key={item?.id} className="mb-[21px]">
               <div className="border border-[#ebebeb] bg-white text-[#333333]">
                 {/* Detail row — its own grid so long product names below can't
                     blow out the intrinsic (max-content) tracks. */}
@@ -149,7 +181,7 @@ const OrderProduct = () => {
                         Order Details
                       </Link>
                       <button
-                        onClick={() => window.print()}
+                        onClick={() => handlePrint(item?.id)}
                         className="border-l border-[#ebebeb] pl-[5px] ml-[3px]"
                       >
                         Invoice

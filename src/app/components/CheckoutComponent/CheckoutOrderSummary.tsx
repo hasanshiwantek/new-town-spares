@@ -27,7 +27,6 @@ interface OrderSummaryProps {
   setPromoCode: (code: string) => void;
   onApplyCoupon: () => void;
   onRemoveCoupon: () => void;
-  ratesLoader?: boolean;
 }
 
 const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
@@ -47,7 +46,6 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   setPromoCode,
   onApplyCoupon,
   onRemoveCoupon,
-  ratesLoader,
 }) => {
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [discountOpen, setDiscountOpen] = useState(false);

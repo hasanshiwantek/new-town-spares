@@ -63,6 +63,7 @@ import { useForm } from "react-hook-form";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { fetchCustomerAddress } from "@/redux/slices/myaccountSlice";
+import CheckoutSkeleton from "./CheckoutSkeleton";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
 import BillingStep from "./Billingstep";
@@ -155,6 +156,8 @@ const CheckoutForm = () => {
 
   const hasRestoredRef = useRef(false);
   const isRestoringRef = useRef(true);
+  // Show skeleton until the saved checkout form has been restored
+  const [isCheckoutReady, setIsCheckoutReady] = useState(false);
 
   const [promoCode, setPromoCode] = useState("");
 
@@ -184,7 +187,7 @@ const CheckoutForm = () => {
     completedDestinations,
     destinations,
     destShippingRates,
-    destRatesLoading,
+    destRatesLoading
   } = useAppSelector((state) => state.multiAddress);
   const stripe = useStripe();
   const elements = useElements();
@@ -382,7 +385,9 @@ const CheckoutForm = () => {
 
         if (!rate) {
           if (dest.selectedShippingMethod === "flat")
-            return [{ service_type: "flat", total_charge: 10, currency: "USD" }];
+            return [
+              { service_type: "flat", total_charge: 10, currency: "USD" },
+            ];
           return [];
         }
 
@@ -446,8 +451,7 @@ const CheckoutForm = () => {
   // Exactly the total the summary shows (same rounded lines), in Stripe's
   // minor units of the charge currency
   const chargeTotalMinor =
-    orderTotals.charge?.total.minor ??
-    toChargeMinor(money(finalTotal, "USD"));
+    orderTotals.charge?.total.minor ?? toChargeMinor(money(finalTotal, "USD"));
 
   // ADD COUPON HANDLERS
   const handleApplyCoupon = async () => {
@@ -1039,7 +1043,9 @@ const CheckoutForm = () => {
     handlePaymentSelection(method);
 
     if (shippingUpdating) {
-      errorMessage("Shipping rates are updating. Please try again in a moment.");
+      errorMessage(
+        "Shipping rates are updating. Please try again in a moment.",
+      );
       return;
     }
 
@@ -1077,7 +1083,9 @@ const CheckoutForm = () => {
 
     // The total doesn't include shipping until the new quote is in
     if (shippingUpdating) {
-      errorMessage("Shipping rates are updating. Please try again in a moment.");
+      errorMessage(
+        "Shipping rates are updating. Please try again in a moment.",
+      );
       return;
     }
 
@@ -1434,6 +1442,7 @@ const CheckoutForm = () => {
       } catch (e) {
       } finally {
         isRestored.current = true;
+        setIsCheckoutReady(true);
         setTimeout(() => {
           isRestoringRef.current = false;
         }, 500);
@@ -1631,6 +1640,10 @@ const CheckoutForm = () => {
 
   return (
     <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
+      {!isCheckoutReady && <CheckoutSkeleton />}
+
+      {/* Kept mounted while loading so form values and Stripe elements persist */}
+      <div className={cn(!isCheckoutReady && "hidden")}>
       {paymentRequest && (
         <div>
           {paymentRequest && (
@@ -1778,7 +1791,6 @@ const CheckoutForm = () => {
                           ? "Google Pay"
                           : "Credit Card"
                   }
-                      ratesLoader={ratesLoader}
                 />
               </div>
             )}
@@ -1803,7 +1815,6 @@ const CheckoutForm = () => {
               setPromoCode={setPromoCode}
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
-              ratesLoader={ratesLoader}
             />
           ) : (
             <CheckoutMultipleOrderSummary
@@ -1825,6 +1836,7 @@ const CheckoutForm = () => {
           )}
         </div>
       </form>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
