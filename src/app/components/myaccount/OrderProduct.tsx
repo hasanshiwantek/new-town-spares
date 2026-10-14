@@ -182,7 +182,7 @@ const OrderProduct = () => {
                       </Link>
                       <button
                         onClick={() => handlePrint(item?.id)}
-                        className="border-l border-[#ebebeb] pl-[5px] ml-[3px]"
+                        className="border-l underline hover:text-[#F15B3A] border-[#ebebeb] pl-[5px] ml-[3px]"
                       >
                         Invoice
                       </button>
