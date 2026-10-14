@@ -63,6 +63,7 @@ import { useForm } from "react-hook-form";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { fetchCustomerAddress } from "@/redux/slices/myaccountSlice";
+import CheckoutSkeleton from "./CheckoutSkeleton";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
 import BillingStep from "./Billingstep";
@@ -155,6 +156,8 @@ const CheckoutForm = () => {
 
   const hasRestoredRef = useRef(false);
   const isRestoringRef = useRef(true);
+  // Show skeleton until the saved checkout form has been restored
+  const [isCheckoutReady, setIsCheckoutReady] = useState(false);
 
   const [promoCode, setPromoCode] = useState("");
 
@@ -1439,6 +1442,7 @@ const CheckoutForm = () => {
       } catch (e) {
       } finally {
         isRestored.current = true;
+        setIsCheckoutReady(true);
         setTimeout(() => {
           isRestoringRef.current = false;
         }, 500);
@@ -1636,6 +1640,10 @@ const CheckoutForm = () => {
 
   return (
     <div className="min-h-screen py-10md:px-[6%]  xl:px-0 2xl:px-0   w-full max-w-[1170px] mx-auto px-4 lg:px-0 ">
+      {!isCheckoutReady && <CheckoutSkeleton />}
+
+      {/* Kept mounted while loading so form values and Stripe elements persist */}
+      <div className={cn(!isCheckoutReady && "hidden")}>
       {paymentRequest && (
         <div>
           {paymentRequest && (
@@ -1828,6 +1836,7 @@ const CheckoutForm = () => {
           )}
         </div>
       </form>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
