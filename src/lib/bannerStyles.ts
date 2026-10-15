@@ -43,18 +43,23 @@ function attrsToInlineSize(node: Element) {
 async function sanitize(html: string): Promise<HTMLElement> {
   // Loaded lazily (jsdom is heavy) so a load failure only drops the banner
   // (prepareBanner rejects, BannerHtml renders nothing) instead of failing
-  // every page that has a banner slot.
-  const { default: DOMPurify } = await import("isomorphic-dompurify");
+  // every page that has a banner slot. sanitizeHtml imports DOMPurify too, so
+  // it's loaded the same lazy way.
+  const [{ default: DOMPurify }, { BASE_SANITIZE_CONFIG }] = await Promise.all([
+    import("isomorphic-dompurify"),
+    import("./sanitizeHtml"),
+  ]);
   DOMPurify.addHook("afterSanitizeAttributes", attrsToInlineSize);
   try {
     return DOMPurify.sanitize(html, {
-      FORCE_BODY: true, // otherwise a leading <style>/<link> is dropped
-      ADD_TAGS: ["iframe", "link"], // iframe: videos from the media dialog
-      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "target"],
+      ...BASE_SANITIZE_CONFIG,
+      // Banners only (trusted admin content): <link> stylesheets, and the DOM
+      // back so the classes can be collected for Tailwind
+      ADD_TAGS: [...BASE_SANITIZE_CONFIG.ADD_TAGS, "link"],
       RETURN_DOM: true,
     }) as HTMLElement;
   } finally {
-    DOMPurify.removeHook("afterSanitizeAttributes");
+    DOMPurify.removeHook("afterSanitizeAttributes", attrsToInlineSize);
   }
 }
 

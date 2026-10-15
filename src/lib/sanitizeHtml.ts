@@ -7,6 +7,14 @@
 // the server and the browser's DOM on the client).
 import DOMPurify from "isomorphic-dompurify";
 
+// DOMPurify options shared by every sanitizer in the app (also bannerStyles.ts,
+// which adds its banner-only extras on top).
+export const BASE_SANITIZE_CONFIG = {
+  FORCE_BODY: true, // keep a leading <style> block
+  ADD_TAGS: ["iframe"], // embedded videos/maps; hosts are checked per use
+  ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "target"],
+};
+
 // Hosts allowed in <iframe src> (embedded videos and maps)
 const IFRAME_HOSTS = new Set([
   "www.youtube.com",
@@ -49,11 +57,7 @@ export function sanitizeHtml(html: string | null | undefined): string {
   DOMPurify.addHook("uponSanitizeElement", dropUnknownIframes);
   DOMPurify.addHook("afterSanitizeAttributes", addNoopener);
   try {
-    return DOMPurify.sanitize(html, {
-      FORCE_BODY: true, // keep a leading <style> block
-      ADD_TAGS: ["iframe"],
-      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "target"],
-    });
+    return DOMPurify.sanitize(html, BASE_SANITIZE_CONFIG);
   } finally {
     DOMPurify.removeHook("uponSanitizeElement", dropUnknownIframes);
     DOMPurify.removeHook("afterSanitizeAttributes", addNoopener);
