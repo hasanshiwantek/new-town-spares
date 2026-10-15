@@ -25,7 +25,7 @@ import {
 import { errorMessage, successMessage } from "@/utils/message";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import React, { useEffect, useRef, useState } from "react";
 import { transferCart } from "@/utils/transferCart";
 interface Category {
@@ -143,10 +143,10 @@ const FooterBottom = () => {
       try {
         // Plain fetch, not axiosInstance: its interceptor would swap in the
         // current session's token, and a 401 would log the visitor out.
-        const res = await fetch(`${baseURL}web/customer-profile`, {
+        const res = await fetch(`${ENV_CONFIG.baseURL}web/customer-profile`, {
           headers: {
             Authorization: `Bearer ${paramsToken}`,
-            storeId: storeId,
+            storeId: ENV_CONFIG.storeId,
             "X-Session-ID": getSessionId() || "",
           },
         });
@@ -489,6 +489,25 @@ const FooterBottom = () => {
             setShowLogoutModal(false);
             router.replace("/auth/login");
           }}
+        />
+        <ConfirmationModal
+          open={!!tokenLogin}
+          onOpenChange={(open) => {
+            if (!open && !tokenLoginLoading) setTokenLogin(null);
+          }}
+          loading={tokenLoginLoading}
+          variant="warning"
+          title="Sign in to this account?"
+          description={
+            tokenLogin
+              ? `This link signs you in as ${tokenLogin.name ? `${tokenLogin.name} (${tokenLogin.email})` : tokenLogin.email}.` +
+                (auth?.isAuthenticated && auth?.user?.email !== tokenLogin.email
+                  ? ` You'll be signed out of ${auth?.user?.email}.`
+                  : "") +
+                " Only continue if you expected this."
+              : ""
+          }
+          onConfirm={confirmTokenLogin}
         />
       </div>
     </React.Fragment>
