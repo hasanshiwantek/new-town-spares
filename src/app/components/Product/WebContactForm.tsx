@@ -3,11 +3,11 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { sitekey } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { contactRequests } from "@/redux/slices/contactSlice";
 import { errorMessage } from "@/utils/message";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useForm } from "react-hook-form";
 type WebContactFormData = {
@@ -37,6 +37,7 @@ const WebContactForm = ({ showTheseFields }: { showTheseFields: string[] }) => {
     reset,
   } = useForm<WebContactFormData>();
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state: any) => state.contact);
 
@@ -47,11 +48,15 @@ const WebContactForm = ({ showTheseFields }: { showTheseFields: string[] }) => {
       errorMessage("Please verify the captcha.");
       return;
     }
-    dispatch(contactRequests(data))
+    dispatch(
+      contactRequests({ ...data, recaptchaToken: captchaToken ?? undefined }),
+    )
       .unwrap()
       .then(() => {
         reset();
       });
+    setCaptchaToken(null);
+    recaptchaRef.current?.reset();
   };
 
   // Filter visible input fields (excluding comments & spamProtection)
@@ -154,10 +159,12 @@ const WebContactForm = ({ showTheseFields }: { showTheseFields: string[] }) => {
         {showField("spamProtection") && (
           <div>
             <ReCAPTCHA
-              sitekey={sitekey}
+              ref={recaptchaRef}
+              sitekey={ENV_CONFIG.sitekey}
               onChange={(token: any) => {
                 setCaptchaToken(token);
               }}
+              onExpired={() => setCaptchaToken(null)}
             />
           </div>
         )}

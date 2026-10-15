@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import WebDynamicList from "../components/sitemap/WebDynamicList";
 
 const SHOW_BRANDS_LIMIT = 19;
@@ -8,8 +8,8 @@ const SHOW_CATEGORIES_LIMIT = 3;
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${baseURL}web/categories/get-categories`, {
-      headers: { storeId: storeId },
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/categories/get-categories`, {
+      headers: { storeId: ENV_CONFIG.storeId },
       cache: "no-store",
     });
     if (!res.ok) return [];
@@ -22,8 +22,8 @@ async function fetchCategories() {
 
 async function fetchBrands() {
   try {
-    const res = await fetch(`${baseURL}web/brands/brands`, {
-      headers: { storeId: storeId },
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/brands/brands`, {
+      headers: { storeId: ENV_CONFIG.storeId },
       cache: "no-store",
     });
     if (!res.ok) return [];
@@ -36,8 +36,8 @@ async function fetchBrands() {
 
 async function fetchWebPages() {
   try {
-    const res = await fetch(`${baseURL}web/webpages/web-pages?page=1&perPage=100`, {
-      headers: { storeId: storeId },
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/webpages/web-pages?page=1&perPage=100`, {
+      headers: { storeId: ENV_CONFIG.storeId },
       cache: "no-store",
     });
     if (!res.ok) return [];

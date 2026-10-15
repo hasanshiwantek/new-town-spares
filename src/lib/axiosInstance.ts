@@ -7,23 +7,7 @@ import {
   removeFromStorage,
 } from "@/utils/storage";
 import axios from "axios";
-
-export const baseURL =
-  process.env.NEXT_PUBLIC_API_URL || "https://backend.sparemicro.com/api/";
-export const siteURL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://new-town-spares.vercel.app";
-export const storeId = process.env.NEXT_PUBLIC_STORE_ID || "4";
-export const sitekey =
-  process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
-  "6LevlOItAAAAAD_SVHBRhmnrQHmTjkaKLGiorihY";
-export const secretkey =
-  process.env.RECAPTCHA_SECRET_KEY ||
-  "6LevlOItAAAAAKEOLuVkdMkaGUQtZCo8fr_eq9Jl";
-export const stripePublishableKey =
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
-  "pk_test_51TTnoo8vkezGA3pyz8ekc5xIQNyhweCnxiumTB1si5Dejq5YWPGHDJIJPpBHMLw9hYRkbSkOGpdCzPrlW8g59HZ600cueNQymh";
-export const chargeInSelectedCurrency =
-  process.env.NEXT_PUBLIC_CHARGE_IN_SELECTED_CURRENCY || true;
+import { ENV_CONFIG } from "@/config/envConfig";
 
 // Several requests can 401 at once; log out only once.
 let isLoggingOut = false;
@@ -54,7 +38,7 @@ const handleUnauthenticated = async () => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL: ENV_CONFIG.baseURL,
 });
 
 axiosInstance.interceptors.request.use((config) => {
@@ -65,8 +49,8 @@ axiosInstance.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (storeId) {
-      config.headers["storeId"] = Number(storeId);
+    if (ENV_CONFIG.storeId) {
+      config.headers["storeId"] = Number(ENV_CONFIG.storeId);
       config.headers["X-Session-ID"] = sessionId;
     }
   }

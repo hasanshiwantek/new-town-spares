@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance, { baseURL, storeId } from "@/lib/axiosInstance";
+import axiosInstance from "@/lib/axiosInstance";
 import {
   removeFromSessionStorage,
   removeFromStorage,
@@ -21,6 +21,8 @@ export interface RegisterPayload {
   country?: string;
   state?: string;
   zip?: string;
+  // reCAPTCHA response token; the backend must verify it with Google
+  recaptchaToken?: string;
 }
 interface SendMagicLinkPayload {
   email: string;

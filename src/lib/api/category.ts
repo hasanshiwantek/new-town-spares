@@ -1,12 +1,12 @@
 // // lib/api/categories.ts
-import { baseURL, storeId } from "../axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 export const fetchCategories = async () => {
-  const res = await fetch(`${baseURL}web/categories/get-categories`, {
+  const res = await fetch(`${ENV_CONFIG.baseURL}web/categories/get-categories`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: storeId,
+      storeId: ENV_CONFIG.storeId,
     },
   });
 
@@ -18,11 +18,11 @@ export const fetchCategories = async () => {
 };
 
 export const fetchCategoryById = async (id: number | string) => {
-  const res = await fetch(`${baseURL}web/categories/categories/${id}`, {
+  const res = await fetch(`${ENV_CONFIG.baseURL}web/categories/categories/${id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: storeId,
+      storeId: ENV_CONFIG.storeId,
     },
     // ✅ ISR: cache once, refresh every 5 min
     next: { revalidate: 300 },

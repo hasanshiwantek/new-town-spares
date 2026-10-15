@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { sitekey } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { addReview } from "@/redux/slices/homeSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
@@ -91,8 +91,11 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     const payload = {
       productId: product?.id,
       ...formData,
+      recaptchaToken: captchaToken,
     };
     const result = await dispatch(addReview(payload));
+    setCaptchaToken(null);
+    recaptchaRef.current?.reset();
     try {
       if (addReview.fulfilled.match(result)) {
         onClose();
@@ -284,7 +287,7 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
                 <div className="mb-[28px]">
                   <ReCAPTCHA
                     ref={recaptchaRef}
-                    sitekey={sitekey}
+                    sitekey={ENV_CONFIG.sitekey}
                     onChange={(token) => setCaptchaToken(token)}
                     onExpired={() => setCaptchaToken(null)}
                   />

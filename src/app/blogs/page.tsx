@@ -1,8 +1,9 @@
 import React from "react";
 import BlogContainer from "../components/Blogs/BlogContainer";
 import { Metadata } from "next";
+import { ENV_CONFIG } from "@/config/envConfig";
 export const metadata: Metadata = {
-  metadataBase: new URL("https://new-town-spares.vercel.app"),
+  metadataBase: new URL(ENV_CONFIG.siteURL),
   title: {
     default: "Blogs | New Town Spares",
     template: "%s | Blogs | New Town Spares",
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://new-town-spares.vercel.app/blogs",
+    url: `${ENV_CONFIG.siteURL}/blogs`,
     siteName: "New Town Spares",
     title: "New Town Spares Blogs – Electronics & Tech Insights",
     description:

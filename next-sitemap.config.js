@@ -1,5 +1,8 @@
+// Runs as a separate CLI (postbuild), so load .env the same way Next.js does.
+require("@next/env").loadEnvConfig(process.cwd());
+
 const config = {
-    siteUrl: 'https://new-town-spares.vercel.app',
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
     generateRobotsTxt: true,
     changefreq: 'daily',
     priority: 0.7,
