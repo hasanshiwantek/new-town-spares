@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { baseURL, storeId } from '@/lib/axiosInstance';
-const BACKEND_BASE = baseURL;
+import { ENV_CONFIG } from '@/config/envConfig';
+const BACKEND_BASE = ENV_CONFIG.baseURL;
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
                 {
                     next: { revalidate: 10 },
                     headers: {
-                        'storeid': storeId
+                        'storeid': ENV_CONFIG.storeId
                     }
                 }
             );
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
         const res = await fetch(backendUrl, {
             next: { revalidate: 10 },        // ← 10 seconds revalidation
             headers: {
-                'storeid': storeId
+                'storeid': ENV_CONFIG.storeId
             }
         });
 

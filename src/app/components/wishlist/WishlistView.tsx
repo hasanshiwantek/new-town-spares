@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import WishlistCartSidebar from "./WishlistCartSidebar";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 const List = () => (
   <svg
@@ -50,7 +51,7 @@ const LayoutGrid = () => (
 
 const WISHLIST = {
   name: "List: Saved cart - Aug 3rd 2026",
-  shareUrl: "http://localhost:3000/wishlist/42",
+  shareUrl: `${ENV_CONFIG.siteURL}/wishlist/42`,
   items: [
     {
       sku: "PA905U",

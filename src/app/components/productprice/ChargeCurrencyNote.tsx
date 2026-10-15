@@ -1,4 +1,4 @@
-import { chargeInSelectedCurrency } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import { RootState } from "@/redux/store";
 
@@ -9,7 +9,7 @@ const ChargeCurrencyNote = ({ usdTotal }: { usdTotal: number }) => {
     (state: RootState) => state.currency.selectedCurrency,
   );
 
-  if (selectedCurrency === "USD" || chargeInSelectedCurrency) return null;
+  if (selectedCurrency === "USD" || ENV_CONFIG.chargeInSelectedCurrency) return null;
 
   return (
     <p className="mt-2 text-[12px] text-[#757575] text-right">

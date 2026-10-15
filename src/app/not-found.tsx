@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 export const metadata: Metadata = {
   title: "404 - Page Not Found | New Town Spares",
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
     title: "404 - Page Not Found | New Town Spares",
     description:
       "The page you're looking for doesn't exist. Return to New Town Spares homepage.",
-    url: "https://new-town-spares.vercel.app/404",
+    url: `${ENV_CONFIG.siteURL}/404`,
     siteName: "New Town Spares",
     type: "website",
   },

@@ -13,6 +13,7 @@ import Script from "next/script";
 import { Suspense } from "react";
 import ProductRecent from "../components/Product/ProductRecent";
 import RecentViewedProduct from "../components/myaccount/RecentViewedPoduct";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 const DynamicWebPage = dynamic(
   () => import("../components/Product/DynamicWebPage"),
@@ -40,7 +41,7 @@ export async function generateMetadata({
     notFound();
   }
 
-  const url = `https://new-town-spares.vercel.app/${slug}`;
+  const url = `${ENV_CONFIG.siteURL}/${slug}`;
 
   if (webPages) {
     return {
