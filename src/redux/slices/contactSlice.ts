@@ -29,6 +29,8 @@ interface ContactFormPayload {
     company_name?: string;
     rma_number?: string;
     comments: string;
+    // reCAPTCHA response token; the backend must verify it with Google
+    recaptchaToken?: string;
 }
 
 // Newsletter thunk

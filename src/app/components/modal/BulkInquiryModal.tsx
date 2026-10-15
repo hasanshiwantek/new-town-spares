@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { ENV_CONFIG } from "@/config/envConfig";
+import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { bulkInquiry } from "@/redux/slices/homeSlice";
 import { errorMessage } from "@/utils/message";
 import Image from "next/image";
@@ -67,8 +67,11 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
     const payload = {
       sku: product?.sku ?? "",
       ...formData,
+      recaptchaToken: captchaToken,
     };
     const result = await dispatch(bulkInquiry(payload));
+    setCaptchaToken(null);
+    recaptchaRef.current?.reset();
     try {
       if (bulkInquiry.fulfilled.match(result)) {
         console.log("Request for quote send✅", result?.payload);

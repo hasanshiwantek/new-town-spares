@@ -91,8 +91,11 @@ const AddReviewModal: React.FC<AddReviewModalProps> = ({
     const payload = {
       productId: product?.id,
       ...formData,
+      recaptchaToken: captchaToken,
     };
     const result = await dispatch(addReview(payload));
+    setCaptchaToken(null);
+    recaptchaRef.current?.reset();
     try {
       if (addReview.fulfilled.match(result)) {
         onClose();

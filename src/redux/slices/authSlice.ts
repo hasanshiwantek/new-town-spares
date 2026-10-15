@@ -21,6 +21,8 @@ export interface RegisterPayload {
   country?: string;
   state?: string;
   zip?: string;
+  // reCAPTCHA response token; the backend must verify it with Google
+  recaptchaToken?: string;
 }
 interface SendMagicLinkPayload {
   email: string;

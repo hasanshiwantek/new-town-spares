@@ -5,7 +5,7 @@ import { contactRequests } from "@/redux/slices/contactSlice";
 import ReCAPTCHA from "react-google-recaptcha";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CONTACT_INFO } from "@/const/contact";
 import { errorMessage } from "@/utils/message";
@@ -46,6 +46,7 @@ const ContactUs = () => {
   const { user } = useAppSelector((state: any) => state.auth);
   const [showSuccess, setShowSuccess] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = "smooth";
@@ -66,13 +67,14 @@ const ContactUs = () => {
       errorMessage("Please verify the captcha.");
       return;
     }
-    // You can also log it in a more formatted way
-    dispatch(contactRequests(data))
+    dispatch(contactRequests({ ...data, recaptchaToken: captchaToken }))
       .unwrap()
       .then(() => {
         reset();
         setShowSuccess(true);
       });
+    setCaptchaToken(null);
+    recaptchaRef.current?.reset();
   };
   return (
     <div className="w-full">
@@ -255,10 +257,12 @@ const ContactUs = () => {
                   </div>
                   <div className="mt-6">
                     <ReCAPTCHA
+                      ref={recaptchaRef}
                       sitekey={ENV_CONFIG.sitekey}
                       onChange={(token: any) => {
                         setCaptchaToken(token);
                       }}
+                      onExpired={() => setCaptchaToken(null)}
                     />
                   </div>
                   <div className="mt-[28px] min-[551px]:text-right">
