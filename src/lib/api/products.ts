@@ -1,11 +1,11 @@
-import { baseURL, storeId } from "../axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 export const fetchProducts = async () => {
   try {
-    const res = await fetch(`${baseURL}web/products/products`, {
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/products/products`, {
       next: { revalidate: 10 }, // ✅ revalidate every 10 seconds
       headers: {
-        storeId: storeId,
+        storeId: ENV_CONFIG.storeId,
       },
     });
 
@@ -27,10 +27,10 @@ export const fetchRelatedProducts = async (
     if (categoryId) params.set("categoryId", String(categoryId));
 
     const res = await fetch(
-      `${baseURL}web/products/related-products?${params.toString()}`,
+      `${ENV_CONFIG.baseURL}web/products/related-products?${params.toString()}`,
       {
         next: { revalidate: 10 },
-        headers: { storeId: storeId },
+        headers: { storeId: ENV_CONFIG.storeId },
       },
     );
 
@@ -47,10 +47,10 @@ export const fetchProductBySlugAndUrl = async (slug?: string) => {
   if (!slug) return;
   try {
     const res = await fetch(
-      `${baseURL}web/products/get-product-by-url${slug}`,
+      `${ENV_CONFIG.baseURL}web/products/get-product-by-url${slug}`,
       {
         cache: "no-store",
-        headers: { storeId: storeId },
+        headers: { storeId: ENV_CONFIG.storeId },
       },
     );
 
@@ -71,9 +71,9 @@ export const fetchProductBySlugAndUrl = async (slug?: string) => {
 };
 export const fetchProductBySlug = async (slug: string) => {
   try {
-    const res = await fetch(`${baseURL}web/products/get-product/${slug}`, {
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/products/get-product/${slug}`, {
       cache: "no-store",
-      headers: { storeId: storeId },
+      headers: { storeId: ENV_CONFIG.storeId },
     });
 
     if (!res.ok) {
@@ -113,13 +113,13 @@ export async function fetchFilteredProducts(filters: {
   if (filters.maxPrice) params.append("maxPrice", filters.maxPrice.toString());
   if (filters.sortBy) params.append("sortBy", filters.sortBy);
 
-  const url = `${baseURL}web/categories/category-filter?${params.toString()}`;
+  const url = `${ENV_CONFIG.baseURL}web/categories/category-filter?${params.toString()}`;
 
   const res = await fetch(url, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: storeId,
+      storeId: ENV_CONFIG.storeId,
     },
     cache: "no-store", // or "no-cache" for fresh data
   });
@@ -135,10 +135,10 @@ export async function fetchFilteredProducts(filters: {
 
 export const getBlogByIdServer = async (id: string) => {
   try {
-    const res = await fetch(`${baseURL}web/blogs/blog-posts/${id}`, {
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/blogs/blog-posts/${id}`, {
       next: { revalidate: 3600 }, // Example: revalidate every hour
       headers: {
-        storeId: storeId,
+        storeId: ENV_CONFIG.storeId,
       },
     });
 
@@ -158,10 +158,10 @@ export const fetchWebPages = async (slug?: string) => {
     const normalizeSlug = (s: string) => s?.replace(/\/+$/, "");
 
     const res = await fetch(
-      `${baseURL}web/webpages/web-pages?page=${1}&perPage=${100}`,
+      `${ENV_CONFIG.baseURL}web/webpages/web-pages?page=${1}&perPage=${100}`,
       {
         cache: "no-store",
-        headers: { storeId: storeId },
+        headers: { storeId: ENV_CONFIG.storeId },
       },
     );
 

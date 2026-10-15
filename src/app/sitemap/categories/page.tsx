@@ -1,12 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 // Fetch categories
 async function fetchCategories() {
     try {
-        const res = await fetch(`${baseURL}web/categories/get-categories`, {
-            headers: { storeId: storeId },
+        const res = await fetch(`${ENV_CONFIG.baseURL}web/categories/get-categories`, {
+            headers: { storeId: ENV_CONFIG.storeId },
             cache: "no-store",
         });
         if (!res.ok) return [];

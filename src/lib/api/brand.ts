@@ -1,14 +1,14 @@
 // // lib/api/categories.ts
 
-import { baseURL, storeId } from "../axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 
 export const fetchBrands = async () => {
-  const res = await fetch(`${baseURL}web/brands/brands`, {
+  const res = await fetch(`${ENV_CONFIG.baseURL}web/brands/brands`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      storeId: storeId,
+      storeId: ENV_CONFIG.storeId,
     },
     // ✅ ISR: cache once, refresh every 5 min
     next: { revalidate: 300 },

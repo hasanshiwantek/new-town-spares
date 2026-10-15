@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 // import countries from "world-countries";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { registerUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
@@ -21,7 +21,6 @@ import { useForm } from "react-hook-form";
 import { countriesWithoutPostalCode } from "@/const/country-level";
 import { useAlert } from "@/hooks/useAlert";
 import ReCAPTCHA from "react-google-recaptcha";
-import { sitekey } from "@/lib/axiosInstance";
 interface SignupFormValues {
   firstName: string;
   lastName: string;
@@ -122,11 +121,11 @@ const SignupPage = () => {
         const token = result.payload.token;
         const sessionId =  getSessionId();
 
-        await fetch(`${baseURL}web/cart/transfer`, {
+        await fetch(`${ENV_CONFIG.baseURL}web/cart/transfer`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            storeId: storeId,
+            storeId: ENV_CONFIG.storeId,
             "X-Session-ID": sessionId || "",
             "Content-Type": "application/json",
           },
@@ -447,7 +446,7 @@ const SignupPage = () => {
           </div>
           <div className="mt-6">
             <ReCAPTCHA
-              sitekey={sitekey}
+              sitekey={ENV_CONFIG.sitekey}
               onChange={(token: any) => {
                 setCaptchaToken(token);
               }}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { loginUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
@@ -45,11 +45,11 @@ const SigninPage = () => {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
           const sessionId = getSessionId();
-          await fetch(`${baseURL}web/cart/transfer`, {
+          await fetch(`${ENV_CONFIG.baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              storeId: storeId,
+              storeId: ENV_CONFIG.storeId,
               "X-Session-ID": sessionId || "",
               "Content-Type": "application/json",
             },

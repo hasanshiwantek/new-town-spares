@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { sitekey } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { contactRequests } from "@/redux/slices/contactSlice";
 import { errorMessage } from "@/utils/message";
 import { X } from "lucide-react";
@@ -154,7 +154,7 @@ const WebContactForm = ({ showTheseFields }: { showTheseFields: string[] }) => {
         {showField("spamProtection") && (
           <div>
             <ReCAPTCHA
-              sitekey={sitekey}
+              sitekey={ENV_CONFIG.sitekey}
               onChange={(token: any) => {
                 setCaptchaToken(token);
               }}

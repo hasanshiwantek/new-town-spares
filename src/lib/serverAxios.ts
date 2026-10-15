@@ -1,11 +1,11 @@
 // lib/serverAxios.ts
 import axios from "axios";
-import { baseURL, storeId } from "./axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 const serverAxios = axios.create({
-  baseURL: baseURL,
+  baseURL: ENV_CONFIG.baseURL,
   headers: {
-    storeId: storeId, // Replace with dynamic storeId if needed
+    storeId: ENV_CONFIG.storeId, // Replace with dynamic storeId if needed
   },
 });
 

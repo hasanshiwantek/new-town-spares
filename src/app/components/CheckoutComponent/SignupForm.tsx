@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { registerUser } from "@/redux/slices/authSlice";
 import { getFromStorage, getSessionId } from "@/utils/storage";
 import { useState } from "react";
@@ -73,11 +73,11 @@ const SignupForm = ({ onCancel }: SignupFormProps) => {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
           const sessionId =  getSessionId();
-          await fetch(`${baseURL}web/cart/transfer`, {
+          await fetch(`${ENV_CONFIG.baseURL}web/cart/transfer`, {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              storeId: storeId,
+              storeId: ENV_CONFIG.storeId,
               "X-Session-ID": sessionId || "",
               "Content-Type": "application/json",
             },

@@ -1,11 +1,11 @@
 import React from "react";
 import Link from "next/link";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 async function fetchBrands() {
     try {
-        const res = await fetch(`${baseURL}web/brands/brands`, {
-            headers: { storeId: storeId },
+        const res = await fetch(`${ENV_CONFIG.baseURL}web/brands/brands`, {
+            headers: { storeId: ENV_CONFIG.storeId },
             cache: "no-store",
         });
         if (!res.ok) return [];
