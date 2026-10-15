@@ -57,7 +57,7 @@ const SigninPage = () => {
 
           reset();
           if (shouldLoadQuote || quoteToken) {
-            window.location.href = `/cart?action=loadSavedQuote&quoteToken=${quoteToken}`;
+            window.location.href = `/cart?action=loadSavedQuote&quoteToken=${encodeURIComponent(quoteToken)}`;
           } else {
             await dispatch(fetchCartList())
               .unwrap()

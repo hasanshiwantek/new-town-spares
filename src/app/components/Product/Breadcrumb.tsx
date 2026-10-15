@@ -1,9 +1,9 @@
 "use client";
-import React from "react";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-import Script from "next/script";
 import { ENV_CONFIG } from "@/config/envConfig";
+import { toJsonLd } from "@/lib/jsonLd";
+import Link from "next/link";
+import Script from "next/script";
+import React from "react";
 
 interface BreadcrumbItem {
   name: string;
@@ -36,7 +36,7 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
         id="breadcrumb-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbJsonLd),
+          __html: toJsonLd(breadcrumbJsonLd),
         }}
         strategy="afterInteractive"
       />
@@ -59,10 +59,7 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
               itemType="https://schema.org/ListItem"
             >
               {index === items.length - 1 ? (
-                <span
-                  className="text-[13px] text-[#2a2a2a]"
-                  itemProp="name"
-                >
+                <span className="text-[13px] text-[#2a2a2a]" itemProp="name">
                   {item.name}
                 </span>
               ) : (
@@ -84,4 +81,3 @@ const Breadcrumb = ({ items }: BreadcrumbProps) => {
 };
 
 export default Breadcrumb;
-
