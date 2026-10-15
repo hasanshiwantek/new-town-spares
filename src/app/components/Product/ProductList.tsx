@@ -2,9 +2,11 @@
 
 "use client";
 
+import { useProductView } from "@/hooks/useProductView";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { AnimatePresence, motion } from "framer-motion";
 import { decode } from "html-entities";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo } from "react";
 import ProductCard from "../Home/ProductCard";
 import ProductCardGridSkeleton from "../loader/ProductCardGridSkeleton";
 import ProductListCardSkeleton from "../loader/ProductListCardSkeleton";
@@ -12,8 +14,6 @@ import CategoryPagination from "./CategoryPagination";
 import ProductCategoryCard from "./ProductCategoryCard";
 import ProductListCartSidebar from "./ProductListCartSidebar";
 import SortingBar from "./SortingBar";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useProductView } from "@/hooks/useProductView";
 
 const MotionDiv = motion.div;
 interface ProductListProps {
@@ -37,15 +37,15 @@ export default function ProductList({
   filterMeta,
   initialCategorydescription,
 }: ProductListProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const total = pagination?.total || 0;
   const { view, setView } = useProductView();
 
-  const decodedHtml = decode(
-    (initialCategorydescription || "")
-      .replace(/<pre[^>]*>/gi, "")
-      .replace(/<\/pre>/gi, ""),
+  const decodedHtml = sanitizeHtml(
+    decode(
+      (initialCategorydescription || "")
+        .replace(/<pre[^>]*>/gi, "")
+        .replace(/<\/pre>/gi, ""),
+    ),
   );
 
   const { contentHtml, faqHtml } = useMemo(() => {

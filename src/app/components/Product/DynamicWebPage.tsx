@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { decode } from "html-entities";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import WebContactForm from "./WebContactForm";
 
 const DynamicWebPage = ({ webPages }: { webPages: any }) => {
@@ -9,9 +10,9 @@ const DynamicWebPage = ({ webPages }: { webPages: any }) => {
             ? webPages?.rawHtml
             : webPages?.pageContent;
 
-    const decodedHtml = decode(
+    const decodedHtml = sanitizeHtml(decode(
         html?.replace(/<pre[^>]*>/gi, "")?.replace(/<\/pre>/gi, "")
-    );
+    ));
     return (
         <main className="flex flex-col gap-30" role="main">
             <div className="w-full max-w-[1170px] mx-auto lg:px-6 xl:px-0">

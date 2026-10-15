@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { decode } from "html-entities";
+import { sanitizeHtml } from "@/lib/sanitizeHtml";
 import { getProductInfo } from "@/utils/product";
 
 const ProductOverview = ({ product }: { product: any }) => {
@@ -9,9 +10,9 @@ const ProductOverview = ({ product }: { product: any }) => {
   const customFields = product?.customFields?.filter(
     (item: { name: string; value: string }) => item.name && item.value
   )
-  const decodedHtml = decode(
+  const decodedHtml = sanitizeHtml(decode(
     product?.description?.replace(/<pre[^>]*>/gi, "")?.replace(/<\/pre>/gi, "")
-  );
+  ));
   return (
     <section className="my-8" aria-labelledby="product-overview-heading">
       <div className="w-full max-w-[1719px] flex flex-col ">

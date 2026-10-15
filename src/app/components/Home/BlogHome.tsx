@@ -9,16 +9,14 @@ import { getBlogs } from "@/redux/slices/storeFrontSlice";
 
 const BlogHome = () => {
  const stripHtml = (html: string = "") => {
-  const div = document.createElement("div");
+  // DOMParser builds an inert document: unlike innerHTML on a live element it
+  // never runs handlers such as <img onerror> or loads anything.
+  const parser = new DOMParser();
+  const textOf = (markup: string) =>
+    parser.parseFromString(markup, "text/html").body.textContent || "";
 
-  // Decode HTML entities first
-  div.innerHTML = html;
-  const decodedHtml = div.textContent || "";
-
-  // Remove actual HTML tags after decoding
-  div.innerHTML = decodedHtml;
-
-  return (div.textContent || "")
+  // Decode HTML entities first, then remove the actual tags
+  return textOf(textOf(html))
     .replace(/\s+/g, " ")
     .trim();
 };
