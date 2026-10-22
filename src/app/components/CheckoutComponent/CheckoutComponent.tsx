@@ -15,10 +15,8 @@ import {
 } from "@/hooks/useFormatPrice";
 import { money } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import axiosInstance, {
-  baseURL,
-  stripePublishableKey,
-} from "@/lib/axiosInstance";
+import axiosInstance from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { cn } from "@/lib/utils";
 import {
   clearCart,
@@ -87,7 +85,7 @@ function splitName(fullName: string) {
   };
 }
 // Stripe publishable key
-const stripePromise = loadStripe(stripePublishableKey);
+const stripePromise = loadStripe(ENV_CONFIG.stripePublishableKey);
 
 // Pre-compute country list at module level
 // const countryList = countries
@@ -568,7 +566,7 @@ const CheckoutForm = () => {
     pr.on("shippingaddresschange", async (event) => {
       try {
         const response = await fetch(
-          `${baseURL}web/checkout/get-shipping-rates`,
+          `${ENV_CONFIG.baseURL}web/checkout/get-shipping-rates`,
           {
             method: "POST",
             headers: {

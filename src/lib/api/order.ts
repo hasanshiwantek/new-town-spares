@@ -1,12 +1,12 @@
-import { baseURL, storeId } from "../axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 export const fetchOrderDetails = async (orderId: string) => {
   try {
-    const res = await fetch(`${baseURL}web/orders/order-details`, {
+    const res = await fetch(`${ENV_CONFIG.baseURL}web/orders/order-details`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        storeId: storeId,
+        storeId: ENV_CONFIG.storeId,
       },
       body: JSON.stringify({
         orderId: orderId,

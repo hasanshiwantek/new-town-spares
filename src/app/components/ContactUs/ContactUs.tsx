@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { CONTACT_INFO } from "@/const/contact";
 import { errorMessage } from "@/utils/message";
-import { sitekey } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 type ContactFormData = {
   full_name: string;
   phone_number: string;
@@ -255,7 +255,7 @@ const ContactUs = () => {
                   </div>
                   <div className="mt-6">
                     <ReCAPTCHA
-                      sitekey={sitekey}
+                      sitekey={ENV_CONFIG.sitekey}
                       onChange={(token: any) => {
                         setCaptchaToken(token);
                       }}

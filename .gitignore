@@ -36,6 +36,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 .env.local*
+!.env.example
 
 # vercel
 .vercel
@@ -47,3 +48,6 @@ next-env.d.ts
 # claude code (do not commit)
 .claude/
 CLAUDE.md
+
+# security audit: local only, never commit
+SECURITY_AUDIT.md

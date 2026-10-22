@@ -1,5 +1,24 @@
 import type { NextConfig } from "next";
 
+// Fail `next dev` / `next build` when a required env var is missing, instead of
+// shipping a build that silently calls the wrong API or drops the storeId header.
+// Keep in sync with src/config/envConfig.ts and .env.example.
+const REQUIRED_ENV = [
+  "NEXT_PUBLIC_API_URL",
+  "NEXT_PUBLIC_SITE_URL",
+  "NEXT_PUBLIC_STORE_ID",
+  "NEXT_PUBLIC_RECAPTCHA_SITE_KEY",
+  "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+  "GEONAMES_USERNAME",
+];
+const missingEnv = REQUIRED_ENV.filter((name) => !process.env[name]?.trim());
+if (missingEnv.length) {
+  throw new Error(
+    `Missing required environment variables: ${missingEnv.join(", ")}. ` +
+      "Set them in .env (see .env.example) or in Vercel → Settings → Environment Variables.",
+  );
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,

@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import Script from "next/script";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 interface BreadcrumbItem {
   name: string;
@@ -14,7 +15,7 @@ interface BreadcrumbProps {
 }
 
 const Breadcrumb = ({ items }: BreadcrumbProps) => {
-  const BASE_URL = "https://new-town-spares.vercel.app";
+  const BASE_URL = ENV_CONFIG.siteURL;
 
   // Generate JSON-LD structured data for SEO
   const breadcrumbJsonLd = {

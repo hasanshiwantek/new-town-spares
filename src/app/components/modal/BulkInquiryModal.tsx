@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
-import { sitekey } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
 import { bulkInquiry } from "@/redux/slices/homeSlice";
 import { errorMessage } from "@/utils/message";
 import Image from "next/image";
@@ -169,7 +169,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
               {/* ✅ ReCAPTCHA */}
               <ReCAPTCHA
                 ref={recaptchaRef}
-                sitekey={sitekey}
+                sitekey={ENV_CONFIG.sitekey}
                 onChange={(token) => setCaptchaToken(token)}
                 onExpired={() => setCaptchaToken(null)}
               />
