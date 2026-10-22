@@ -2,26 +2,24 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-// import countries from "world-countries";
 import { Label } from "@/components/ui/label";
-import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { ENV_CONFIG } from "@/config/envConfig";
+import { countriesWithoutPostalCode } from "@/const/country-level";
+import { useAlert } from "@/hooks/useAlert";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { transferCart } from "@/lib/api/transferCart";
 import { registerUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
 import { Country, State } from "country-state-city";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { countriesWithoutPostalCode } from "@/const/country-level";
-import { useAlert } from "@/hooks/useAlert";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useForm } from "react-hook-form";
 interface SignupFormValues {
   firstName: string;
   lastName: string;

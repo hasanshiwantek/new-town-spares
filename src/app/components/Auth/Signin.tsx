@@ -10,7 +10,6 @@ import { loginUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage } from "@/utils/storage";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -152,7 +151,7 @@ const SigninPage = () => {
                   id="email"
                   type="email"
                   placeholder=""
-                  className="w-full h-[42px] !max-w-full !text-[14px] bg-white border border-[#ebebeb] rounded-[4px] px-[14px] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]"
+                  className="w-full h-[42px] max-w-full! text-[14px]! bg-white border border-[#ebebeb] rounded-[4px] px-[14px] focus:ring-2 focus:ring-[#FF482E] focus:border-[#FF482E]"
                   {...register("email", { required: "Email is required" })}
                 />
                 {errors.email && (
