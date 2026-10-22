@@ -76,11 +76,7 @@ export const addBySku = createAsyncThunk(
   "cart/addBySku",
   async (data: { sku: string; quantity: number }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/web/cart/add-by-sku", data, {
-        headers: {
-          storeId: 10,
-        },
-      });
+      const response = await axiosInstance.post("/web/cart/add-by-sku", data);
 
       return response.data;
     } catch (error: any) {
