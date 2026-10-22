@@ -14,134 +14,130 @@ const initialState: AccountState = {
   order: null,
   address: null,
   loading: false,
-   customerAddresses: null,
+  customerAddresses: null,
   error: null,
 };
 
 // Async thunk to fetch account details (POST request)
 export const postAccountDetails = createAsyncThunk(
   "account/postAccountDetails",
-  async (data:any, { rejectWithValue }) => {
+  async (data: any, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("dashboard/customers/account-settings", data);
-      return response.data; 
+      const response = await axiosInstance.post(
+        "web/customers/account-settings",
+        data,
+      );
+      return response.data;
     } catch (error: any) {
-      return rejectWithValue(   error.response?.data?.message  || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 export const fetchAccountOrders = createAsyncThunk(
   "account/fetchAccountOrders",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("dashboard/customers/my-orders?isDraft=false");
-      return response.data; 
+      const response = await axiosInstance.get(
+        "web/customers/my-orders?isDraft=false",
+      );
+      return response.data;
     } catch (error: any) {
-      return rejectWithValue(   error.response?.data?.message  || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 export const fetchAccountAddress = createAsyncThunk(
   "account/fetchAccountAddress",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("dashboard/customers/my-addresses");
-      return response.data; 
+      const response = await axiosInstance.get("web/customers/my-addresses");
+      return response.data;
     } catch (error: any) {
-      return rejectWithValue(   error.response?.data?.message  || error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 export const fetchCustomerAddress = createAsyncThunk(
   "account/customer-address",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get("dashboard/customer-address/list");
+      const response = await axiosInstance.get("web/customer-address/list");
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 // Async thunk to update customer details (PUT request)
 
 export const addCustomerAddress = createAsyncThunk(
   "account/addCustomerAddress",
-  async ({ id, data }: { id: string | number; data: any }, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string | number; data: any },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axiosInstance.post(
-        `dashboard/customer-address/store`,
-        data
+        `web/customer-address/store`,
+        data,
       );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 export const updatecustomer = createAsyncThunk(
   "account/updatecustomer",
-  async ({ id, data }: { id: string | number; data: any }, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string | number; data: any },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axiosInstance.put(
-        `dashboard/customers/update-customer/${id}`,
-        data
+        `web/customers/update-customer/${id}`,
+        data,
       );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
-
-// export const deletecustomeraddress = createAsyncThunk(
-//   "account/updatecustomer",
-//   async ({ id }: { id: string | number; }, { rejectWithValue }) => {
-//     try {
-//       const response = await axiosInstance.delete(
-//         `dashboard/customers/delete-my-address/${id}`
-
-//       );
-//       return response.data;
-//     } catch (error: any) {
-//       return rejectWithValue(error.response?.data?.message || error.message);
-//     }
-//   }
-// );
 export const deletecustomeraddress = createAsyncThunk(
   "account/deletecustomeraddress",
-  async ({ id }: { id: string | number; }, { rejectWithValue }) => {
+  async ({ id }: { id: string | number }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.delete(
-        `dashboard/customer-address/delete/${id}`
-
+        `web/customer-address/delete/${id}`,
       );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 export const updateCustomerAddress = createAsyncThunk(
   "account/updateCustomerAddress",
-  async ({ id, data }: { id: string | number; data: any }, { rejectWithValue }) => {
+  async (
+    { id, data }: { id: string | number; data: any },
+    { rejectWithValue },
+  ) => {
     try {
       const response = await axiosInstance.put(
-        `dashboard/customer-address/update/${id}`,
-        data
+        `web/customer-address/update/${id}`,
+        data,
       );
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
-
-
 
 const myAccountSlice = createSlice({
   name: "account",
@@ -153,10 +149,13 @@ const myAccountSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAccountOrders.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-      state.order = action.payload;
-      })
+      .addCase(
+        fetchAccountOrders.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.order = action.payload;
+        },
+      )
       .addCase(fetchAccountOrders.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -165,63 +164,74 @@ const myAccountSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAccountAddress.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-      state.address = action.payload;
-      
-       
-      })
+      .addCase(
+        fetchAccountAddress.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.address = action.payload;
+        },
+      )
       .addCase(fetchAccountAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-        
       })
-        .addCase(fetchCustomerAddress.pending, (state) => {
+      .addCase(fetchCustomerAddress.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCustomerAddress.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-        state.customerAddresses = action.payload?.data?.customer_addresses;
-      })
+      .addCase(
+        fetchCustomerAddress.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+          state.customerAddresses = action.payload?.data?.customer_addresses;
+        },
+      )
       .addCase(fetchCustomerAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-        // addCustomerAddress
+      // addCustomerAddress
       .addCase(addCustomerAddress.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(addCustomerAddress.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-      })
+      .addCase(
+        addCustomerAddress.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+        },
+      )
       .addCase(addCustomerAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-     // updateCustomerAddress
+      // updateCustomerAddress
       .addCase(updateCustomerAddress.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateCustomerAddress.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-      })
+      .addCase(
+        updateCustomerAddress.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+        },
+      )
       .addCase(updateCustomerAddress.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
-
       .addCase(updatecustomer.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updatecustomer.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-      })
+      .addCase(
+        updatecustomer.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+        },
+      )
       .addCase(updatecustomer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
@@ -230,9 +240,12 @@ const myAccountSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(postAccountDetails.fulfilled, (state, action: PayloadAction<any>) => {
-        state.loading = false;
-      })
+      .addCase(
+        postAccountDetails.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.loading = false;
+        },
+      )
       .addCase(postAccountDetails.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
