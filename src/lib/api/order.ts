@@ -1,16 +1,10 @@
-import { baseURL, storeId } from "../axiosInstance";
+import { apiFetch } from "@/lib/apiFetch";
 
 export const fetchOrderDetails = async (orderId: string) => {
   try {
-    const res = await fetch(`${baseURL}web/orders/order-details`, {
+    const res = await apiFetch("web/orders/order-details", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        storeId: storeId,
-      },
-      body: JSON.stringify({
-        orderId: orderId,
-      }),
+      json: { orderId },
     });
 
     if (!res.ok) throw new Error("Failed to fetch order details");

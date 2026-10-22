@@ -1,22 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { baseURL, storeId } from "@/lib/axiosInstance";
-
-// Fetch categories
-async function fetchCategories() {
-    try {
-        const res = await fetch(`${baseURL}web/categories/get-categories`, {
-            headers: { storeId: storeId },
-            cache: "no-store",
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-
-        return data.data || [];
-    } catch {
-        return [];
-    }
-}
+import { fetchCategories } from "@/lib/api/category";
 
 
 // Recursive function to render categories as nested list
@@ -43,7 +27,7 @@ const CategoryList: React.FC<{ categories: any[] }> = ({ categories }) => {
 };
 
 export default async function SitemapPage() {
-    const categories = await fetchCategories();
+    const categories = await fetchCategories({ cache: "no-store" }).catch(() => []);
     return (
         <main className="w-full max-w-[1170px] font-roboto mx-auto mt-8 lg:px-6 xl:px-4">
             <h1 className="text-[28px] text-[#333333] mb-6">Sitemap</h1>

@@ -1,52 +1,12 @@
 
 import Link from "next/link";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { fetchBrands } from "@/lib/api/brand";
+import { fetchCategories } from "@/lib/api/category";
+import { fetchAllWebPages } from "@/lib/api/products";
 import WebDynamicList from "../components/sitemap/WebDynamicList";
 
 const SHOW_BRANDS_LIMIT = 19;
 const SHOW_CATEGORIES_LIMIT = 3;
-
-async function fetchCategories() {
-  try {
-    const res = await fetch(`${baseURL}web/categories/get-categories`, {
-      headers: { storeId: storeId },
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.data || [];
-  } catch {
-    return [];
-  }
-}
-
-async function fetchBrands() {
-  try {
-    const res = await fetch(`${baseURL}web/brands/brands`, {
-      headers: { storeId: storeId },
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.data || [];
-  } catch {
-    return [];
-  }
-}
-
-async function fetchWebPages() {
-  try {
-    const res = await fetch(`${baseURL}web/webpages/web-pages?page=1&perPage=100`, {
-      headers: { storeId: storeId },
-      cache: "no-store",
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.data || [];
-  } catch {
-    return [];
-  }
-}
 
 const CategoryList: React.FC<{ categories: any[]; categoriesLength?: number }> = ({
   categories,
@@ -102,9 +62,12 @@ function BrandsList({ brands }: { brands: any[] }) {
 }
 
 export default async function SitemapPage() {
-  const categories = await fetchCategories();
-  const brands = await fetchBrands();
-  const webPages = await fetchWebPages();
+  // A failed section is just left out of the page.
+  const [categories, brands, webPages] = await Promise.all([
+    fetchCategories({ cache: "no-store" }).catch(() => []),
+    fetchBrands({ cache: "no-store" }).catch(() => []),
+    fetchAllWebPages().catch(() => []),
+  ]);
 
   return (
     <main className="w-full max-w-[1170px]  mx-auto mt-8 lg:px-6 xl:px-4">

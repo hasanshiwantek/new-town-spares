@@ -1,12 +1,11 @@
 // lib/serverAxios.ts
 import axios from "axios";
-import { baseURL, storeId } from "./axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
+import { getStoreHeaders } from "@/lib/apiFetch";
 
 const serverAxios = axios.create({
-  baseURL: baseURL,
-  headers: {
-    storeId: storeId, // Replace with dynamic storeId if needed
-  },
+  baseURL: ENV_CONFIG.baseURL,
+  headers: getStoreHeaders(),
 });
 
 export default serverAxios;

@@ -12,7 +12,7 @@ import axiosInstance from "@/lib/axiosInstance";
 import { errorMessage } from "@/utils/message";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface ResetPasswordValues {
@@ -23,8 +23,16 @@ interface ResetPasswordValues {
 const ResetPassword = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  // Read the reset link once, then remove it from the address bar/history so
+  // the token can't leak via bookmarks, shared links or screenshots
+  const [{ token, email }] = useState(() => ({
+    token: searchParams.get("token"),
+    email: searchParams.get("email"),
+  }));
+  useEffect(() => {
+    if (!searchParams.has("token") && !searchParams.has("email")) return;
+    window.history.replaceState(null, "", window.location.pathname);
+  }, [searchParams]);
   const {
     register,
     handleSubmit,

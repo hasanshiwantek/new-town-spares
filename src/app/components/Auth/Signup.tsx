@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 // import countries from "world-countries";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
+import { transferCart } from "@/lib/api/transferCart";
 import { registerUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { addCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage, successMessage } from "@/utils/message";
-import { getFromStorage, getSessionId } from "@/utils/storage";
+import { getFromStorage } from "@/utils/storage";
 import { Country, State } from "country-state-city";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
@@ -21,7 +22,6 @@ import { useForm } from "react-hook-form";
 import { countriesWithoutPostalCode } from "@/const/country-level";
 import { useAlert } from "@/hooks/useAlert";
 import ReCAPTCHA from "react-google-recaptcha";
-import { sitekey } from "@/lib/axiosInstance";
 interface SignupFormValues {
   firstName: string;
   lastName: string;
@@ -120,17 +120,8 @@ const SignupPage = () => {
       const result = await dispatch(registerUser(payload));
       if (registerUser.fulfilled.match(result)) {
         const token = result.payload.token;
-        const sessionId =  getSessionId();
-
-        await fetch(`${baseURL}web/cart/transfer`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            storeId: storeId,
-            "X-Session-ID": sessionId || "",
-            "Content-Type": "application/json",
-          },
-        });
+        // A failed cart transfer must not stop the rest of the flow.
+        await transferCart({ token }).catch(() => {});
         const {
           email,
           userRole,
@@ -447,7 +438,7 @@ const SignupPage = () => {
           </div>
           <div className="mt-6">
             <ReCAPTCHA
-              sitekey={sitekey}
+              sitekey={ENV_CONFIG.sitekey}
               onChange={(token: any) => {
                 setCaptchaToken(token);
               }}

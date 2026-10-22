@@ -16,17 +16,13 @@ import { RootState } from "@/redux/store";
 
 import ConfirmationModal from "../modal/confirmationModal";
 
-import {
-  getFromStorage,
-  getPersistedAuth,
-  getSessionId,
-  setInStorage,
-} from "@/utils/storage";
+import { apiFetch } from "@/lib/apiFetch";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getPersistedAuth, getSessionId, setInStorage } from "@/utils/storage";
+import { transferCart } from "@/lib/api/transferCart";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import { transferCart } from "@/utils/transferCart";
 interface Category {
   id: number;
   name: string;
@@ -47,6 +43,14 @@ const FooterBottom = () => {
   const auth = useAppSelector((state: RootState) => state?.auth);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const pathname = usePathname();
+  const handledLoginToken = useRef<string | null>(null);
+  const [tokenLogin, setTokenLogin] = useState<{
+    token: string;
+    email: string;
+    name: string;
+  } | null>(null);
+  const [tokenLoginLoading, setTokenLoginLoading] = useState(false);
 
   const { newsletterLoading, newsletterSuccess, newsletterError } =
     useAppSelector((state: any) => state.contact);
@@ -96,35 +100,93 @@ const FooterBottom = () => {
   }, []);
 
   useEffect(() => {
-    const existingSession =  getSessionId();
+    const existingSession = getSessionId();
     if (existingSession) {
       dispatch(visitorSession({ sessionId: existingSession }));
     } else {
-      const randomString = Math.random().toString(36).substring(2, 15);
-      setInStorage("sessionId", randomString);
+      // Guest carts are keyed by this ID, so it must be unguessable:
+      // 128 bits from the crypto RNG (Math.random is predictable)
+      const bytes = crypto.getRandomValues(new Uint8Array(16));
+      const sessionId = Array.from(bytes, (b) =>
+        b.toString(16).padStart(2, "0"),
+      ).join("");
+      setInStorage("sessionId", sessionId);
     }
   }, []);
+  // `?token=` sign-in links (admin "Login as customer"). Anyone can craft such
+  // a link with their own token, so never sign in silently: look up whose
+  // account it is and ask the visitor to confirm first (prevents login CSRF).
   useEffect(() => {
     if (!paramsToken) return;
-    const login = async () => {
-      const auth = {
-        token: paramsToken,
-      };
-      setInStorage("persist:auth", auth);
-      const result = await dispatch(customerProfile());
-      if (customerProfile.fulfilled.match(result)) {
-        dispatch(fetchCartList());
-        window.location.href = "/my-account/orders";
+    // /auth/reset-password uses `?token=` for the reset token; never treat
+    // anything under /auth/ as a sign-in token.
+    if (pathname?.startsWith("/auth/")) return;
+    if (handledLoginToken.current === paramsToken) return;
+    handledLoginToken.current = paramsToken;
+
+    // Drop the token from the address bar and history right away, so it
+    // can't leak through the Referer header, bookmarks or shared links.
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete("token");
+    window.history.replaceState(
+      null,
+      "",
+      cleanUrl.pathname + cleanUrl.search + cleanUrl.hash,
+    );
+
+    const lookUpAccount = async () => {
+      try {
+        // apiFetch, not axiosInstance: the interceptor would swap in the
+        // current session's token, and a 401 would log the visitor out.
+        const res = await apiFetch("web/customer-profile", {
+          token: paramsToken,
+        });
+        if (!res.ok) throw new Error(`Profile lookup failed: ${res.status}`);
+        const body = await res.json();
+        const customer = body?.customer || body?.user || body?.data?.customer;
+        if (!customer?.email) throw new Error("Profile has no email");
+        setTokenLogin({
+          token: paramsToken,
+          email: customer.email,
+          name: [customer.firstName, customer.lastName]
+            .filter(Boolean)
+            .join(" "),
+        });
+      } catch {
+        errorMessage("This sign-in link is invalid or has expired.");
       }
     };
-    login();
-  }, [paramsToken, dispatch, router]);
+    lookUpAccount();
+  }, [paramsToken, pathname]);
+
+  const confirmTokenLogin = async () => {
+    if (!tokenLogin) return;
+    setTokenLoginLoading(true);
+    setInStorage("persist:auth", { token: tokenLogin.token });
+    const result = await dispatch(customerProfile());
+    if (customerProfile.fulfilled.match(result)) {
+      dispatch(fetchCartList());
+      window.location.href = "/my-account/orders";
+      return;
+    }
+    setTokenLoginLoading(false);
+    setTokenLogin(null);
+    errorMessage("This sign-in link is invalid or has expired.");
+  };
   useEffect(() => {
     if (!paramsActiontoken) return;
     if (verifiedToken.current === paramsActiontoken) return;
     verifiedToken.current = paramsActiontoken;
 
-    let cancelled = false;
+    // Drop the magic-link token from the address bar and history right away,
+    // so it can't leak through bookmarks, shared links or the Referer header
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete("actiontoken");
+    window.history.replaceState(
+      null,
+      "",
+      cleanUrl.pathname + cleanUrl.search + cleanUrl.hash,
+    );
 
     dispatch(verifyMagicLink({ token: paramsActiontoken }))
       .unwrap()
@@ -151,13 +213,11 @@ const FooterBottom = () => {
         }
       })
       .catch((msg) => {
-        verifiedToken.current = null;
-        if (!cancelled) errorMessage(msg || "Magic link is invalid or expired");
+        // No cleanup-based cancel flag: removing the token from the URL above
+        // re-runs this effect, which would hide this message. verifiedToken
+        // already stops the link from being verified twice.
+        errorMessage(msg || "Magic link is invalid or expired");
       });
-
-    return () => {
-      cancelled = true;
-    };
   }, [paramsActiontoken, dispatch, router]);
   return (
     <React.Fragment>
@@ -420,6 +480,25 @@ const FooterBottom = () => {
             setShowLogoutModal(false);
             router.replace("/auth/login");
           }}
+        />
+        <ConfirmationModal
+          open={!!tokenLogin}
+          onOpenChange={(open) => {
+            if (!open && !tokenLoginLoading) setTokenLogin(null);
+          }}
+          loading={tokenLoginLoading}
+          variant="warning"
+          title="Sign in to this account?"
+          description={
+            tokenLogin
+              ? `This link signs you in as ${tokenLogin.name ? `${tokenLogin.name} (${tokenLogin.email})` : tokenLogin.email}.` +
+                (auth?.isAuthenticated && auth?.user?.email !== tokenLogin.email
+                  ? ` You'll be signed out of ${auth?.user?.email}.`
+                  : "") +
+                " Only continue if you expected this."
+              : ""
+          }
+          onConfirm={confirmTokenLogin}
         />
       </div>
     </React.Fragment>

@@ -5,6 +5,7 @@ import { Poppins } from "next/font/google";
 import ScriptInjector from "@/components/ScriptInjector";
 import "./globals.css";
 import "../styles/blog/api-content.css";
+import { ENV_CONFIG } from "@/config/envConfig";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -14,7 +15,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://new-town-spares.vercel.app"),
+  metadataBase: new URL(ENV_CONFIG.siteURL),
   robots: { index: false, follow: false },
   title: {
     default: "New Town Spares",
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://new-town-spares.vercel.app",
+    url: ENV_CONFIG.siteURL,
     siteName: "New Town Spares",
     title: "New Town Spares – Quality Electronics & Accessories",
     description:

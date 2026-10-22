@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const GEONAMES_USERNAME = "shan12"; // geonames.org pe register karo
+import { ENV_CONFIG } from "@/config/envConfig";
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -12,7 +11,7 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const url = `http://api.geonames.org/postalCodeSearchJSON?placename=${encodeURIComponent(city)}&country=${countryCode.toUpperCase()}&maxRows=20&username=${GEONAMES_USERNAME}`;
+        const url = `http://api.geonames.org/postalCodeSearchJSON?placename=${encodeURIComponent(city)}&country=${countryCode.toUpperCase()}&maxRows=20&username=${ENV_CONFIG.geonamesUsername}`;
 
         const res = await fetch(url);
         const data = await res.json();

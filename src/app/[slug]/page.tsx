@@ -1,9 +1,11 @@
 import ProductCard from "@/app/components/Product/ProductCard";
+import { ENV_CONFIG } from "@/config/envConfig";
 import {
   fetchProductBySlugAndUrl,
   fetchRelatedProducts,
   fetchWebPages,
 } from "@/lib/api/products";
+import { toJsonLd } from "@/lib/jsonLd";
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import { headers } from "next/headers";
@@ -12,7 +14,6 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Suspense } from "react";
 import ProductRecent from "../components/Product/ProductRecent";
-import RecentViewedProduct from "../components/myaccount/RecentViewedPoduct";
 
 const DynamicWebPage = dynamic(
   () => import("../components/Product/DynamicWebPage"),
@@ -40,7 +41,7 @@ export async function generateMetadata({
     notFound();
   }
 
-  const url = `https://new-town-spares.vercel.app/${slug}`;
+  const url = `${ENV_CONFIG.siteURL}/${slug}`;
 
   if (webPages) {
     return {
@@ -150,7 +151,7 @@ export default async function ProductPage({
               id="product-jsonld"
               type="application/ld+json"
               dangerouslySetInnerHTML={{
-                __html: JSON.stringify(backendSchema),
+                __html: toJsonLd(backendSchema),
               }}
               strategy="afterInteractive"
             />

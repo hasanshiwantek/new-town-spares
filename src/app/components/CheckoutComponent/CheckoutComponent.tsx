@@ -15,10 +15,9 @@ import {
 } from "@/hooks/useFormatPrice";
 import { money } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import axiosInstance, {
-  baseURL,
-  stripePublishableKey,
-} from "@/lib/axiosInstance";
+import axiosInstance from "@/lib/axiosInstance";
+import { ENV_CONFIG } from "@/config/envConfig";
+import { apiFetch } from "@/lib/apiFetch";
 import { cn } from "@/lib/utils";
 import {
   clearCart,
@@ -87,7 +86,7 @@ function splitName(fullName: string) {
   };
 }
 // Stripe publishable key
-const stripePromise = loadStripe(stripePublishableKey);
+const stripePromise = loadStripe(ENV_CONFIG.stripePublishableKey);
 
 // Pre-compute country list at module level
 // const countryList = countries
@@ -567,31 +566,25 @@ const CheckoutForm = () => {
     });
     pr.on("shippingaddresschange", async (event) => {
       try {
-        const response = await fetch(
-          `${baseURL}web/checkout/get-shipping-rates`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+        const response = await apiFetch("web/checkout/get-shipping-rates", {
+          method: "POST",
+          json: {
+            destination: {
+              state: event.shippingAddress.region,
+              country_code: event.shippingAddress.country,
+              postal_code: event.shippingAddress.postalCode,
             },
-            body: JSON.stringify({
-              destination: {
-                state: event.shippingAddress.region,
-                country_code: event.shippingAddress.country,
-                postal_code: event.shippingAddress.postalCode,
-              },
 
-              package: {
-                total_weight: calculatePackage(cart).total_weight,
-                weight_unit: "LB",
-                order_total: finalTotal,
-                item_count: calculatePackage(cart).item_count,
-                package_value: finalTotal,
-              },
-              currency: selectedCurrency,
-            }),
+            package: {
+              total_weight: calculatePackage(cart).total_weight,
+              weight_unit: "LB",
+              order_total: finalTotal,
+              item_count: calculatePackage(cart).item_count,
+              package_value: finalTotal,
+            },
+            currency: selectedCurrency,
           },
-        );
+        });
 
         const data = await response.json();
 

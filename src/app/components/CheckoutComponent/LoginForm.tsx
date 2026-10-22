@@ -2,11 +2,11 @@
 
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { baseURL, storeId } from "@/lib/axiosInstance";
+import { transferCart } from "@/lib/api/transferCart";
 import { loginUser, sendMagicLink } from "@/redux/slices/authSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage, getSessionId } from "@/utils/storage";
+import { getFromStorage } from "@/utils/storage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -48,16 +48,8 @@ const LoginForm = ({ onCancel }: LoginFormProps) => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId =  getSessionId();
-          const res = await fetch(`${baseURL}web/cart/transfer`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              storeId: storeId,
-              "X-Session-ID": sessionId || "",
-              "Content-Type": "application/json",
-            },
-          });
+          // A failed cart transfer must not stop the rest of the flow.
+          await transferCart({ token }).catch(() => {});
           window.location.reload();
         };
         fetchCartListInner();
