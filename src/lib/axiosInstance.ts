@@ -43,6 +43,9 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
+  // Store headers don't depend on the browser, so the server gets them too.
+  config.headers.set(getStoreHeaders());
+
   if (typeof window !== "undefined") {
     const auth = getPersistedAuth();
     const sessionId = getSessionId();
@@ -50,7 +53,6 @@ axiosInstance.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    config.headers.set(getStoreHeaders());
     if (sessionId) {
       config.headers["X-Session-ID"] = sessionId;
     }
