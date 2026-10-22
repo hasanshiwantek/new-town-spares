@@ -1,23 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { ENV_CONFIG } from "@/config/envConfig";
-
-async function fetchBrands() {
-    try {
-        const res = await fetch(`${ENV_CONFIG.baseURL}web/brands/brands`, {
-            headers: { storeId: ENV_CONFIG.storeId },
-            cache: "no-store",
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.data || [];
-    } catch {
-        return [];
-    }
-}
+import { fetchBrands } from "@/lib/api/brand";
 
 export default async function SitemapPage() {
-    const brands = await fetchBrands();
+    const brands = await fetchBrands({ cache: "no-store" }).catch(() => []);
 
     return (
         <main className="w-full max-w-[1170px] font-roboto mx-auto mt-8 lg:px-6 xl:px-4">

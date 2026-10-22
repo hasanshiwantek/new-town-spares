@@ -1,9 +1,7 @@
-import { ENV_CONFIG } from "@/config/envConfig";
+import { apiFetch } from "@/lib/apiFetch";
 export const fetchWebsiteSeo = async () => {
     try {
-        const res = await fetch(`${ENV_CONFIG.baseURL}web/store-setting/get-website-seo`, {
-            headers: { storeId: ENV_CONFIG.storeId },
-        });
+        const res = await apiFetch("web/store-setting/get-website-seo");
         if (!res.ok) return null;
         const data = await res.json();
         return data?.data || null;

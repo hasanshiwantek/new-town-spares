@@ -1,5 +1,5 @@
 // lib/api/banners.ts
-import { ENV_CONFIG } from "@/config/envConfig";
+import { apiFetch } from "@/lib/apiFetch";
 import { fetchBrands } from "./brand";
 import { fetchCategories } from "./category";
 
@@ -60,8 +60,7 @@ export const fetchBanners = async ({
   const params = new URLSearchParams({ islocation: locationType });
   if (locationId != null) params.set("locationId", String(locationId));
 
-  const res = await fetch(`${ENV_CONFIG.baseURL}web/banners/by-location?${params}`, {
-    headers: { "Content-Type": "application/json", storeId: ENV_CONFIG.storeId },
+  const res = await apiFetch(`web/banners/by-location?${params}`, {
     // Admin changes show up within a 10 second window.
     next: { revalidate: 10 },
   });

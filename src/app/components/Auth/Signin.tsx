@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { ENV_CONFIG } from "@/config/envConfig";
+import { transferCart } from "@/lib/api/transferCart";
 import { loginUser } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { RootState } from "@/redux/store";
 import { errorMessage } from "@/utils/message";
-import { getFromStorage, getSessionId } from "@/utils/storage";
+import { getFromStorage } from "@/utils/storage";
 import { Eye, EyeOff, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,16 +44,8 @@ const SigninPage = () => {
       if (loginUser.fulfilled.match(result)) {
         const token = result?.payload?.token;
         const fetchCartListInner = async () => {
-          const sessionId = getSessionId();
-          await fetch(`${ENV_CONFIG.baseURL}web/cart/transfer`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              storeId: ENV_CONFIG.storeId,
-              "X-Session-ID": sessionId || "",
-              "Content-Type": "application/json",
-            },
-          });
+          // A failed cart transfer must not stop the rest of the flow.
+          await transferCart({ token }).catch(() => {});
 
           reset();
           if (shouldLoadQuote || quoteToken) {

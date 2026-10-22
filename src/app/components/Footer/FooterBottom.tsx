@@ -16,18 +16,13 @@ import { RootState } from "@/redux/store";
 
 import ConfirmationModal from "../modal/confirmationModal";
 
-import {
-  getFromStorage,
-  getPersistedAuth,
-  getSessionId,
-  setInStorage,
-} from "@/utils/storage";
+import { apiFetch } from "@/lib/apiFetch";
 import { errorMessage, successMessage } from "@/utils/message";
+import { getPersistedAuth, getSessionId, setInStorage } from "@/utils/storage";
+import { transferCart } from "@/lib/api/transferCart";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ENV_CONFIG } from "@/config/envConfig";
 import React, { useEffect, useRef, useState } from "react";
-import { transferCart } from "@/utils/transferCart";
 interface Category {
   id: number;
   name: string;
@@ -105,7 +100,7 @@ const FooterBottom = () => {
   }, []);
 
   useEffect(() => {
-    const existingSession =  getSessionId();
+    const existingSession = getSessionId();
     if (existingSession) {
       dispatch(visitorSession({ sessionId: existingSession }));
     } else {
@@ -141,14 +136,10 @@ const FooterBottom = () => {
 
     const lookUpAccount = async () => {
       try {
-        // Plain fetch, not axiosInstance: its interceptor would swap in the
+        // apiFetch, not axiosInstance: the interceptor would swap in the
         // current session's token, and a 401 would log the visitor out.
-        const res = await fetch(`${ENV_CONFIG.baseURL}web/customer-profile`, {
-          headers: {
-            Authorization: `Bearer ${paramsToken}`,
-            storeId: ENV_CONFIG.storeId,
-            "X-Session-ID": getSessionId() || "",
-          },
+        const res = await apiFetch("web/customer-profile", {
+          token: paramsToken,
         });
         if (!res.ok) throw new Error(`Profile lookup failed: ${res.status}`);
         const body = await res.json();
