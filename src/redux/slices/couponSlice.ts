@@ -184,7 +184,7 @@ export const fetchCustomerDiscounts = createAsyncThunk(
   "coupon/fetchCustomerDiscounts",
   async (_, thunkAPI) => {
     try {
-      const res = await axiosInstance.get(`dashboard/customer-discounts`);
+      const res = await axiosInstance.get(`web/customer-discounts`);
       return res?.data;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(
