@@ -108,20 +108,6 @@ export const updatecustomer = createAsyncThunk(
   },
 );
 
-// export const deletecustomeraddress = createAsyncThunk(
-//   "account/updatecustomer",
-//   async ({ id }: { id: string | number; }, { rejectWithValue }) => {
-//     try {
-//       const response = await axiosInstance.delete(
-//         `web/customers/delete-my-address/${id}`
-
-//       );
-//       return response.data;
-//     } catch (error: any) {
-//       return rejectWithValue(error.response?.data?.message || error.message);
-//     }
-//   }
-// );
 export const deletecustomeraddress = createAsyncThunk(
   "account/deletecustomeraddress",
   async ({ id }: { id: string | number }, { rejectWithValue }) => {
