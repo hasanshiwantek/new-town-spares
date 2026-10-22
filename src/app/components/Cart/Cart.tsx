@@ -43,7 +43,7 @@ const Cart = () => {
           dispatch(removeCoupon());
           dispatch(removeManualDiscount());
           dispatch(logout());
-          window.location.href = `/auth/login?action=loadSavedQuote&quoteToken=${quoteToken}`;
+          window.location.href = `/auth/login?action=loadSavedQuote&quoteToken=${encodeURIComponent(quoteToken)}`;
         }
       });
   }, [shouldLoadQuote, quoteToken]);

@@ -2,12 +2,6 @@
 import axiosInstance from "@/lib/axiosInstance";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../store";
-import {
-  getFromSessionStorage,
-  getFromStorage,
-  setInSessionStorage,
-  setInStorage,
-} from "@/utils/storage";
 
 interface Coupon {
   id?: number;

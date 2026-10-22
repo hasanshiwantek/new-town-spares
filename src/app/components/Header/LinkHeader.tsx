@@ -3,17 +3,12 @@
 import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
-import { cn } from "@/lib/utils";
-import {
-  fetchCurrencies,
-  setSelectedCurrency,
-} from "@/redux/slices/currencySlice";
+import { fetchCurrencies } from "@/redux/slices/currencySlice";
 import { RootState } from "@/redux/store";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
-import { FaChevronDown } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
 
 interface Category {

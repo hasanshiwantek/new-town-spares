@@ -1,18 +1,13 @@
 // // lib/api/categories.ts
 
-import { ENV_CONFIG } from "@/config/envConfig";
+import { apiFetch, type ApiFetchOptions } from "@/lib/apiFetch";
 
-
-export const fetchBrands = async () => {
-  const res = await fetch(`${ENV_CONFIG.baseURL}web/brands/brands`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      storeId: ENV_CONFIG.storeId,
-    },
-    // ✅ ISR: cache once, refresh every 5 min
-    next: { revalidate: 300 },
-  });
+// ✅ ISR by default: cache once, refresh every 5 min. Passing `options`
+// replaces that, e.g. { cache: "no-store" }.
+export const fetchBrands = async (
+  options: ApiFetchOptions = { next: { revalidate: 300 } },
+) => {
+  const res = await apiFetch("web/brands/brands", options);
 
   if (!res.ok) throw new Error("Failed to fetch brands");
 

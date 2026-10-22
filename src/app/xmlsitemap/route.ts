@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
-import { ENV_CONFIG } from '@/config/envConfig';
-const BACKEND_BASE = ENV_CONFIG.baseURL;
+import { apiFetch } from '@/lib/apiFetch';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
@@ -9,15 +8,9 @@ export async function GET(request: NextRequest) {
 
     if (!type) {
         try {
-            const backendRes = await fetch(
-                `${BACKEND_BASE}sitemap/xmlsitemap`,
-                {
-                    next: { revalidate: 10 },
-                    headers: {
-                        'storeid': ENV_CONFIG.storeId
-                    }
-                }
-            );
+            const backendRes = await apiFetch('sitemap/xmlsitemap', {
+                next: { revalidate: 10 },
+            });
 
             if (!backendRes.ok) throw new Error(`Backend returned ${backendRes.status}`);
 
@@ -54,18 +47,15 @@ export async function GET(request: NextRequest) {
     }
 
     let backendUrl = '';
-    if (type === 'pages') backendUrl = `${BACKEND_BASE}sitemap/pages`;
-    else if (type === 'products') backendUrl = `${BACKEND_BASE}sitemap/products/${page}`;
-    else if (type === 'categories') backendUrl = `${BACKEND_BASE}sitemap/categories/${page}`;
-    else if (type === 'brands') backendUrl = `${BACKEND_BASE}sitemap/brands/${page}`;
+    if (type === 'pages') backendUrl = `sitemap/pages`;
+    else if (type === 'products') backendUrl = `sitemap/products/${page}`;
+    else if (type === 'categories') backendUrl = `sitemap/categories/${page}`;
+    else if (type === 'brands') backendUrl = `sitemap/brands/${page}`;
     else return new Response('Invalid type', { status: 400 });
 
     try {
-        const res = await fetch(backendUrl, {
+        const res = await apiFetch(backendUrl, {
             next: { revalidate: 10 },        // ← 10 seconds revalidation
-            headers: {
-                'storeid': ENV_CONFIG.storeId
-            }
         });
 
         if (!res.ok) throw new Error(`Backend error ${res.status}`);

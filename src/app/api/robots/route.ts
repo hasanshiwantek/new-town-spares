@@ -1,18 +1,11 @@
 // /app/api/robots/route.ts
 
-import axiosInstance from "@/lib/axiosInstance";
+import serverAxios from "@/lib/serverAxios";
 import { ENV_CONFIG } from "@/config/envConfig";
 
 export async function GET() {
   try {
-    const res = await axiosInstance.get(
-      "web/store-setting/get-store-setting",
-      {
-        headers: {
-          "storeId": ENV_CONFIG.storeId,
-        },
-      }
-    );
+    const res = await serverAxios.get("web/store-setting/get-store-setting");
     // Extract robotsTxt from the response
     const robotsTxt = res.data?.data?.[0]?.website?.robotsTxt;
 

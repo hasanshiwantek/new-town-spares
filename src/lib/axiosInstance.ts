@@ -1,4 +1,6 @@
 // lib/axiosInstance.ts
+import { ENV_CONFIG } from "@/config/envConfig";
+import { getStoreHeaders } from "@/lib/apiFetch";
 import { errorMessage } from "@/utils/message";
 import {
   getFromStorage,
@@ -7,7 +9,6 @@ import {
   removeFromStorage,
 } from "@/utils/storage";
 import axios from "axios";
-import { ENV_CONFIG } from "@/config/envConfig";
 
 // Several requests can 401 at once; log out only once.
 let isLoggingOut = false;
@@ -49,8 +50,8 @@ axiosInstance.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (ENV_CONFIG.storeId) {
-      config.headers["storeId"] = Number(ENV_CONFIG.storeId);
+    config.headers.set(getStoreHeaders());
+    if (sessionId) {
       config.headers["X-Session-ID"] = sessionId;
     }
   }
