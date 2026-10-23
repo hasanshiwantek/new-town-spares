@@ -1,6 +1,7 @@
 // lib/axiosInstance.ts
 import { ENV_CONFIG } from "@/config/envConfig";
 import { getStoreHeaders } from "@/lib/apiFetch";
+import { customerLogout } from "@/redux/slices/authSlice";
 import { errorMessage } from "@/utils/message";
 import {
   getFromStorage,
@@ -24,6 +25,7 @@ const handleUnauthenticated = async () => {
     import("@/redux/slices/authSlice"),
   ]);
 
+  await store.dispatch(customerLogout()).catch(() => undefined);
   store.dispatch(logout());
   // redux-persist writes lazily; flush before navigating, and drop the legacy
   // token keys, or the next page load picks the dead token back up and loops.

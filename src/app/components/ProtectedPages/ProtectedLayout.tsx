@@ -1,44 +1,54 @@
 "use client";
-import { useSelector, useDispatch } from "react-redux";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { RootState } from "@/redux/store";
-import { logout } from "@/redux/slices/authSlice";
+import { customerLogout, logout } from "@/redux/slices/authSlice";
+import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
+import dayjs from "dayjs";
 
-
-export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, expireAt } = useSelector((state: RootState) => state.auth);
-  const dispatch = useDispatch();
+export default function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { isAuthenticated, expireAt } = useAppSelector(
+    (state: RootState) => state.auth,
+  );
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
-useEffect(() => {
-  if (!isAuthenticated) {
-    const loginUrl = `/auth/login?redirect=${encodeURIComponent(pathname || "/checkout")}`;
-    router.replace(loginUrl);
-    return;
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const loginUrl = `/auth/login?redirect=${encodeURIComponent(pathname || "/checkout")}`;
+      router.replace(loginUrl);
+      return;
+    }
 
-  if (!expireAt) return;
+    if (!expireAt) return;
 
-  const now = Date.now();
-  const expiryTime = new Date(expireAt).getTime();
-  const timeoutDuration = expiryTime - now; // ✅ const
+    const now = dayjs();
+    const expiryTime = dayjs(expireAt);
+    const timeoutDuration = expiryTime.diff(now);
+    if (timeoutDuration <= 0) {
+      dispatch(customerLogout()).unwrap();
+      dispatch(logout());
+      router.replace(
+        `/auth/login?redirect=${encodeURIComponent(pathname || "/checkout")}`,
+      );
+      return;
+    }
 
-  if (timeoutDuration <= 0) {
-    dispatch(logout());
-    router.replace(`/auth/login?redirect=${encodeURIComponent(pathname || "/checkout")}`);
-    return;
-  }
+    const timerId = setTimeout(() => {
+      dispatch(customerLogout()).unwrap();
+      dispatch(logout());
+      router.replace(
+        `/auth/login?redirect=${encodeURIComponent(pathname || "/checkout")}`,
+      );
+    }, timeoutDuration);
 
-  const timerId = setTimeout(() => {
-    dispatch(logout());
-    router.replace(`/auth/login?redirect=${encodeURIComponent(pathname || "/checkout")}`);
-  }, timeoutDuration);
-
-  return () => clearTimeout(timerId); // cleanup
-}, [isAuthenticated, expireAt, dispatch, router, pathname]);
-
+    return () => clearTimeout(timerId); // cleanup
+  }, [isAuthenticated, expireAt, dispatch, router, pathname]);
 
   // Loader while redirecting
   if (!isAuthenticated) {
