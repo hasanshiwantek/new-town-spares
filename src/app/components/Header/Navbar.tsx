@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
 import { clampQty, getQtyError } from "@/lib/utils";
-import { logout } from "@/redux/slices/authSlice";
+import { customerLogout, logout } from "@/redux/slices/authSlice";
 import {
   addBySku,
   deleteCart,
@@ -68,6 +68,16 @@ const Navbar: React.FC = () => {
   const cartRef = useRef<HTMLDivElement | null>(null);
   const accountRef = useRef<HTMLDivElement | null>(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const handleConfirmLogout = async () => {
+    try {
+      await dispatch(customerLogout()).unwrap();
+      dispatch(logout());
+      setShowLogoutModal(false);
+      router.replace("/auth/login");
+    } catch (error) {
+      errorMessage(typeof error === "string" ? error : "Logout failed");
+    }
+  };
 
   const [quantities, setQuantities] = useState<{
     [key: string]: number | string;
@@ -428,7 +438,7 @@ const Navbar: React.FC = () => {
                         Account Settings
                       </Link>
                     </li>
-                    <li onClick={handleLogout}>Sign out</li>
+                    <li onClick={handleLogout}>{auth?.loading ? "Signing out..." : "Sign out"}</li>
                   </ul>
                 </div>
               )}
@@ -551,7 +561,10 @@ const Navbar: React.FC = () => {
                                 {cartTotals ? (
                                   formatMoney(cartTotals.subtotal)
                                 ) : (
-                                  <ProductPrice price={subtotal} inline={true} />
+                                  <ProductPrice
+                                    price={subtotal}
+                                    inline={true}
+                                  />
                                 )}
                               </span>
                             </div>
@@ -561,7 +574,10 @@ const Navbar: React.FC = () => {
                                 {cartTotals ? (
                                   formatMoney(cartTotals.total)
                                 ) : (
-                                  <ProductPrice price={subtotal} inline={true} />
+                                  <ProductPrice
+                                    price={subtotal}
+                                    inline={true}
+                                  />
                                 )}
                               </span>
                             </div>
@@ -856,14 +872,10 @@ const Navbar: React.FC = () => {
         open={showLogoutModal}
         onOpenChange={setShowLogoutModal}
         variant="warning"
+        loading={auth?.loading}
         title="Confirm Logout?"
         description="Are you sure you want to logout?"
-        onConfirm={() => {
-          dispatch(logout());
-          successMessage("Logged out successfully!");
-          setShowLogoutModal(false);
-          router.replace("/auth/login");
-        }}
+        onConfirm={handleConfirmLogout}
       />
     </header>
   );

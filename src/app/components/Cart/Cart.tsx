@@ -1,6 +1,6 @@
 "use client";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import { logout } from "@/redux/slices/authSlice";
+import { customerLogout, logout } from "@/redux/slices/authSlice";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import {
   fetchLoadSavedQuote,
@@ -42,6 +42,9 @@ const Cart = () => {
         if (error) {
           dispatch(removeCoupon());
           dispatch(removeManualDiscount());
+          if (auth?.isAuthenticated) {
+            dispatch(customerLogout()).unwrap();
+          }
           dispatch(logout());
           window.location.href = `/auth/login?action=loadSavedQuote&quoteToken=${encodeURIComponent(quoteToken)}`;
         }
