@@ -84,6 +84,28 @@ export const customerProfile = createAsyncThunk(
   },
 );
 
+export const customerLogout = createAsyncThunk(
+  "auth/customerLogout",
+  async (_, thunkAPI) => {
+    let lastError: any = null;
+
+    try {
+      const res = await axiosInstance.post("web/customer/logout");
+      return res.data;
+    } catch (err: any) {
+      lastError = err;
+      if (err.response?.status !== 404) {
+        return thunkAPI.rejectWithValue(
+          err.response?.data?.message || "Logout failed",
+        );
+      }
+    }
+    return thunkAPI.rejectWithValue(
+      lastError?.response?.data?.message || "Logout failed",
+    );
+  },
+);
+
 // Register thunk
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
@@ -158,7 +180,14 @@ export const verifyMagicLink = createAsyncThunk(
   },
 );
 const clearAuthStorage = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
   removeManualDiscount();
+  ["persist:auth", "token", "tokenExpiry", "user"].forEach((key) => {
+    removeFromStorage(key);
+  });
 };
 // Slice
 const authSlice = createSlice({
@@ -170,6 +199,7 @@ const authSlice = createSlice({
       state.token = null;
       state.expireAt = null;
       state.isAuthenticated = false;
+      state.loading = false;
       clearAuthStorage();
     },
   },
@@ -234,6 +264,25 @@ const authSlice = createSlice({
         state.registerLoading = false;
         state.error = action.payload as string;
       })
+      .addCase(customerLogout.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(customerLogout.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.expireAt = null;
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.stores = [];
+        state.loginloading = false;
+        state.registerLoading = false;
+        clearAuthStorage();
+      })
+      .addCase(customerLogout.rejected, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
 
       // Send Magic Link
       .addCase(sendMagicLink.pending, (state) => {
@@ -260,9 +309,6 @@ const authSlice = createSlice({
         state.expireAt = expireAt;
         state.isAuthenticated = true;
         state.error = null;
-        // if (store?.id) {
-        //   state.stores = [{ storeId: store.id, name: store.name }];
-        // }
         if (token) {
           setInStorage("token", token);
           setInStorage("tokenExpiry", expireAt);

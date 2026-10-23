@@ -5,6 +5,7 @@ import { fetchCategories } from "@/lib/api/category";
 import {
   checkAuthToken,
   customerProfile,
+  customerLogout,
   logout,
   verifyMagicLink,
 } from "@/redux/slices/authSlice";
@@ -67,6 +68,16 @@ const FooterBottom = () => {
   };
   const handleLogout = () => {
     setShowLogoutModal(true);
+  };
+  const handleConfirmLogout = async () => {
+    try {
+      await dispatch(customerLogout()).unwrap();
+      dispatch(logout());
+      setShowLogoutModal(false);
+      router.replace("/auth/login");
+    } catch (error) {
+      errorMessage(typeof error === "string" ? error : "Logout failed");
+    }
   };
 
   useEffect(() => {
@@ -474,12 +485,7 @@ const FooterBottom = () => {
           variant="warning"
           title="Confirm Logout?"
           description="Are you sure you want to logout?"
-          onConfirm={() => {
-            dispatch(logout());
-            successMessage("Logged out successfully!");
-            setShowLogoutModal(false);
-            router.replace("/auth/login");
-          }}
+          onConfirm={handleConfirmLogout}
         />
         <ConfirmationModal
           open={!!tokenLogin}
