@@ -8,6 +8,7 @@ import { RootState } from "@/redux/store";
 import { customerLogout, logout } from "@/redux/slices/authSlice";
 import { errorMessage } from "@/utils/message";
 import LoginForm from "./LoginForm";
+import { cn } from "@/lib/utils";
 interface CustomerStepProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
@@ -46,6 +47,14 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
         window.location.href = "/auth/login";
       });
   };
+  const handleClick = isLoggedIn ? handleSignOut : onEdit;
+  const title = isLoggedIn ? "Sign Out" : "Edit";
+  const classNames = cn(
+    "text-[#333333] hover:text-[#FF482E] shrink-0",
+    isLoggedIn
+      ? "text-[12px] h-12 w-[80px] border border-[#D9D9D9]"
+      : "text-[13px]",
+  );
   useEffect(() => {
     if (auth?.isAuthenticated) {
       onContinue();
@@ -60,23 +69,9 @@ const CustomerStep: React.FC<CustomerStepProps> = ({
             {emailValue}
           </span>
           <div></div>
-          {auth?.isAuthenticated ? (
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="text-[12px] text-[#333333] h-12 w-[80px] border border-[#D9D9D9]  hover:text-[#FF482E] shrink-0"
-            >
-              Sign Out
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onEdit}
-              className="text-[13px] text-[#333333] hover:text-[#FF482E] shrink-0"
-            >
-              Edit
-            </button>
-          )}
+          <button type="button" onClick={handleClick} className={classNames}>
+            {title}
+          </button>
         </div>
       ) : isActive ? (
         // Show active form
