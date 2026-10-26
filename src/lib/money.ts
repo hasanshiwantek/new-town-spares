@@ -25,7 +25,8 @@ const ZERO_DECIMAL_CURRENCIES = [
   "XPF",
 ];
 
-export const decimalsFor = (currency: string) =>
+// Stripe's minor units — used for amounts/charges, not for display
+const decimalsFor = (currency: string) =>
   ZERO_DECIMAL_CURRENCIES.includes(currency.toUpperCase()) ? 0 : 2;
 
 const unit = (currency: string) => 10 ** decimalsFor(currency);
@@ -38,8 +39,6 @@ export const money = (
   minor: Math.round(Number(amount || 0) * unit(currency)),
   currency: currency.toUpperCase(),
 });
-
-export const zero = (currency: string): Money => money(0, currency);
 
 export const toMajor = (m: Money) => m.minor / unit(m.currency);
 
@@ -82,17 +81,17 @@ export const times = (m: Money, qty: number): Money => ({
 });
 
 export const sum = (currency: string, items: Money[]): Money =>
-  items.reduce(add, zero(currency));
+  items.reduce(add, money(0, currency));
 
 export const atLeastZero = (m: Money): Money => ({
   minor: Math.max(m.minor, 0),
   currency: m.currency,
 });
 
-// How the store displays a currency (from /web/currencies)
+// How the store displays a currency (set on the dashboard, from /web/currencies)
 export type CurrencyFormat = {
   symbol: string;
-  symbolLocation: "left" | "right" | string;
+  symbolLocation: string; // "left" | "right"
   decimalToken: string;
   thousandsToken: string;
   decimalPlaces: number;
@@ -108,9 +107,7 @@ const THOUSANDS_GROUP_REGEX = /\B(?=(\d{3})+(?!\d))/g;
 export const setCurrencyFormats = (
   list: (CurrencyFormat & { code: string })[],
 ) => {
-  currencyFormats = Object.fromEntries(
-    list.map((c) => [c.code.toUpperCase(), c]),
-  );
+  currencyFormats = Object.fromEntries(list.map((c) => [c.code, c]));
 };
 
 export const formatMoney = (m: Money) => {
@@ -120,13 +117,10 @@ export const formatMoney = (m: Money) => {
     return `${m.currency} ${toMajor(m).toFixed(decimalsFor(m.currency))}`;
   }
 
-  const places = Number.isFinite(f.decimalPlaces)
-    ? f.decimalPlaces
-    : decimalsFor(m.currency);
   const major = toMajor(m);
-  const [int, frac] = Math.abs(major).toFixed(places).split(".");
-  const grouped = int.replace(THOUSANDS_GROUP_REGEX, f.thousandsToken ?? "");
-  const number = frac ? `${grouped}${f.decimalToken || "."}${frac}` : grouped;
+  const [int, frac] = Math.abs(major).toFixed(f.decimalPlaces).split(".");
+  const grouped = int.replace(THOUSANDS_GROUP_REGEX, f.thousandsToken);
+  const number = frac ? `${grouped}${f.decimalToken}${frac}` : grouped;
   const sign = major < 0 ? "-" : "";
 
   return f.symbolLocation === "right"

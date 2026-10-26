@@ -13,7 +13,7 @@ import {
   useMoney,
   useOrderTotals,
 } from "@/hooks/useFormatPrice";
-import { money } from "@/lib/money";
+import { money, rateCurrency, toMajor } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
 import { ENV_CONFIG } from "@/config/envConfig";
@@ -269,7 +269,11 @@ const CheckoutForm = () => {
     (state) => state.currency,
   );
   const { toUsd: moneyToUsd, ofRate } = useMoney();
-  const { currency: chargeCurrency, toChargeMinor } = useChargeCurrency();
+  const {
+    currency: chargeCurrency,
+    toChargeMinor,
+    toChargeMajor,
+  } = useChargeCurrency();
   // A rate in USD for the backend fields that are USD (each rate carries its
   // own currency: API rates the quoted one, frontend-built rates USD)
   const rateToUsd = useCallback(
@@ -454,6 +458,51 @@ const CheckoutForm = () => {
   const chargeTotalMinor =
     orderTotals.charge?.total.minor ?? toChargeMinor(money(finalTotal, "USD"));
 
+  // Order total in the selected currency, for the shipping-rate request
+  // (`currency: selectedCurrency` there)
+  const selectedOrderTotal = orderTotals.display
+    ? toMajor(orderTotals.display.total)
+    : toChargeMajor(money(finalTotal, "USD"));
+
+  // Order payload amounts, in the charge (= selected) currency — the same
+  // rounded amounts the summary shows and Stripe charges
+  const chargeAmount = (
+    key: "shipping" | "couponDiscount" | "manualDiscount",
+    usd: number,
+  ) =>
+    orderTotals.charge
+      ? toMajor(orderTotals.charge[key])
+      : toChargeMajor(money(usd, "USD"));
+  const chargeShipping = chargeAmount("shipping", shipping);
+  const chargeCouponDiscount = chargeAmount(
+    "couponDiscount",
+    Number(discountAmount) || 0,
+  );
+  const chargeManualDiscount = chargeAmount(
+    "manualDiscount",
+    Number(manualDiscount) || 0,
+  );
+
+  // A shipping rate with its amounts in the charge currency (API rates
+  // already are; frontend-built fixed/free/flat rates are in USD)
+  const toChargeRate = useCallback(
+    (rate: any) => {
+      if (!rate || typeof rate !== "object") return rate;
+      const from = rateCurrency(rate, selectedCurrency);
+      if (from === chargeCurrency) return rate;
+      return {
+        ...rate,
+        total_charge: toChargeMajor(ofRate(rate)),
+        surcharges: rate.surcharges?.map((s: any) => ({
+          ...s,
+          amount: toChargeMajor(money(s.amount, from)),
+        })),
+        currency: chargeCurrency,
+      };
+    },
+    [selectedCurrency, chargeCurrency, toChargeMajor, ofRate],
+  );
+
   // ADD COUPON HANDLERS
   const handleApplyCoupon = async () => {
     if (!promoCode.trim()) {
@@ -580,9 +629,9 @@ const CheckoutForm = () => {
             package: {
               total_weight: calculatePackage(cart).total_weight,
               weight_unit: "LB",
-              order_total: finalTotal,
+              order_total: selectedOrderTotal,
               item_count: calculatePackage(cart).item_count,
-              package_value: finalTotal,
+              package_value: selectedOrderTotal,
             },
             currency: selectedCurrency,
           },
@@ -651,6 +700,7 @@ const CheckoutForm = () => {
     stripe,
     cart,
     finalTotal,
+    selectedOrderTotal,
     selectedCurrency,
     chargeCurrency,
     chargeTotalMinor,
@@ -683,9 +733,9 @@ const CheckoutForm = () => {
               : data.paymentMethod == "apple_pay"
                 ? "Apple Pay"
                 : "Google Pay",
-          discountAmount: discountAmount,
+          discountAmount: chargeCouponDiscount,
           couponCode: appliedCoupon?.couponCode,
-          shippingCost: shipping,
+          shippingCost: chargeShipping,
           comments: data.orderComment || "",
           paymentIntentId: data.paymentIntentId ?? "",
           currency: chargeCurrency,
@@ -723,11 +773,14 @@ const CheckoutForm = () => {
               shippingMethod:
                 dest.selectedShippingMethod ||
                 shippingDetail?.rate?.method_type,
-              shippingData:
+              shippingData: toChargeRate(
                 shippingRates.find(
                   (item) => item?.service_type == dest.selectedShippingMethod,
                 ) || shippingDetail?.rate?.service_type,
-              shippingCost: selectedRate ? rateToUsd(selectedRate) : 0,
+              ),
+              shippingCost: selectedRate
+                ? toChargeMajor(ofRate(selectedRate))
+                : 0,
               products: Object.entries(allocatedProducts).map(
                 ([productId, quantity]) => ({
                   product_id: Number(productId),
@@ -767,13 +820,14 @@ const CheckoutForm = () => {
               : "Google Pay",
         shippingMethod:
           data.shippingMethod || shippingDetail?.rate?.method_type,
-        shippingData:
+        shippingData: toChargeRate(
           shippingRates.find(
             (item) => item?.service_type == data.shippingMethod,
           ) || shippingDetail?.rate?.service_type,
-        discountAmount: discountAmount,
+        ),
+        discountAmount: chargeCouponDiscount,
         couponCode: appliedCoupon?.couponCode,
-        shippingCost: shipping,
+        shippingCost: chargeShipping,
         comments: data.orderComment || "",
         newsletter: data.newsletter || false,
         paymentIntentId: data.paymentIntentId ?? "",
@@ -784,13 +838,17 @@ const CheckoutForm = () => {
           product_id: item.id,
           quantity: item.quantity || 1,
         })),
-        ...(manualDiscount ? { manualDiscount } : {}),
+        ...(manualDiscount ? { manualDiscount: chargeManualDiscount } : {}),
       };
     },
     [
       cart,
-      shipping,
-      rateToUsd,
+      chargeShipping,
+      chargeCouponDiscount,
+      chargeManualDiscount,
+      toChargeRate,
+      toChargeMajor,
+      ofRate,
       chargeCurrency,
       selectedCurrencyPayload,
       isMultiAddress,
