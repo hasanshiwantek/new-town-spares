@@ -50,11 +50,11 @@ const couponPersistConfig = {
   storage,
 };
 
-// ✅ only selected currency persisted
+// ✅ only selected currency (code + whole payload) persisted
 const currencyPersistConfig = {
   key: "currency",
   storage,
-  whitelist: ["selectedCurrency"],
+  whitelist: ["selectedCurrency", "selectedCurrencyPayload", "userSelected"],
 };
 
 const rootReducer = combineReducers({
