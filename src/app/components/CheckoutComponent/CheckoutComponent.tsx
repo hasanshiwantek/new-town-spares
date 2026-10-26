@@ -265,7 +265,9 @@ const CheckoutForm = () => {
   const shippingUpdating = isMultiAddress
     ? destinations.some((d) => destRatesLoading?.[d.id])
     : ratesLoader || shippingSaving;
-  const { selectedCurrency } = useAppSelector((state) => state.currency);
+  const { selectedCurrency, selectedCurrencyPayload } = useAppSelector(
+    (state) => state.currency,
+  );
   const { toUsd: moneyToUsd, ofRate } = useMoney();
   const { currency: chargeCurrency, toChargeMinor } = useChargeCurrency();
   // A rate in USD for the backend fields that are USD (each rate carries its
@@ -687,6 +689,7 @@ const CheckoutForm = () => {
           comments: data.orderComment || "",
           paymentIntentId: data.paymentIntentId ?? "",
           currency: chargeCurrency,
+          selectedCurrency: selectedCurrencyPayload,
           newsletter: data.newsletter || false,
           // ✅ Multi destination array
           isMultiAddress: true,
@@ -775,6 +778,7 @@ const CheckoutForm = () => {
         newsletter: data.newsletter || false,
         paymentIntentId: data.paymentIntentId ?? "",
         currency: chargeCurrency,
+        selectedCurrency: selectedCurrencyPayload,
         isMultiAddress: false,
         products: cart.map((item) => ({
           product_id: item.id,
@@ -788,6 +792,7 @@ const CheckoutForm = () => {
       shipping,
       rateToUsd,
       chargeCurrency,
+      selectedCurrencyPayload,
       isMultiAddress,
       destinations,
       destShippingRates,

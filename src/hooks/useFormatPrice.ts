@@ -6,7 +6,6 @@ import {
   add,
   atLeastZero,
   convert,
-  currencySymbols,
   formatMoney,
   money,
   rateMoney,
@@ -18,8 +17,6 @@ import {
 } from "@/lib/money";
 import { RootState } from "@/redux/store";
 import { useCallback, useMemo } from "react";
-
-export { currencySymbols };
 
 // Selected currency and its USD → currency rate. `ready` is false while the
 // rates are loading or if they failed to load: callers must never treat a

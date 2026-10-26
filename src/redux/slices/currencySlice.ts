@@ -1,39 +1,63 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/lib/axiosInstance";
+import { CurrencyFormat, setCurrencyFormats } from "@/lib/money";
 
-interface Currency {
+export interface Currency extends CurrencyFormat {
   code: string;
-  rate: number;
+  name: string;
+  rate: number; // USD → currency, parsed from exchangeRate
+  isDefault: boolean;
+  payload: ApiCurrency; // the currency exactly as /web/currencies returned it
+}
+
+export interface ApiCurrency extends CurrencyFormat {
+  id: number;
+  code: string;
+  name: string;
+  exchangeRate: string;
+  isDefault: boolean;
+  [key: string]: unknown;
 }
 
 interface CurrencyState {
   currencies: Currency[];
   selectedCurrency: string;
+  // Whole payload of the selected currency; persisted and sent with the order
+  selectedCurrencyPayload: ApiCurrency | null;
+  // true once the shopper picks a currency; until then the store default is used
+  userSelected: boolean;
   status: "idle" | "loading" | "succeeded" | "failed";
 }
 
 const initialState: CurrencyState = {
   currencies: [],
   selectedCurrency: "USD",
+  selectedCurrencyPayload: null,
+  userSelected: false,
   status: "idle",
 };
 
-// Only these currencies are offered in the store (in dropdown order)
-export const SUPPORTED_CURRENCIES = ["USD", "GBP"];
-
-// Fetch currencies via our own API route, which caches the open.er-api.com
-// rates server-side for 3 hours (src/app/api/currency-rates/route.ts)
+// Fetch the store's currencies (default first, then additional) from the backend
 export const fetchCurrencies = createAsyncThunk(
   "currency/fetchCurrencies",
-  async () => {
-    const res = await axios.get("/api/currency-rates");
-    const rates = res.data.rates;
-    return SUPPORTED_CURRENCIES.filter((code) => rates[code] != null).map(
-      (code) => ({
-        code,
-        rate: rates[code],
-      }),
-    );
+  async (): Promise<Currency[]> => {
+    const res = await axiosInstance.get("web/currencies");
+    const data: ApiCurrency[] = res.data?.data ?? [];
+    const currencies = data.filter(Boolean).map((c: ApiCurrency) => ({
+      code: c.code,
+      name: c.name,
+      rate: Number(c.exchangeRate),
+      isDefault: c.isDefault,
+      symbol: c.symbol,
+      symbolLocation: c.symbolLocation,
+      decimalToken: c.decimalToken,
+      thousandsToken: c.thousandsToken,
+      decimalPlaces: Number(c.decimalPlaces),
+      payload: c,
+    }));
+    // formatMoney() reads these, so every price uses the store's settings
+    setCurrencyFormats(currencies);
+    return currencies;
   },
   {
     // Several header components dispatch this on mount; only the first runs
@@ -49,8 +73,11 @@ const currencySlice = createSlice({
   initialState,
   reducers: {
     setSelectedCurrency(state, action: PayloadAction<string>) {
-      if (!SUPPORTED_CURRENCIES.includes(action.payload)) return;
+      const match = state.currencies.find((c) => c.code === action.payload);
+      if (state.currencies.length && !match) return;
       state.selectedCurrency = action.payload;
+      state.selectedCurrencyPayload = match?.payload ?? null;
+      state.userSelected = true;
     },
   },
   extraReducers: (builder) => {
@@ -61,10 +88,21 @@ const currencySlice = createSlice({
       .addCase(fetchCurrencies.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.currencies = action.payload;
-        // reset a previously saved currency that is no longer offered
-        if (!SUPPORTED_CURRENCIES.includes(state.selectedCurrency)) {
-          state.selectedCurrency = "USD";
+        // Pre-select the store's default (isDefault) currency, unless the
+        // shopper already picked one that is still offered
+        const defaultCurrency =
+          action.payload.find((c) => c.isDefault) ?? action.payload[0];
+        if (
+          defaultCurrency &&
+          (!state.userSelected ||
+            !action.payload.some((c) => c.code === state.selectedCurrency))
+        ) {
+          state.selectedCurrency = defaultCurrency.code;
         }
+        // refresh the saved payload with the latest rate/format
+        state.selectedCurrencyPayload =
+          action.payload.find((c) => c.code === state.selectedCurrency)
+            ?.payload ?? null;
       })
       .addCase(fetchCurrencies.rejected, (state) => {
         state.status = "failed";

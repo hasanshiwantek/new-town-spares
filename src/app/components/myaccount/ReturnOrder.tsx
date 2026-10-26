@@ -121,6 +121,7 @@ const ReturnOrder = () => {
           reason,
           comments,
         } = getReturnOrderInfo(order);
+    
 
         const labelClass = "text-[12px] leading-[16px] text-[#757575]";
         const valueClass =
@@ -150,7 +151,7 @@ const ReturnOrder = () => {
                     Order #{orderNumber}
                   </p>
                   <p className="text-[14px] leading-[21px] text-[#333333] mt-1">
-                    {productLabel} totaling {formatPrice(formattedTotal)}
+                    {productLabel} totaling  {formattedTotal}
                   </p>
                 </div>
                 <span className="shrink-0 bg-[#BFBFBF] text-white font-bold text-[13px] leading-[15px] px-3 py-[6px] rounded">
