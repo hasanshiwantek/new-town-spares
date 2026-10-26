@@ -4,171 +4,6 @@
 
 export type Money = { minor: number; currency: string };
 
-export const currencySymbols: Record<string, string> = {
-  AED: "د.إ",
-  AFN: "؋",
-  ALL: "L",
-  AMD: "֏",
-  ANG: "ƒ",
-  AOA: "Kz",
-  ARS: "$",
-  AUD: "A$",
-  AWG: "ƒ",
-  AZN: "₼",
-  BAM: "KM",
-  BBD: "B$",
-  BDT: "৳",
-  BGN: "лв",
-  BHD: ".د.ب",
-  BIF: "FBu",
-  BMD: "BD$",
-  BND: "B$",
-  BOB: "Bs.",
-  BRL: "R$",
-  BSD: "B$",
-  BTN: "Nu.",
-  BWP: "P",
-  BYN: "Br",
-  BZD: "BZ$",
-  CAD: "C$",
-  CDF: "FC",
-  CHF: "CHF",
-  CLP: "$",
-  CNY: "¥",
-  COP: "$",
-  CRC: "₡",
-  CUP: "$",
-  CVE: "$",
-  CZK: "Kč",
-  DJF: "Fdj",
-  DKK: "kr",
-  DOP: "RD$",
-  DZD: "دج",
-  EGP: "£",
-  ERN: "Nfk",
-  ETB: "Br",
-  EUR: "€",
-  FJD: "FJ$",
-  FKP: "£",
-  FOK: "kr",
-  GBP: "£",
-  GEL: "₾",
-  GGP: "£",
-  GHS: "GH₵",
-  GIP: "£",
-  GMD: "D",
-  GNF: "FG",
-  GTQ: "Q",
-  GYD: "$",
-  HKD: "HK$",
-  HNL: "L",
-  HRK: "kn",
-  HTG: "G",
-  HUF: "Ft",
-  IDR: "Rp",
-  ILS: "₪",
-  IMP: "£",
-  INR: "₹",
-  IQD: "ع.د",
-  IRR: "﷼",
-  ISK: "kr",
-  JEP: "£",
-  JMD: "J$",
-  JOD: "د.ا",
-  JPY: "¥",
-  KES: "KSh",
-  KGS: "лв",
-  KHR: "៛",
-  KID: "A$",
-  KMF: "CF",
-  KRW: "₩",
-  KWD: "د.ك",
-  KYD: "CI$",
-  KZT: "₸",
-  LAK: "₭",
-  LBP: "ل.ل",
-  LKR: "Rs",
-  LRD: "L$",
-  LSL: "L",
-  LYD: "ل.د",
-  MAD: "د.م.",
-  MDL: "L",
-  MGA: "Ar",
-  MKD: "ден",
-  MMK: "K",
-  MNT: "₮",
-  MOP: "MOP$",
-  MRU: "UM",
-  MUR: "₨",
-  MVR: "Rf",
-  MWK: "MK",
-  MXN: "$",
-  MYR: "RM",
-  MZN: "MT",
-  NAD: "N$",
-  NGN: "₦",
-  NIO: "C$",
-  NOK: "kr",
-  NPR: "₨",
-  NZD: "NZ$",
-  OMR: "ر.ع.",
-  PAB: "B/.",
-  PEN: "S/.",
-  PGK: "K",
-  PHP: "₱",
-  PKR: "₨",
-  PLN: "zł",
-  PYG: "₲",
-  QAR: "﷼",
-  RON: "lei",
-  RSD: "дин",
-  RUB: "₽",
-  RWF: "FRw",
-  SAR: "﷼",
-  SBD: "$",
-  SCR: "₨",
-  SDG: "£",
-  SEK: "kr",
-  SGD: "S$",
-  SHP: "£",
-  SLE: "Le",
-  SLL: "Le",
-  SOS: "Sh.So.",
-  SRD: "$",
-  SSP: "£",
-  STN: "Db",
-  SYP: "£",
-  SZL: "E",
-  THB: "฿",
-  TJS: "ЅМ",
-  TMT: "m",
-  TND: "د.ت",
-  TOP: "T$",
-  TRY: "₺",
-  TTD: "TT$",
-  TVD: "A$",
-  TWD: "NT$",
-  TZS: "Sh",
-  UAH: "₴",
-  UGX: "Sh",
-  USD: "$",
-  UYU: "$U",
-  UZS: "so'm",
-  VES: "Bs.S",
-  VND: "₫",
-  VUV: "VT",
-  WST: "T",
-  XAF: "FCFA",
-  XCD: "EC$",
-  XDR: "SDR",
-  XOF: "CFA",
-  XPF: "₣",
-  YER: "﷼",
-  ZAR: "R",
-  ZMW: "ZK",
-  ZWL: "Z$",
-};
-
 // Stripe charges these in whole units, not cents.
 // https://docs.stripe.com/currencies#zero-decimal
 const ZERO_DECIMAL_CURRENCIES = [
@@ -240,10 +75,50 @@ export const atLeastZero = (m: Money): Money => ({
   currency: m.currency,
 });
 
-export const formatMoney = (m: Money) =>
-  `${currencySymbols[m.currency] || m.currency}${toMajor(m).toFixed(
-    decimalsFor(m.currency),
-  )}`;
+// How the store displays a currency (from /web/currencies)
+export type CurrencyFormat = {
+  symbol: string;
+  symbolLocation: "left" | "right" | string;
+  decimalToken: string;
+  thousandsToken: string;
+  decimalPlaces: number;
+};
+
+let currencyFormats: Record<string, CurrencyFormat> = {};
+
+// Positions between every group of 3 integer digits, counted from the right
+// (e.g. "1234567" → "1,234,567")
+const THOUSANDS_GROUP_REGEX = /\B(?=(\d{3})+(?!\d))/g;
+
+// Called once the store's currencies load; until then the fallback below is used
+export const setCurrencyFormats = (
+  list: (CurrencyFormat & { code: string })[],
+) => {
+  currencyFormats = Object.fromEntries(
+    list.map((c) => [c.code.toUpperCase(), c]),
+  );
+};
+
+export const formatMoney = (m: Money) => {
+  const f = currencyFormats[m.currency];
+  // Symbols come from /web/currencies; show the code until they've loaded
+  if (!f) {
+    return `${m.currency} ${toMajor(m).toFixed(decimalsFor(m.currency))}`;
+  }
+
+  const places = Number.isFinite(f.decimalPlaces)
+    ? f.decimalPlaces
+    : decimalsFor(m.currency);
+  const major = toMajor(m);
+  const [int, frac] = Math.abs(major).toFixed(places).split(".");
+  const grouped = int.replace(THOUSANDS_GROUP_REGEX, f.thousandsToken ?? "");
+  const number = frac ? `${grouped}${f.decimalToken || "."}${frac}` : grouped;
+  const sign = major < 0 ? "-" : "";
+
+  return f.symbolLocation === "right"
+    ? `${sign}${number}${f.symbol}`
+    : `${sign}${f.symbol}${number}`;
+};
 
 // Currency of a shipping rate. API rates carry `currency`; rates built on the
 // frontend (fixed/free/flat/own) are tagged "USD". Older saved rates have no
