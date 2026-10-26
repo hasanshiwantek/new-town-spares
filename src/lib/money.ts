@@ -7,8 +7,22 @@ export type Money = { minor: number; currency: string };
 // Stripe charges these in whole units, not cents.
 // https://docs.stripe.com/currencies#zero-decimal
 const ZERO_DECIMAL_CURRENCIES = [
-  "BIF", "CLP", "DJF", "GNF", "JPY", "KMF", "KRW", "MGA",
-  "PYG", "RWF", "UGX", "VND", "VUV", "XAF", "XOF", "XPF",
+  "BIF",
+  "CLP",
+  "DJF",
+  "GNF",
+  "JPY",
+  "KMF",
+  "KRW",
+  "MGA",
+  "PYG",
+  "RWF",
+  "UGX",
+  "VND",
+  "VUV",
+  "XAF",
+  "XOF",
+  "XPF",
 ];
 
 export const decimalsFor = (currency: string) =>

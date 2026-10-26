@@ -1,5 +1,5 @@
-import { useAppSelector } from "@/hooks/useReduxHooks";
 import { ENV_CONFIG } from "@/config/envConfig";
+import { useAppSelector } from "@/hooks/useReduxHooks";
 import {
   Money,
   RateLookup,
@@ -213,7 +213,9 @@ export function useOrderTotals(input: OrderTotalsInput) {
 export function useChargeCurrency() {
   const { code: selectedCurrency, ready } = useCurrencyRate();
   const { currencies } = useAppSelector((state: RootState) => state.currency);
-  const currency = ENV_CONFIG.chargeInSelectedCurrency ? selectedCurrency : "USD";
+  const currency = ENV_CONFIG.chargeInSelectedCurrency
+    ? selectedCurrency
+    : "USD";
 
   const usdRate: RateLookup = useCallback(
     (c: string) =>
