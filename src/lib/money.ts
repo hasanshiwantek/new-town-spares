@@ -126,11 +126,14 @@ export const setCurrencyFormats = (
   currencyFormats = Object.fromEntries(list.map((c) => [c.code, c]));
 };
 
-export const formatMoney = (m: Money) => {
+// `symbol` is used when the currency has no dashboard format (e.g. an order
+// placed in a currency that has since been removed)
+export const formatMoney = (m: Money, symbol?: string) => {
   const f = currencyFormats[m.currency];
   // Symbols come from /web/currencies; show the code until they've loaded
   if (!f) {
-    return `${m.currency} ${toMajor(m).toFixed(decimalsFor(m.currency))}`;
+    const amount = toMajor(m).toFixed(decimalsFor(m.currency));
+    return symbol ? `${symbol}${amount}` : `${m.currency} ${amount}`;
   }
 
   const major = toMajor(m);
