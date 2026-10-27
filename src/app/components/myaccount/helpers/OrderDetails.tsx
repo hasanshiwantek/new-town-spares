@@ -6,6 +6,7 @@ import { useReactToPrint } from "react-to-print";
 import navlogo from "@/assets/navlogoreal.webp";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchLogos } from "@/redux/slices/homeSlice";
+import { formatMoney, money } from "@/lib/money";
 
 // ── Types (same as before) ───────────────────────────────────────────────────
 
@@ -123,7 +124,25 @@ interface OrderData {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const fmt = (val: string | number) => `$${parseFloat(String(val)).toFixed(2)}`;
+// An order's amounts are locked in the currency it was placed in (older
+// orders without one were placed in USD): shown as-is, never converted
+export const orderCurrency = (order: any) => ({
+  currency: order?.currencyCode || "USD",
+  symbol: order?.currencySymbol || undefined,
+});
+
+// A product's quantity and unit price as ordered. The order's `products` hold
+// the current catalog price (USD); the ordered price is on the destinations.
+export const orderLine = (order: any, product: any) => {
+  const lines = (order?.shippingDestinations ?? [])
+    .flatMap((d: any) => d?.products ?? [])
+    .filter((p: any) => p?.productId === product?.id);
+  const quantity =
+    lines.reduce((sum: number, p: any) => sum + (Number(p?.quantity) || 0), 0) ||
+    1;
+  const price = Number(lines[0]?.price ?? product?.price) || 0;
+  return { quantity, price };
+};
 
 const formatDate = (iso?: string) => {
   if (!iso)
@@ -159,11 +178,13 @@ export const Invoice = React.forwardRef<HTMLDivElement, InvoiceProps>(
     const bill = order.billingInformation;
     const ship = order.shippingDestinations[0]?.address ?? bill;
 
+    const { currency, symbol } = orderCurrency(order);
+    const fmt = (val: string | number) =>
+      formatMoney(money(val, currency), symbol);
+
     const subtotal = order.products.reduce((sum: any, p: any) => {
-      const dest = order.shippingDestinations[0]?.products.find(
-        (dp: any) => dp.productId === p.id,
-      );
-      return sum + parseFloat(p.price) * (dest?.quantity ?? 1);
+      const { quantity, price } = orderLine(order, p);
+      return sum + price * quantity;
     }, 0);
 
     const shipping = parseFloat(order.shippingCost);
@@ -473,11 +494,8 @@ export const Invoice = React.forwardRef<HTMLDivElement, InvoiceProps>(
           </thead>
           <tbody>
             {order.products.map((product: any) => {
-              const dest = order.shippingDestinations[0]?.products.find(
-                (dp: any) => dp.productId === product.id,
-              );
-              const qty = dest?.quantity ?? 1;
-              const lineTotal = parseFloat(product.price) * qty;
+              const { quantity: qty, price } = orderLine(order, product);
+              const lineTotal = price * qty;
               return (
                 <tr key={product.id} style={{ borderBottom: "1px solid #eee" }}>
                   <td style={{ padding: "6px 8px", verticalAlign: "top" }}>
@@ -518,7 +536,7 @@ export const Invoice = React.forwardRef<HTMLDivElement, InvoiceProps>(
                       textAlign: "right",
                     }}
                   >
-                    {fmt(product.price)}
+                    {fmt(price)}
                   </td>
                   <td
                     style={{

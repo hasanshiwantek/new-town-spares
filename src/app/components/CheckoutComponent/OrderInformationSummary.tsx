@@ -16,6 +16,8 @@ interface OrderSummaryProps {
   appliedCoupon: any;
   promoCode: string;
   setPromoCode: (code: string) => void;
+  currency: string;
+  symbol?: string;
 }
 
 const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
@@ -31,7 +33,10 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
   setPromoCode,
   manualDiscount,
   discountTotal,
+  currency,
+  symbol,
 }) => {
+  const currencyProps = { currency, symbol };
   const cartItemCount = cart?.reduce(
     (sum, item: any) => sum + (item?.quantity ?? 1),
     0,
@@ -77,7 +82,7 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
             <div className="text-base font-normal text-[13px] text-[#545454] roboto-font">
               <ProductPrice
                 price={Number(item.price) * (item.quantity || 1)}
-                inline={true}
+                inline={true} {...currencyProps}
               />
             </div>
           </div>
@@ -89,7 +94,7 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
         <div className="flex justify-between text-[13px] text-[#545454] roboto-font">
           <span>Subtotal</span>
           <span className="font-medium">
-            <ProductPrice price={subtotal} inline={true} />
+            <ProductPrice price={subtotal} inline={true} {...currencyProps} />
           </span>
         </div>
 
@@ -104,14 +109,14 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
 
               {/* Discount value */}
               <span className="font-medium">
-                -<ProductPrice price={discountTotal} inline={true} />
+                -<ProductPrice price={discountTotal} inline={true} {...currencyProps} />
               </span>
             </div>
             {manualDiscount > 0 && (
               <div className="flex justify-between text-gray-600 text-[13px] mt-1">
                 <span>Manual Discount</span>
                 <span className="font-medium">
-                  -<ProductPrice price={manualDiscount} inline={true} />
+                  -<ProductPrice price={manualDiscount} inline={true} {...currencyProps} />
                 </span>
               </div>
             )}
@@ -119,7 +124,7 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
             {appliedCoupon && Number(discountAmount) > 0 && (
               <div className="flex justify-between text-gray-600 text-[13px] mt-1">
                 <span>
-                  <ProductPrice price={Number(discountAmount)} inline={true} />{" "}
+                  <ProductPrice price={Number(discountAmount)} inline={true} {...currencyProps} />{" "}
                   off the order total ({appliedCoupon?.toUpperCase()})
                 </span>
               </div>
@@ -130,13 +135,13 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
         <div className="flex justify-between text-[13px] text-[#545454] roboto-font">
           <span>Shipping</span>
           <span className="font-medium">
-            <ProductPrice price={Number(shipping)} inline={true} />
+            <ProductPrice price={Number(shipping)} inline={true} {...currencyProps} />
           </span>
         </div>
         <div className="flex justify-between pb-[10px] text-[13px] text-[#545454] roboto-font">
           <span>Tax</span>
           <span className="font-medium">
-            <ProductPrice price={Number(tax)} inline={true} />
+            <ProductPrice price={Number(tax)} inline={true} {...currencyProps} />
           </span>
         </div>
       </div>
@@ -149,7 +154,7 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
             Total <br />{" "}
           </span>
           <span className="font-bold text-[16px]">
-            <ProductPrice price={Number(finalTotal)} inline={true} />
+            <ProductPrice price={Number(finalTotal)} inline={true} {...currencyProps} />
           </span>
         </div>
 
@@ -158,7 +163,7 @@ const OrderInformationSummary: React.FC<OrderSummaryProps> = ({
           <div className="text-[#333] font-medium text-[13px]  mt-1 self-end">
             You saved{" "}
             <span className="!text-[#2aab3f] ">
-              <ProductPrice price={discountTotal} inline={true} />
+              <ProductPrice price={discountTotal} inline={true} {...currencyProps} />
             </span>{" "}
             in total!
           </div>

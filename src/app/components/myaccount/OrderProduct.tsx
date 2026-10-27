@@ -154,6 +154,10 @@ const OrderProduct = () => {
                       <ProductPrice
                         price={item?.total_amount || 0}
                         inline={true}
+                        currency={
+                          item?.currency_code || item?.currencyCode || "USD"
+                        }
+                        symbol={item?.currency_symbol || item?.currencySymbol}
                       />
                     </span>
                   </div>
