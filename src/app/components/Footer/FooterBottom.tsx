@@ -371,17 +371,27 @@ const FooterBottom = () => {
 
               {/* BRANDS */}
               <nav className="hidden lg:block">
-                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                <h4 className="text-[18px] font-normal text-[#FAFAFA] mb-4">
                   Brands
                 </h4>
                 <ul className="space-y-3 text-[#FAFAFA] text-[14px]!">
-                  {getBrand?.data?.slice(0, 8)?.map((item: any) => (
+                  {getBrand?.data?.slice(0, 7)?.map((item: any) => (
                     <li key={item?.brand?.id}>
                       <Link href={`/brand/${item?.brand?.slug || ""}`}>
                         {item?.brand?.name}
                       </Link>
                     </li>
                   ))}
+
+                  {/* All Brands Link */}
+                  <li>
+                    <Link
+                      href="/brands"
+                      className="font-medium text-[#FAFAFA] hover:underline"
+                    >
+                      View All
+                    </Link>
+                  </li>
                 </ul>
               </nav>
 

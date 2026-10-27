@@ -58,6 +58,14 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --color-confirmation-text: var(--confirmation-text);
   --color-text-primary: var(--color-text-primary);
   --color-text-secondary: var(--color-text-secondary);
+  --color-page-bg: var(--page-bg);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-heading: var(--heading);
+  --color-Heading: var(--Heading-dark);
+  --color-brand: var(--brand);
+  --color-breadcrumb: var(--breadcrumb);
+  --color-breadcrumb-link: var(--breadcrumb-link);
 
   /* ✅ Add your Figma-based breakpoints here */
   --breakpoint-xs: 375px;
@@ -118,6 +126,15 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --confirmation-text: #2d2d2d;
   --color-text-primary: #545454;
   --color-text-secondary: #333333;
+--page-bg: #f8f8f8;
+  --card-bg: #ffffff;
+  --card-border: #e5e5e5;
+  --heading: #1a1a1a;
+  --Heading-dark: #111111;
+  --brand: #6b6b6b;
+  --breadcrumb: #555555;
+  --breadcrumb-link: #333333;
+
 }
 
 body {
