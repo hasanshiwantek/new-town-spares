@@ -21,7 +21,7 @@ import { useCallback, useMemo } from "react";
 // the selected currency's rate is loading or failed to load: a missing rate
 // must never be treated as 1, or GBP amounts are shown/charged at USD values.
 function useRates() {
-  const { selectedCurrency, currencies } = useAppSelector(
+  const { selectedCurrency, currencies, status } = useAppSelector(
     (state: RootState) => state.currency,
   );
 
@@ -31,7 +31,12 @@ function useRates() {
     [currencies],
   );
 
-  return { selectedCurrency, usdRate, ready: !!usdRate(selectedCurrency) };
+  return {
+    selectedCurrency,
+    usdRate,
+    status,
+    ready: !!usdRate(selectedCurrency),
+  };
 }
 
 // Money in the shopper's display currency. Until the selected currency's rate
@@ -224,12 +229,24 @@ export function useOrderTotals(input: OrderTotalsInput) {
 }
 
 // Currency Stripe charges in (also the currency the order is placed in), and
-// converters into it. Both return 0 if a rate is missing.
+// converters into it. Both return 0 if a rate is missing, so payment must be
+// blocked while `notReadyMessage` is set: until the currencies have loaded (the
+// default currency may still replace the selected one) and the charge
+// currency's rate is known.
 export function useChargeCurrency() {
-  const { selectedCurrency, usdRate } = useRates();
+  const { selectedCurrency, usdRate, status } = useRates();
   const currency = ENV_CONFIG.chargeInSelectedCurrency
     ? selectedCurrency
     : "USD";
+  const ready = status === "succeeded" && !!usdRate(currency);
+  // Why payment is blocked, for the shopper; null when ready
+  const notReadyMessage = ready
+    ? null
+    : status === "failed"
+      ? "We couldn't load exchange rates. Please refresh the page to pay."
+      : status === "succeeded"
+        ? `${currency} isn't available right now. Please choose another currency.`
+        : "Loading exchange rates…";
 
   // Any Money → Stripe minor units of the charge currency
   const toChargeMinor = useCallback(
@@ -246,7 +263,7 @@ export function useChargeCurrency() {
     [currency, usdRate],
   );
 
-  return { currency, toChargeMinor, toChargeMajor };
+  return { currency, notReadyMessage, toChargeMinor, toChargeMajor };
 }
 
 export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];

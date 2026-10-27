@@ -279,6 +279,7 @@ const CheckoutForm = () => {
   const { toUsd: moneyToUsd, ofRate } = useMoney();
   const {
     currency: chargeCurrency,
+    notReadyMessage: chargeNotReadyMessage,
     toChargeMinor,
     toChargeMajor,
   } = useChargeCurrency();
@@ -1123,6 +1124,12 @@ const CheckoutForm = () => {
   const handleWalletClick = (method: string) => {
     handlePaymentSelection(method);
 
+    // Amounts would be 0 without the exchange rate
+    if (chargeNotReadyMessage) {
+      errorMessage(chargeNotReadyMessage);
+      return;
+    }
+
     if (shippingUpdating) {
       errorMessage(
         "Shipping rates are updating. Please try again in a moment.",
@@ -1161,6 +1168,12 @@ const CheckoutForm = () => {
       selectedPaymentMethod,
     );
     const isWalletMethod = walletMethods.includes(selectedPaymentMethod);
+
+    // Amounts would be 0 without the exchange rate
+    if (chargeNotReadyMessage) {
+      errorMessage(chargeNotReadyMessage);
+      return;
+    }
 
     // The total doesn't include shipping until the new quote is in
     if (shippingUpdating) {
@@ -1732,6 +1745,13 @@ const CheckoutForm = () => {
                 options={{
                   paymentRequest,
                 }}
+                onClick={(event) => {
+                  // Amounts would be 0 without the exchange rate
+                  if (chargeNotReadyMessage) {
+                    event.preventDefault();
+                    errorMessage(chargeNotReadyMessage);
+                  }
+                }}
               />
             )}
           </div>
@@ -1862,6 +1882,7 @@ const CheckoutForm = () => {
                     walletSupport={walletSupport}
                     isProcessing={isProcessing}
                     stripe={stripe}
+                    notReadyMessage={chargeNotReadyMessage}
                     isActive={currentStep === 4}
                     isCompleted={completedSteps.includes(4)}
                     onEdit={handleEditPayment}
