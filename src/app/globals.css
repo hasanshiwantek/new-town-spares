@@ -62,7 +62,7 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --color-card-bg: var(--card-bg);
   --color-card-border: var(--card-border);
   --color-heading: var(--heading);
-  --color-letter: var(--letter);
+  --color-Heading: var(--Heading-dark);
   --color-brand: var(--brand);
   --color-breadcrumb: var(--breadcrumb);
   --color-breadcrumb-link: var(--breadcrumb-link);
@@ -130,7 +130,7 @@ body > div:has(iframe[src*="recaptcha/api2/bframe"]) {
   --card-bg: #ffffff;
   --card-border: #e5e5e5;
   --heading: #1a1a1a;
-  --letter: #111111;
+  --Heading-dark: #111111;
   --brand: #6b6b6b;
   --breadcrumb: #555555;
   --breadcrumb-link: #333333;
