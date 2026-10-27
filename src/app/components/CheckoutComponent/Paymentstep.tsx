@@ -34,6 +34,8 @@ interface PaymentStepProps {
   };
   isProcessing: boolean;
   stripe: any;
+  // Why payment is blocked (e.g. exchange rates still loading); null when ready
+  notReadyMessage?: string | null;
   isActive: boolean;
   isCompleted: boolean;
   onEdit?: () => void;
@@ -52,13 +54,14 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
   walletSupport,
   isProcessing,
   stripe,
+  notReadyMessage,
   isActive,
   isCompleted,
   onEdit,
   paymentMethodLabel,
 }) => {
   const stripeCardMethods = ["credit_card"];
-  const disabled = isProcessing || !stripe 
+  const disabled = isProcessing || !stripe || !!notReadyMessage;
   if (isCompleted && !isActive) {
     // Show completed state with payment method and edit button
     return (
@@ -273,10 +276,16 @@ const PaymentStep: React.FC<PaymentStepProps> = ({
         </p>
       )}
 
+      {notReadyMessage && (
+        <p role="status" className="text-sm text-[#757575]">
+          {notReadyMessage}
+        </p>
+      )}
+
       <button
         type="submit"
         disabled={disabled}
-        className="h-[54px] w-full bg-[#FD5430] text-[18px] text-white rounded-sm"
+        className="h-[54px] w-full bg-[#FD5430] text-[18px] text-white rounded-sm disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isProcessing ? "Processing..." : "PLACE YOUR ORDER"}
       </button>

@@ -1,5 +1,6 @@
 // Money helpers. Every amount carries its currency and is held in whole minor
-// units (cents/pence; whole yen for zero-decimal currencies), so amounts in
+// units (cents/pence; whole yen for zero-decimal currencies; fils for
+// three-decimal currencies), so amounts in
 // different currencies can't be mixed by accident and sums don't drift.
 
 export type Money = { minor: number; currency: string };
@@ -25,20 +26,35 @@ const ZERO_DECIMAL_CURRENCIES = [
   "XPF",
 ];
 
+// Stripe charges these in thousandths (fils), but the last digit must be 0.
+// https://docs.stripe.com/currencies#three-decimal
+const THREE_DECIMAL_CURRENCIES = ["BHD", "JOD", "KWD", "OMR", "TND"];
+
 // Stripe's minor units — used for amounts/charges, not for display
-const decimalsFor = (currency: string) =>
-  ZERO_DECIMAL_CURRENCIES.includes(currency.toUpperCase()) ? 0 : 2;
+const decimalsFor = (currency: string) => {
+  const code = currency.toUpperCase();
+  if (ZERO_DECIMAL_CURRENCIES.includes(code)) return 0;
+  if (THREE_DECIMAL_CURRENCIES.includes(code)) return 3;
+  return 2;
+};
 
 const unit = (currency: string) => 10 ** decimalsFor(currency);
+
+// Smallest step an amount is rounded to, in minor units: 10 for three-decimal
+// currencies (so the amount ends in 0, as Stripe requires), else 1
+const step = (currency: string) => (decimalsFor(currency) === 3 ? 10 : 1);
 
 // A major-unit amount (e.g. 12.34) → Money, rounded once to the minor unit.
 export const money = (
   amount: number | string | null | undefined,
   currency: string,
-): Money => ({
-  minor: Math.round(Number(amount || 0) * unit(currency)),
-  currency: currency.toUpperCase(),
-});
+): Money => {
+  const s = step(currency);
+  return {
+    minor: Math.round((Number(amount || 0) * unit(currency)) / s) * s,
+    currency: currency.toUpperCase(),
+  };
+};
 
 export const toMajor = (m: Money) => m.minor / unit(m.currency);
 

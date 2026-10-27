@@ -8,16 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ENV_CONFIG } from "@/config/envConfig";
 import {
   useChargeCurrency,
   useMoney,
   useOrderTotals,
 } from "@/hooks/useFormatPrice";
-import { money, rateCurrency, toMajor } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
-import axiosInstance from "@/lib/axiosInstance";
-import { ENV_CONFIG } from "@/config/envConfig";
 import { apiFetch } from "@/lib/apiFetch";
+import axiosInstance from "@/lib/axiosInstance";
+import { money, rateCurrency, toMajor } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import {
   clearCart,
@@ -62,12 +62,12 @@ import { useForm } from "react-hook-form";
 import { fetchCartList } from "@/redux/slices/cartsSlice";
 import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { fetchCustomerAddress } from "@/redux/slices/myaccountSlice";
-import CheckoutSkeleton from "./CheckoutSkeleton";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
 import BillingStep from "./Billingstep";
 import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
+import CheckoutSkeleton from "./CheckoutSkeleton";
 import CustomerStep from "./CustomerStep";
 import PaymentStep from "./Paymentstep";
 import ShippingStep, {
@@ -186,7 +186,7 @@ const CheckoutForm = () => {
     completedDestinations,
     destinations,
     destShippingRates,
-    destRatesLoading
+    destRatesLoading,
   } = useAppSelector((state) => state.multiAddress);
   const stripe = useStripe();
   const elements = useElements();
@@ -268,9 +268,18 @@ const CheckoutForm = () => {
   const { selectedCurrency, selectedCurrencyPayload } = useAppSelector(
     (state) => state.currency,
   );
+
+  // The selected currency as the order payload sends it
+  const orderCurrency = useMemo(() => {
+    if (!selectedCurrencyPayload) return null;
+    const { id, code, name, symbol, exchangeRate } = selectedCurrencyPayload;
+    return { id, code, name, symbol, exchangeRate };
+  }, [selectedCurrencyPayload]);
+
   const { toUsd: moneyToUsd, ofRate } = useMoney();
   const {
     currency: chargeCurrency,
+    notReadyMessage: chargeNotReadyMessage,
     toChargeMinor,
     toChargeMajor,
   } = useChargeCurrency();
@@ -734,12 +743,15 @@ const CheckoutForm = () => {
                 ? "Apple Pay"
                 : "Google Pay",
           discountAmount: chargeCouponDiscount,
+          manualDiscount: chargeManualDiscount,
           couponCode: appliedCoupon?.couponCode,
           shippingCost: chargeShipping,
           comments: data.orderComment || "",
           paymentIntentId: data.paymentIntentId ?? "",
+          // Minor units of `currency` — the amount Stripe charged
+          amount: chargeTotalMinor,
           currency: chargeCurrency,
-          selectedCurrency: selectedCurrencyPayload,
+          selectedCurrency: orderCurrency,
           newsletter: data.newsletter || false,
           // ✅ Multi destination array
           isMultiAddress: true,
@@ -826,19 +838,21 @@ const CheckoutForm = () => {
           ) || shippingDetail?.rate?.service_type,
         ),
         discountAmount: chargeCouponDiscount,
+        manualDiscount: chargeManualDiscount,
         couponCode: appliedCoupon?.couponCode,
         shippingCost: chargeShipping,
         comments: data.orderComment || "",
         newsletter: data.newsletter || false,
         paymentIntentId: data.paymentIntentId ?? "",
+        // Minor units of `currency` — the amount Stripe charged
+        amount: chargeTotalMinor,
         currency: chargeCurrency,
-        selectedCurrency: selectedCurrencyPayload,
+        selectedCurrency: orderCurrency,
         isMultiAddress: false,
         products: cart.map((item) => ({
           product_id: item.id,
           quantity: item.quantity || 1,
         })),
-        ...(manualDiscount ? { manualDiscount: chargeManualDiscount } : {}),
       };
     },
     [
@@ -846,11 +860,12 @@ const CheckoutForm = () => {
       chargeShipping,
       chargeCouponDiscount,
       chargeManualDiscount,
+      chargeTotalMinor,
       toChargeRate,
       toChargeMajor,
       ofRate,
       chargeCurrency,
-      selectedCurrencyPayload,
+      orderCurrency,
       isMultiAddress,
       destinations,
       destShippingRates,
@@ -881,6 +896,10 @@ const CheckoutForm = () => {
         // Minor units (cents/pence) of `currency` — the exact total shown
         amount: chargeTotalMinor,
         currency: chargeCurrency,
+        exchangeRate: Number(orderCurrency?.exchangeRate ?? 1),
+        // Major units of `currency`, same as the place-order payload
+        shippingCost: chargeShipping,
+        discountAmount: chargeCouponDiscount,
         products: cart.map((item) => ({
           product_id: item.id,
           quantity: item.quantity || 1,
@@ -893,7 +912,14 @@ const CheckoutForm = () => {
       );
       return response.data?.payment_intent_id || null;
     },
-    [cart, chargeCurrency, chargeTotalMinor],
+    [
+      cart,
+      chargeCurrency,
+      chargeTotalMinor,
+      orderCurrency,
+      chargeShipping,
+      chargeCouponDiscount,
+    ],
   );
 
   useEffect(() => {
@@ -1098,6 +1124,12 @@ const CheckoutForm = () => {
   const handleWalletClick = (method: string) => {
     handlePaymentSelection(method);
 
+    // Amounts would be 0 without the exchange rate
+    if (chargeNotReadyMessage) {
+      errorMessage(chargeNotReadyMessage);
+      return;
+    }
+
     if (shippingUpdating) {
       errorMessage(
         "Shipping rates are updating. Please try again in a moment.",
@@ -1136,6 +1168,12 @@ const CheckoutForm = () => {
       selectedPaymentMethod,
     );
     const isWalletMethod = walletMethods.includes(selectedPaymentMethod);
+
+    // Amounts would be 0 without the exchange rate
+    if (chargeNotReadyMessage) {
+      errorMessage(chargeNotReadyMessage);
+      return;
+    }
 
     // The total doesn't include shipping until the new quote is in
     if (shippingUpdating) {
@@ -1700,198 +1738,208 @@ const CheckoutForm = () => {
 
       {/* Kept mounted while loading so form values and Stripe elements persist */}
       <div className={cn(!isCheckoutReady && "hidden")}>
-      {paymentRequest && (
-        <div>
-          {paymentRequest && (
-            <PaymentRequestButtonElement
-              options={{
-                paymentRequest,
-              }}
-            />
-          )}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* LEFT SECTION - Multi-step form */}
-          <div className="lg:col-span-2 space-y-0">
-            {/* STEP 1: Customer */}
-            {/* STEP 1: Customer */}
-            <div
-              className={cn(
-                "p-6 border-b-[1px] border-b-[#8b8b8b]",
-                // Completed step: heading column + summary side by side (desktop)
-                currentStep >= 2 && "md:flex md:items-start md:gap-6",
-              )}
-            >
-              <h2
-                className={cn(
-                  "text-[1.92308rem] font-normal mb-4 text-[#545454]",
-                  currentStep >= 2 &&
-                    "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
-                )}
-              >
-                Customer
-              </h2>
-              <CustomerStep
-                register={register}
-                errors={errors}
-                onContinue={handleContinueToShipping}
-                walletSupport={walletSupport}
-                onWalletClick={handleWalletClick}
-                isActive={currentStep === 1}
-                isCompleted={completedSteps.includes(1)}
-                onEdit={handleEditCustomer}
-                emailValue={watch("email")}
-              />
-            </div>
-
-            {/* STEP 2: Shipping */}
-            <div
-              className={cn(
-                "p-6 border-b-[1px] border-b-[#8b8b8b]",
-                currentStep >= 3 && "relative md:flex md:items-start md:gap-6",
-              )}
-            >
-              <h2
-                className={cn(
-                  "text-[25px] font-normal mt-6 mb-6 text-[#545454]",
-                  currentStep >= 3 &&
-                    "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
-                )}
-              >
-                Shipping
-              </h2>
-              <ShippingStep
-                register={register}
-                errors={errors}
-                control={control}
-                setValue={setValue}
-                onContinue={handleContinueToBilling}
-                clearErrors={clearErrors}
-                countryList={countryList}
-                stateList={stateList}
-                cityList={cityList}
-                isActive={currentStep === 2}
-                isCompleted={completedSteps.includes(2)}
-                onEdit={handleEditShipping}
-                onAddressSelect={handleShippingAddressSelect}
-                shippingInfo={shippingInfoMemo}
-                watchedShippingMethod={watchedShippingMethod}
-              />
-            </div>
-
-            {/* STEP 3: Billing */}
-            <div
-              className={cn(
-                "p-6 border-b-[1px] border-b-[#8b8b8b]",
-                // Completed step: heading column + summary side by side (desktop)
-                currentStep >= 4 && "relative md:flex md:items-start md:gap-6",
-              )}
-            >
-              <h2
-                className={cn(
-                  "text-[25px] font-normal mb-4 text-[#545454]",
-                  currentStep >= 4 &&
-                    "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
-                )}
-              >
-                Billing
-              </h2>
-              <BillingStep
-                register={register}
-                errors={errors}
-                control={control}
-                setValue={setValue}
-                onContinue={handleContinueToPayment}
-                countryList={countryList}
-                stateList={billingStateList}
-                cityList={billingCityList}
-                clearErrors={clearErrors}
-                isActive={currentStep === 3}
-                isCompleted={completedSteps.includes(3)}
-                onEdit={handleEditBilling}
-                onAddressSelect={handleBillingAddressSelect}
-                billingInfo={billingInfoMemo}
-              />
-            </div>
-
-            {/* STEP 4: Payment */}
-            {cart?.length > 0 && (
-              <div className="p-6  border-b-[1px] border-b-[#8b8b8b]">
-                <h2 className="text-[1.92308rem] font-normal mb-4 text-[#545454]">
-                  Payment
-                </h2>
-                <PaymentStep
-                  register={register}
-                  errors={errors}
-                  watchedPaymentMethod={watchedPaymentMethod}
-                  handlePaymentSelection={handlePaymentSelection}
-                  cardCompletion={cardCompletion}
-                  setCardCompletion={setCardCompletion}
-                  cardError={cardError}
-                  setCardError={setCardError}
-                  walletSupport={walletSupport}
-                  isProcessing={isProcessing}
-                  stripe={stripe}
-                  isActive={currentStep === 4}
-                  isCompleted={completedSteps.includes(4)}
-                  onEdit={handleEditPayment}
-                  paymentMethodLabel={
-                    watchedPaymentMethod === "credit_card"
-                      ? "Credit Card"
-                      : watchedPaymentMethod === "apple_pay"
-                        ? "Apple Pay"
-                        : watchedPaymentMethod === "google_pay"
-                          ? "Google Pay"
-                          : "Credit Card"
+        {paymentRequest && (
+          <div>
+            {paymentRequest && (
+              <PaymentRequestButtonElement
+                options={{
+                  paymentRequest,
+                }}
+                onClick={(event) => {
+                  // Amounts would be 0 without the exchange rate
+                  if (chargeNotReadyMessage) {
+                    event.preventDefault();
+                    errorMessage(chargeNotReadyMessage);
                   }
-                />
-              </div>
+                }}
+              />
             )}
           </div>
+        )}
 
-          {/* RIGHT SECTION - Order Summary */}
-          {!isMultiAddress ? (
-            <CheckoutOrderSummary
-              totals={orderTotals.display}
-              shippingUpdating={shippingUpdating}
-              cart={cart}
-              subtotal={subtotal}
-              shipping={shipping}
-              tax={tax}
-              total={totalBeforeDiscount}
-              finalTotal={finalTotal}
-              discountAmount={discountAmount}
-              appliedCoupon={appliedCoupon}
-              manualDiscount={manualDiscount}
-              discountTotal={discountTotal}
-              promoCode={promoCode}
-              setPromoCode={setPromoCode}
-              onApplyCoupon={handleApplyCoupon}
-              onRemoveCoupon={handleRemoveCoupon}
-            />
-          ) : (
-            <CheckoutMultipleOrderSummary
-              totals={orderTotals.display}
-              shippingUpdating={shippingUpdating}
-              cart={cart}
-              subtotal={subtotal}
-              shipping={shipping}
-              tax={tax}
-              total={totalBeforeDiscount}
-              finalTotal={finalTotal}
-              discountAmount={discountAmount}
-              appliedCoupon={appliedCoupon}
-              promoCode={promoCode}
-              setPromoCode={setPromoCode}
-              onApplyCoupon={handleApplyCoupon}
-              onRemoveCoupon={handleRemoveCoupon}
-            />
-          )}
-        </div>
-      </form>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* LEFT SECTION - Multi-step form */}
+            <div className="lg:col-span-2 space-y-0">
+              {/* STEP 1: Customer */}
+              {/* STEP 1: Customer */}
+              <div
+                className={cn(
+                  "p-6 border-b-[1px] border-b-[#8b8b8b]",
+                  // Completed step: heading column + summary side by side (desktop)
+                  currentStep >= 2 && "md:flex md:items-start md:gap-6",
+                )}
+              >
+                <h2
+                  className={cn(
+                    "text-[1.92308rem] font-normal mb-4 text-[#545454]",
+                    currentStep >= 2 &&
+                      "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
+                  )}
+                >
+                  Customer
+                </h2>
+                <CustomerStep
+                  register={register}
+                  errors={errors}
+                  onContinue={handleContinueToShipping}
+                  walletSupport={walletSupport}
+                  onWalletClick={handleWalletClick}
+                  isActive={currentStep === 1}
+                  isCompleted={completedSteps.includes(1)}
+                  onEdit={handleEditCustomer}
+                  emailValue={watch("email")}
+                />
+              </div>
+
+              {/* STEP 2: Shipping */}
+              <div
+                className={cn(
+                  "p-6 border-b-[1px] border-b-[#8b8b8b]",
+                  currentStep >= 3 &&
+                    "relative md:flex md:items-start md:gap-6",
+                )}
+              >
+                <h2
+                  className={cn(
+                    "text-[25px] font-normal mt-6 mb-6 text-[#545454]",
+                    currentStep >= 3 &&
+                      "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
+                  )}
+                >
+                  Shipping
+                </h2>
+                <ShippingStep
+                  register={register}
+                  errors={errors}
+                  control={control}
+                  setValue={setValue}
+                  onContinue={handleContinueToBilling}
+                  clearErrors={clearErrors}
+                  countryList={countryList}
+                  stateList={stateList}
+                  cityList={cityList}
+                  isActive={currentStep === 2}
+                  isCompleted={completedSteps.includes(2)}
+                  onEdit={handleEditShipping}
+                  onAddressSelect={handleShippingAddressSelect}
+                  shippingInfo={shippingInfoMemo}
+                  watchedShippingMethod={watchedShippingMethod}
+                />
+              </div>
+
+              {/* STEP 3: Billing */}
+              <div
+                className={cn(
+                  "p-6 border-b-[1px] border-b-[#8b8b8b]",
+                  // Completed step: heading column + summary side by side (desktop)
+                  currentStep >= 4 &&
+                    "relative md:flex md:items-start md:gap-6",
+                )}
+              >
+                <h2
+                  className={cn(
+                    "text-[25px] font-normal mb-4 text-[#545454]",
+                    currentStep >= 4 &&
+                      "mt-0 mb-3 md:my-0 md:w-[136px] md:shrink-0 md:leading-[1.2]",
+                  )}
+                >
+                  Billing
+                </h2>
+                <BillingStep
+                  register={register}
+                  errors={errors}
+                  control={control}
+                  setValue={setValue}
+                  onContinue={handleContinueToPayment}
+                  countryList={countryList}
+                  stateList={billingStateList}
+                  cityList={billingCityList}
+                  clearErrors={clearErrors}
+                  isActive={currentStep === 3}
+                  isCompleted={completedSteps.includes(3)}
+                  onEdit={handleEditBilling}
+                  onAddressSelect={handleBillingAddressSelect}
+                  billingInfo={billingInfoMemo}
+                />
+              </div>
+
+              {/* STEP 4: Payment */}
+              {cart?.length > 0 && (
+                <div className="p-6  border-b-[1px] border-b-[#8b8b8b]">
+                  <h2 className="text-[1.92308rem] font-normal mb-4 text-[#545454]">
+                    Payment
+                  </h2>
+                  <PaymentStep
+                    register={register}
+                    errors={errors}
+                    watchedPaymentMethod={watchedPaymentMethod}
+                    handlePaymentSelection={handlePaymentSelection}
+                    cardCompletion={cardCompletion}
+                    setCardCompletion={setCardCompletion}
+                    cardError={cardError}
+                    setCardError={setCardError}
+                    walletSupport={walletSupport}
+                    isProcessing={isProcessing}
+                    stripe={stripe}
+                    notReadyMessage={chargeNotReadyMessage}
+                    isActive={currentStep === 4}
+                    isCompleted={completedSteps.includes(4)}
+                    onEdit={handleEditPayment}
+                    paymentMethodLabel={
+                      watchedPaymentMethod === "credit_card"
+                        ? "Credit Card"
+                        : watchedPaymentMethod === "apple_pay"
+                          ? "Apple Pay"
+                          : watchedPaymentMethod === "google_pay"
+                            ? "Google Pay"
+                            : "Credit Card"
+                    }
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT SECTION - Order Summary */}
+            {!isMultiAddress ? (
+              <CheckoutOrderSummary
+                totals={orderTotals.display}
+                shippingUpdating={shippingUpdating}
+                cart={cart}
+                subtotal={subtotal}
+                shipping={shipping}
+                tax={tax}
+                total={totalBeforeDiscount}
+                finalTotal={finalTotal}
+                discountAmount={discountAmount}
+                appliedCoupon={appliedCoupon}
+                manualDiscount={manualDiscount}
+                discountTotal={discountTotal}
+                promoCode={promoCode}
+                setPromoCode={setPromoCode}
+                onApplyCoupon={handleApplyCoupon}
+                onRemoveCoupon={handleRemoveCoupon}
+              />
+            ) : (
+              <CheckoutMultipleOrderSummary
+                totals={orderTotals.display}
+                shippingUpdating={shippingUpdating}
+                cart={cart}
+                subtotal={subtotal}
+                shipping={shipping}
+                tax={tax}
+                total={totalBeforeDiscount}
+                finalTotal={finalTotal}
+                discountAmount={discountAmount}
+                appliedCoupon={appliedCoupon}
+                promoCode={promoCode}
+                setPromoCode={setPromoCode}
+                onApplyCoupon={handleApplyCoupon}
+                onRemoveCoupon={handleRemoveCoupon}
+              />
+            )}
+          </div>
+        </form>
       </div>
 
       {/* Delete Confirmation Dialog */}
