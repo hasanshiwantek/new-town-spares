@@ -8,12 +8,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  useCartRate,
   useFormatRate,
   useMoney,
   useOrderTotals,
   type OrderTotals,
 } from "@/hooks/useFormatPrice";
-import { formatMoney, Money, rateCurrency } from "@/lib/money";
+import { formatMoney, Money } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
@@ -51,6 +52,7 @@ import ProductPrice from "../productprice/ProductPrice";
 const OrderSummary = () => {
   const dispatch = useAppDispatch();
   const formatRate = useFormatRate();
+  const toCartRate = useCartRate();
   const { toUsd: moneyToUsd, ofRate } = useMoney();
   const selectedCurrency = useAppSelector(
     (state: RootState) => state.currency.selectedCurrency,
@@ -177,12 +179,7 @@ const OrderSummary = () => {
             state: shippingDetail.state,
             zip: shippingDetail.zip,
             cartId: cartItems.map((item) => item.cartItemId),
-            rate: {
-              service_type: match.service_type,
-              method_type: match.method_type,
-              total_charge: Number(match.total_charge).toFixed(2),
-              currency: rateCurrency(match, selectedCurrency),
-            },
+            rate: toCartRate(match),
           };
           await dispatch(addShippingCost(payload)).unwrap();
         } else {
@@ -572,25 +569,13 @@ const OrderSummary = () => {
                         (rate: any) =>
                           rate.service_type === selectedShippingMethod,
                       );
-                      const cost = selectedRate
-                        ? Number(selectedRate.total_charge).toFixed(2)
-                        : "0";
-
                       const shippingPayload: any = {
                         country: shippingData.country,
                         city: shippingData.city,
                         state: shippingData.state,
                         zip: shippingData.zip,
                         cartId: cartItems.map((item) => item.cartItemId),
-                        rate: {
-                          service_type: selectedRate?.service_type,
-                          method_type: selectedRate?.method_type,
-                          total_charge: cost,
-                          currency: rateCurrency(
-                            selectedRate,
-                            selectedCurrency,
-                          ),
-                        },
+                        rate: toCartRate(selectedRate),
                       };
                       await dispatch(addShippingCost(shippingPayload))
                         .unwrap()

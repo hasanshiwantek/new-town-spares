@@ -11,6 +11,7 @@ import { orderDetailById } from "@/redux/slices/OrderMessage";
 import { CONTACT_INFO } from "@/const/contact";
 import OrderConfirmationSkeleton from "./OrderConfirmationSkeleton";
 import { Button } from "@/components/ui/button";
+import { orderCurrency } from "../myaccount/helpers/OrderDetails";
 // Inner component that uses Stripe hooks
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
@@ -150,6 +151,7 @@ const CheckoutForm = () => {
                 discountTotal={discountTotal}
                 promoCode={promoCode}
                 setPromoCode={setPromoCode}
+                {...orderCurrency(customerOrderDetail)}
               />
             </div>
           </div>

@@ -1,12 +1,11 @@
-import { useAppSelector } from "@/hooks/useReduxHooks";
 import { ENV_CONFIG } from "@/config/envConfig";
+import { useAppSelector } from "@/hooks/useReduxHooks";
 import {
   Money,
   RateLookup,
   add,
   atLeastZero,
   convert,
-  currencySymbols,
   formatMoney,
   money,
   rateMoney,
@@ -14,41 +13,37 @@ import {
   sum,
   times,
   toMajor,
-  zero,
 } from "@/lib/money";
 import { RootState } from "@/redux/store";
 import { useCallback, useMemo } from "react";
 
-export { currencySymbols };
-
-// Selected currency and its USD → currency rate. `ready` is false while the
-// rates are loading or if they failed to load: callers must never treat a
-// missing rate as 1, or GBP amounts are shown/charged at USD values.
-export function useCurrencyRate() {
-  const { selectedCurrency, currencies } = useAppSelector(
+// Selected currency and the USD → currency rate lookup. `ready` is false while
+// the selected currency's rate is loading or failed to load: a missing rate
+// must never be treated as 1, or GBP amounts are shown/charged at USD values.
+function useRates() {
+  const { selectedCurrency, currencies, status } = useAppSelector(
     (state: RootState) => state.currency,
   );
-  const rate =
-    selectedCurrency === "USD"
-      ? 1
-      : currencies.find((c) => c.code === selectedCurrency)?.rate;
-  const ready = typeof rate === "number" && rate > 0;
 
-  return { code: selectedCurrency, rate: ready ? rate : null, ready };
+  const usdRate: RateLookup = useCallback(
+    (c: string) =>
+      currencies.find((x) => x.code === c)?.rate ?? (c === "USD" ? 1 : null),
+    [currencies],
+  );
+
+  return {
+    selectedCurrency,
+    usdRate,
+    status,
+    ready: !!usdRate(selectedCurrency),
+  };
 }
 
 // Money in the shopper's display currency. Until the selected currency's rate
 // has loaded, everything is shown in USD rather than mislabelled.
 export function useMoney() {
-  const { code, ready } = useCurrencyRate();
-  const { currencies } = useAppSelector((state: RootState) => state.currency);
-  const display = ready ? code : "USD";
-
-  const usdRate: RateLookup = useCallback(
-    (c: string) =>
-      c === "USD" ? 1 : (currencies.find((x) => x.code === c)?.rate ?? null),
-    [currencies],
-  );
+  const { selectedCurrency, usdRate, ready } = useRates();
+  const display = ready ? selectedCurrency : "USD";
 
   // Any Money → display currency (null if a rate is missing)
   const toDisplay = useCallback(
@@ -58,7 +53,10 @@ export function useMoney() {
 
   // A shipping rate as Money in its own currency. Untagged (older saved)
   // rates were quoted in the selected currency.
-  const ofRate = useCallback((rate: any) => rateMoney(rate, code), [code]);
+  const ofRate = useCallback(
+    (rate: any) => rateMoney(rate, selectedCurrency),
+    [selectedCurrency],
+  );
 
   // Any Money → USD major units, for the backend fields that are USD
   const toUsd = useCallback(
@@ -69,7 +67,7 @@ export function useMoney() {
     [usdRate],
   );
 
-  return { display, ready, usdRate, toDisplay, ofRate, toUsd };
+  return { display, usdRate, toDisplay, ofRate, toUsd };
 }
 
 // All product/order prices in the app are stored in USD.
@@ -78,10 +76,10 @@ export function useFormatPrice() {
   const { toDisplay } = useMoney();
 
   return useCallback(
-    (usdAmount: number | string | null | undefined) =>
-      formatMoney(
-        toDisplay(money(usdAmount, "USD")) ?? money(usdAmount, "USD"),
-      ),
+    (usdAmount: number | string | null | undefined) => {
+      const usd = money(usdAmount, "USD");
+      return formatMoney(toDisplay(usd) ?? usd);
+    },
     [toDisplay],
   );
 }
@@ -114,6 +112,27 @@ export function useFormatRate() {
   );
 }
 
+// A shipping rate as `web/cart/add/shipping-by-rate` saves it: the amount in
+// the selected currency, whatever currency it was quoted in (fixed/free/flat
+// rates are built in USD)
+export function useCartRate() {
+  const { toDisplay, ofRate } = useMoney();
+
+  return useCallback(
+    (rate: any) => {
+      const m = ofRate(rate);
+      const selected = toDisplay(m) ?? m;
+      return {
+        service_type: rate?.service_type,
+        method_type: rate?.method_type,
+        total_charge: toMajor(selected).toFixed(2),
+        currency: selected.currency,
+      };
+    },
+    [toDisplay, ofRate],
+  );
+}
+
 export type OrderTotals = {
   currency: string;
   lines: Money[]; // one per cart line, in cart order
@@ -140,10 +159,9 @@ type OrderTotalsInput = {
 const buildTotals = (
   input: OrderTotalsInput,
   currency: string,
-  to: (m: Money) => Money | null,
+  conv: (m: Money) => Money | null,
   ofRate: (rate: any) => Money,
 ): OrderTotals | null => {
-  const conv = (m: Money) => to(m);
   const lines: Money[] = [];
   for (const item of input.cart) {
     // Convert the unit price, then × qty — matches the unit price shown
@@ -210,29 +228,42 @@ export function useOrderTotals(input: OrderTotalsInput) {
   ]);
 }
 
-// Currency Stripe charges in, and converters to Stripe's minor-unit amounts.
-// `ready` is false until the selected currency's rate has loaded — payments
-// must be blocked until then (the amounts would be wrong).
+// Currency Stripe charges in (also the currency the order is placed in), and
+// converters into it. Both return 0 if a rate is missing, so payment must be
+// blocked while `notReadyMessage` is set: until the currencies have loaded (the
+// default currency may still replace the selected one) and the charge
+// currency's rate is known.
 export function useChargeCurrency() {
-  const { code: selectedCurrency, ready } = useCurrencyRate();
-  const { currencies } = useAppSelector((state: RootState) => state.currency);
-  const currency = ENV_CONFIG.chargeInSelectedCurrency ? selectedCurrency : "USD";
+  const { selectedCurrency, usdRate, status } = useRates();
+  const currency = ENV_CONFIG.chargeInSelectedCurrency
+    ? selectedCurrency
+    : "USD";
+  const ready = status === "succeeded" && !!usdRate(currency);
+  // Why payment is blocked, for the shopper; null when ready
+  const notReadyMessage = ready
+    ? null
+    : status === "failed"
+      ? "We couldn't load exchange rates. Please refresh the page to pay."
+      : status === "succeeded"
+        ? `${currency} isn't available right now. Please choose another currency.`
+        : "Loading exchange rates…";
 
-  const usdRate: RateLookup = useCallback(
-    (c: string) =>
-      c === "USD" ? 1 : (currencies.find((x) => x.code === c)?.rate ?? null),
-    [currencies],
-  );
-
-  // Any Money → minor units of the charge currency (0 if a rate is missing)
+  // Any Money → Stripe minor units of the charge currency
   const toChargeMinor = useCallback(
     (m: Money) => convert(m, currency, usdRate)?.minor ?? 0,
     [currency, usdRate],
   );
 
-  return { currency, ready, toChargeMinor };
-}
+  // Any Money → major units of the charge currency, for the order payload
+  const toChargeMajor = useCallback(
+    (m: Money) => {
+      const charged = convert(m, currency, usdRate);
+      return charged ? toMajor(charged) : 0;
+    },
+    [currency, usdRate],
+  );
 
-export { formatMoney, zero };
+  return { currency, notReadyMessage, toChargeMinor, toChargeMajor };
+}
 
 export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];

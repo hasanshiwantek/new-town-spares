@@ -3,12 +3,17 @@
 import { CONTACT_INFO } from "@/const/contact";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
-import { fetchCurrencies } from "@/redux/slices/currencySlice";
+import { cn } from "@/lib/utils";
+import {
+  fetchCurrencies,
+  setSelectedCurrency,
+} from "@/redux/slices/currencySlice";
 import { RootState } from "@/redux/store";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import { FaChevronDown } from "react-icons/fa";
 import { TfiHeadphoneAlt } from "react-icons/tfi";
 
 interface Category {
@@ -117,25 +122,6 @@ const DropdownColumn = ({
       </MotionUl>
     </div>
   );
-};
-
-const CURRENCY_NAME_OVERRIDES: Record<string, string> = {
-  USD: "US Dollars",
-  GBP: "British Pound",
-};
-
-const currencyNames =
-  typeof Intl !== "undefined" && "DisplayNames" in Intl
-    ? new Intl.DisplayNames(["en"], { type: "currency" })
-    : null;
-
-const getCurrencyName = (code: string) => {
-  if (CURRENCY_NAME_OVERRIDES[code]) return CURRENCY_NAME_OVERRIDES[code];
-  try {
-    return currencyNames?.of(code) ?? code;
-  } catch {
-    return code;
-  }
 };
 
 const LinkHeader = () => {
@@ -260,7 +246,7 @@ const LinkHeader = () => {
           className="relative hidden lg:flex items-center gap-1 sm:gap-6"
           ref={currencyRef}
         >
-          {/* <div className="flex flex-col leading-tight relative">
+          <div className="flex flex-col leading-tight relative">
             <button
               aria-label="currency"
               aria-expanded={open}
@@ -295,14 +281,14 @@ const LinkHeader = () => {
                       <span
                         className={`underline underline-offset-2 hover:text-[#FF482E] ${isSelected ? "font-semibold" : "font-normal"}`}
                       >
-                        {getCurrencyName(c?.code)}
+                        {c?.name || c?.code}
                       </span>
                     </button>
                   );
                 })}
               </div>
             )}
-          </div> */}
+          </div>
           <div className="flex items-center gap-2">
             <TfiHeadphoneAlt className=" w-8 h-8" />
             <span className="text-sm sm:text-base md:text-lg lg:text-xl">

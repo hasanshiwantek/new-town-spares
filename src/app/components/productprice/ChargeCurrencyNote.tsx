@@ -1,5 +1,6 @@
 import { ENV_CONFIG } from "@/config/envConfig";
 import { useAppSelector } from "@/hooks/useReduxHooks";
+import { formatMoney, money } from "@/lib/money";
 import { RootState } from "@/redux/store";
 
 // Payments are always charged in USD; when another display currency is
@@ -13,7 +14,7 @@ const ChargeCurrencyNote = ({ usdTotal }: { usdTotal: number }) => {
 
   return (
     <p className="mt-2 text-[12px] text-[#757575] text-right">
-      Your card will be charged in USD: ${Number(usdTotal || 0).toFixed(2)}.{" "}
+      Your card will be charged in USD: {formatMoney(money(usdTotal, "USD"))}.{" "}
       {selectedCurrency} amounts are estimates.
     </p>
   );
