@@ -1,6 +1,5 @@
 "use client";
 
-import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
 import { fetchOrderDetails } from "@/redux/slices/cartsSlice";
@@ -9,13 +8,15 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
-import { Invoice } from "./helpers/OrderDetails";
+import { Invoice, orderCurrency, orderLine } from "./helpers/OrderDetails";
 interface OrderData {
   id: number;
   orderNumber: string;
   status: string;
   totalAmount: string;
   shippingCost: string;
+  currencyCode?: string;
+  currencySymbol?: string;
   manualDiscount?: number;
   discountAmount?: number;
   couponCode?: string;
@@ -70,7 +71,6 @@ const SingleOrder = () => {
   const params = useParams();
   const orderNumber = params?.slug as string;
   const dispatch = useAppDispatch();
-  const formatPrice = useFormatPrice();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -171,6 +171,12 @@ const SingleOrder = () => {
     discountAmount: Number(order?.discountAmount),
   };
   const total = parseFloat(order.totalAmount);
+  // Amounts are shown in the order's own currency, not converted
+  const currencyProps = orderCurrency(order);
+  const subtotal = order.products.reduce((sum, item) => {
+    const { quantity, price } = orderLine(order, item);
+    return sum + price * quantity;
+  }, 0);
 
   // Format date
   const orderDate = new Date().toLocaleDateString("en-US", {
@@ -181,14 +187,6 @@ const SingleOrder = () => {
 
   const shippingAddress = order.shippingDestinations[0]?.address;
   const billingAddress = order.billingInformation;
-
-  // Get product quantities from shipping destinations
-  const getProductQuantity = (productId: number) => {
-    const product = order.shippingDestinations[0]?.products.find(
-      (p) => p.productId === productId,
-    );
-    return product?.quantity || 1;
-  };
 
   const blockTypography = "text-[15px] leading-[22.5px] text-[#333333]";
   const blockClass = `${blockTypography} w-full p-[21px] border-b border-[#ebebeb] min-[801px]:w-1/2 min-[1261px]:w-auto min-[1261px]:flex-1 min-[1261px]:border-b-0 min-[1261px]:p-0`;
@@ -222,7 +220,9 @@ const SingleOrder = () => {
             </div>
             <div className="clear-both">
               <dt className="float-left mr-[5px]">Order total:</dt>
-              <dd className="m-0">{formatPrice(total)}</dd>
+              <dd className="m-0">
+                <ProductPrice price={total} inline={true} {...currencyProps} />
+              </dd>
             </div>
           </dl>
         </section>
@@ -293,7 +293,7 @@ const SingleOrder = () => {
             </div>
 
             {order.products.map((item, index) => {
-              const quantity = getProductQuantity(item.id);
+              const { quantity, price } = orderLine(order, item);
               const primaryImage = item.image.find(
                 (img) => img.isPrimary === 1,
               );
@@ -327,8 +327,9 @@ const SingleOrder = () => {
                     </h5>
                     <div className="text-[15px] leading-[22.5px] text-[#FF482E]">
                       <ProductPrice
-                        price={Number(item.price) * quantity}
+                        price={price * quantity}
                         inline={true}
+                        {...currencyProps}
                       />
                     </div>
                   </div>
@@ -347,14 +348,19 @@ const SingleOrder = () => {
           <div className={summaryRow}>
             <span>Subtotal:</span>
             <span className="float-right">
-              <ProductPrice price={Number(order?.totalAmount)} inline={true} />
+              <ProductPrice price={subtotal} inline={true} {...currencyProps} />
             </span>
           </div>
           {manualDiscount > 0 && (
             <div className={summaryRow}>
               <span>Discount:</span>
               <span className="float-right">
-                -<ProductPrice price={manualDiscount} inline={true} />
+                -
+                <ProductPrice
+                  price={manualDiscount}
+                  inline={true}
+                  {...currencyProps}
+                />
               </span>
             </div>
           )}
@@ -366,14 +372,23 @@ const SingleOrder = () => {
               </span>
 
               <span className="absolute right-0 top-0">
-                -<ProductPrice price={coupon?.discountAmount} inline={true} />
+                -
+                <ProductPrice
+                  price={coupon?.discountAmount}
+                  inline={true}
+                  {...currencyProps}
+                />
               </span>
             </div>
           )}
           <div className={summaryRow}>
             <span>Shipping:</span>
             <span className="float-right">
-              <ProductPrice price={shippingCost} inline={true} />
+              <ProductPrice
+                price={shippingCost}
+                inline={true}
+                {...currencyProps}
+              />
             </span>
           </div>
           <div
@@ -381,7 +396,7 @@ const SingleOrder = () => {
           >
             <span>Grand total:</span>
             <span className="float-right">
-              <ProductPrice price={total} inline={true} />
+              <ProductPrice price={total} inline={true} {...currencyProps} />
             </span>
           </div>
 
