@@ -107,6 +107,27 @@ export function useFormatRate() {
   );
 }
 
+// A shipping rate as `web/cart/add/shipping-by-rate` saves it: the amount in
+// the selected currency, whatever currency it was quoted in (fixed/free/flat
+// rates are built in USD)
+export function useCartRate() {
+  const { toDisplay, ofRate } = useMoney();
+
+  return useCallback(
+    (rate: any) => {
+      const m = ofRate(rate);
+      const selected = toDisplay(m) ?? m;
+      return {
+        service_type: rate?.service_type,
+        method_type: rate?.method_type,
+        total_charge: toMajor(selected).toFixed(2),
+        currency: selected.currency,
+      };
+    },
+    [toDisplay, ofRate],
+  );
+}
+
 export type OrderTotals = {
   currency: string;
   lines: Money[]; // one per cart line, in cart order

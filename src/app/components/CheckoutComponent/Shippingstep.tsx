@@ -8,8 +8,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { countriesWithoutPostalCode } from "@/const/country-level";
-import { PRODUCT_SHIPPING_TYPES, useFormatRate } from "@/hooks/useFormatPrice";
-import { rateCurrency } from "@/lib/money";
+import {
+  PRODUCT_SHIPPING_TYPES,
+  useCartRate,
+  useFormatRate,
+} from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { cn } from "@/lib/utils";
 import {
@@ -212,6 +215,7 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
 
   const dispatch = useAppDispatch();
   const formatRate = useFormatRate();
+  const toCartRate = useCartRate();
   const selectedCurrency = useAppSelector(
     (state: RootState) => state.currency.selectedCurrency,
   );
@@ -379,21 +383,13 @@ const ShippingStep: React.FC<ShippingStepProps> = ({
   const saveShippingMethod = async (serviceType: string, rate?: any) => {
     const selectedRate =
       rate || shippingRates?.find((r: any) => r.service_type === serviceType);
-    const cost = selectedRate
-      ? Number(selectedRate.total_charge).toFixed(2)
-      : "0";
     const shippingData: any = {
       country: country?.trim(),
       city: city?.trim(),
       state: state?.trim(),
       zip: zip?.trim(),
       cartId: cart?.map((item) => item.cartItemId),
-      rate: {
-        service_type: selectedRate?.service_type,
-        method_type: selectedRate?.method_type,
-        total_charge: cost,
-        currency: rateCurrency(selectedRate, selectedCurrency),
-      },
+      rate: toCartRate(selectedRate),
     };
     await dispatch(addShippingCost(shippingData))
       .unwrap()
