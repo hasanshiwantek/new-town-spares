@@ -14,6 +14,11 @@ import {
   useMoney,
   useOrderTotals,
 } from "@/hooks/useFormatPrice";
+import {
+  buildCalculateRequest,
+  useOrderCalculate,
+  type CalculateInput,
+} from "@/hooks/useOrderCalculate";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { apiFetch } from "@/lib/apiFetch";
 import axiosInstance from "@/lib/axiosInstance";
@@ -276,10 +281,10 @@ const CheckoutForm = () => {
     return { id, code, name, symbol, exchangeRate };
   }, [selectedCurrencyPayload]);
 
-  const { toUsd: moneyToUsd, ofRate } = useMoney();
+  const { display: displayCurrency, toUsd: moneyToUsd, ofRate } = useMoney();
   const {
     currency: chargeCurrency,
-    notReadyMessage: chargeNotReadyMessage,
+    notReadyMessage: ratesNotReadyMessage,
     toChargeMinor,
     toChargeMajor,
   } = useChargeCurrency();
@@ -441,7 +446,9 @@ const CheckoutForm = () => {
     [selectedShippingRates, rateToUsd],
   );
 
-  // Summary + charge, worked out in whole minor units in one currency
+  // Summary + charge, worked out on the frontend in whole minor units. Used
+  // for multi-address orders (order-calculate prices one address only), and
+  // for the display currency when it differs from the charge currency.
   const orderTotals = useOrderTotals({
     cart,
     manualDiscountUsd: Number(manualDiscount) || 0,
@@ -449,6 +456,53 @@ const CheckoutForm = () => {
     shippingRates: selectedShippingRates,
     taxUsd: tax,
   });
+
+  // Single address: the backend prices the order, and that quote is what
+  // the summary shows, Stripe charges and the order records
+  const serverPricing = !isMultiAddress;
+  // What the order is priced on; place-order sends the same fields
+  const calcInput = useMemo<CalculateInput>(
+    () => ({
+      currency: chargeCurrency,
+      cart,
+      shippingRate: selectedShippingRates[0] ?? null,
+      destination: {
+        country_code: watchedCountry || undefined,
+        state: watchedState || undefined,
+        city: watchedCity?.trim() || undefined,
+        postal_code: watchedZip?.trim() || undefined,
+      },
+      coupon: appliedCoupon,
+      manualDiscountUsd: Number(manualDiscount) || 0,
+    }),
+    [
+      chargeCurrency,
+      cart,
+      selectedShippingRates,
+      watchedCountry,
+      watchedState,
+      watchedCity,
+      watchedZip,
+      appliedCoupon,
+      manualDiscount,
+    ],
+  );
+  const {
+    quote,
+    loading: quoteLoading,
+    notReadyMessage: quoteNotReadyMessage,
+  } = useOrderCalculate(calcInput, serverPricing);
+
+  // Totals in the charge currency, and as the summary shows them
+  const chargeTotals = serverPricing ? (quote?.totals ?? null) : orderTotals.charge;
+  const displayTotals =
+    serverPricing && displayCurrency === chargeCurrency
+      ? (quote?.totals ?? null)
+      : orderTotals.display;
+
+  // Why payment is blocked (rates missing, or the backend total isn't in yet)
+  const chargeNotReadyMessage =
+    ratesNotReadyMessage ?? (serverPricing ? quoteNotReadyMessage : null);
 
   // Total before discount
   const totalBeforeDiscount = useMemo(
@@ -465,13 +519,20 @@ const CheckoutForm = () => {
   // Exactly the total the summary shows (same rounded lines), in Stripe's
   // minor units of the charge currency
   const chargeTotalMinor =
-    orderTotals.charge?.total.minor ?? toChargeMinor(money(finalTotal, "USD"));
+    chargeTotals?.total.minor ?? toChargeMinor(money(finalTotal, "USD"));
 
   // Order total in the selected currency, for the shipping-rate request
   // (`currency: selectedCurrency` there)
-  const selectedOrderTotal = orderTotals.display
-    ? toMajor(orderTotals.display.total)
+  const selectedOrderTotal = displayTotals
+    ? toMajor(displayTotals.total)
     : toChargeMajor(money(finalTotal, "USD"));
+
+  // USD total for the "charged in USD" note: the backend's total when it
+  // priced the order in USD
+  const usdChargeTotal =
+    chargeTotals && chargeCurrency === "USD"
+      ? toMajor(chargeTotals.total)
+      : finalTotal;
 
   // Order payload amounts, in the charge (= selected) currency — the same
   // rounded amounts the summary shows and Stripe charges
@@ -479,8 +540,8 @@ const CheckoutForm = () => {
     key: "shipping" | "couponDiscount" | "manualDiscount",
     usd: number,
   ) =>
-    orderTotals.charge
-      ? toMajor(orderTotals.charge[key])
+    chargeTotals
+      ? toMajor(chargeTotals[key])
       : toChargeMajor(money(usd, "USD"));
   const chargeShipping = chargeAmount("shipping", shipping);
   const chargeCouponDiscount = chargeAmount(
@@ -804,7 +865,9 @@ const CheckoutForm = () => {
         };
       }
 
-      // ✅ Single address — existing logic
+      // ✅ Single address: the same pricing fields order-calculate got, so
+      // the backend can re-price the order and check it against `amount`
+      const priced = buildCalculateRequest(calcInput, null);
       return {
         userType: token ? null : "guest",
         deviceType: getDeviceType(),
@@ -830,29 +893,22 @@ const CheckoutForm = () => {
             : data.paymentMethod == "apple_pay"
               ? "Apple Pay"
               : "Google Pay",
-        shippingMethod:
-          data.shippingMethod || shippingDetail?.rate?.method_type,
-        shippingData: toChargeRate(
-          shippingRates.find(
-            (item) => item?.service_type == data.shippingMethod,
-          ) || shippingDetail?.rate?.service_type,
-        ),
-        discountAmount: chargeCouponDiscount,
-        manualDiscount: chargeManualDiscount,
-        couponCode: appliedCoupon?.couponCode,
-        shippingCost: chargeShipping,
-        comments: data.orderComment || "",
-        newsletter: data.newsletter || false,
         paymentIntentId: data.paymentIntentId ?? "",
-        // Minor units of `currency` — the amount Stripe charged
+        // Minor units of the selected currency — the amount Stripe charged
         amount: chargeTotalMinor,
-        currency: chargeCurrency,
         selectedCurrency: orderCurrency,
         isMultiAddress: false,
-        products: cart.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity || 1,
-        })),
+        method_id: priced.method_id,
+        service_type: priced.service_type,
+        // The rate the backend priced the order with
+        shippingData:
+          quote?.matchedRate ?? toChargeRate(calcInput.shippingRate),
+        destination: priced.destination,
+        coupon: priced.coupon,
+        manualDiscount: priced.manualDiscount,
+        comments: data.orderComment || "",
+        newsletter: data.newsletter || false,
+        products: priced.products,
       };
     },
     [
@@ -861,6 +917,8 @@ const CheckoutForm = () => {
       chargeCouponDiscount,
       chargeManualDiscount,
       chargeTotalMinor,
+      calcInput,
+      quote,
       toChargeRate,
       toChargeMajor,
       ofRate,
@@ -1418,6 +1476,20 @@ const CheckoutForm = () => {
           const shipping = apiData.shipping_form_data;
           const billing = apiData.billing_form_data;
 
+          // The saved form belongs to the shopper, not the cart: its method
+          // may be from an earlier cart. Restore it only if this cart still
+          // has it (the cart's saved rate is removed whenever its items
+          // change), or the products' fixed/free shipping is that method.
+          const cartRate = await dispatch(fetchShippingRate())
+            .unwrap()
+            .then((res: any) => res?.data?.rate ?? null)
+            .catch(() => null);
+          const methodStillSaved =
+            !!shipping.shippingMethod &&
+            (shipping.shippingMethod === cartRate?.service_type ||
+              shipping.shippingMethod ===
+                getProductShippingRate(cart)?.service_type);
+
           if (
             shipping.country &&
             shipping.zip &&
@@ -1458,6 +1530,7 @@ const CheckoutForm = () => {
           ];
           shippingFields.forEach((field) => {
             const val = (shipping as any)[field];
+            if (field === "shippingMethod" && !methodStillSaved) return;
             if (val !== undefined && val !== "") {
               setValue(field, val);
             }
@@ -1498,7 +1571,7 @@ const CheckoutForm = () => {
               !!shipping.city &&
               !!shipping.country &&
               !!shipping.zip &&
-              !!shipping.shippingMethod;
+              methodStillSaved;
 
             const billingComplete =
               !!billing?.billingFirstName &&
@@ -1903,14 +1976,14 @@ const CheckoutForm = () => {
             {/* RIGHT SECTION - Order Summary */}
             {!isMultiAddress ? (
               <CheckoutOrderSummary
-                totals={orderTotals.display}
-                shippingUpdating={shippingUpdating}
+                totals={displayTotals}
+                shippingUpdating={shippingUpdating || quoteLoading}
                 cart={cart}
                 subtotal={subtotal}
                 shipping={shipping}
                 tax={tax}
                 total={totalBeforeDiscount}
-                finalTotal={finalTotal}
+                finalTotal={usdChargeTotal}
                 discountAmount={discountAmount}
                 appliedCoupon={appliedCoupon}
                 manualDiscount={manualDiscount}
@@ -1922,7 +1995,7 @@ const CheckoutForm = () => {
               />
             ) : (
               <CheckoutMultipleOrderSummary
-                totals={orderTotals.display}
+                totals={displayTotals}
                 shippingUpdating={shippingUpdating}
                 cart={cart}
                 subtotal={subtotal}
