@@ -123,6 +123,7 @@ export function useCartRate() {
       const m = ofRate(rate);
       const selected = toDisplay(m) ?? m;
       return {
+        method_id: rate?.method_id,
         service_type: rate?.service_type,
         method_type: rate?.method_type,
         total_charge: toMajor(selected).toFixed(2),
