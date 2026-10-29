@@ -57,7 +57,9 @@ const normalizeCoupon = (
   if (!coupon) return null;
 
   const code = coupon.couponCode ?? coupon.coupon_code ?? "";
-  const couponId = "coupon_id" in coupon ? coupon.coupon_id : coupon.id;
+  const isUsage = "coupon_id" in coupon;
+  const couponId = isUsage ? coupon.coupon_id : coupon.id;
+  const usageId = isUsage ? coupon.id : (coupon as Partial<Coupon>).usageId;
   const discountValue =
     (coupon as Partial<Coupon>)?.discountAmount ??
     (coupon as Partial<CouponUsageItem>)?.discount_amount ??
@@ -65,13 +67,13 @@ const normalizeCoupon = (
 
   return {
     ...coupon,
-    id: coupon.id ?? couponId ?? undefined,
+    id: couponId ?? undefined,
     coupon_id: couponId ?? undefined,
     couponCode: code,
     coupon_code: code,
     discountAmount: Number(discountValue),
     discount_amount: Number(discountValue),
-    usageId: couponId ?? null,
+    usageId: usageId ?? null,
   } as Coupon;
 };
 
@@ -110,7 +112,6 @@ export const removeCoupon = createAsyncThunk(
       const usageId =
         state.coupon?.couponUsageId ??
         state.coupon?.appliedCoupon?.usageId ??
-        state.coupon?.appliedCoupon?.id ??
         null;
 
       if (usageId) {

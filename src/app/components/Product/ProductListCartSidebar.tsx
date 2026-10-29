@@ -20,6 +20,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 import ProductPrice from "../productprice/ProductPrice";
+import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
 import { formatMoney } from "@/lib/money";
 
@@ -139,13 +140,17 @@ export default function ProductListCartSidebar() {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  // Subtotal = sum of the unit prices shown × qty (same as cart/checkout)
-  const { display: cartTotals } = useOrderTotals({ cart, shippingRates: [] });
+  // The cart priced by the backend (saved shipping and coupon included), the
+  // same totals as the cart page; until it arrives, the frontend's subtotal
+  const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
+  const { totals: quoteTotals } = useCartQuote();
+  const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals ? (
     formatMoney(cartTotals.subtotal)
   ) : (
     <ProductPrice price={subtotal} inline={true} />
   );
+  const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) {
       return;
@@ -276,11 +281,23 @@ export default function ProductListCartSidebar() {
             {subtotalText}
           </span>
         </div>
+        {cartTotals && cartTotals.shipping.minor > 0 && (
+          <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
+            <span>Shipping:</span>
+            <span>{formatMoney(cartTotals.shipping)}</span>
+          </div>
+        )}
+        {cartTotals && cartTotals.discount.minor > 0 && (
+          <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
+            <span>Discount:</span>
+            <span>-{formatMoney(cartTotals.discount)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Grand total:</span>
           <span>
             {" "}
-            {subtotalText}
+            {totalText}
           </span>
         </div>
       </div>

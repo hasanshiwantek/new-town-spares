@@ -1,6 +1,7 @@
 "use client";
 import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
 import { formatMoney } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
@@ -48,9 +49,11 @@ const Navbar: React.FC = () => {
     (sum: number, item: any) => sum + (item?.quantity || 0),
     0,
   );
-  // Same totals as the cart page/checkout: unit price converted once, × qty,
-  // so the subtotal equals the sum of the prices shown (null while rates load)
-  const { display: cartTotals } = useOrderTotals({ cart, shippingRates: [] });
+  // The cart priced by the backend (saved shipping and coupon included), the
+  // same totals as the cart page; until it arrives, the frontend's subtotal
+  const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
+  const { totals: quoteTotals } = useCartQuote();
+  const cartTotals = quoteTotals ?? localTotals;
   const auth = useAppSelector((state: RootState) => state?.auth);
   const currencyRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
@@ -568,6 +571,18 @@ const Navbar: React.FC = () => {
                                 )}
                               </span>
                             </div>
+                            {cartTotals && cartTotals.shipping.minor > 0 && (
+                              <div className="flex justify-between border-t border-gray-200 pt-3">
+                                <span>Shipping:</span>
+                                <span>{formatMoney(cartTotals.shipping)}</span>
+                              </div>
+                            )}
+                            {cartTotals && cartTotals.discount.minor > 0 && (
+                              <div className="flex justify-between border-t border-gray-200 pt-3">
+                                <span>Discount:</span>
+                                <span>-{formatMoney(cartTotals.discount)}</span>
+                              </div>
+                            )}
                             <div className="flex justify-between border-t border-gray-200 pt-3">
                               <span>Grand total:</span>
                               <span>
