@@ -6,7 +6,7 @@ import { useReactToPrint } from "react-to-print";
 import navlogo from "@/assets/navlogoreal.webp";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchLogos } from "@/redux/slices/homeSlice";
-import { formatMoney, money } from "@/lib/money";
+import { formatAmount } from "@/lib/money";
 
 // ── Types (same as before) ───────────────────────────────────────────────────
 
@@ -180,7 +180,7 @@ export const Invoice = React.forwardRef<HTMLDivElement, InvoiceProps>(
 
     const { currency, symbol } = orderCurrency(order);
     const fmt = (val: string | number) =>
-      formatMoney(money(val, currency), symbol);
+      formatAmount(Number(val) || 0, currency, symbol);
 
     const subtotal = order.products.reduce((sum: any, p: any) => {
       const { quantity, price } = orderLine(order, p);
