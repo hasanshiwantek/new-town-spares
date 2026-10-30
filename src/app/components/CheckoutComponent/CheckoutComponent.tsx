@@ -867,7 +867,10 @@ const CheckoutForm = () => {
 
       // ✅ Single address: the same pricing fields order-calculate got, so
       // the backend can re-price the order and check it against `amount`
-      const priced = buildCalculateRequest(calcInput, null);
+      const priced = buildCalculateRequest(calcInput, {
+        id: orderCurrency?.id,
+        exchangeRate: orderCurrency?.exchangeRate,
+      });
       return {
         userType: token ? null : "guest",
         deviceType: getDeviceType(),
@@ -896,13 +899,10 @@ const CheckoutForm = () => {
         paymentIntentId: data.paymentIntentId ?? "",
         // Minor units of the selected currency — the amount Stripe charged
         amount: chargeTotalMinor,
-        selectedCurrency: orderCurrency,
+        selectedCurrency: priced.selectedCurrency,
         isMultiAddress: false,
         method_id: priced.method_id,
         service_type: priced.service_type,
-        // The rate the backend priced the order with
-        shippingData:
-          quote?.matchedRate ?? toChargeRate(calcInput.shippingRate),
         destination: priced.destination,
         coupon: priced.coupon,
         manualDiscount: priced.manualDiscount,
@@ -918,7 +918,6 @@ const CheckoutForm = () => {
       chargeManualDiscount,
       chargeTotalMinor,
       calcInput,
-      quote,
       toChargeRate,
       toChargeMajor,
       ofRate,
