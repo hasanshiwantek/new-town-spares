@@ -22,7 +22,7 @@ import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 import ProductPrice from "../productprice/ProductPrice";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney } from "@/lib/money";
+import { formatExact, formatMoney } from "@/lib/money";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -146,7 +146,7 @@ export default function ProductListCartSidebar() {
   const { totals: quoteTotals } = useCartQuote();
   const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals ? (
-    formatMoney(cartTotals.subtotal)
+    formatExact(cartTotals.exact.subtotal)
   ) : (
     <ProductPrice price={subtotal} inline={true} />
   );
@@ -284,13 +284,13 @@ export default function ProductListCartSidebar() {
         {cartTotals && cartTotals.shipping.minor > 0 && (
           <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
             <span>Shipping:</span>
-            <span>{formatMoney(cartTotals.shipping)}</span>
+            <span>{formatExact(cartTotals.exact.shipping)}</span>
           </div>
         )}
         {cartTotals && cartTotals.discount.minor > 0 && (
           <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
             <span>Discount:</span>
-            <span>-{formatMoney(cartTotals.discount)}</span>
+            <span>-{formatExact(cartTotals.exact.discount)}</span>
           </div>
         )}
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">

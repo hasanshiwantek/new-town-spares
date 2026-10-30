@@ -1,7 +1,6 @@
-import type { OrderTotals } from "@/hooks/useFormatPrice";
+import { totalsFromExact, type OrderTotals } from "@/hooks/useFormatPrice";
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import axiosInstance from "@/lib/axiosInstance";
-import { Money, money, sum } from "@/lib/money";
 import { RootState } from "@/redux/store";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -71,35 +70,32 @@ const toQuote = (
   cart: CalculateInput["cart"],
 ): OrderQuote => {
   const currency = data.currency.code.toUpperCase();
-  const of = (amount: number | undefined) => money(amount ?? 0, currency);
   const rate = Number(data.currency.exchangeRate) || 0;
 
-  const lines: Money[] = cart.map((item) => {
+  // Lines, discounts and shipping as the backend sends them (exact, shown
+  // with the dashboard's decimal places); the total is its `amount` exactly
+  const lines = cart.map((item) => {
     const line = data.items?.find(
       (i) => String(i.productId) === String(item.id),
     );
-    return of(line?.lineTotal);
+    return Number(line?.lineTotal) || 0;
   });
-  const couponDiscount = of(data.convertedDiscount);
-  const manualDiscount = of(
-    data.convertedManualDiscount ?? (data.manualDiscount ?? 0) * rate,
-  );
 
   return {
-    totals: {
+    totals: totalsFromExact(
       currency,
-      lines,
-      subtotal: sum(currency, lines),
-      couponDiscount,
-      manualDiscount,
-      discount: {
-        minor: couponDiscount.minor + manualDiscount.minor,
-        currency,
+      {
+        lines,
+        couponDiscount: Number(data.convertedDiscount) || 0,
+        manualDiscount:
+          Number(
+            data.convertedManualDiscount ?? (data.manualDiscount ?? 0) * rate,
+          ) || 0,
+        shipping: Number(data.shippingCost) || 0,
+        tax: Number(data.convertedTax) || 0,
       },
-      shipping: of(data.shippingCost),
-      tax: of(data.convertedTax),
-      total: { minor: Math.round(Number(data.amount) || 0), currency },
-    },
+      Number(data.amount) || 0,
+    ),
     matchedRate: data.matchedRate ?? null,
     raw: data,
   };
