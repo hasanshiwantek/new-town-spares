@@ -3,7 +3,7 @@ import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney } from "@/lib/money";
+import { formatExact, formatMoney } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
 import { clampQty, getQtyError } from "@/lib/utils";
@@ -562,7 +562,7 @@ const Navbar: React.FC = () => {
                               <span>Subtotal:</span>
                               <span>
                                 {cartTotals ? (
-                                  formatMoney(cartTotals.subtotal)
+                                  formatExact(cartTotals.exact.subtotal)
                                 ) : (
                                   <ProductPrice
                                     price={subtotal}
@@ -574,13 +574,13 @@ const Navbar: React.FC = () => {
                             {cartTotals && cartTotals.shipping.minor > 0 && (
                               <div className="flex justify-between border-t border-gray-200 pt-3">
                                 <span>Shipping:</span>
-                                <span>{formatMoney(cartTotals.shipping)}</span>
+                                <span>{formatExact(cartTotals.exact.shipping)}</span>
                               </div>
                             )}
                             {cartTotals && cartTotals.discount.minor > 0 && (
                               <div className="flex justify-between border-t border-gray-200 pt-3">
                                 <span>Discount:</span>
-                                <span>-{formatMoney(cartTotals.discount)}</span>
+                                <span>-{formatExact(cartTotals.exact.discount)}</span>
                               </div>
                             )}
                             <div className="flex justify-between border-t border-gray-200 pt-3">
