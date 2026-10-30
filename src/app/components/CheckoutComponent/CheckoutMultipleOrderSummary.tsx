@@ -8,7 +8,7 @@ import ChargeCurrencyNote from "../productprice/ChargeCurrencyNote";
 import ProductPrice from "../productprice/ProductPrice";
 import EditCartShipModal from "./EditCartShipModal";
 import { useFormatLine, type OrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney, Money } from "@/lib/money";
+import { Exact, formatShown, Money } from "@/lib/money";
 interface OrderSummaryProps {
   // Summary in the display currency; null until exchange rates are known
   totals: OrderTotals | null;
@@ -52,9 +52,9 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
   const formatLine = useFormatLine();
   // Shows a line from `totals` so every line and the total add up exactly;
   // falls back to converting the USD amount while rates are loading.
-  const amount = (pick: (t: OrderTotals) => Money, usd: number) =>
+  const amount = (pick: (t: OrderTotals) => Money | Exact, usd: number) =>
     totals ? (
-      formatMoney(pick(totals))
+      formatShown(pick(totals))
     ) : (
       <ProductPrice price={usd} inline={true} />
     );
@@ -321,7 +321,7 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="flex justify-between text-[#333333]">
             <span>Subtotal</span>
             <span>
-              {amount((t) => t.subtotal, subtotal)}
+              {amount((t) => t.exact.subtotal, subtotal)}
             </span>
           </div>
           {appliedCoupon && discountAmount > 0 && (
@@ -348,7 +348,7 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                 </span>
                 <span className="font-medium">
                   {" "}
-                  -{amount((t) => t.couponDiscount, discountAmount)}
+                  -{amount((t) => t.exact.couponDiscount, discountAmount)}
                 </span>
               </div>
               {discountOpen && (
@@ -361,7 +361,7 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                     off ({appliedCoupon.couponCode.toUpperCase()})
                   </span>
                   <span className="font-medium">
-                    -{amount((t) => t.couponDiscount, discountAmount)}
+                    -{amount((t) => t.exact.couponDiscount, discountAmount)}
                   </span>
                 </div>
               )}
@@ -374,13 +374,13 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
                 ? spinner
                 : (totals ? totals.shipping.minor === 0 : shipping === 0)
                   ? "Free"
-                  : amount((t) => t.shipping, shipping)}
+                  : amount((t) => t.exact.shipping, shipping)}
             </span>
           </div>
           <div className="flex justify-between text-[#333333]">
             <span>Tax</span>
             <span>
-              {amount((t) => t.tax, tax)}
+              {amount((t) => t.exact.tax, tax)}
             </span>
           </div>
         </div>

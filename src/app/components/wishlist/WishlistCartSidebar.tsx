@@ -2,7 +2,7 @@
 
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useFormatPrice, useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney } from "@/lib/money";
+import { formatExact, formatMoney } from "@/lib/money";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -49,7 +49,7 @@ export default function WishlistCartSidebar() {
   const { totals: quoteTotals } = useCartQuote();
   const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals
-    ? formatMoney(cartTotals.subtotal)
+    ? formatExact(cartTotals.exact.subtotal)
     : formatPrice(subtotal);
   const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
 
@@ -241,13 +241,13 @@ export default function WishlistCartSidebar() {
         {cartTotals && cartTotals.shipping.minor > 0 && (
           <div className="flex justify-between py-[7px]">
             <span>Shipping:</span>
-            <span>{formatMoney(cartTotals.shipping)}</span>
+            <span>{formatExact(cartTotals.exact.shipping)}</span>
           </div>
         )}
         {cartTotals && cartTotals.discount.minor > 0 && (
           <div className="flex justify-between py-[7px]">
             <span>Discount:</span>
-            <span>-{formatMoney(cartTotals.discount)}</span>
+            <span>-{formatExact(cartTotals.exact.discount)}</span>
           </div>
         )}
         <div className="flex justify-between py-[7px]">

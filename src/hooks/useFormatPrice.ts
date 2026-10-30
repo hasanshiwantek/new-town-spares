@@ -1,17 +1,14 @@
 import { ENV_CONFIG } from "@/config/envConfig";
 import { useAppSelector } from "@/hooks/useReduxHooks";
 import {
+  Exact,
   Money,
   RateLookup,
-  add,
-  atLeastZero,
   convert,
-  formatMoney,
+  convertExact,
+  formatExact,
   money,
   rateMoney,
-  subtract,
-  sum,
-  times,
   toMajor,
 } from "@/lib/money";
 import { RootState } from "@/redux/store";
@@ -67,48 +64,68 @@ export function useMoney() {
     [usdRate],
   );
 
-  return { display, usdRate, toDisplay, ofRate, toUsd };
+  // Any amount → display currency at full precision, for showing prices
+  // (null if a rate is missing)
+  const toDisplayExact = useCallback(
+    (amount: number | string | null | undefined, from = "USD") =>
+      convertExact(amount, from, display, usdRate),
+    [display, usdRate],
+  );
+
+  return { display, usdRate, toDisplay, toDisplayExact, ofRate, toUsd };
 }
 
 // All product/order prices in the app are stored in USD.
-// Returns a formatter that converts a USD amount to the display currency.
+// Returns a formatter that converts a USD amount to the display currency,
+// shown with the dashboard's decimal places (not rounded to the penny).
 export function useFormatPrice() {
-  const { toDisplay } = useMoney();
+  const { toDisplayExact } = useMoney();
 
   return useCallback(
-    (usdAmount: number | string | null | undefined) => {
-      const usd = money(usdAmount, "USD");
-      return formatMoney(toDisplay(usd) ?? usd);
-    },
-    [toDisplay],
+    (usdAmount: number | string | null | undefined) =>
+      formatExact(
+        toDisplayExact(usdAmount) ?? {
+          amount: Number(usdAmount || 0),
+          currency: "USD",
+        },
+      ),
+    [toDisplayExact],
   );
 }
 
-// Formats a cart line (USD unit price × qty) rounded the same way as the order
-// totals: the unit price is converted once, then multiplied.
+// Formats a cart line (USD unit price × qty) the same way as the order
+// totals: the exact unit price × qty.
 export function useFormatLine() {
-  const { toDisplay } = useMoney();
+  const { toDisplayExact } = useMoney();
 
   return useCallback(
     (unitUsd: number | string | null | undefined, qty: number) => {
-      const unitPrice = money(unitUsd, "USD");
-      return formatMoney(times(toDisplay(unitPrice) ?? unitPrice, qty || 1));
+      const unit = toDisplayExact(unitUsd) ?? {
+        amount: Number(unitUsd || 0),
+        currency: "USD",
+      };
+      return formatExact({ ...unit, amount: unit.amount * (qty || 1) });
     },
-    [toDisplay],
+    [toDisplayExact],
   );
 }
 
 // Formats a shipping rate in the display currency, whatever currency it was
 // quoted in (API rates: selected currency; frontend-built rates: USD).
 export function useFormatRate() {
-  const { toDisplay, ofRate } = useMoney();
+  const { toDisplayExact, ofRate } = useMoney();
 
   return useCallback(
     (rate: any) => {
       const m = ofRate(rate);
-      return formatMoney(toDisplay(m) ?? m);
+      return formatExact(
+        toDisplayExact(toMajor(m), m.currency) ?? {
+          amount: toMajor(m),
+          currency: m.currency,
+        },
+      );
     },
-    [toDisplay, ofRate],
+    [toDisplayExact, ofRate],
   );
 }
 
@@ -134,6 +151,9 @@ export function useCartRate() {
   );
 }
 
+// Each amount as charged (Money: whole minor units, for payloads), plus
+// `exact`: the same amounts at full precision, as the summary shows them.
+// `total` is the exact amounts added up, then rounded once to the minor unit.
 export type OrderTotals = {
   currency: string;
   lines: Money[]; // one per cart line, in cart order
@@ -144,6 +164,58 @@ export type OrderTotals = {
   shipping: Money;
   tax: Money;
   total: Money;
+  exact: {
+    lines: Exact[];
+    subtotal: Exact;
+    manualDiscount: Exact;
+    couponDiscount: Exact;
+    discount: Exact;
+    shipping: Exact;
+    tax: Exact;
+  };
+};
+
+// Builds OrderTotals from exact major-unit amounts in `currency`
+export const totalsFromExact = (
+  currency: string,
+  a: {
+    lines: number[];
+    manualDiscount: number;
+    couponDiscount: number;
+    shipping: number;
+    tax: number;
+  },
+  // The charged total when the backend already worked it out
+  totalMinor?: number,
+): OrderTotals => {
+  const exact = (amount: number): Exact => ({ amount, currency });
+  const subtotal = a.lines.reduce((s, l) => s + l, 0);
+  const discount = a.manualDiscount + a.couponDiscount;
+  const total = Math.max(subtotal - discount + a.shipping + a.tax, 0);
+
+  return {
+    currency,
+    lines: a.lines.map((l) => money(l, currency)),
+    subtotal: money(subtotal, currency),
+    manualDiscount: money(a.manualDiscount, currency),
+    couponDiscount: money(a.couponDiscount, currency),
+    discount: money(discount, currency),
+    shipping: money(a.shipping, currency),
+    tax: money(a.tax, currency),
+    total:
+      totalMinor === undefined
+        ? money(total, currency)
+        : { minor: Math.round(totalMinor), currency },
+    exact: {
+      lines: a.lines.map(exact),
+      subtotal: exact(subtotal),
+      manualDiscount: exact(a.manualDiscount),
+      couponDiscount: exact(a.couponDiscount),
+      discount: exact(discount),
+      shipping: exact(a.shipping),
+      tax: exact(a.tax),
+    },
+  };
 };
 
 type OrderTotalsInput = {
@@ -154,46 +226,44 @@ type OrderTotalsInput = {
   taxUsd?: number;
 };
 
-// Builds the order summary in one currency, in whole minor units. Each line is
-// converted and rounded once, and every subtotal/total is the sum of those
-// same rounded lines, so the summary always adds up and matches the charge.
+// Builds the order summary in one currency, the way the backend does
+// (order-calculate): every amount converted at full precision, then the
+// total rounded once to the minor unit.
 const buildTotals = (
   input: OrderTotalsInput,
   currency: string,
-  conv: (m: Money) => Money | null,
+  conv: (amount: unknown, from: string) => number | null,
   ofRate: (rate: any) => Money,
 ): OrderTotals | null => {
-  const lines: Money[] = [];
+  const lines: number[] = [];
   for (const item of input.cart) {
-    // Convert the unit price, then × qty — matches the unit price shown
-    const unitPrice = conv(money(Number(item.price) || 0, "USD"));
-    if (!unitPrice) return null;
-    lines.push(times(unitPrice, Number(item.quantity) || 1));
+    // The exact unit price × qty — matches the line shown
+    const unitPrice = conv(Number(item.price) || 0, "USD");
+    if (unitPrice === null) return null;
+    lines.push(unitPrice * (Number(item.quantity) || 1));
   }
-  const manual = conv(money(input.manualDiscountUsd, "USD"));
-  const coupon = conv(money(input.couponDiscountUsd, "USD"));
-  const tax = conv(money(input.taxUsd, "USD"));
-  const shippingParts = input.shippingRates.map((r) => conv(ofRate(r)));
-  if (!manual || !coupon || !tax || shippingParts.some((p) => !p)) return null;
+  const manual = conv(input.manualDiscountUsd, "USD");
+  const coupon = conv(input.couponDiscountUsd, "USD");
+  const tax = conv(input.taxUsd, "USD");
+  const shippingParts = input.shippingRates.map((r) => {
+    const m = ofRate(r);
+    return conv(toMajor(m), m.currency);
+  });
+  if (
+    manual === null ||
+    coupon === null ||
+    tax === null ||
+    shippingParts.some((p) => p === null)
+  )
+    return null;
 
-  const subtotal = sum(currency, lines);
-  const discount = add(manual, coupon);
-  const shipping = sum(currency, shippingParts as Money[]);
-  const total = atLeastZero(
-    add(add(subtract(subtotal, discount), shipping), tax),
-  );
-
-  return {
-    currency,
+  return totalsFromExact(currency, {
     lines,
-    subtotal,
     manualDiscount: manual,
     couponDiscount: coupon,
-    discount,
-    shipping,
+    shipping: (shippingParts as number[]).reduce((s, p) => s + p, 0),
     tax,
-    total,
-  };
+  });
 };
 
 // Order totals for display, plus the same totals in the currency Stripe
@@ -208,7 +278,9 @@ export function useOrderTotals(input: OrderTotalsInput) {
       buildTotals(
         input,
         currency,
-        (m) => convert(m, currency, usdRate),
+        (amount, from) =>
+          convertExact(amount as number, from, currency, usdRate)?.amount ??
+          null,
         ofRate,
       );
     const displayTotals = build(display);

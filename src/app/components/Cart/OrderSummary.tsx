@@ -15,7 +15,7 @@ import {
   type OrderTotals,
 } from "@/hooks/useFormatPrice";
 import { useCartQuote } from "@/hooks/useCartQuote";
-import { formatMoney, Money } from "@/lib/money";
+import { Exact, formatShown, Money } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
@@ -207,9 +207,9 @@ const OrderSummary = () => {
     requote();
   }, [selectedCurrency]);
 
-  const amount = (pick: (t: OrderTotals) => Money, usd: number) =>
+  const amount = (pick: (t: OrderTotals) => Money | Exact, usd: number) =>
     totals ? (
-      formatMoney(pick(totals))
+      formatShown(pick(totals))
     ) : (
       <ProductPrice price={usd} inline={true} />
     );
@@ -349,7 +349,7 @@ const OrderSummary = () => {
             Subtotal:
           </span>
           <span className="text-[14px] text-[#333333]">
-            {amount((t) => t.subtotal, subtotal)}
+            {amount((t) => t.exact.subtotal, subtotal)}
           </span>
         </div>
 
@@ -632,7 +632,7 @@ const OrderSummary = () => {
                 Manual Discount:
               </span>
               <span className="text-[14px] font-medium">
-                -{amount((t) => t.manualDiscount, manualDiscount)}
+                -{amount((t) => t.exact.manualDiscount, manualDiscount)}
               </span>
             </div>
           </>
@@ -648,7 +648,7 @@ const OrderSummary = () => {
           {/* If coupon already applied, show it here */}
           {appliedCoupon ? (
             <span className="text-[14px] font-medium">
-              -{amount((t) => t.couponDiscount, discountAmount)}
+              -{amount((t) => t.exact.couponDiscount, discountAmount)}
             </span>
           ) : (
             <span

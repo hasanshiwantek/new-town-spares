@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import React, { useMemo } from "react";
 import ProductPrice from "../productprice/ProductPrice";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney } from "@/lib/money";
+import { formatExact } from "@/lib/money";
 
 interface AddToCartModalProps {
   isOpen: boolean;
@@ -107,7 +107,7 @@ const AddToCartModal: React.FC<AddToCartModalProps> = ({
               <p className="text-[20px] font-semibold">
                 {cartTotals ? (
                   <span className="text-[#FF482E] !text-[20px]">
-                    {formatMoney(cartTotals.subtotal)}
+                    {formatExact(cartTotals.exact.subtotal)}
                   </span>
                 ) : (
                   <ProductPrice
