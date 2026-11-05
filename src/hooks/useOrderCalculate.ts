@@ -28,7 +28,7 @@ type CalculateResponse = {
   coupon?: { id?: number; couponCode?: string; discountAmount?: number } | null;
   manualDiscount?: number;
   convertedManualDiscount?: number;
-  convertedDiscount?: number;
+  convertedCouponDiscount?: number;
   shippingCost?: number;
   convertedTax?: number;
   matchedRate?: any;
@@ -86,7 +86,7 @@ const toQuote = (
       currency,
       {
         lines,
-        couponDiscount: Number(data.convertedDiscount) || 0,
+        couponDiscount: Number(data.convertedCouponDiscount) || 0,
         manualDiscount:
           Number(
             data.convertedManualDiscount ?? (data.manualDiscount ?? 0) * rate,
