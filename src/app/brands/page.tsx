@@ -1,11 +1,5 @@
-"use client";
-
-import { useEffect, useMemo } from "react";
-import {  useSelector } from "react-redux";
+"use client"; 
 import Link from "next/link";
-import { getBrands } from "@/redux/slices/homeSlice";
-import { GroupedBrands } from "./type";
-import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { useBrandsContainer } from "./container";
 
 export default function BrandsPage() {
