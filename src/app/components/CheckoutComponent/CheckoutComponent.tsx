@@ -494,7 +494,9 @@ const CheckoutForm = () => {
   } = useOrderCalculate(calcInput, serverPricing);
 
   // Totals in the charge currency, and as the summary shows them
-  const chargeTotals = serverPricing ? (quote?.totals ?? null) : orderTotals.charge;
+  const chargeTotals = serverPricing
+    ? (quote?.totals ?? null)
+    : orderTotals.charge;
   const displayTotals =
     serverPricing && displayCurrency === chargeCurrency
       ? (quote?.totals ?? null)
@@ -952,7 +954,10 @@ const CheckoutForm = () => {
         payment_method_id: paymentMethodId,
         // Minor units (cents/pence) of `currency` — the exact total shown
         amount: chargeTotalMinor,
-        currency: chargeCurrency,
+        selectedCurrency: {
+          id: orderCurrency?.id,
+          exchangeRate: orderCurrency?.exchangeRate,
+        },
         exchangeRate: Number(orderCurrency?.exchangeRate ?? 1),
         // Major units of `currency`, same as the place-order payload
         shippingCost: chargeShipping,

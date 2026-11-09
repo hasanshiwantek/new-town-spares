@@ -18,9 +18,8 @@ import { useCallback, useMemo } from "react";
 // the selected currency's rate is loading or failed to load: a missing rate
 // must never be treated as 1, or GBP amounts are shown/charged at USD values.
 function useRates() {
-  const { selectedCurrency, currencies, status } = useAppSelector(
-    (state: RootState) => state.currency,
-  );
+  const { selectedCurrency, currencies, status, selectedCurrencyPayload } =
+    useAppSelector((state: RootState) => state.currency);
 
   const usdRate: RateLookup = useCallback(
     (c: string) =>
@@ -30,6 +29,10 @@ function useRates() {
 
   return {
     selectedCurrency,
+    selectedCurrencyPayload: {
+      id: selectedCurrencyPayload?.id,
+      exchangeRate: selectedCurrencyPayload?.exchangeRate,
+    },
     usdRate,
     status,
     ready: !!usdRate(selectedCurrency),
@@ -307,7 +310,8 @@ export function useOrderTotals(input: OrderTotalsInput) {
 // default currency may still replace the selected one) and the charge
 // currency's rate is known.
 export function useChargeCurrency() {
-  const { selectedCurrency, usdRate, status } = useRates();
+  const { selectedCurrency, usdRate, status, selectedCurrencyPayload } =
+    useRates();
   const currency = ENV_CONFIG.chargeInSelectedCurrency
     ? selectedCurrency
     : "USD";
@@ -336,7 +340,13 @@ export function useChargeCurrency() {
     [currency, usdRate],
   );
 
-  return { currency, notReadyMessage, toChargeMinor, toChargeMajor };
+  return {
+    currency,
+    notReadyMessage,
+    toChargeMinor,
+    toChargeMajor,
+    selectedCurrencyPayload,
+  };
 }
 
 export const PRODUCT_SHIPPING_TYPES = ["fixed_shipping", "free_shipping"];
