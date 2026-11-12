@@ -1,6 +1,7 @@
 "use client";
 import navlogo from "@/assets/navlogoreal.webp";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
+import TotalSpinner from "@/app/components/Cart/TotalSpinner";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
@@ -52,7 +53,7 @@ const Navbar: React.FC = () => {
   // The cart priced by the backend (saved shipping and coupon included), the
   // same totals as the cart page; until it arrives, the frontend's subtotal
   const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
-  const { totals: quoteTotals } = useCartQuote();
+  const { totals: quoteTotals, loading: quoteLoading } = useCartQuote();
   const cartTotals = quoteTotals ?? localTotals;
   const auth = useAppSelector((state: RootState) => state?.auth);
   const currencyRef = useRef<HTMLDivElement | null>(null);
@@ -592,7 +593,9 @@ const Navbar: React.FC = () => {
                             <div className="flex justify-between border-t border-gray-200 pt-3">
                               <span>Grand total:</span>
                               <span>
-                                {cartTotals ? (
+                                {quoteLoading ? (
+                                  <TotalSpinner />
+                                ) : cartTotals ? (
                                   formatMoney(cartTotals.total)
                                 ) : (
                                   <ProductPrice
