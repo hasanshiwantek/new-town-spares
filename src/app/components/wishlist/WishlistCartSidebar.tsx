@@ -1,5 +1,6 @@
 "use client";
 
+import TotalSpinner from "@/app/components/Cart/TotalSpinner";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useFormatPrice, useOrderTotals } from "@/hooks/useFormatPrice";
 import { formatExact, formatMoney } from "@/lib/money";
@@ -46,7 +47,7 @@ export default function WishlistCartSidebar() {
   // The cart priced by the backend (saved shipping and coupon included), the
   // same totals as the cart page; until it arrives, the frontend's subtotal
   const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
-  const { totals: quoteTotals } = useCartQuote();
+  const { totals: quoteTotals, loading: quoteLoading } = useCartQuote();
   const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals
     ? formatExact(cartTotals.exact.subtotal)
@@ -252,7 +253,7 @@ export default function WishlistCartSidebar() {
         )}
         <div className="flex justify-between py-[7px]">
           <span>Grand total:</span>
-          <span>{totalText}</span>
+          <span>{quoteLoading ? <TotalSpinner /> : totalText}</span>
         </div>
       </div>
 
