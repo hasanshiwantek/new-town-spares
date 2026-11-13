@@ -954,7 +954,7 @@ const CheckoutForm = () => {
         id: orderCurrency?.id,
         exchangeRate: orderCurrency?.exchangeRate,
       });
-      const stripePayload = {
+         const stripePayload = {
         payment_method_id: paymentMethodId,
         // Minor units (cents/pence) of `currency` — the exact total shown
         amount: chargeTotalMinor,
@@ -971,8 +971,10 @@ const CheckoutForm = () => {
           quantity: item.quantity || 1,
         })),
         method_id: priced.method_id,
+        service_type: priced.service_type,
         coupon: priced.coupon,
         destination: priced.destination,
+        manualDiscount: priced.manualDiscount,
       };
 
       const response = await axiosInstance.post(
