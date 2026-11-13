@@ -1632,7 +1632,7 @@ const CheckoutForm = () => {
 
   // ✅ Save to localStorage on form changes (debounced)
   const watchedValues = watch();
-  console.log(" watchedValues.shippingMethod", watchedValues.shippingMethod);
+
   useEffect(() => {
     // ✅ Restore complete hone tak save mat karo
     if (!isRestored.current) return;
