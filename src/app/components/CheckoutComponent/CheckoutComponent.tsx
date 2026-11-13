@@ -950,6 +950,10 @@ const CheckoutForm = () => {
 
   const handleStripeCharge = useCallback(
     async (paymentMethodId: string) => {
+      const priced = buildCalculateRequest(calcInput, {
+        id: orderCurrency?.id,
+        exchangeRate: orderCurrency?.exchangeRate,
+      });
       const stripePayload = {
         payment_method_id: paymentMethodId,
         // Minor units (cents/pence) of `currency` — the exact total shown
@@ -966,6 +970,9 @@ const CheckoutForm = () => {
           product_id: item.id,
           quantity: item.quantity || 1,
         })),
+        method_id: priced.method_id,
+        coupon: priced.coupon,
+        destination: priced.destination,
       };
 
       const response = await axiosInstance.post(
@@ -1622,8 +1629,10 @@ const CheckoutForm = () => {
 
     restoreData();
   }, [dispatch, setValue, cart]);
+
   // ✅ Save to localStorage on form changes (debounced)
   const watchedValues = watch();
+  console.log(" watchedValues.shippingMethod", watchedValues.shippingMethod);
   useEffect(() => {
     // ✅ Restore complete hone tak save mat karo
     if (!isRestored.current) return;
