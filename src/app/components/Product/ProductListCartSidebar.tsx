@@ -23,7 +23,7 @@ import ProductPrice from "../productprice/ProductPrice";
 import TotalSpinner from "@/app/components/Cart/TotalSpinner";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatExact, formatMoney } from "@/lib/money";
+import { formatExact } from "@/lib/money";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -151,7 +151,7 @@ export default function ProductListCartSidebar() {
   ) : (
     <ProductPrice price={subtotal} inline={true} />
   );
-  const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
+  const totalText = cartTotals ? formatExact(cartTotals.exact.total) : subtotalText;
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) {
       return;

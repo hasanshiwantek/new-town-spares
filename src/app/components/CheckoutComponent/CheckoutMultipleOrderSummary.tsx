@@ -390,7 +390,7 @@ const CheckoutMultipleOrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="flex justify-between items-center">
             <span className="text-[15px]">Total</span>
             <span className="text-[30px] font-bold leading-none text-[#FF482E]">
-              {shippingUpdating ? spinner : amount((t) => t.total, finalTotal)}
+              {shippingUpdating ? spinner : amount((t) => t.exact.total, finalTotal)}
             </span>
           </div>
           <ChargeCurrencyNote usdTotal={finalTotal} />

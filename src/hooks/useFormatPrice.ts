@@ -175,6 +175,7 @@ export type OrderTotals = {
     discount: Exact;
     shipping: Exact;
     tax: Exact;
+    total: Exact; // not rounded to the minor unit, for display
   };
 };
 
@@ -190,6 +191,8 @@ export const totalsFromExact = (
   },
   // The charged total when the backend already worked it out
   totalMinor?: number,
+  // The backend's unrounded total (order-calculate `amountDecimal`), shown
+  totalExact?: number,
 ): OrderTotals => {
   const exact = (amount: number): Exact => ({ amount, currency });
   const subtotal = a.lines.reduce((s, l) => s + l, 0);
@@ -217,6 +220,12 @@ export const totalsFromExact = (
       discount: exact(discount),
       shipping: exact(a.shipping),
       tax: exact(a.tax),
+      total:
+        totalExact !== undefined
+          ? exact(totalExact)
+          : totalMinor === undefined
+            ? exact(total)
+            : exact(toMajor({ minor: Math.round(totalMinor), currency })),
     },
   };
 };

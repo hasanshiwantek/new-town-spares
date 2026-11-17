@@ -6,7 +6,7 @@ import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { fetchCategories } from "@/lib/api/category";
-import { formatExact, formatMoney } from "@/lib/money";
+import { formatExact } from "@/lib/money";
 import { clampQty, getQtyError } from "@/lib/utils";
 import { customerLogout, logout } from "@/redux/slices/authSlice";
 import {
@@ -596,7 +596,7 @@ const Navbar: React.FC = () => {
                                 {quoteLoading ? (
                                   <TotalSpinner />
                                 ) : cartTotals ? (
-                                  formatMoney(cartTotals.total)
+                                  formatExact(cartTotals.exact.total)
                                 ) : (
                                   <ProductPrice
                                     price={subtotal}

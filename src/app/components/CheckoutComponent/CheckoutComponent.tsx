@@ -942,10 +942,36 @@ const CheckoutForm = () => {
         orderPayload,
       );
       const orderData = orderResponse.data?.data || orderResponse.data;
+
+      // Re-run order-calculate for the placed order, tagged with its id.
+      // The order is already placed, so a failure here must not fail checkout.
+      const placed = Array.isArray(orderData) ? orderData[0] : orderData;
+      const orderId = placed?.orderId ?? placed?.id;
+      if (orderId) {
+        const priced = buildCalculateRequest(calcInput, {
+          id: orderCurrency?.id,
+          exchangeRate: orderCurrency?.exchangeRate,
+        });
+        // Multi-address: the per-destination split, as place-order got it
+        const multi =
+          "destinations" in orderPayload
+            ? { isMultiAddress: true, destinations: orderPayload.destinations }
+            : {};
+        try {
+          await axiosInstance.post("web/orders/order-calculate", {
+            ...priced,
+            ...multi,
+            orderId,
+          });
+        } catch (err) {
+          console.error("order-calculate after place-order failed", err);
+        }
+      }
+
       dispatch(fetchShippingRate());
       return orderData || null;
     },
-    [buildOrderPayload],
+    [buildOrderPayload, calcInput, orderCurrency],
   );
 
   const handleStripeCharge = useCallback(
@@ -954,7 +980,7 @@ const CheckoutForm = () => {
         id: orderCurrency?.id,
         exchangeRate: orderCurrency?.exchangeRate,
       });
-         const stripePayload = {
+      const stripePayload = {
         payment_method_id: paymentMethodId,
         // Minor units (cents/pence) of `currency` — the exact total shown
         amount: chargeTotalMinor,
@@ -976,6 +1002,8 @@ const CheckoutForm = () => {
         destination: priced.destination,
         manualDiscount: priced.manualDiscount,
       };
+
+      console.log({calcInput, priced, stripePayload });
 
       const response = await axiosInstance.post(
         "web/stripe/pay",
