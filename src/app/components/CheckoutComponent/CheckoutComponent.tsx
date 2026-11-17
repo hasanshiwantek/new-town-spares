@@ -946,7 +946,7 @@ const CheckoutForm = () => {
       // Re-run order-calculate for the placed order, tagged with its id.
       // The order is already placed, so a failure here must not fail checkout.
       const placed = Array.isArray(orderData) ? orderData[0] : orderData;
-      const orderId = placed?.orderId ?? placed?.id;
+      const orderId = placed?.orderNumber;
       if (orderId) {
         const priced = buildCalculateRequest(calcInput, {
           id: orderCurrency?.id,
