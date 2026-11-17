@@ -3,7 +3,7 @@
 import TotalSpinner from "@/app/components/Cart/TotalSpinner";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useFormatPrice, useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatExact, formatMoney } from "@/lib/money";
+import { formatExact } from "@/lib/money";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -52,7 +52,7 @@ export default function WishlistCartSidebar() {
   const subtotalText = cartTotals
     ? formatExact(cartTotals.exact.subtotal)
     : formatPrice(subtotal);
-  const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
+  const totalText = cartTotals ? formatExact(cartTotals.exact.total) : subtotalText;
 
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) return;

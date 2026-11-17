@@ -719,7 +719,7 @@ const OrderSummary = () => {
                 className="inline-block h-6 w-6 align-middle rounded-full border-[3px] border-gray-300 border-t-orange-500 animate-spin"
               />
             ) : (
-              amount((t) => t.total, finalTotal)
+              amount((t) => t.exact.total, finalTotal)
             )}
           </span>
         </div>
