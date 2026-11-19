@@ -120,6 +120,7 @@ interface CheckoutFormValues {
   shippingMethod: string;
   orderComment: string;
   paymentMethod: string;
+  paymentMethodId?: string;
   addressLine1: string;
   addressLine2: string;
 
@@ -798,6 +799,7 @@ const CheckoutForm = () => {
           deviceType: getDeviceType(),
           ipAddress: ipAddress,
           email: data.email,
+          paymentMethodId: data.paymentMethodId ?? "",
           paymentMethod:
             data.paymentMethod == "credit_card"
               ? "Credit Card (Via Stripe)"
@@ -872,6 +874,7 @@ const CheckoutForm = () => {
         exchangeRate: orderCurrency?.exchangeRate,
       });
       return {
+        paymentMethodId: data.paymentMethodId ?? "",
         userType: token ? null : "guest",
         deviceType: getDeviceType(),
         ipAddress,
@@ -971,53 +974,6 @@ const CheckoutForm = () => {
     [buildOrderPayload, calcInput, orderCurrency],
   );
 
-  const handleStripeCharge = useCallback(
-    async (paymentMethodId: string) => {
-      const priced = buildCalculateRequest(calcInput, {
-        id: orderCurrency?.id,
-        exchangeRate: orderCurrency?.exchangeRate,
-      });
-      const stripePayload = {
-        payment_method_id: paymentMethodId,
-        // Minor units (cents/pence) of `currency` — the exact total shown
-        amount: chargeTotalMinor,
-        selectedCurrency: {
-          id: orderCurrency?.id,
-          exchangeRate: orderCurrency?.exchangeRate,
-        },
-        exchangeRate: Number(orderCurrency?.exchangeRate ?? 1),
-        // Major units of `currency`, same as the place-order payload
-        shippingCost: chargeShipping,
-        discountAmount: chargeCouponDiscount,
-        products: cart.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity || 1,
-        })),
-        method_id: priced.method_id,
-        service_type: priced.service_type,
-        coupon: priced.coupon,
-        destination: priced.destination,
-        manualDiscount: priced.manualDiscount,
-      };
-
-      console.log({ calcInput, priced, stripePayload });
-
-      const response = await axiosInstance.post(
-        "web/stripe/pay",
-        stripePayload,
-      );
-      return response.data?.payment_intent_id || null;
-    },
-    [
-      cart,
-      chargeCurrency,
-      chargeTotalMinor,
-      orderCurrency,
-      chargeShipping,
-      chargeCouponDiscount,
-    ],
-  );
-
   useEffect(() => {
     if (!paymentRequest) {
       return;
@@ -1032,14 +988,14 @@ const CheckoutForm = () => {
       }
 
       try {
-        const orderData = await placeOrder(pendingWalletForm);
-        const paymentIntentId = await handleStripeCharge(
-          event.paymentMethod.id,
-        );
-
-        if (!paymentIntentId) {
+        const orderData = await placeOrder({
+          ...pendingWalletForm,
+          paymentMethodId: event.paymentMethod.id,
+        });
+        const orderId = orderData?.[0]?.orderNumber;
+        if (!orderId) {
           event.complete("fail");
-          errorMessage("Failed to generate payment intent.");
+          errorMessage("Unable to identify the placed order.");
           setIsProcessing(false);
           return;
         }
@@ -1089,7 +1045,6 @@ const CheckoutForm = () => {
   }, [
     paymentRequest,
     pendingWalletForm,
-    handleStripeCharge,
     placeOrder,
     dispatch,
     router,
@@ -1371,16 +1326,16 @@ const CheckoutForm = () => {
         }
       }
 
-      const orderData = await placeOrder(data);
-      if (paymentMethodId) {
-        const paymentIntentId = await handleStripeCharge(paymentMethodId);
-        if (!paymentIntentId) {
-          errorMessage("Failed to generate payment intent.");
-          setIsProcessing(false);
-          return;
-        }
-      }
+      const orderData = await placeOrder({
+        ...data,
+        paymentMethodId: paymentMethodId ?? undefined,
+      });
       const orderNumber = orderData?.[0]?.orderNumber;
+      if (!orderNumber) {
+        errorMessage("Unable to identify the placed order.");
+        setIsProcessing(false);
+        return;
+      }
       const orderDetail = orderData?.[0];
       skipEmptyCartCheckRef.current = true;
 
