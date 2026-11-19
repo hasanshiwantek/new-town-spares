@@ -123,7 +123,6 @@ interface CheckoutFormValues {
   addressLine1: string;
   addressLine2: string;
 
-  paymentIntentId?: string | null;
   billingSame: boolean;
   billingFirstName: string;
   billingLastName: string;
@@ -791,7 +790,7 @@ const CheckoutForm = () => {
   };
 
   const buildOrderPayload = useCallback(
-    (data: CheckoutFormValues & { paymentIntentId?: string | null }) => {
+    (data: CheckoutFormValues) => {
       // ✅ Multi address mode
       if (isMultiAddress && destinations.length > 0) {
         return {
@@ -810,7 +809,6 @@ const CheckoutForm = () => {
           couponCode: appliedCoupon?.couponCode,
           shippingCost: chargeShipping,
           comments: data.orderComment || "",
-          paymentIntentId: data.paymentIntentId ?? "",
           // Minor units of `currency` — the amount Stripe charged
           amount: chargeTotalMinor,
           currency: chargeCurrency,
@@ -898,7 +896,6 @@ const CheckoutForm = () => {
             : data.paymentMethod == "apple_pay"
               ? "Apple Pay"
               : "Google Pay",
-        paymentIntentId: data.paymentIntentId ?? "",
         // Minor units of the selected currency — the amount Stripe charged
         amount: chargeTotalMinor,
         selectedCurrency: priced.selectedCurrency,
@@ -1003,7 +1000,7 @@ const CheckoutForm = () => {
         manualDiscount: priced.manualDiscount,
       };
 
-      console.log({calcInput, priced, stripePayload });
+      console.log({ calcInput, priced, stripePayload });
 
       const response = await axiosInstance.post(
         "web/stripe/pay",
@@ -1035,6 +1032,7 @@ const CheckoutForm = () => {
       }
 
       try {
+        const orderData = await placeOrder(pendingWalletForm);
         const paymentIntentId = await handleStripeCharge(
           event.paymentMethod.id,
         );
@@ -1045,11 +1043,6 @@ const CheckoutForm = () => {
           setIsProcessing(false);
           return;
         }
-
-        const orderData = await placeOrder({
-          ...pendingWalletForm,
-          paymentIntentId,
-        });
 
         event.complete("success");
 
@@ -1329,7 +1322,7 @@ const CheckoutForm = () => {
     setIsProcessing(true);
 
     try {
-      let paymentIntentId: string | null = null;
+      let paymentMethodId: string | null = null;
 
       if (requiresStripeCard) {
         if (!stripe || !elements) {
@@ -1374,17 +1367,19 @@ const CheckoutForm = () => {
         }
 
         if (paymentMethod) {
-          paymentIntentId = await handleStripeCharge(paymentMethod.id);
-
-          if (!paymentIntentId) {
-            errorMessage("Failed to generate payment intent.");
-            setIsProcessing(false);
-            return;
-          }
+          paymentMethodId = paymentMethod.id;
         }
       }
 
-      const orderData = await placeOrder({ ...data, paymentIntentId });
+      const orderData = await placeOrder(data);
+      if (paymentMethodId) {
+        const paymentIntentId = await handleStripeCharge(paymentMethodId);
+        if (!paymentIntentId) {
+          errorMessage("Failed to generate payment intent.");
+          setIsProcessing(false);
+          return;
+        }
+      }
       const orderNumber = orderData?.[0]?.orderNumber;
       const orderDetail = orderData?.[0];
       skipEmptyCartCheckRef.current = true;
