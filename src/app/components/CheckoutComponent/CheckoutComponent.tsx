@@ -980,7 +980,9 @@ const CheckoutForm = () => {
       return;
     }
 
-    const handlePaymentMethod = async (event: PaymentRequestPaymentMethodEvent) => {
+    const handlePaymentMethod = async (
+      event: PaymentRequestPaymentMethodEvent,
+    ) => {
       if (!pendingWalletForm) {
         event.complete("fail");
         errorMessage("Unable to process wallet payment. Please try again.");
@@ -1043,13 +1045,7 @@ const CheckoutForm = () => {
       paymentRequest.off("paymentmethod", handlePaymentMethod);
       paymentRequest.off("cancel", handleCancel);
     };
-  }, [
-    paymentRequest,
-    pendingWalletForm,
-    placeOrder,
-    dispatch,
-    router,
-  ]);
+  }, [paymentRequest, pendingWalletForm, placeOrder, dispatch, router]);
 
   // Step navigation handlers
   // const handleContinueToShipping = async () => {
