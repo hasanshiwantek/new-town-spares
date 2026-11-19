@@ -80,6 +80,7 @@ import ShippingStep, {
   getProductShippingRate,
   getSavedShippingRate,
 } from "./Shippingstep";
+import type { PaymentRequestPaymentMethodEvent } from "@stripe/stripe-js";
 
 export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
 function splitName(fullName: string) {
@@ -979,7 +980,7 @@ const CheckoutForm = () => {
       return;
     }
 
-    const handlePaymentMethod = async (event: any) => {
+    const handlePaymentMethod = async (event: PaymentRequestPaymentMethodEvent) => {
       if (!pendingWalletForm) {
         event.complete("fail");
         errorMessage("Unable to process wallet payment. Please try again.");
