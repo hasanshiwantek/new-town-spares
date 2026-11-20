@@ -152,7 +152,7 @@ const OrderProduct = () => {
                     <span className={labelClass}>Total</span>
                     <span className={valueClass}>
                       <ProductPrice
-                        price={item?.total_amount || 0}
+                        price={item?.amountDecimal || 0}
                         inline={true}
                         currency={
                           item?.currency_code || item?.currencyCode || "USD"

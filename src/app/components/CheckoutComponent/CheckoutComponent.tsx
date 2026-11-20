@@ -69,6 +69,7 @@ import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { fetchCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
+import type { PaymentRequestPaymentMethodEvent } from "@stripe/stripe-js";
 import BillingStep from "./Billingstep";
 import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
@@ -80,7 +81,6 @@ import ShippingStep, {
   getProductShippingRate,
   getSavedShippingRate,
 } from "./Shippingstep";
-import type { PaymentRequestPaymentMethodEvent } from "@stripe/stripe-js";
 
 export const CHECKOUT_STORAGE_KEY = "checkoutFormData";
 function splitName(fullName: string) {

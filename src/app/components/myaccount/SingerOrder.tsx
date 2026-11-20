@@ -8,7 +8,13 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import ProductPrice from "../productprice/ProductPrice";
-import { Invoice, orderCurrency, orderLine } from "./helpers/OrderDetails";
+import {
+  Invoice,
+  orderCurrency,
+  orderLine,
+  orderSubtotal,
+  orderTotal,
+} from "./helpers/OrderDetails";
 interface OrderData {
   id: number;
   orderNumber: string;
@@ -170,13 +176,16 @@ const SingleOrder = () => {
     couponCode: order?.couponCode,
     discountAmount: Number(order?.discountAmount),
   };
-  const total = parseFloat(order.totalAmount);
+  const total = orderTotal(order);
   // Amounts are shown in the order's own currency, not converted
   const currencyProps = orderCurrency(order);
-  const subtotal = order.products.reduce((sum, item) => {
-    const { quantity, price } = orderLine(order, item);
-    return sum + price * quantity;
-  }, 0);
+  const subtotal = orderSubtotal(
+    order,
+    order.products.reduce((sum, item) => {
+      const { quantity, price } = orderLine(order, item);
+      return sum + price * quantity;
+    }, 0),
+  );
 
   // Format date
   const orderDate = new Date().toLocaleDateString("en-US", {
