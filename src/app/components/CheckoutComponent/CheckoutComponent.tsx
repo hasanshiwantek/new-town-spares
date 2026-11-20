@@ -1003,8 +1003,6 @@ const CheckoutForm = () => {
         manualDiscount: priced.manualDiscount,
       };
 
-      console.log({calcInput, priced, stripePayload });
-
       const response = await axiosInstance.post(
         "web/stripe/pay",
         stripePayload,
@@ -1013,6 +1011,7 @@ const CheckoutForm = () => {
     },
     [
       cart,
+      calcInput,
       chargeCurrency,
       chargeTotalMinor,
       orderCurrency,
