@@ -1,7 +1,6 @@
 // app/category/[slug]/page.tsx
-import ProductsPage from "@/app/products/page";
+import ProductsPageContent from "@/app/components/Product/ProductsPageContent";
 import { fetchBrands } from "@/lib/api/brand";
-import { fetchCategories } from "@/lib/api/category";
 import { Metadata } from "next";
 
 interface Props {
@@ -80,7 +79,7 @@ export default async function BrandPage({ params }: Props) {
   }
 
   return (
-    <ProductsPage
+    <ProductsPageContent
       initialBrandId={brand?.brand?.id}
       initialBrandName={brand?.brand?.name}
     />

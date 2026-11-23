@@ -7,9 +7,11 @@ import Sidebar from "../Filters/Sidebar";
 import Breadcrumb from "./Breadcrumb";
 import ProductList from "./ProductList";
 import ProductRecent from "./ProductRecent";
-import { findCategoryPath } from "@/lib/utils";
-
-
+import {
+  findCategoryBySlug,
+  findCategoryPath,
+  getCategorySlugFromPath,
+} from "@/lib/utils";
 
 export default function ProductsClientWrapper({
   categories,
@@ -22,6 +24,7 @@ export default function ProductsClientWrapper({
 }: any) {
   const params = useParams(); // get slug param
   const pathname = usePathname(); // get current path
+  const categorySlug = getCategorySlugFromPath(pathname);
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +46,8 @@ export default function ProductsClientWrapper({
 
   // ✅ Sync filters when URL slug changes (for category pages)
   useEffect(() => {
-    if (isCategoryPage && params?.slug && categories?.length > 0) {
-      const matched = categories.find((c: any) => c.slug === params.slug);
+    if (isCategoryPage && categorySlug && categories?.length > 0) {
+      const matched = findCategoryBySlug(categories, categorySlug);
       if (matched) {
         setFilters((prev) => ({
           ...prev,
@@ -57,7 +60,7 @@ export default function ProductsClientWrapper({
         }));
       }
     }
-  }, [params?.slug, categories, isCategoryPage]);
+  }, [categorySlug, categories, isCategoryPage]);
 
   // ✅ Sync filters when URL slug changes (for brand pages)
   useEffect(() => {

@@ -69,6 +69,25 @@ export function isEmpty(val: unknown): boolean {
 
   return false;
 }
+
+export function getCategorySlugFromPath(pathname: string | null): string {
+  return pathname?.replace(/^\/category\/?/, "").replace(/\/+$/, "") ?? "";
+}
+
+export function findCategoryBySlug(
+  categories: any[] | null | undefined,
+  slug: string,
+): any | undefined {
+  for (const category of categories ?? []) {
+    if (category.slug === slug) return category;
+
+    const found = findCategoryBySlug(category.subcategories, slug);
+    if (found) return found;
+  }
+
+  return undefined;
+}
+
 export const findCategoryPath = (
   categories: any[],
   targetId: number,

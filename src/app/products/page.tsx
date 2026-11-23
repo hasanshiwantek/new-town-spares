@@ -1,35 +1,6 @@
 // app/products/page.tsx
-import { fetchCategories } from "@/lib/api/category";
-import { fetchBrands } from "@/lib/api/brand";
-import ProductsClientWrapper from "../components/Product/ProductsClientWrapper";
+import ProductsPageContent from "../components/Product/ProductsPageContent";
 
-export default async function ProductsPage({
-  initialCategoryId,
-  initialCategoryName,
-  initialBrandId,
-  initialBrandName,
-  initialCategorydescription,
-}: {
-  initialCategorydescription?: any;
-  initialCategoryId?: number;
-  initialCategoryName?: string;
-  initialBrandId?: number;
-  initialBrandName?: string;
-}) {
-  const categories = await fetchCategories();
-  const brands = await fetchBrands();
-
-  return (
-    <div>
-      <ProductsClientWrapper
-        categories={categories}
-        brands={brands}
-        initialCategoryId={initialCategoryId}
-        initialCategoryName={initialCategoryName}
-        initialBrandId={initialBrandId}
-        initialBrandName={initialBrandName}
-        initialCategorydescription={initialCategorydescription}
-      />
-    </div>
-  );
+export default function ProductsPage() {
+  return <ProductsPageContent />;
 }
