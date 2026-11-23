@@ -1,5 +1,6 @@
 // app/category/[slug]/page.tsx
 import ProductsPageContent from "@/app/components/Product/ProductsPageContent";
+import { REGEX } from "@/const/regex";
 import { fetchBrands } from "@/lib/api/brand";
 import { Metadata } from "next";
 
@@ -20,22 +21,21 @@ interface Props {
 
 function findBrandBySlug(brands: any[], slug: string): any | undefined {
   for (const brand of brands) {
-    if (brand.brand?.slug == slug) return brand; 
+    if (brand.brand?.slug == slug) return brand;
   }
-  return undefined; 
+  return undefined;
 }
 
-
 // ✅ Dynamic SEO metadata per category
-export async function generateMetadata({
-  params,
-}: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-   const brands = await fetchBrands();
+  const brands = await fetchBrands();
   const brand = findBrandBySlug(brands, slug);
   const formattedBrand =
     brand?.brand?.name ||
-    slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    slug
+      .replace(REGEX?.HYPHEN, " ")
+      .replace(REGEX?.WORDSTART, (char) => char.toUpperCase());
 
   const title = `${formattedBrand} | NewTown Spares`;
   const description = `Browse our collection of ${formattedBrand}. Genuine components, affordable prices, and fast shipping.`;
@@ -70,8 +70,7 @@ export default async function BrandPage({ params }: Props) {
   console.log("Category Slug:", slug);
 
   const brands = await fetchBrands();
-  
-  
+
   const brand = findBrandBySlug(brands, slug);
 
   if (!brand) {

@@ -1,10 +1,8 @@
 // app/category/[slug]/page.tsx
 import ProductsPageContent from "@/app/components/Product/ProductsPageContent";
+import { REGEX } from "@/const/regex";
 import { fetchCategories } from "@/lib/api/category";
-import {
-  findCategoryBySlug,
-  getCategorySlugFromPath,
-} from "@/lib/utils";
+import { findCategoryBySlug, getCategorySlugFromPath } from "@/lib/utils";
 import { Metadata } from "next";
 import { headers } from "next/headers";
 
@@ -25,7 +23,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const formattedCategory =
     category?.name ||
-    routeSlug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    routeSlug
+      .replace(REGEX?.HYPHEN, " ")
+      .replace(REGEX?.WORDSTART, (char) => char.toUpperCase());
 
   const title = `${formattedCategory} | NewTown Spares`;
   const description = `Browse our collection of ${formattedCategory}. Genuine components, affordable prices, and fast shipping.`;
