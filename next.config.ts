@@ -103,7 +103,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false, // don't advertise "X-Powered-By: Next.js"
   compress: true,
-
+  skipTrailingSlashRedirect: true,
   images: {
     unoptimized: true,
     formats: ["image/avif", "image/webp"],
