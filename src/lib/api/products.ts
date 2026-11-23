@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/apiFetch";
+import { removeTrailingSlash } from "../utils";
 
 export const fetchProducts = async () => {
   try {
@@ -40,9 +41,13 @@ export const fetchRelatedProducts = async (
 export const fetchProductBySlugAndUrl = async (slug?: string) => {
   if (!slug) return;
   try {
-    const res = await apiFetch(`web/products/get-product-by-url${slug}`, {
-      cache: "no-store",
-    });
+    const removeTrailingPath = removeTrailingSlash(slug);
+    const res = await apiFetch(
+      `web/products/get-product-by-url${removeTrailingPath}`,
+      {
+        cache: "no-store",
+      },
+    );
 
     if (!res?.ok) {
       return null;
@@ -148,12 +153,11 @@ export const fetchAllWebPages = async (): Promise<any[]> => {
 export const fetchWebPages = async (slug?: string) => {
   if (!slug) return;
   try {
-    const normalizeSlug = (s: string) => s?.replace(/\/+$/, "");
     const pages = await fetchAllWebPages();
-
     return (
       pages.find(
-        (page: any) => normalizeSlug(page?.slugWithUrl) === normalizeSlug(slug),
+        (page) =>
+          removeTrailingSlash(page?.slugWithUrl) === removeTrailingSlash(slug),
       ) ?? null
     );
   } catch (err) {

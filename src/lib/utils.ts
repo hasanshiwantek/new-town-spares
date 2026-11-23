@@ -72,7 +72,7 @@ export function isEmpty(val: unknown): boolean {
 export const findCategoryPath = (
   categories: any[],
   targetId: number,
-  path: any[] = []
+  path: any[] = [],
 ): any[] | null => {
   for (const cat of categories ?? []) {
     const currentPath = [
@@ -89,11 +89,7 @@ export const findCategoryPath = (
     }
 
     if (cat.subcategories?.length) {
-      const found = findCategoryPath(
-        cat.subcategories,
-        targetId,
-        currentPath
-      );
+      const found = findCategoryPath(cat.subcategories, targetId, currentPath);
 
       if (found) return found;
     }
@@ -101,3 +97,7 @@ export const findCategoryPath = (
 
   return null;
 };
+
+export function removeTrailingSlash(url: string): string {
+  return url?.endsWith("/") ? url?.slice(0, -1) : url;
+}
