@@ -9,5 +9,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
 }
 export const config = {
-    matcher: ["/((?!_next|api|favicon|.*\\..*).*)"],
+  matcher: [
+    "/((?!_next|api|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|css|js|woff2?|ttf|eot)).*)",
+  ],
 };
