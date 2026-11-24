@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ENV_CONFIG } from "@/config/envConfig";
-
+import { headers } from "next/headers";
+import { permanentRedirect } from "next/navigation";
+import { fetchStorefrontRedirect } from "@/lib/api/redirects";
 export const metadata: Metadata = {
   title: "404 - Page Not Found | New Town Spares",
   description:
@@ -21,7 +23,33 @@ export const metadata: Metadata = {
   },
 };
 
-export default function NotFound() {
+export default async function NotFound() {
+    const headersList = await headers();
+  const pathname = headersList.get("x-pathname");
+
+  if (pathname) {
+    const redirectData = await fetchStorefrontRedirect(pathname);
+
+    if (redirectData?.redirect) {
+      const destination = redirectData.redirect;
+
+      const isSafeInternalUrl =
+        destination.startsWith("/") &&
+        !destination.startsWith("//") &&
+        !destination.includes("\\");
+
+      const normalizePath = (value: string) =>
+        value.split("?")[0].replace(/\/+$/, "") || "/";
+
+      const isDifferentUrl =
+        normalizePath(destination) !== normalizePath(pathname);
+
+      if (isSafeInternalUrl && isDifferentUrl) {
+        permanentRedirect(destination);
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 px-4 py-16">
       <div className="max-w-4xl w-full text-center">
