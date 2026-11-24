@@ -34,9 +34,6 @@ export async function generateMetadata({
   const headersList = await headers();
 
   const pathname: any = headersList.get("x-pathname");
-
-  console.log("pathname", pathname);
-
   const product = await fetchProductBySlugAndUrl(pathname);
   const webPages = await fetchWebPages(pathname);
 
