@@ -70,8 +70,9 @@ export function isEmpty(val: unknown): boolean {
   return false;
 }
 
-export function getCategorySlugFromPath(pathname: string | null): string {
-  return pathname?.replace(/^\/category\/?/, "").replace(/\/+$/, "") ?? "";
+export function getCategorySlugFromPath(pathname: string): string {
+  return pathname?.slice(1);
+  // return pathname?.replace(/^\/category\/?/, "").replace(/\/+$/, "") ?? "";
 }
 
 export function findCategoryBySlug(
