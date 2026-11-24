@@ -1,8 +1,8 @@
 export const CONTACT_INFO = {
   phone: {
-    display: "+44 (192) 9507-277",
-    href: "tel:+441929507277",
-    number: "+441929507277",
+    display: "(209) 651-6864",
+    href: "tel:+12096516864",
+    number: "+12096516864",
   },
 };
 

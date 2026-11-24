@@ -481,15 +481,15 @@ const FooterBottom = () => {
           <div className="text-[14px] flex items-center flex-wrap sm:flex-nowrap justify-between bg-[#2C2D2C] min-h-[4.5rem] px-[5%]">
             {/* Center Content */}
             <p className="!text-white text-center sm:text-left w-full">
-              &copy; {new Date().getFullYear()} NEW TOWN SPARES UK LTD
+              &copy; {new Date().getFullYear()} New Town Spares Inc.
             </p>
-            <div className="flex items-center gap-3 text-white text-5xl">
+            {/* <div className="flex items-center gap-3 text-white text-5xl">
               <FaCcVisa />
               <FaCcMastercard />
               <FaCcAmex />
               <FaCcDiscover />
               <FaCcStripe />
-            </div>
+            </div> */}
           </div>
         </footer>
         <ConfirmationModal
