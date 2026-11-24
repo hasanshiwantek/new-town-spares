@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { EMAIL_REGEX } from "@/const/contact";
+
 import { errorMessage } from "@/utils/message";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { AccountSignInLinkModalProps } from "./types";
+import { REGEX } from "@/const/regex";
 
 const AccountSignInLinkModal: React.FC<AccountSignInLinkModalProps> = ({
   isOpen,
@@ -27,7 +28,7 @@ const AccountSignInLinkModal: React.FC<AccountSignInLinkModalProps> = ({
   }, [isOpen]);
 
   const handleSend = async () => {
-    if (!EMAIL_REGEX.test(email.trim())) {
+    if (!REGEX.EMAIL_REGEX.test(email.trim())) {
       errorMessage(
         "Please use a valid email address, such as user@example.com.",
       );

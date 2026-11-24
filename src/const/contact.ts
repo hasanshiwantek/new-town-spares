@@ -5,4 +5,4 @@ export const CONTACT_INFO = {
     number: "+441929507277",
   },
 };
-export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
