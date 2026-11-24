@@ -234,7 +234,7 @@ const nextConfig: NextConfig = {
         { source: "/about-us/:path+", destination: "/about-us/:path+" },
         { source: "/my-account/:path+", destination: "/my-account/:path+" },
         { source: "/wishlist/:path+", destination: "/wishlist/:path+" },
-        { source: "/products/:path+", destination: "/products/:path+" },
+        { source: "/products/:path+", destination: "/:path+" },
         {
           source: "/order-success/:path+",
           destination: "/order-success/:path+",
