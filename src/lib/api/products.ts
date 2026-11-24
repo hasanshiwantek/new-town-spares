@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/apiFetch";
 import { removeTrailingSlash } from "../utils";
+import { REGEX } from "@/const/regex";
 
 export const fetchProducts = async () => {
   try {
@@ -42,24 +43,27 @@ export const fetchProductBySlugAndUrl = async (slug?: string) => {
   if (!slug) return;
   try {
     const removeTrailingPath = removeTrailingSlash(slug);
-    const res = await apiFetch(
-      `web/products/get-product-by-url${removeTrailingPath}`,
-      {
-        cache: "no-store",
-      },
+    const canonicalHtmlPath = removeTrailingPath.replace(
+      REGEX.PATH_FILE_EXTENSION,
+      ".html",
     );
-
-    if (!res?.ok) {
-      return null;
+    const paths = [removeTrailingPath];
+    if (canonicalHtmlPath !== removeTrailingPath) {
+      paths.push(canonicalHtmlPath);
     }
 
-    const data = await res.json();
-    if (!data?.data) {
-      console.warn(`⚠️ No product found for slug: ${slug}`);
-      return null;
+    for (const path of paths) {
+      const res = await apiFetch(`web/products/get-product-by-url${path}`, {
+        cache: "no-store",
+      });
+
+      if (!res?.ok) continue;
+
+      const data = await res.json();
+      if (data?.data) return data?.data;
     }
 
-    return data.data;
+    return null;
   } catch (err) {
     return null; // always return null, not throw
   }
