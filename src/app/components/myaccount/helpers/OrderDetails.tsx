@@ -131,6 +131,30 @@ export const orderCurrency = (order: any) => ({
   symbol: order?.currencySymbol || undefined,
 });
 
+// An order's total as shown: the unrounded `amountDecimal` when the backend
+// sends it (`totalAmount` is the charged total, rounded to the penny)
+export const orderTotal = (order: any) => {
+  const exact = Number(order?.amountDecimal);
+  return order?.amountDecimal != null && Number.isFinite(exact)
+    ? exact
+    : Number(order?.totalAmount) || 0;
+};
+
+// An order's subtotal as shown. The stored line prices are rounded to the
+// penny, so with `amountDecimal` it's worked back from the exact total:
+// total − shipping − tax + discounts. Older orders add up the lines.
+export const orderSubtotal = (order: any, linesTotal: number, tax = 0) => {
+  const exact = Number(order?.amountDecimal);
+  if (order?.amountDecimal == null || !Number.isFinite(exact)) return linesTotal;
+  return (
+    exact -
+    (Number(order?.shippingCost) || 0) -
+    tax +
+    (Number(order?.discountAmount) || 0) +
+    (Number(order?.manualDiscount) || 0)
+  );
+};
+
 // A product's quantity and unit price as ordered. The order's `products` hold
 // the current catalog price (USD); the ordered price is on the destinations.
 export const orderLine = (order: any, product: any) => {
@@ -182,10 +206,13 @@ export const Invoice = React.forwardRef<HTMLDivElement, InvoiceProps>(
     const fmt = (val: string | number) =>
       formatAmount(Number(val) || 0, currency, symbol);
 
-    const subtotal = order.products.reduce((sum: any, p: any) => {
-      const { quantity, price } = orderLine(order, p);
-      return sum + price * quantity;
-    }, 0);
+    const subtotal = orderSubtotal(
+      order,
+      order.products.reduce((sum: any, p: any) => {
+        const { quantity, price } = orderLine(order, p);
+        return sum + price * quantity;
+      }, 0),
+    );
 
     const shipping = parseFloat(order.shippingCost);
     const tax = 0;
@@ -598,7 +625,7 @@ export const Invoice = React.forwardRef<HTMLDivElement, InvoiceProps>(
                   fontSize: "14px",
                 }}
               >
-                {fmt(order?.totalAmount)}
+                {fmt(orderTotal(order))}
               </td>
             </tr>
           </tfoot>

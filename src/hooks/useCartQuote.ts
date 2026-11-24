@@ -103,7 +103,7 @@ export function CartQuoteSync() {
   // shipping first (if the method isn't quoted any more, price it as is)
   const awaitingMethodId = !!methodIdKey && methodIdLookedUp !== methodIdKey;
 
-  const { quote, loading } = useOrderCalculate(
+  const { quote, loading, error } = useOrderCalculate(
     {
       currency: display,
       cart,
@@ -121,9 +121,14 @@ export function CartQuoteSync() {
     !awaitingMethodId && !awaitingPricing,
   );
 
-  const updating = loading || awaitingMethodId || awaitingPricing;
+  // Also "updating" in the render between the inputs becoming ready and the
+  // request starting, so cart views never show the subtotal as the total
+  const updating =
+    loading ||
+    awaitingMethodId ||
+    awaitingPricing ||
+    (cart.length > 0 && !quote && !error);
   useEffect(() => {
-    console.log({quote})
     dispatch(
       setCartQuote({
         totals: cart.length ? (quote?.totals ?? null) : null,
@@ -143,9 +148,11 @@ export function useCartQuote() {
     (state: RootState) => state.cartQuote,
   );
   const { display } = useMoney();
-  // A quote in another currency is stale (the currency was just switched)
+  // A quote in another currency is stale (the currency was just switched):
+  // a new one is on its way
+  const stale = !!totals && totals.currency !== display;
   return {
-    totals: totals?.currency === display ? totals : null,
-    loading,
+    totals: stale ? null : totals,
+    loading: loading || stale,
   };
 }

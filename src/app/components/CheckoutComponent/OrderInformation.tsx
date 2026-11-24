@@ -11,7 +11,11 @@ import { orderDetailById } from "@/redux/slices/OrderMessage";
 import { CONTACT_INFO } from "@/const/contact";
 import OrderConfirmationSkeleton from "./OrderConfirmationSkeleton";
 import { Button } from "@/components/ui/button";
-import { orderCurrency } from "../myaccount/helpers/OrderDetails";
+import {
+  orderCurrency,
+  orderLine,
+  orderSubtotal,
+} from "../myaccount/helpers/OrderDetails";
 // Inner component that uses Stripe hooks
 const CheckoutForm = () => {
   const dispatch = useAppDispatch();
@@ -25,12 +29,14 @@ const CheckoutForm = () => {
     ? customerOrderDetail
     : null;
   const discountTotal =
-    Number(orderCustomer?.discountAmount) +
-    Number(orderCustomer?.manualDiscount);
+    (Number(orderCustomer?.discountAmount) || 0) +
+    (Number(orderCustomer?.manualDiscount) || 0);
+  // Each line at the price it was ordered at: the destination's price when
+  // the order has `shippingDestinations`, else `products[].price`
   const cart: any = customerOrderDetail?.products
     ? customerOrderDetail.products.map((product: any) => ({
         ...product,
-        quantity: product.quantity || 1,
+        ...orderLine(customerOrderDetail, product),
       }))
     : [];
   const loading = useAppSelector(
@@ -40,12 +46,18 @@ const CheckoutForm = () => {
   const [promoCode, setPromoCode] = useState("");
 
   // Memoized calculations
-  const subtotal = useMemo(() => {
-    return cart.reduce(
-      (acc: any, item: any) => acc + Number(item.price) * (item.quantity || 1),
-      0,
-    );
-  }, [cart]);
+  const subtotal = useMemo(
+    () =>
+      orderSubtotal(
+        orderCustomer,
+        cart.reduce(
+          (acc: any, item: any) =>
+            acc + Number(item.price) * (item.quantity || 1),
+          0,
+        ),
+      ),
+    [cart, orderCustomer],
+  );
 
   const shipping = useMemo(() => {
     // ✅ Cart page se localStorage mein saved cost
@@ -69,15 +81,21 @@ const CheckoutForm = () => {
     [subtotal, shipping],
   );
 
-  // Final total after discount: the order's charged total. Adding up the
-  // stored lines here can differ by a penny (the charge is the exact amounts
-  // added up, then rounded once).
+  // Final total after discount, not rounded to the penny: the backend's
+  // `amountDecimal` (`totalAmount` is the charged total, rounded); older
+  // orders without it add up the stored amounts
+  const amountDecimal = Number(orderCustomer?.amountDecimal);
   const finalTotal = useMemo(
     () =>
-      orderCustomer?.totalAmount != null
-        ? Number(orderCustomer.totalAmount)
+      orderCustomer?.amountDecimal != null && Number.isFinite(amountDecimal)
+        ? amountDecimal
         : Math.max(totalBeforeDiscount - discountTotal, 0),
-    [totalBeforeDiscount, discountTotal, orderCustomer?.totalAmount],
+    [
+      totalBeforeDiscount,
+      discountTotal,
+      orderCustomer?.amountDecimal,
+      amountDecimal,
+    ],
   );
 
   useEffect(() => {
@@ -106,7 +124,7 @@ const CheckoutForm = () => {
                 <h6 className="text-lg font-medium mb-6 text-[#545454]">
                   Your order number is{" "}
                   <span className="font-bold text-[#545454]">
-                    #{orderCustomer?.id}
+                    #{orderCustomer?.orderNumber}
                   </span>
                 </h6>
 

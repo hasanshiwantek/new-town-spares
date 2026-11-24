@@ -1,8 +1,9 @@
 "use client";
 
+import TotalSpinner from "@/app/components/Cart/TotalSpinner";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useFormatPrice, useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatExact, formatMoney } from "@/lib/money";
+import { formatExact } from "@/lib/money";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -46,12 +47,12 @@ export default function WishlistCartSidebar() {
   // The cart priced by the backend (saved shipping and coupon included), the
   // same totals as the cart page; until it arrives, the frontend's subtotal
   const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
-  const { totals: quoteTotals } = useCartQuote();
+  const { totals: quoteTotals, loading: quoteLoading } = useCartQuote();
   const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals
     ? formatExact(cartTotals.exact.subtotal)
     : formatPrice(subtotal);
-  const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
+  const totalText = cartTotals ? formatExact(cartTotals.exact.total) : subtotalText;
 
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) return;
@@ -252,7 +253,7 @@ export default function WishlistCartSidebar() {
         )}
         <div className="flex justify-between py-[7px]">
           <span>Grand total:</span>
-          <span>{totalText}</span>
+          <span>{quoteLoading ? <TotalSpinner /> : totalText}</span>
         </div>
       </div>
 

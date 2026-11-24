@@ -69,6 +69,7 @@ import { subscribeNewsletter } from "@/redux/slices/contactSlice";
 import { fetchCustomerAddress } from "@/redux/slices/myaccountSlice";
 import { errorMessage, infoMessage, successMessage } from "@/utils/message";
 import { removeFromSessionStorage, removeFromStorage } from "@/utils/storage";
+import type { PaymentRequestPaymentMethodEvent } from "@stripe/stripe-js";
 import BillingStep from "./Billingstep";
 import CheckoutMultipleOrderSummary from "./CheckoutMultipleOrderSummary";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
@@ -120,10 +121,10 @@ interface CheckoutFormValues {
   shippingMethod: string;
   orderComment: string;
   paymentMethod: string;
+  paymentMethodId?: string;
   addressLine1: string;
   addressLine2: string;
 
-  paymentIntentId?: string | null;
   billingSame: boolean;
   billingFirstName: string;
   billingLastName: string;
@@ -496,7 +497,9 @@ const CheckoutForm = () => {
 
   
   // Totals in the charge currency, and as the summary shows them
-  const chargeTotals = serverPricing ? (quote?.totals ?? null) : orderTotals.charge;
+  const chargeTotals = serverPricing
+    ? (quote?.totals ?? null)
+    : orderTotals.charge;
   const displayTotals =
     serverPricing && displayCurrency === chargeCurrency
       ? (quote?.totals ?? null)
@@ -791,7 +794,7 @@ const CheckoutForm = () => {
   };
 
   const buildOrderPayload = useCallback(
-    (data: CheckoutFormValues & { paymentIntentId?: string | null }) => {
+    (data: CheckoutFormValues) => {
       // ✅ Multi address mode
       if (isMultiAddress && destinations.length > 0) {
         return {
@@ -799,6 +802,7 @@ const CheckoutForm = () => {
           deviceType: getDeviceType(),
           ipAddress: ipAddress,
           email: data.email,
+          paymentMethodId: data.paymentMethodId ?? "",
           paymentMethod:
             data.paymentMethod == "credit_card"
               ? "Credit Card (Via Stripe)"
@@ -810,7 +814,6 @@ const CheckoutForm = () => {
           couponCode: appliedCoupon?.couponCode,
           shippingCost: chargeShipping,
           comments: data.orderComment || "",
-          paymentIntentId: data.paymentIntentId ?? "",
           // Minor units of `currency` — the amount Stripe charged
           amount: chargeTotalMinor,
           currency: chargeCurrency,
@@ -874,6 +877,7 @@ const CheckoutForm = () => {
         exchangeRate: orderCurrency?.exchangeRate,
       });
       return {
+        paymentMethodId: data.paymentMethodId ?? "",
         userType: token ? null : "guest",
         deviceType: getDeviceType(),
         ipAddress,
@@ -898,7 +902,6 @@ const CheckoutForm = () => {
             : data.paymentMethod == "apple_pay"
               ? "Apple Pay"
               : "Google Pay",
-        paymentIntentId: data.paymentIntentId ?? "",
         // Minor units of the selected currency — the amount Stripe charged
         amount: chargeTotalMinor,
         selectedCurrency: priced.selectedCurrency,
@@ -942,43 +945,36 @@ const CheckoutForm = () => {
         orderPayload,
       );
       const orderData = orderResponse.data?.data || orderResponse.data;
+
+      // Re-run order-calculate for the placed order, tagged with its id.
+      // The order is already placed, so a failure here must not fail checkout.
+      const placed = Array.isArray(orderData) ? orderData[0] : orderData;
+      const orderId = placed?.orderNumber;
+      if (orderId) {
+        const priced = buildCalculateRequest(calcInput, {
+          id: orderCurrency?.id,
+          exchangeRate: orderCurrency?.exchangeRate,
+        });
+        // Multi-address: the per-destination split, as place-order got it
+        const multi =
+          "destinations" in orderPayload
+            ? { isMultiAddress: true, destinations: orderPayload.destinations }
+            : {};
+        try {
+          await axiosInstance.post("web/orders/order-calculate", {
+            ...priced,
+            ...multi,
+            orderId,
+          });
+        } catch (err) {
+          console.error("order-calculate after place-order failed", err);
+        }
+      }
+
       dispatch(fetchShippingRate());
       return orderData || null;
     },
-    [buildOrderPayload],
-  );
-
-  const handleStripeCharge = useCallback(
-    async (paymentMethodId: string) => {
-      const stripePayload = {
-        payment_method_id: paymentMethodId,
-        // Minor units (cents/pence) of `currency` — the exact total shown
-        amount: chargeTotalMinor,
-        currency: chargeCurrency,
-        exchangeRate: Number(orderCurrency?.exchangeRate ?? 1),
-        // Major units of `currency`, same as the place-order payload
-        shippingCost: chargeShipping,
-        discountAmount: chargeCouponDiscount,
-        products: cart.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity || 1,
-        })),
-      };
-
-      const response = await axiosInstance.post(
-        "web/stripe/pay",
-        stripePayload,
-      );
-      return response.data?.payment_intent_id || null;
-    },
-    [
-      cart,
-      chargeCurrency,
-      chargeTotalMinor,
-      orderCurrency,
-      chargeShipping,
-      chargeCouponDiscount,
-    ],
+    [buildOrderPayload, calcInput, orderCurrency],
   );
 
   useEffect(() => {
@@ -986,7 +982,9 @@ const CheckoutForm = () => {
       return;
     }
 
-    const handlePaymentMethod = async (event: any) => {
+    const handlePaymentMethod = async (
+      event: PaymentRequestPaymentMethodEvent,
+    ) => {
       if (!pendingWalletForm) {
         event.complete("fail");
         errorMessage("Unable to process wallet payment. Please try again.");
@@ -995,21 +993,17 @@ const CheckoutForm = () => {
       }
 
       try {
-        const paymentIntentId = await handleStripeCharge(
-          event.paymentMethod.id,
-        );
-
-        if (!paymentIntentId) {
+        const orderData = await placeOrder({
+          ...pendingWalletForm,
+          paymentMethodId: event.paymentMethod.id,
+        });
+        const orderId = orderData?.[0]?.orderNumber;
+        if (!orderId) {
           event.complete("fail");
-          errorMessage("Failed to generate payment intent.");
+          errorMessage("Unable to identify the placed order.");
           setIsProcessing(false);
           return;
         }
-
-        const orderData = await placeOrder({
-          ...pendingWalletForm,
-          paymentIntentId,
-        });
 
         event.complete("success");
 
@@ -1053,14 +1047,7 @@ const CheckoutForm = () => {
       paymentRequest.off("paymentmethod", handlePaymentMethod);
       paymentRequest.off("cancel", handleCancel);
     };
-  }, [
-    paymentRequest,
-    pendingWalletForm,
-    handleStripeCharge,
-    placeOrder,
-    dispatch,
-    router,
-  ]);
+  }, [paymentRequest, pendingWalletForm, placeOrder, dispatch, router]);
 
   // Step navigation handlers
   // const handleContinueToShipping = async () => {
@@ -1289,7 +1276,7 @@ const CheckoutForm = () => {
     setIsProcessing(true);
 
     try {
-      let paymentIntentId: string | null = null;
+      let paymentMethodId: string | null = null;
 
       if (requiresStripeCard) {
         if (!stripe || !elements) {
@@ -1334,18 +1321,20 @@ const CheckoutForm = () => {
         }
 
         if (paymentMethod) {
-          paymentIntentId = await handleStripeCharge(paymentMethod.id);
-
-          if (!paymentIntentId) {
-            errorMessage("Failed to generate payment intent.");
-            setIsProcessing(false);
-            return;
-          }
+          paymentMethodId = paymentMethod.id;
         }
       }
 
-      const orderData = await placeOrder({ ...data, paymentIntentId });
+      const orderData = await placeOrder({
+        ...data,
+        paymentMethodId: paymentMethodId ?? undefined,
+      });
       const orderNumber = orderData?.[0]?.orderNumber;
+      if (!orderNumber) {
+        errorMessage("Unable to identify the placed order.");
+        setIsProcessing(false);
+        return;
+      }
       const orderDetail = orderData?.[0];
       skipEmptyCartCheckRef.current = true;
 
@@ -1619,8 +1608,10 @@ const CheckoutForm = () => {
 
     restoreData();
   }, [dispatch, setValue, cart]);
+
   // ✅ Save to localStorage on form changes (debounced)
   const watchedValues = watch();
+
   useEffect(() => {
     // ✅ Restore complete hone tak save mat karo
     if (!isRestored.current) return;

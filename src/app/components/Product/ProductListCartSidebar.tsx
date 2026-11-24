@@ -20,9 +20,10 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import CartLoadingOverlay from "../Cart/CartLoadingOverlay";
 import ProductPrice from "../productprice/ProductPrice";
+import TotalSpinner from "@/app/components/Cart/TotalSpinner";
 import { useCartQuote } from "@/hooks/useCartQuote";
 import { useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatExact, formatMoney } from "@/lib/money";
+import { formatExact } from "@/lib/money";
 
 export default function ProductListCartSidebar() {
   const cart = useAppSelector((state: RootState) => state.carts.items);
@@ -143,14 +144,14 @@ export default function ProductListCartSidebar() {
   // The cart priced by the backend (saved shipping and coupon included), the
   // same totals as the cart page; until it arrives, the frontend's subtotal
   const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
-  const { totals: quoteTotals } = useCartQuote();
+  const { totals: quoteTotals, loading: quoteLoading } = useCartQuote();
   const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals ? (
     formatExact(cartTotals.exact.subtotal)
   ) : (
     <ProductPrice price={subtotal} inline={true} />
   );
-  const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
+  const totalText = cartTotals ? formatExact(cartTotals.exact.total) : subtotalText;
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) {
       return;
@@ -296,8 +297,7 @@ export default function ProductListCartSidebar() {
         <div className="flex justify-between text-[14px] border-t border-gray-200 pt-3">
           <span>Grand total:</span>
           <span>
-            {" "}
-            {totalText}
+            {quoteLoading ? <TotalSpinner /> : totalText}
           </span>
         </div>
       </div>

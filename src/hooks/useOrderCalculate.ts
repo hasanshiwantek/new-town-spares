@@ -23,12 +23,13 @@ export type CalculateInput = {
 };
 
 type CalculateResponse = {
-  amount: number;
+  amount: number; // charged total, minor units
+  amountDecimal?: number | string; // the same total, not rounded
   currency: { id: number; code: string; exchangeRate: number | string };
   coupon?: { id?: number; couponCode?: string; discountAmount?: number } | null;
   manualDiscount?: number;
   convertedManualDiscount?: number;
-  convertedDiscount?: number;
+  convertedCouponDiscount?: number;
   shippingCost?: number;
   convertedTax?: number;
   matchedRate?: any;
@@ -73,7 +74,9 @@ const toQuote = (
   const rate = Number(data.currency.exchangeRate) || 0;
 
   // Lines, discounts and shipping as the backend sends them (exact, shown
-  // with the dashboard's decimal places); the total is its `amount` exactly
+  // with the dashboard's decimal places). The charged total is its `amount`;
+  // the total shown is its unrounded `amountDecimal`.
+  const exactTotal = Number(data.amountDecimal);
   const lines = cart.map((item) => {
     const line = data.items?.find(
       (i) => String(i.productId) === String(item.id),
@@ -86,7 +89,7 @@ const toQuote = (
       currency,
       {
         lines,
-        couponDiscount: Number(data.convertedDiscount) || 0,
+        couponDiscount: Number(data.convertedCouponDiscount) || 0,
         manualDiscount:
           Number(
             data.convertedManualDiscount ?? (data.manualDiscount ?? 0) * rate,
@@ -95,6 +98,9 @@ const toQuote = (
         tax: Number(data.convertedTax) || 0,
       },
       Number(data.amount) || 0,
+      data.amountDecimal != null && Number.isFinite(exactTotal)
+        ? exactTotal
+        : undefined,
     ),
     matchedRate: data.matchedRate ?? null,
     raw: data,

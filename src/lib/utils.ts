@@ -69,10 +69,29 @@ export function isEmpty(val: unknown): boolean {
 
   return false;
 }
+
+export function getCategorySlugFromPath(pathname: string | null): string {
+  return pathname?.replace(/^\/category\/?/, "").replace(/\/+$/, "") ?? "";
+}
+
+export function findCategoryBySlug(
+  categories: any[] | null | undefined,
+  slug: string,
+): any | undefined {
+  for (const category of categories ?? []) {
+    if (category.slug === slug) return category;
+
+    const found = findCategoryBySlug(category.subcategories, slug);
+    if (found) return found;
+  }
+
+  return undefined;
+}
+
 export const findCategoryPath = (
   categories: any[],
   targetId: number,
-  path: any[] = []
+  path: any[] = [],
 ): any[] | null => {
   for (const cat of categories ?? []) {
     const currentPath = [
@@ -89,11 +108,7 @@ export const findCategoryPath = (
     }
 
     if (cat.subcategories?.length) {
-      const found = findCategoryPath(
-        cat.subcategories,
-        targetId,
-        currentPath
-      );
+      const found = findCategoryPath(cat.subcategories, targetId, currentPath);
 
       if (found) return found;
     }
@@ -101,3 +116,7 @@ export const findCategoryPath = (
 
   return null;
 };
+
+export function removeTrailingSlash(url: string): string {
+  return url?.endsWith("/") ? url?.slice(0, -1) : url;
+}
