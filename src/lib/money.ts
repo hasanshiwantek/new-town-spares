@@ -75,6 +75,29 @@ export const convert = (
   return money((toMajor(m) / fromRate) * toRate, target);
 };
 
+// An amount as shown, not charged: a price converted at full precision
+// (e.g. 77.04 USD × 0.74736 = 57.5766144 GBP). Shown with the dashboard's
+// decimal places; only amounts that are charged (Money) are rounded to the
+// minor unit — the order total is the exact amounts added up, then rounded.
+export type Exact = { amount: number; currency: string };
+
+// Converts at full precision, without rounding; null if a rate is missing.
+export const convertExact = (
+  amount: number | string | null | undefined,
+  from: string,
+  to: string,
+  usdRate: RateLookup,
+): Exact | null => {
+  const source = from.toUpperCase();
+  const target = to.toUpperCase();
+  const value = Number(amount || 0);
+  if (source === target) return { amount: value, currency: target };
+  const fromRate = usdRate(source);
+  const toRate = usdRate(target);
+  if (!fromRate || !toRate) return null;
+  return { amount: (value / fromRate) * toRate, currency: target };
+};
+
 const sameCurrency = (a: Money, b: Money) => {
   if (a.currency !== b.currency) {
     throw new Error(`Cannot combine ${a.currency} and ${b.currency} amounts`);
@@ -126,26 +149,53 @@ export const setCurrencyFormats = (
   currencyFormats = Object.fromEntries(list.map((c) => [c.code, c]));
 };
 
-// `symbol` is used when the currency has no dashboard format (e.g. an order
-// placed in a currency that has since been removed)
-export const formatMoney = (m: Money, symbol?: string) => {
-  const f = currencyFormats[m.currency];
+// Rounds half up to `places` decimals without float drift
+// (56.5078896 → 56.50789 at 5 places; 1.005 → 1.01 at 2)
+const roundTo = (value: number, places: number) => {
+  const shifted = `${value}e${places}`;
+  return /e.*e/.test(shifted)
+    ? Math.round(value * 10 ** places) / 10 ** places
+    : Number(`${Math.round(Number(shifted))}e-${places}`);
+};
+
+// A major-unit amount as the store displays the currency: its dashboard
+// decimal places, symbol and separators. `symbol` is used when the currency
+// has no dashboard format (e.g. an order placed in a currency that has since
+// been removed).
+export const formatAmount = (
+  amount: number,
+  currency: string,
+  symbol?: string,
+) => {
+  const code = currency.toUpperCase();
+  const f = currencyFormats[code];
   // Symbols come from /web/currencies; show the code until they've loaded
   if (!f) {
-    const amount = toMajor(m).toFixed(decimalsFor(m.currency));
-    return symbol ? `${symbol}${amount}` : `${m.currency} ${amount}`;
+    const places = decimalsFor(code);
+    const text = roundTo(amount, places).toFixed(places);
+    return symbol ? `${symbol}${text}` : `${code} ${text}`;
   }
 
-  const major = toMajor(m);
-  const [int, frac] = Math.abs(major).toFixed(f.decimalPlaces).split(".");
+  const rounded = roundTo(amount, f.decimalPlaces);
+  const [int, frac] = Math.abs(rounded).toFixed(f.decimalPlaces).split(".");
   const grouped = int.replace(THOUSANDS_GROUP_REGEX, f.thousandsToken);
   const number = frac ? `${grouped}${f.decimalToken}${frac}` : grouped;
-  const sign = major < 0 ? "-" : "";
+  const sign = rounded < 0 ? "-" : "";
 
   return f.symbolLocation === "right"
     ? `${sign}${number}${f.symbol}`
     : `${sign}${f.symbol}${number}`;
 };
+
+export const formatMoney = (m: Money, symbol?: string) =>
+  formatAmount(toMajor(m), m.currency, symbol);
+
+export const formatExact = (e: Exact, symbol?: string) =>
+  formatAmount(e.amount, e.currency, symbol);
+
+// Either kind of amount, as shown
+export const formatShown = (x: Money | Exact) =>
+  "minor" in x ? formatMoney(x) : formatExact(x);
 
 // Currency of a shipping rate. API rates carry `currency`; rates built on the
 // frontend (fixed/free/flat/own) are tagged "USD". Older saved rates have no

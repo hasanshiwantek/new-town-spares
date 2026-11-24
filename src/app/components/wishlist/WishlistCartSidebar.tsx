@@ -1,7 +1,8 @@
 "use client";
 
+import { useCartQuote } from "@/hooks/useCartQuote";
 import { useFormatPrice, useOrderTotals } from "@/hooks/useFormatPrice";
-import { formatMoney } from "@/lib/money";
+import { formatExact, formatMoney } from "@/lib/money";
 import { useAddProductBySku } from "@/hooks/useAddProductBySku";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
@@ -42,11 +43,15 @@ export default function WishlistCartSidebar() {
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
-  // Subtotal = sum of the unit prices shown × qty (same as cart/checkout)
-  const { display: cartTotals } = useOrderTotals({ cart, shippingRates: [] });
+  // The cart priced by the backend (saved shipping and coupon included), the
+  // same totals as the cart page; until it arrives, the frontend's subtotal
+  const { display: localTotals } = useOrderTotals({ cart, shippingRates: [] });
+  const { totals: quoteTotals } = useCartQuote();
+  const cartTotals = quoteTotals ?? localTotals;
   const subtotalText = cartTotals
-    ? formatMoney(cartTotals.subtotal)
+    ? formatExact(cartTotals.exact.subtotal)
     : formatPrice(subtotal);
+  const totalText = cartTotals ? formatMoney(cartTotals.total) : subtotalText;
 
   const handleSkuCart = async () => {
     if (skuInput == "" || Number(qty) < 1) return;
@@ -233,9 +238,21 @@ export default function WishlistCartSidebar() {
           <span>Subtotal:</span>
           <span>{subtotalText}</span>
         </div>
+        {cartTotals && cartTotals.shipping.minor > 0 && (
+          <div className="flex justify-between py-[7px]">
+            <span>Shipping:</span>
+            <span>{formatExact(cartTotals.exact.shipping)}</span>
+          </div>
+        )}
+        {cartTotals && cartTotals.discount.minor > 0 && (
+          <div className="flex justify-between py-[7px]">
+            <span>Discount:</span>
+            <span>-{formatExact(cartTotals.exact.discount)}</span>
+          </div>
+        )}
         <div className="flex justify-between py-[7px]">
           <span>Grand total:</span>
-          <span>{subtotalText}</span>
+          <span>{totalText}</span>
         </div>
       </div>
 

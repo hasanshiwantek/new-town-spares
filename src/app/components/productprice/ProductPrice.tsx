@@ -1,5 +1,5 @@
 import { useFormatPrice } from "@/hooks/useFormatPrice";
-import { formatMoney, money } from "@/lib/money";
+import { formatAmount } from "@/lib/money";
 
 const ProductPrice: React.FC<{
   price: number;
@@ -20,8 +20,11 @@ const ProductPrice: React.FC<{
 }) => {
   const formatPrice = useFormatPrice();
 
+  // With `currency`: an amount already in that currency (e.g. an order's),
+  // shown as stored at the dashboard's decimal places — not rounded to the
+  // penny first, the same way checkout shows prices
   const formattedPrice = currency
-    ? formatMoney(money(price, currency), symbol)
+    ? formatAmount(Number(price) || 0, currency, symbol)
     : formatPrice(price);
   const baseClasses = "xl:text-[13.3px] 2xl:text-[16.6px] font-normal";
   const combinedClasses = className

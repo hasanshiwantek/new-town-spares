@@ -69,10 +69,15 @@ const CheckoutForm = () => {
     [subtotal, shipping],
   );
 
-  // Final total after discount
+  // Final total after discount: the order's charged total. Adding up the
+  // stored lines here can differ by a penny (the charge is the exact amounts
+  // added up, then rounded once).
   const finalTotal = useMemo(
-    () => Math.max(totalBeforeDiscount - discountTotal, 0),
-    [totalBeforeDiscount, orderCustomer?.discountAmount],
+    () =>
+      orderCustomer?.totalAmount != null
+        ? Number(orderCustomer.totalAmount)
+        : Math.max(totalBeforeDiscount - discountTotal, 0),
+    [totalBeforeDiscount, discountTotal, orderCustomer?.totalAmount],
   );
 
   useEffect(() => {

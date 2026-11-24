@@ -12,6 +12,13 @@ import { useState } from "react";
 import AddToCartModal from "../modal/AddToCartModal";
 import BulkInquiryModal from "../modal/BulkInquiryModal";
 import ProductPrice from "../productprice/ProductPrice";
+import {
+  FaCcAmex,
+  FaCcDiscover,
+  FaCcMastercard,
+  FaCcStripe,
+  FaCcVisa,
+} from "react-icons/fa";
 interface ProductRightProps {
   product: ProductInfoSource;
   quantity: number | string;
@@ -98,9 +105,7 @@ const ProductRight = ({
                     setQuantity(clampQty(quantity, product));
                     return;
                   }
-                  const existingItem = cart.find(
-                    (item: any) => item.id === id,
-                  );
+                  const existingItem = cart.find((item: any) => item.id === id);
                   const currentQty = existingItem ? existingItem.quantity : 0;
                   const desiredQty = clampQty(quantity, product);
                   const remainingQty = maxQty
@@ -184,12 +189,12 @@ const ProductRight = ({
               WhatsApp
             </a>
             <a
-              href="https://join.skype.com/invite/example"
+              href=""
               target="_blank"
               rel="noopener noreferrer"
               className="px-[6px] py-[5px] bg-[#2c2d2c] text-white text-[12.6px] leading-[18.9px] font-medium shadow-sm transition-colors w-full text-center"
             >
-              Skype
+              Teams
             </a>
           </div>
           <p className="text-center text-[#333]! text-[14px]! mt-4">
@@ -202,6 +207,13 @@ const ProductRight = ({
           >
             Request A Bulk Quote
           </button>
+          <div className="flex items-center gap-3 mt-4 text-black text-5xl">
+            <FaCcVisa />
+            <FaCcMastercard />
+            <FaCcAmex />
+            <FaCcDiscover />
+            <FaCcStripe />
+          </div>
         </div>
       </aside>
 

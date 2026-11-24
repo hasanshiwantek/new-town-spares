@@ -124,7 +124,7 @@ export const bulkInquiry = createAsyncThunk(
       );
 
       if (res?.data?.status && res?.data?.data) {
-        console.log("Bulk inquiry response:", res?.data);
+      
         return res.data;
       }
 

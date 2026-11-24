@@ -4,6 +4,7 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage for
 
 import advanceSearchReducer from "./slices/advanceSearchSlice";
 import authReducer from "./slices/authSlice";
+import cartQuoteReducer from "./slices/cartQuoteSlice";
 import cartsSliceReducer from "./slices/cartsSlice";
 import configReducer from "./slices/configSlice";
 import contactReducer from "./slices/contactSlice";
@@ -73,6 +74,7 @@ const rootReducer = combineReducers({
   advanceSearch: advanceSearchReducer,
   scripts: scriptReducer,
   carts: cartsSliceReducer,
+  cartQuote: cartQuoteReducer,
   customerMessage: orderMessageReducer,
   ui: uiReducer,
 });

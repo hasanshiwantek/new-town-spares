@@ -134,7 +134,7 @@ const Testimonials = () => {
             {review?.reviewHeading}
           </h2>
         </Link>
-        <div className="text-[14px] leading-[21px] text-[#333333] min-h-[105px]">
+        <div className="text-[14px] leading-[21px] text-[#333333] ">
           {displayContent}
           {isTruncated && (
             <>

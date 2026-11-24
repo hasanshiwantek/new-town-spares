@@ -1,7 +1,7 @@
 "use client";
 import type { OrderTotals } from "@/hooks/useFormatPrice";
 import { useAppSelector } from "@/hooks/useReduxHooks";
-import { formatMoney, Money } from "@/lib/money";
+import { Exact, formatShown, Money } from "@/lib/money";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -51,9 +51,9 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
   const [discountOpen, setDiscountOpen] = useState(false);
   // Shows a line from `totals` so every line and the total add up exactly;
   // falls back to converting the USD amount while rates are loading.
-  const amount = (pick: (t: OrderTotals) => Money, usd: number) =>
+  const amount = (pick: (t: OrderTotals) => Money | Exact, usd: number) =>
     totals ? (
-      formatMoney(pick(totals))
+      formatShown(pick(totals))
     ) : (
       <ProductPrice price={usd} inline={true} />
     );
@@ -101,7 +101,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
               </p>
               <p className="text-[13px] text-[#333333] whitespace-nowrap">
                 {amount(
-                  (t) => t.lines[index],
+                  (t) => t.exact.lines[index],
                   Number(item.price) * (item.quantity || 1),
                 )}
               </p>
@@ -160,7 +160,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-3 text-[13px] pt-[19.5px] px-[19.5px]">
         <div className="flex justify-between text-[#333333]">
           <span>Subtotal</span>
-          <span> {amount((t) => t.subtotal, subtotal)}</span>
+          <span> {amount((t) => t.exact.subtotal, subtotal)}</span>
         </div>
         {(appliedCoupon && discountAmount > 0) || manualDiscount > 0 ? (
           <div className="mt-2 overflow-hidden transition-all duration-300 ease-in-out">
@@ -187,7 +187,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
                 </svg>
               </span>
               <span className="font-medium">
-                -{amount((t) => t.discount, Number(discountTotal))}
+                -{amount((t) => t.exact.discount, Number(discountTotal))}
               </span>
             </div>
 
@@ -206,7 +206,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
                       <span>
                         -
                         {amount(
-                          (t) => t.manualDiscount,
+                          (t) => t.exact.manualDiscount,
                           Number(manualDiscount),
                         )}
                       </span>
@@ -217,7 +217,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
                     <div className="flex justify-between mt-1">
                       <span>
                         {amount(
-                          (t) => t.couponDiscount,
+                          (t) => t.exact.couponDiscount,
                           Number(discountAmount),
                         )}{" "}
                         off the order total (
@@ -226,7 +226,7 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
                       <span>
                         -
                         {amount(
-                          (t) => t.couponDiscount,
+                          (t) => t.exact.couponDiscount,
                           Number(discountAmount),
                         )}
                       </span>
@@ -244,12 +244,12 @@ const CheckoutOrderSummary: React.FC<OrderSummaryProps> = ({
               ? spinner
               : (totals ? totals.shipping.minor === 0 : shipping === 0)
                 ? "Free"
-                : amount((t) => t.shipping, shipping)}
+                : amount((t) => t.exact.shipping, shipping)}
           </span>
         </div>
         <div className="flex justify-between text-[#333333]">
           <span>Tax</span>
-          <span>{amount((t) => t.tax, tax)}</span>
+          <span>{amount((t) => t.exact.tax, tax)}</span>
         </div>
       </div>
 

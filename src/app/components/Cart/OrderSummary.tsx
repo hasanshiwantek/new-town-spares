@@ -14,7 +14,8 @@ import {
   useOrderTotals,
   type OrderTotals,
 } from "@/hooks/useFormatPrice";
-import { formatMoney, Money } from "@/lib/money";
+import { useCartQuote } from "@/hooks/useCartQuote";
+import { Exact, formatShown, Money } from "@/lib/money";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import {
   applyCoupon,
@@ -80,6 +81,9 @@ const OrderSummary = () => {
   const { shippingDetail, saveDetail } = useAppSelector(
     (state: any) => state.shippingZone,
   );
+  const { shippingRates, ratesLoader } = useAppSelector(
+    (state) => state.shippingZone,
+  );
   const cartItems = useAppSelector((state: RootState) => state?.carts?.items);
   const [shippingData, setShippingData] = useState({
     country: "",
@@ -137,13 +141,20 @@ const OrderSummary = () => {
   const finalTotal = Math.max(totalBeforeDiscount - discountTotal, 0);
 
   // Summary in the display currency, in whole minor units: every line and
-  // the grand total add up exactly (null while exchange rates load)
-  const { display: totals } = useOrderTotals({
+  // the grand total add up exactly (null while exchange rates load). Shown
+  // only until the backend's quote below first arrives.
+  const { display: localTotals } = useOrderTotals({
     cart,
     manualDiscountUsd: Number(manualDiscount) || 0,
     couponDiscountUsd: Number(discountAmount) || 0,
     shippingRates: selectedShippingRates,
   });
+
+  // The cart priced by the backend (<CartQuoteSync />), the same quote the
+  // header cart and sidebars show, so the grand total matches everywhere and
+  // is the total checkout will charge
+  const { totals: quoteTotals, loading: quoteLoading } = useCartQuote();
+  const totals = quoteTotals ?? localTotals;
   // Currency switched: the saved carrier rate was quoted in the previous
   // currency. Re-quote it for the saved address and save the same method at
   // its new price (or clear it if that method isn't offered any more).
@@ -196,15 +207,12 @@ const OrderSummary = () => {
     requote();
   }, [selectedCurrency]);
 
-  const amount = (pick: (t: OrderTotals) => Money, usd: number) =>
+  const amount = (pick: (t: OrderTotals) => Money | Exact, usd: number) =>
     totals ? (
-      formatMoney(pick(totals))
+      formatShown(pick(totals))
     ) : (
       <ProductPrice price={usd} inline={true} />
     );
-  const { shippingRates, ratesLoader } = useAppSelector(
-    (state) => state.shippingZone,
-  );
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (productShippingRate) {
@@ -341,7 +349,7 @@ const OrderSummary = () => {
             Subtotal:
           </span>
           <span className="text-[14px] text-[#333333]">
-            {amount((t) => t.subtotal, subtotal)}
+            {amount((t) => t.exact.subtotal, subtotal)}
           </span>
         </div>
 
@@ -624,7 +632,7 @@ const OrderSummary = () => {
                 Manual Discount:
               </span>
               <span className="text-[14px] font-medium">
-                -{amount((t) => t.manualDiscount, manualDiscount)}
+                -{amount((t) => t.exact.manualDiscount, manualDiscount)}
               </span>
             </div>
           </>
@@ -640,7 +648,7 @@ const OrderSummary = () => {
           {/* If coupon already applied, show it here */}
           {appliedCoupon ? (
             <span className="text-[14px] font-medium">
-              -{amount((t) => t.couponDiscount, discountAmount)}
+              -{amount((t) => t.exact.couponDiscount, discountAmount)}
             </span>
           ) : (
             <span
@@ -702,8 +710,9 @@ const OrderSummary = () => {
             Grand total:
           </span>
           <span className="text-[25px] leading-none text-[#333333] font-bold">
-            {requoting || shippingCostLoading ? (
-              // Shipping is being re-quoted: total isn't final yet
+            {requoting || shippingCostLoading || quoteLoading ? (
+              // Shipping is being re-quoted or the backend is re-pricing the
+              // cart: total isn't final yet
               <span
                 role="status"
                 aria-label="Updating total"
