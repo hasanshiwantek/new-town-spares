@@ -64,4 +64,5 @@ export const REGEX = {
 
   HYPHEN: /-/g,
   WORDSTART: /\b\w/g,
+  EMAIL_REGEX : /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 };

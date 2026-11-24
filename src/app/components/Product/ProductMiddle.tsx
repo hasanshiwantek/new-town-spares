@@ -65,7 +65,7 @@ const ProductMiddle = ({ product }: any) => {
                 onClick={() => setIsReviewModalOpen(true)}
                 className="underline font-semibold"
               >
-                Write a Review
+                Write a Review 
               </button>
             </>
           </div>

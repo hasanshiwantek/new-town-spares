@@ -139,6 +139,7 @@ export default async function ProductPage({
     notFound();
   }
   const backendSchema = product?.schema;
+  
   return (
     <>
       {/* ✅ Structured Data (SEO safe) */}
@@ -174,6 +175,7 @@ export default async function ProductPage({
                       aria-hidden="true"
                     >
                       /
+             
                     </span>
                     <Link
                       href={`/category/${cat?.slug}`}

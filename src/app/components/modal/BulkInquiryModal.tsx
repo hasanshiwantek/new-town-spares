@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAppDispatch } from "@/hooks/useReduxHooks";
 import { ENV_CONFIG } from "@/config/envConfig";
 import { bulkInquiry } from "@/redux/slices/homeSlice";
-import { errorMessage } from "@/utils/message";
+import { errorMessage, successMessage } from "@/utils/message";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -71,7 +71,7 @@ const BulkInquiryModal: React.FC<BulkInquiryModalProps> = ({
     const result = await dispatch(bulkInquiry(payload));
     try {
       if (bulkInquiry.fulfilled.match(result)) {
-        console.log("Request for quote send✅", result?.payload);
+        successMessage(result.payload?.message || "Inquiry submitted successfully")
         setTimeout(() => {
           onClose();
         }, 2000);

@@ -494,6 +494,8 @@ const CheckoutForm = () => {
     notReadyMessage: quoteNotReadyMessage,
   } = useOrderCalculate(calcInput, serverPricing);
 
+
+  
   // Totals in the charge currency, and as the summary shows them
   const chargeTotals = serverPricing
     ? (quote?.totals ?? null)

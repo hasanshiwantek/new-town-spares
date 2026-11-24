@@ -24,6 +24,13 @@ import { transferCart } from "@/lib/api/transferCart";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import {
+  FaCcAmex,
+  FaCcDiscover,
+  FaCcMastercard,
+  FaCcStripe,
+  FaCcVisa,
+} from "react-icons/fa";
 interface Category {
   id: number;
   name: string;
@@ -84,7 +91,7 @@ const FooterBottom = () => {
     const loadCategories = async () => {
       try {
         const data = await fetchCategories();
-        setCategories(data); // ✅ fill the variable
+        setCategories(data);
       } catch (error) {
         console.error("Failed to load categories:", error);
       }
@@ -100,7 +107,7 @@ const FooterBottom = () => {
   useEffect(() => {
     const auth = getPersistedAuth();
     const t = auth?.token || null;
-    // A 401 here is handled by the axios interceptor (logout + redirect once).
+
     if (t) dispatch(checkAuthToken());
     setToken(t);
   }, []);
@@ -115,8 +122,6 @@ const FooterBottom = () => {
     if (existingSession) {
       dispatch(visitorSession({ sessionId: existingSession }));
     } else {
-      // Guest carts are keyed by this ID, so it must be unguessable:
-      // 128 bits from the crypto RNG (Math.random is predictable)
       const bytes = crypto.getRandomValues(new Uint8Array(16));
       const sessionId = Array.from(bytes, (b) =>
         b.toString(16).padStart(2, "0"),
@@ -124,19 +129,14 @@ const FooterBottom = () => {
       setInStorage("sessionId", sessionId);
     }
   }, []);
-  // `?token=` sign-in links (admin "Login as customer"). Anyone can craft such
-  // a link with their own token, so never sign in silently: look up whose
-  // account it is and ask the visitor to confirm first (prevents login CSRF).
+
   useEffect(() => {
     if (!paramsToken) return;
-    // /auth/reset-password uses `?token=` for the reset token; never treat
-    // anything under /auth/ as a sign-in token.
+
     if (pathname?.startsWith("/auth/")) return;
     if (handledLoginToken.current === paramsToken) return;
     handledLoginToken.current = paramsToken;
 
-    // Drop the token from the address bar and history right away, so it
-    // can't leak through the Referer header, bookmarks or shared links.
     const cleanUrl = new URL(window.location.href);
     cleanUrl.searchParams.delete("token");
     window.history.replaceState(
@@ -147,8 +147,6 @@ const FooterBottom = () => {
 
     const lookUpAccount = async () => {
       try {
-        // apiFetch, not axiosInstance: the interceptor would swap in the
-        // current session's token, and a 401 would log the visitor out.
         const res = await apiFetch("web/customer-profile", {
           token: paramsToken,
         });
@@ -189,8 +187,6 @@ const FooterBottom = () => {
     if (verifiedToken.current === paramsActiontoken) return;
     verifiedToken.current = paramsActiontoken;
 
-    // Drop the magic-link token from the address bar and history right away,
-    // so it can't leak through bookmarks, shared links or the Referer header
     const cleanUrl = new URL(window.location.href);
     cleanUrl.searchParams.delete("actiontoken");
     window.history.replaceState(
@@ -224,9 +220,6 @@ const FooterBottom = () => {
         }
       })
       .catch((msg) => {
-        // No cleanup-based cancel flag: removing the token from the URL above
-        // re-runs this effect, which would hide this message. verifiedToken
-        // already stops the link from being verified twice.
         errorMessage(msg || "Magic link is invalid or expired");
       });
   }, [paramsActiontoken, dispatch, router]);
@@ -298,26 +291,29 @@ const FooterBottom = () => {
               style={{ fontFamily: poppinsFont }}
             >
               {/* INFO */}
-              <address className="not-italic text-[#FAFAFA] text-[14px]! mt-3 sm:mt-0">
-                <h4 className="text-[18px] font-noraml mb-4 ">Info</h4>
+              {/* INFO */}
+              <address className="not-italic text-footer-text text-[14px]! mt-3 sm:mt-0">
+                <h4 className="text-[18px] font-normal mb-4">Info</h4>
 
-                <p className="mb-2 text-[14px]">Address :</p>
+                <p className="mb-2 text-[14px]">
+                  Address : NEW TOWN SPARES UK LTD
+                </p>
+                <p className="text-[13px] mb-3">Company number 14631799</p>
 
                 <p className="text-[13px]">
-                  MAILING ADDRESS: 1032 E BRANDON BLVD
+                  Lytchett House 13 Freeland Park, Wareham
+                  <br />
+                  Road, Poole, Dorset, United Kingdom, BH16
+                  <br />
+                  6FA
                 </p>
-                <p className="text-[13px]">Suite 1124 BRANDON, FL 33511</p>
 
-                <div className="h-4" />
+                <div className="h-6" />
 
-                <p>CALIFORNIA ADDRESS: 440 N Barranca Ave</p>
-                <p className="text-[13px]">Covina, CA 91723</p>
+                <p className="mb-1">Hours of Operations:</p>
+                <p className="text-[13px]">Mon - Fri 8:00AM - 5:00PM GMT+1</p>
 
-                <div className="h-12" />
-
-                <p>orders@newtownspares.com</p>
                 <p className="mt-4">
-                  {" "}
                   Call us:{" "}
                   <a href={CONTACT_INFO.phone.href}>
                     {CONTACT_INFO.phone.display}
@@ -327,10 +323,10 @@ const FooterBottom = () => {
 
               {/* PAGES */}
               <nav>
-                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                <h4 className="text-[18px] font-noraml text-footer-text mb-4">
                   Pages
                 </h4>
-                <ul className="space-y-3 text-[#FAFAFA] text-[14px]!">
+                <ul className="space-y-3 text-footer-text text-[14px]!">
                   {visiblePages?.map((page: any) => (
                     <li key={page.id}>
                       {page?.pageType == "2" ? (
@@ -354,11 +350,11 @@ const FooterBottom = () => {
 
               {/* CATEGORIES */}
               <nav className="hidden lg:block">
-                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                <h4 className="text-[18px] font-noraml text-footer-text mb-4">
                   Categories
                 </h4>
 
-                <ul className="space-y-3 text-[#FAFAFA] text-[14px]!">
+                <ul className="space-y-3 text-footer-text text-[14px]!">
                   {categories?.slice(0, 8).map((category) => (
                     <li key={category.id}>
                       <Link href={`/category/${category.slug}`}>
@@ -371,10 +367,10 @@ const FooterBottom = () => {
 
               {/* BRANDS */}
               <nav className="hidden lg:block">
-                <h4 className="text-[18px] font-normal text-[#FAFAFA] mb-4">
+                <h4 className="text-[18px] font-normal text-footer-text mb-4">
                   Brands
                 </h4>
-                <ul className="space-y-3 text-[#FAFAFA] text-[14px]!">
+                <ul className="space-y-3 text-footer-text text-[14px]!">
                   {getBrand?.data?.slice(0, 7)?.map((item: any) => (
                     <li key={item?.brand?.id}>
                       <Link href={`/brand/${item?.brand?.slug || ""}`}>
@@ -387,7 +383,7 @@ const FooterBottom = () => {
                   <li>
                     <Link
                       href="/brands"
-                      className="font-medium text-[#FAFAFA] hover:underline"
+                      className="font-medium text-footer-text hover:underline"
                     >
                       View All
                     </Link>
@@ -396,11 +392,11 @@ const FooterBottom = () => {
               </nav>
 
               <nav>
-                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mb-4">
+                <h4 className="text-[18px] font-noraml text-footer-text mb-4">
                   Account
                 </h4>
 
-                <ul className="space-y-3 text-[#FAFAFA] text-[14px]!">
+                <ul className="space-y-3 text-footer-text text-[14px]!">
                   {!auth?.isAuthenticated ? (
                     <>
                       <li>
@@ -427,7 +423,7 @@ const FooterBottom = () => {
                   </li>
                 </ul>
 
-                <h4 className="text-[18px] font-noraml text-[#FAFAFA] mt-12 mb-4">
+                <h4 className="text-[18px] font-noraml text-footer-text mt-12 mb-4">
                   Follow Us
                 </h4>
 
@@ -487,6 +483,13 @@ const FooterBottom = () => {
             <p className="!text-white text-center sm:text-left w-full">
               &copy; {new Date().getFullYear()} New Town Spares Inc.
             </p>
+            {/* <div className="flex items-center gap-3 text-white text-5xl">
+              <FaCcVisa />
+              <FaCcMastercard />
+              <FaCcAmex />
+              <FaCcDiscover />
+              <FaCcStripe />
+            </div> */}
           </div>
         </footer>
         <ConfirmationModal

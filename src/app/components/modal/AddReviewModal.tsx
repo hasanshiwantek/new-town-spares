@@ -13,6 +13,7 @@ import { ChevronDown, X } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { REGEX } from "@/const/regex";
 
 interface AddReviewModalProps {
   isOpen: boolean;
@@ -37,14 +38,14 @@ type FormErrors = Partial<
   Record<"rating" | "email" | "subject" | "comment", string>
 >;
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 
 const validate = (data: FormData): FormErrors => {
   const errors: FormErrors = {};
   if (!data.rating) {
     errors.rating = "The 'Rating' field cannot be blank.";
   }
-  if (!EMAIL_REGEX.test(String(data.email).trim())) {
+  if (!REGEX.EMAIL_REGEX.test(String(data.email).trim())) {
     errors.email =
       "Please use a valid email address, such as user@example.com.";
   }

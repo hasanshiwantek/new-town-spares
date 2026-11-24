@@ -27,8 +27,15 @@ const SearchResultItem = ({
   item: ProductInfoSource;
   onSelect: (url: string) => void;
 }) => {
-  const { productName, sku, productUrl, brandName, images, price, availableForSale } =
-    getProductInfo(item);
+  const {
+    productName,
+    sku,
+    productUrl,
+    brandName,
+    images,
+    price,
+    availableForSale,
+  } = getProductInfo(item);
   const displayPrice = availableForSale ? price : 0;
   const formatPrice = useFormatPrice();
 
@@ -155,6 +162,19 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
       setShowDropdown(true);
     }
   };
+  const handleAdvancedSearch = () => {
+    const q = query.trim();
+    if (!q) return;
+
+    setInStorage("advancedSearchFilters", { q });
+    window.dispatchEvent(new Event("searchFiltersUpdated"));
+
+    if (pathname === "/advanced-search") {
+      window.location.reload();
+    } else {
+      router.push("/advanced-search");
+    }
+  };
   // Navigate to selected category
   const handleSelect = (url: string) => {
     setQuery("");
@@ -197,16 +217,7 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
-                const q = query.trim();
-                if (q) {
-                  setInStorage("advancedSearchFilters", { q });
-                  window.dispatchEvent(new Event("searchFiltersUpdated"));
-                  if (pathname === "/advanced-search") {
-                    window.location.reload();
-                  } else {
-                    router.push(`/advanced-search`);
-                  }
-                }
+                handleAdvancedSearch();
               }
             }}
             className="w-full pl-[14px] pr-[92px] border-[#d9d9d9] border rounded-sm py-[10.5px] bg-white text-[#333333] text-[14px]! focus:outline-none focus:border-[#FF482E] focus:ring-1 focus:ring-[#FF482E] h-[42px] [&::-webkit-search-cancel-button]:appearance-none"
@@ -231,16 +242,7 @@ const GlobalSearchBar = ({ onHideMenu }: { onHideMenu?: () => void }) => {
               name="search"
               onClick={(e) => {
                 e.preventDefault();
-                const q = query.trim();
-                if (q) {
-                  setInStorage("advancedSearchFilters", { q });
-                  window.dispatchEvent(new Event("searchFiltersUpdated"));
-                  if (pathname === "/advanced-search") {
-                    window.location.reload();
-                  } else {
-                    router.push(`/advanced-search`);
-                  }
-                }
+                handleAdvancedSearch();
               }}
               className="bg-[#FF482E] w-16 lg:w-14 xl:w-[52px] h-[42px] rounded-r-sm flex items-center justify-center"
             >

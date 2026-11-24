@@ -61,10 +61,10 @@ const DropdownColumn = ({
     visible: { opacity: 1, x: 0 },
   };
   return (
-    <div className="xl:w-[25.8rem] 2xl:w-[34.2rem] bg-white text-black border-r relative">
+    <div className="xl:w-[18rem] 2xl:w-[21rem]  bg-white text-black border-r relative">
       {/* Column Heading (static, no animation) */}
       {heading && (
-        <div className="px-4 py-2 h3-secondary !text-[#F15939] border-b">
+        <div className="px-4 py-2 h3-secondary text-[#F15939]! border-b">
           {heading}
         </div>
       )}
@@ -195,15 +195,16 @@ const LinkHeader = () => {
               All Categories
             </span>
             <ChevronDown
-              className={`w-4 h-4 md:w-5 md:h-5 ml-1 mt-1 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200 ${
-                isOpen ? "rotate-180" : ""
-              }`}
+              className={cn(
+                "w-4 h-4 md:w-5 md:h-5 ml-1 mt-1 2xl:w-[20px] 2xl:h-[20px] transition-transform duration-200",
+                isOpen && "rotate-180",
+              )}
             />
           </button>
 
           {/* Mega Menu */}
           {isOpen && (
-            <div className="absolute left-0 top-14 flex bg-white shadow-xl border z-50">
+            <div className="absolute left-0 top-22 flex bg-white shadow-xl border z-50">
               <DropdownColumn
                 setIsOpen={setIsOpen}
                 heading=""

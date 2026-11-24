@@ -110,6 +110,7 @@ export default function ProductPage() {
                 }}
               />
             </div>
+            
             {productCount === 0 && (
               <div className="w-full border-t border-gray-200">
                 <div className="px-1 py-5">
