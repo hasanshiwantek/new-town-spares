@@ -64,4 +64,6 @@ export const REGEX = {
 
   HYPHEN: /-/g,
   WORDSTART: /\b\w/g,
+
+  PATH_FILE_EXTENSION: /\.[^/]*$/,
 };
