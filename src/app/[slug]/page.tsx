@@ -235,7 +235,7 @@ export default async function ProductPage({
                       /
                     </span>
                     <Link
-                      href={`/category/${cat?.slug}`}
+                      href={`/${cat?.slug}`}
                       className="text-[13px] text-[#333333] underline"
                       itemProp="name"
                     >
