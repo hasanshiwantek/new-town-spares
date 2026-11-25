@@ -14,6 +14,10 @@ import { notFound } from "next/navigation";
 import Script from "next/script";
 import { Suspense } from "react";
 import ProductRecent from "../components/Product/ProductRecent";
+import { findCategoryBySlug, getCategorySlugFromPath } from "@/lib/utils";
+import { fetchCategories } from "@/lib/api/category";
+import { REGEX } from "@/const/regex";
+import ProductsPageContent from "../components/Product/ProductsPageContent";
 
 const DynamicWebPage = dynamic(
   () => import("../components/Product/DynamicWebPage"),
@@ -31,13 +35,21 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const routeSlug = slug;
   const headersList = await headers();
-
   const pathname: any = headersList.get("x-pathname");
+
+  const categorySlug = getCategorySlugFromPath(pathname);
+  const categories = await fetchCategories();
+  const category = findCategoryBySlug(categories, categorySlug);
+  const formattedCategory = category?.name;
+
   const product = await fetchProductBySlugAndUrl(pathname);
   const webPages = await fetchWebPages(pathname);
+  const title = `${formattedCategory} | NewTown Spares`;
+  const description = `Browse our collection of ${formattedCategory}. Genuine components, affordable prices, and fast shipping.`;
 
-  if (!product && !webPages) {
+  if (!product && !webPages && !category) {
     notFound();
   }
 
@@ -67,7 +79,44 @@ export async function generateMetadata({
         follow: true,
       },
     };
+  } else if (category) {
+    return {
+      title,
+      description,
+      alternates: {
+        canonical: url,
+      },
+      openGraph: {
+        title,
+        description,
+        url: url,
+        siteName: "NewTown Spares",
+        images: [
+          {
+            url: "https://newtownspares.com/images/products-og.jpg",
+            width: 1200,
+            height: 630,
+            alt: `${formattedCategory} Products`,
+          },
+        ],
+        locale: "en_US",
+        type: "website",
+      },
+      robots: {
+        index: true,
+        follow: true,
+        nocache: false,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+        },
+      },
+    };
   }
+
   return {
     title: {
       absolute: product.pageTitle || product.name, // ← changed
@@ -125,6 +174,10 @@ export default async function ProductPage({
   //  Most reliable - Next.js sets this automatically
   const pathname: any = headersList.get("x-pathname");
 
+  const categorySlug = getCategorySlugFromPath(pathname);
+  const categories = await fetchCategories();
+
+  const category = findCategoryBySlug(categories, categorySlug);
   //  Parallel data fetching
   const product = await fetchProductBySlugAndUrl(pathname);
   const webPages = await fetchWebPages(pathname);
@@ -135,7 +188,7 @@ export default async function ProductPage({
     ? await fetchRelatedProducts(product?.brandId, categoryId)
     : [];
 
-  if (!product && !webPages) {
+  if (!product && !webPages && !category) {
     notFound();
   }
   const backendSchema = product?.schema;
@@ -144,6 +197,12 @@ export default async function ProductPage({
       {/* ✅ Structured Data (SEO safe) */}
       {webPages ? (
         <DynamicWebPage webPages={webPages} />
+      ) : category ? (
+        <ProductsPageContent
+          initialCategoryId={category.id}
+          initialCategoryName={category.name}
+          initialCategorydescription={category?.description}
+        />
       ) : (
         <div>
           {backendSchema && (

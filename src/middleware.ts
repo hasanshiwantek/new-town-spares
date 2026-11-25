@@ -9,8 +9,5 @@ export function middleware(request: NextRequest) {
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 export const config = {
-  matcher: [
-    "/((?!_next|api|favicon|.*\\..*).*)",
-    "/((?!_next|api|favicon).+\\.[^/]*$)",
-  ],
+  matcher: ["/:path*"],
 };

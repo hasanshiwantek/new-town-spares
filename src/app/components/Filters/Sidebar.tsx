@@ -81,7 +81,7 @@ export default function Sidebar({
     // Only navigate if we're NOT on a brand page
     // If on brand page, just update filters without changing URL
     if (slug && !isBrandPage) {
-      router.push(`/category/${slug}`);
+      router.push(`/${slug}`);
     }
   };
 

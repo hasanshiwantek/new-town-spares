@@ -224,7 +224,6 @@ const nextConfig: NextConfig = {
       ],
       afterFiles: [
         // Real nested routes — keep untouched
-        { source: "/category/:path+", destination: "/category/:path+" },
         { source: "/blogs/:path+", destination: "/blogs/:path+" },
         { source: "/brand/:path+", destination: "/brand/:path+" },
         { source: "/auth/:path+", destination: "/auth/:path+" },

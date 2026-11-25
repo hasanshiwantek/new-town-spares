@@ -79,7 +79,7 @@ const DropdownColumn = ({
           categories.map((cat) => (
             <Link
               key={cat.id}
-              href={`/category/${cat.slug}`}
+              href={`/${cat.slug}`}
               onClick={() => setIsOpen(false)}
             >
               <MotionLi

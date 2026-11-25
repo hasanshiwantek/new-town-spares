@@ -361,7 +361,7 @@ const FooterBottom = () => {
                 <ul className="space-y-3 text-[#FAFAFA] text-[14px]!">
                   {categories?.slice(0, 8).map((category) => (
                     <li key={category.id}>
-                      <Link href={`/category/${category.slug}`}>
+                      <Link href={`/${category.slug}`}>
                         {category.name}
                       </Link>
                     </li>
