@@ -80,7 +80,8 @@ export function findCategoryBySlug(
   slug: string,
 ): any | undefined {
   for (const category of categories ?? []) {
-    if (category.slug === slug) return category;
+    if (removeTrailingSlash(category.slug) === removeTrailingSlash(slug))
+      return category;
 
     const found = findCategoryBySlug(category.subcategories, slug);
     if (found) return found;
