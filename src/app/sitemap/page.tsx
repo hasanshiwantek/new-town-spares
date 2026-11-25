@@ -19,7 +19,7 @@ const CategoryList: React.FC<{ categories: any[]; categoriesLength?: number }> =
     <ul className="list-disc list-inside ml-4 space-y-1">
       {visibleCategories?.map((cat) => (
         <li key={cat.slug}>
-          <Link href={`/category/${cat.slug}`} className="text-[#333333] !font-normal text-[14px] underline">
+          <Link href={`/${cat.slug}`} className="text-[#333333] !font-normal text-[14px] underline">
             {cat.name}
           </Link>
           {cat.subcategories && cat.subcategories.length > 0 && (
