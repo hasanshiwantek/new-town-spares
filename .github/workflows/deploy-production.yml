@@ -1,0 +1,104 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: production-nts
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-2
+  AWS_ROLE_ARN: arn:aws:iam::651706754088:role/ecom-github-deploy-nts
+  BUCKET: ecom-prod-651706754088
+  INSTANCE_ID: i-0d5a2bc3a06bc5069
+  DOCUMENT: ecom-deploy-nts
+  APP: nts
+  NEXT_TELEMETRY_DISABLED: "1"
+  NEXT_PUBLIC_API_URL: https://xlcommerce-api.wexldigital.com/api/
+  NEXT_PUBLIC_SITE_URL: https://nts.wexldigital.com
+  NEXT_PUBLIC_STORE_ID: "4"
+  NEXT_PUBLIC_STORE_HASH: store-zeg5dpw5cz6j
+  NEXT_PUBLIC_CHARGE_IN_SELECTED_CURRENCY: "true"
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: 6LevlOItAAAAAD_SVHBRhmnrQHmTjkaKLGiorihY
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51TTnoo8vkezGA3pyz8ekc5xIQNyhweCnxiumTB1si5Dejq5YWPGHDJIJPpBHMLw9hYRkbSkOGpdCzPrlW8g59HZ600cueNQymh
+  # Build only checks this is set; the real value is in the server .env
+  GEONAMES_USERNAME: set-on-server
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      # Pages prerendered at build time call the API, and the WAF only lets GitHub's runners through with this token
+      - name: Load build token
+        run: |
+          t=$(aws ssm get-parameter --name /ecom/build-token --with-decryption --query Parameter.Value --output text)
+          echo "::add-mask::$t"
+          echo "ECOM_BUILD_TOKEN=$t" >> "$GITHUB_ENV"
+          cat > "$RUNNER_TEMP/build-fetch.cjs" <<'JS'
+          const api = new URL(process.env.NEXT_PUBLIC_API_URL).host;
+          const token = process.env.ECOM_BUILD_TOKEN;
+          const realFetch = globalThis.fetch;
+          globalThis.fetch = function (input, init) {
+            let host = "";
+            try { host = new URL(input instanceof Request ? input.url : String(input)).host; } catch {}
+            if (!token || host !== api) return realFetch.call(this, input, init);
+            const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
+            headers.set("x-ecom-build", token);
+            return realFetch.call(this, input, { ...init, headers });
+          };
+          JS
+
+      - name: Build
+        env:
+          NODE_OPTIONS: --require ${{ runner.temp }}/build-fetch.cjs
+        run: |
+          npm run build
+          if grep -rqF --exclude-dir=cache "$ECOM_BUILD_TOKEN" .next; then echo "build token found in .next output"; exit 1; fi
+
+      - name: Package release
+        run: |
+          cp -R node_modules/typescript "$RUNNER_TEMP/typescript"
+          npm prune --omit=dev --no-audit --no-fund
+          # next start compiles next.config.ts with typescript, a devDependency that prune removes
+          rm -rf node_modules/typescript && mv "$RUNNER_TEMP/typescript" node_modules/typescript
+          tar -czf "$RUNNER_TEMP/release.tar.gz" --exclude=.next/cache .next public node_modules package.json next.config.ts tsconfig.json
+
+      - name: Upload release
+        run: aws s3 cp "$RUNNER_TEMP/release.tar.gz" "s3://$BUCKET/releases/$APP/$GITHUB_SHA.tar.gz" --only-show-errors
+
+      - name: Deploy on server
+        run: |
+          id=$(aws ssm send-command --instance-ids "$INSTANCE_ID" --document-name "$DOCUMENT" \
+            --parameters "key=releases/$APP/$GITHUB_SHA.tar.gz" --query Command.CommandId --output text)
+          status=Pending
+          for i in $(seq 1 120); do
+            status=$(aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE_ID" --query Status --output text 2>/dev/null || echo Pending)
+            case "$status" in Pending|InProgress|Delayed) sleep 5 ;; *) break ;; esac
+          done
+          aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE_ID" --query StandardOutputContent --output text
+          aws ssm get-command-invocation --command-id "$id" --instance-id "$INSTANCE_ID" --query StandardErrorContent --output text >&2
+          echo "status: $status"
+          test "$status" = Success
