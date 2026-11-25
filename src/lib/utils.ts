@@ -72,7 +72,6 @@ export function isEmpty(val: unknown): boolean {
 
 export function getCategorySlugFromPath(pathname: string): string {
   return pathname?.slice(1);
-  // return pathname?.replace(/^\/category\/?/, "").replace(/\/+$/, "") ?? "";
 }
 
 export function findCategoryBySlug(

@@ -107,50 +107,49 @@ export default function ProductsClientWrapper({
   }, [filters]);
   // Generate breadcrumb items based on page type
 
-const breadcrumbItems = React.useMemo(() => {
-  const items: { name: string; href: string }[] = [
-    { name: "Home", href: "/" },
-  ];
+  const breadcrumbItems = React.useMemo(() => {
+    const items: { name: string; href: string }[] = [
+      { name: "Home", href: "/" },
+    ];
 
-  if (isCategoryPage && initialCategoryId) {
-    const categoryPath = findCategoryPath(
-      categories,
-      Number(filters.categoryIds?.[0] ?? initialCategoryId)
-    );
+    if (isCategoryPage && initialCategoryId) {
+      const categoryPath = findCategoryPath(
+        categories,
+        Number(filters.categoryIds?.[0] ?? initialCategoryId),
+      );
 
-    if (categoryPath?.length) {
-      categoryPath.forEach((cat, index) => {
-        items.push({
-          name: cat.name,
-          href: `/category/${cat.slug}`,
+      if (categoryPath?.length) {
+        categoryPath.forEach((cat, index) => {
+          items.push({
+            name: cat.name,
+            href: `/${cat.slug}`,
+          });
         });
-      });
-    } else if (filterMeta.categoryName) {
-      // Fallback if the category tree doesn't contain the category
+      } else if (filterMeta.categoryName) {
+        // Fallback if the category tree doesn't contain the category
+        items.push({
+          name: filterMeta.categoryName,
+          href: `/${params?.slug || ""}`,
+        });
+      }
+    } else if (isBrandPage && filterMeta.brandName) {
       items.push({
-        name: filterMeta.categoryName,
-        href: `/category/${params?.slug || ""}`,
+        name: filterMeta.brandName,
+        href: `/brand/${params?.slug || ""}`,
       });
     }
-  } else if (isBrandPage && filterMeta.brandName) {
-    items.push({
-      name: filterMeta.brandName,
-      href: `/brand/${params?.slug || ""}`,
-    });
-  }
 
-  return items;
-}, [
-  categories,
-  filters.categoryIds,
-  initialCategoryId,
-  isCategoryPage,
-  isBrandPage,
-  filterMeta.categoryName,
-  filterMeta.brandName,
-  params?.slug,
-]);
-
+    return items;
+  }, [
+    categories,
+    filters.categoryIds,
+    initialCategoryId,
+    isCategoryPage,
+    isBrandPage,
+    filterMeta.categoryName,
+    filterMeta.brandName,
+    params?.slug,
+  ]);
 
   return (
     <>

@@ -176,6 +176,7 @@ export default async function ProductPage({
 
   const categorySlug = getCategorySlugFromPath(pathname);
   const categories = await fetchCategories();
+
   const category = findCategoryBySlug(categories, categorySlug);
   //  Parallel data fetching
   const product = await fetchProductBySlugAndUrl(pathname);
