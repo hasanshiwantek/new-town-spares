@@ -84,12 +84,12 @@ export async function generateMetadata({
       title,
       description,
       alternates: {
-        canonical: `https://newtownspares.com/category/${routeSlug}`,
+        canonical: url,
       },
       openGraph: {
         title,
         description,
-        url: `https://newtownspares.com/category/${routeSlug}`,
+        url: url,
         siteName: "NewTown Spares",
         images: [
           {
