@@ -35,46 +35,52 @@
 // }
 
 // export default CategoriesSection
-import Link from 'next/link'
-import React from 'react'
+import Link from "next/link";
+import React from "react";
 
 const CategoriesSection = ({ categories }: { categories: any[] }) => {
-  const categoryChains: any[][] = []
+  const categoryChains: any[][] = [];
 
   const buildChains = (category: any, chain: any[] = []) => {
-    const currentChain = [...chain, category]
+    const currentChain = [...chain, category];
     // Always push the current chain as a row
     if (chain.length > 0) {
-      categoryChains.push(currentChain)
+      categoryChains.push(currentChain);
     }
     // Continue deeper if subcategories exist
     if (category?.subcategories?.length > 0) {
       category.subcategories.forEach((sub: any) => {
-        buildChains(sub, currentChain)
-      })
+        buildChains(sub, currentChain);
+      });
     }
-  }
-   const poppinsFont = "Poppins, sans-serif";
+  };
+  const poppinsFont = "Poppins, sans-serif";
 
   categories?.forEach((category: any) => {
     // Top-level with no children — show alone
     if (!category?.subcategories?.length) {
-      categoryChains.push([category])
+      categoryChains.push([category]);
     } else {
       category.subcategories.forEach((sub: any) => {
-        buildChains(sub, [category])
-      })
+        buildChains(sub, [category]);
+      });
     }
-  })
+  });
 
   return (
-    <div className="flex flex-col gap-y-[2px]" style={{fontFamily:poppinsFont}}>
+    <div
+      className="flex flex-col gap-y-[2px]"
+      style={{ fontFamily: poppinsFont }}
+    >
       {categoryChains?.map((chain, index) => (
-        <div key={index} className="flex items-center flex-wrap text-[14px] leading-[22px]">
+        <div
+          key={index}
+          className="flex items-center flex-wrap text-[14px] leading-[22px]"
+        >
           {chain.map((cat, i) => (
             <React.Fragment key={cat.slug || i}>
               <Link
-                href={`/category/${cat.slug}`}
+                href={`/${cat.slug}`}
                 className="text-[#333333] underline hover:text-black"
               >
                 {cat.name}
@@ -87,7 +93,7 @@ const CategoriesSection = ({ categories }: { categories: any[] }) => {
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default CategoriesSection
+export default CategoriesSection;
