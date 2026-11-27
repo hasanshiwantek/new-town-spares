@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ENV_CONFIG } from "@/config/envConfig";
 import { countriesWithoutPostalCode } from "@/const/country-level";
+import { REGEX } from "@/const/regex";
 import { useAlert } from "@/hooks/useAlert";
 import { useAppDispatch, useAppSelector } from "@/hooks/useReduxHooks";
 import { transferCart } from "@/lib/api/transferCart";
@@ -214,7 +215,23 @@ const SignupPage = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 className={`${inputClass} pr-10`}
-                {...register("password", { required: true })}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 7,
+                    message: "Passwords must be at least 7 characters",
+                  },
+                  validate: (value) => {
+                    const hasLetter = REGEX.HAS_LETTER.test(value);
+                    const hasNumber = REGEX.HAS_NUMBER.test(value);
+
+                    if (!hasLetter || !hasNumber) {
+                      return "Passwords must be at least 7 characters and contain both alphabetic and numeric characters.";
+                    }
+
+                    return true;
+                  },
+                })}
               />
               <button
                 type="button"
@@ -224,8 +241,13 @@ const SignupPage = () => {
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
-              {errors.password && (
+              {/* {errors.password && (
                 <p className="text-[10px] text-red-500 mt-0.5">Required</p>
+              )} */}
+              {errors.password && (
+                <p className="text-[10px] text-red-500 mt-0.5">
+                  {errors.password.message || "Required"}
+                </p>
               )}
             </div>
           </div>
